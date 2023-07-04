@@ -72,16 +72,17 @@ BEGIN TRY
 	SELECT	@strCompanyName + CHAR(13)+CHAR(10) +
 			ISNULL(@strAddress,'') + CHAR(13)+CHAR(10) +
 			ISNULL(@strCity,'') +ISNULL(', '+@strState,'') + ISNULL('  '+@strZip,'') + CHAR(13)+CHAR(10) +  
-			ISNULL(@strCountry,'') +  CHAR(13)+CHAR(10) 
-			--ISNULL(@strCompanyPhone,'')
+			ISNULL(@strCountry,'') +  CHAR(13)+CHAR(10) +
+			CASE WHEN @strCompanyName IN ('Global Grain LLC') THEN ISNULL(@strCompanyPhone,'') ELSE '' END
 			AS	strA,
 			LTRIM(RTRIM(CH.strEntityName))+ CHAR(13)+CHAR(10) +
 			ISNULL(LTRIM(RTRIM(CH.strEntityAddress)),'')+ CHAR(13)+CHAR(10) +
 			ISNULL(LTRIM(RTRIM(CH.strEntityCity)),'') + 
 			ISNULL(', '+CASE WHEN LTRIM(RTRIM(CH.strEntityState)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strEntityState)) END,'') + 
 			ISNULL('  '+CASE WHEN LTRIM(RTRIM(CH.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strEntityZipCode)) END,'') + CHAR(13)+CHAR(10) + 
-			ISNULL(CASE WHEN LTRIM(RTRIM(CH.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strEntityCountry)) END,'') +  CHAR(13)+CHAR(10) 
-			--ISNULL(CASE WHEN LTRIM(RTRIM(EM.strPhone)) = '' THEN NULL ELSE LTRIM(RTRIM(EM.strPhone)) END,'') 
+			ISNULL(CASE WHEN LTRIM(RTRIM(CH.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strEntityCountry)) END,'') +  CHAR(13)+CHAR(10) +
+			CASE WHEN @strCompanyName IN ('Global Grain LLC') THEN ISNULL(ISNULL(CASE WHEN LTRIM(RTRIM(EM.strPhone)) = '' THEN NULL ELSE LTRIM(RTRIM(EM.strPhone)) END,'') ,'')
+			ELSE '' END
 			AS	strB,
 			CH.dtmContractDate,
 			CH.strContractNumber,

@@ -241,7 +241,7 @@ SELECT
 	, strStorageLocationName		= strgLoc.strName
 	, intOwnershipType				= ad.intOwnershipType
 	, strOwnershipType				= dbo.fnICGetOwnershipType(ad.intOwnershipType)
-	, dblRunningAvailableQty		= t.dblQty 
+	, dblRunningAvailableQty		= CASE WHEN ad.intLotId IS NOT NULL THEN lot.dblLotQty ELSE t.dblQty END 
 	, dblStorageAvailableQty		= t.dblUnitStorage
 	, dblCost = CASE 
 				WHEN CostMethod.intCostingMethodId = 1 THEN dbo.fnGetItemAverageCost(i.intItemId, ItemLocation.intItemLocationId, CASE WHEN ad.intSubLocationId IS NULL OR ad.intStorageLocationId IS NULL THEN stock.intItemUOMId ELSE ItemUOM.intItemUOMId END)
@@ -249,8 +249,10 @@ SELECT
 				WHEN CostMethod.intCostingMethodId = 3 THEN dbo.fnCalculateCostBetweenUOM(LIFO.intItemUOMId, StockUOM.intItemUOMId, LIFO.dblCost)
 				ELSE t.dblCost
 			END
-	, dblDiffInQty = (CASE WHEN ad.intOwnershipType = 1 THEN t.dblQty - ad.dblQuantity ELSE t.dblUnitStorage - t.dblQty END)
-	, ysnHasDiffQty = CAST(CASE WHEN (CASE WHEN ad.intOwnershipType = 1 THEN t.dblQty - ad.dblQuantity ELSE t.dblUnitStorage - t.dblQty END) <> 0 THEN 1 ELSE 0 END AS BIT)
+	, dblDiffInQty = (CASE WHEN ad.intOwnershipType = 1 THEN CASE WHEN ad.intLotId IS NOT NULL THEN lot.dblLotQty ELSE t.dblQty END - ad.dblQuantity ELSE t.dblUnitStorage - CASE WHEN ad.intLotId IS NOT NULL THEN lot.dblLotQty ELSE t.dblQty END END)
+	, ysnHasDiffQty = CAST(CASE WHEN (CASE WHEN ad.intOwnershipType = 1 
+        THEN CASE WHEN ad.intLotId IS NOT NULL THEN lot.dblLotQty ELSE t.dblQty END - ad.dblQuantity 
+        ELSE t.dblUnitStorage - CASE WHEN ad.intLotId IS NOT NULL THEN lot.dblLotQty ELSE t.dblQty END END) <> 0 THEN 1 ELSE 0 END AS BIT)
 FROM @tblInventoryTransactionGrouped t
 	INNER JOIN tblICItem i ON i.intItemId = t.intItemId
 	INNER JOIN tblICInventoryAdjustmentDetail ad ON ad.intItemId = t.intItemId
@@ -260,6 +262,13 @@ FROM @tblInventoryTransactionGrouped t
 			ON ItemUOM.intUnitMeasureId = iUOM.intUnitMeasureId
 	) 
 		ON ItemUOM.intItemUOMId = t.intItemUOMId
+	OUTER APPLY (
+        SELECT TOP 1 (cl.dblStockIn - cl.dblStockOut) dblLotQty
+        FROM tblICInventoryLot cl
+        WHERE cl.intLotId = ad.intLotId
+            AND cl.ysnIsUnposted = 0
+		ORDER BY cl.dtmDate DESC
+    ) lot
 	CROSS APPLY (
 		SELECT
 			SUM(s.dblOnHand) dblOnHand
@@ -335,7 +344,7 @@ FROM @tblInventoryTransactionGrouped t
 		ON strgLoc.intStorageLocationId = t.intStorageLocationId
 
 WHERE a.intInventoryAdjustmentId = @intAdjustmentId
-	AND 1 = CAST(CASE WHEN (CASE WHEN (CASE WHEN ad.intOwnershipType = 1 THEN t.dblQty - ad.dblQuantity 
-			ELSE t.dblUnitStorage - t.dblQty END) <> 0 THEN 1 ELSE 0 END) = 0 THEN 
+	AND 1 = CAST(CASE WHEN (CASE WHEN (CASE WHEN ad.intOwnershipType = 1 THEN CASE WHEN ad.intLotId IS NOT NULL THEN lot.dblLotQty ELSE t.dblQty END - ad.dblQuantity 
+			ELSE t.dblUnitStorage - CASE WHEN ad.intLotId IS NOT NULL THEN lot.dblLotQty ELSE t.dblQty END END) <> 0 THEN 1 ELSE 0 END) = 0 THEN 
 		 CASE WHEN @ysnShowNoDiff = 1 THEN 1 ELSE 0 END
 	ELSE 1 END AS BIT)
