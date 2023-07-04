@@ -5,8 +5,8 @@
 		column strStationUnitMeasure is not referring to scale station uom but to company preference uom since SC-4512
 	*/
 	select 
-
-		Ticket.strTicketNumber
+		Ticket.intTicketId
+		,Ticket.strTicketNumber
 		,Entity.strName
 		,CompanyLocation.strLocationName
 		, case when StorageType.strStorageTypeDescription = 'Split' then coalesce(DeliverySheet.strDeliverySheetNumber, StorageType.strStorageTypeDescription) else StorageType.strStorageTypeDescription  end as strStorageTypeDescription 
@@ -94,7 +94,8 @@
 	union all
 	select 
 
-		Ticket.strTicketNumber
+		Ticket.intTicketId
+		,Ticket.strTicketNumber
 		, EntityCompanyLocation.strLocationName as strName
 		,CompanyLocation.strLocationName
 		,'Transfer' as strStorageTypeDescription
@@ -170,7 +171,8 @@
 	union all
 	select 
 
-		Ticket.strTicketNumber
+		Ticket.intTicketId
+		,Ticket.strTicketNumber
 		, EntityCompanyLocation.strLocationName as strName
 		,CompanyLocation.strLocationName
 		,'Transfer' as strStorageTypeDescription
@@ -244,5 +246,4 @@
 		and EntityCompanyLocation.ysnLicensed = 1
 		--and dtmTicketDateTime between '2021-10-15' and '2021-10-22'
 GO
-
 

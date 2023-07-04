@@ -38,6 +38,7 @@ BEGIN TRY
 			,intInventoryShipmentChargeId INT NULL
 			,intLoadShipmentDetailId INT NULL
 			,intLoadShipmentCostId INT NULL
+			,intLoadHeaderId INT NULL
 			,intWeightClaimDetailId INT NULL
 			,intCustomerStorageId INT NULL
 			,intSettleStorageId INT NULL
@@ -58,6 +59,7 @@ BEGIN TRY
 			,P.intInventoryShipmentChargeId
 			,P.intLoadShipmentDetailId
 			,P.intLoadShipmentCostId
+			,P.intLoadHeaderId
 			,P.intWeightClaimDetailId
 			,P.intCustomerStorageId
 			,P.intSettleStorageId
@@ -81,6 +83,7 @@ BEGIN TRY
 			,P.intInventoryShipmentChargeId
 			,P.intLoadShipmentDetailId
 			,P.intLoadShipmentCostId
+			,P.intLoadHeaderId
 			,P.intWeightClaimDetailId
 			,P.intCustomerStorageId
 			,P.intSettleStorageId
@@ -105,6 +108,7 @@ BEGIN TRY
 		,P.intInventoryShipmentChargeId
 		,P.intLoadShipmentDetailId
 		,P.intLoadShipmentCostId
+		,P.intLoadHeaderId
 		,P.intWeightClaimDetailId
 		,P.intCustomerStorageId
 		,P.intSettleStorageId
@@ -128,6 +132,7 @@ BEGIN TRY
 			,P.intInventoryShipmentChargeId
 			,P.intLoadShipmentDetailId
 			,P.intLoadShipmentCostId
+			,P.intLoadHeaderId
 			,P.intWeightClaimDetailId
 			,P.intCustomerStorageId
 			,P.intSettleStorageId
@@ -151,6 +156,7 @@ BEGIN TRY
 			,P.intInventoryShipmentChargeId
 			,P.intLoadShipmentDetailId
 			,P.intLoadShipmentCostId
+			,P.intLoadHeaderId
 			,P.intWeightClaimDetailId
 			,P.intCustomerStorageId
 			,P.intSettleStorageId
@@ -173,6 +179,7 @@ BEGIN TRY
 			,intInventoryShipmentChargeId INT NULL
 			,intLoadShipmentDetailId INT NULL
 			,intLoadShipmentCostId INT NULL
+			,intLoadHeaderId INT NULL
 			,intWeightClaimDetailId INT NULL
 			,intCustomerStorageId INT NULL
 			,intSettleStorageId INT NULL
@@ -192,6 +199,7 @@ BEGIN TRY
 			,B.intInventoryShipmentChargeId
 			,B.intLoadDetailId
 			,B.intLoadShipmentCostId
+			,B.intLoadHeaderId
 			,B.intWeightClaimDetailId
 			,B.intCustomerStorageId
 			,B.intSettleStorageId
@@ -208,6 +216,7 @@ BEGIN TRY
 			AND ISNULL(C.intInventoryReceiptItemId,-1) = ISNULL(B.intInventoryReceiptItemId,-1)
 			AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(B.intLoadDetailId,-1)
 			AND ISNULL(C.intLoadShipmentCostId,-1) = ISNULL(B.intLoadShipmentCostId,-1)
+			AND ISNULL(C.intLoadHeaderId,-1) = ISNULL(B.intLoadHeaderId,-1)
 			AND ISNULL(C.intWeightClaimDetailId,-1) = ISNULL(B.intWeightClaimDetailId,-1)
 			AND ISNULL(C.intInventoryShipmentChargeId,-1) = ISNULL(B.intInventoryShipmentChargeId,-1)
 			AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1)

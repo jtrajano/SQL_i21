@@ -2,7 +2,8 @@
 (
 	@intFromItemUOMId	INT,
 	@intToItemUOMId	INT,
-	@dblPrice				NUMERIC(26,12)
+	@dblPrice				NUMERIC(26,12),
+	@ysnPrice bit = null
 )
 RETURNS NUMERIC(26,12)
 AS 
@@ -15,7 +16,14 @@ BEGIN
 	select @dblFromUnitQuantity = dblUnitQty from tblICItemUOM where intItemUOMId = @intFromItemUOMId;
 	select @dblToUnitQuantity = dblUnitQty from tblICItemUOM where intItemUOMId = @intToItemUOMId;
 
-	select @dblRet = (@dblPrice/@dblFromUnitQuantity) * @dblToUnitQuantity
+	if (@ysnPrice = 1)
+	begin
+		select @dblRet = (@dblPrice/@dblFromUnitQuantity) * @dblToUnitQuantity;
+	end
+	else
+	begin
+		select @dblRet = (@dblFromUnitQuantity / @dblToUnitQuantity) * @dblPrice;
+	end
 
 	RETURN @dblRet
 END
