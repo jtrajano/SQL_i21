@@ -356,7 +356,7 @@ BEGIN
 	LEFT JOIN (tblEMEntityToContact C2 INNER JOIN tblEMEntity C3 ON C2.intEntityId = C3.intEntityId)
 		ON C2.ysnDefaultContact = 1 AND C2.intEntityId = C.intEntityId
 	LEFT JOIN tblEMEntityLocation F ON F.strLocationName = A2.strPayTo AND D.intEntityId = F.intEntityId
-	LEFT JOIN tblEMEntityLocation F2 ON F.strLocationName = A2.strPayTo AND D.intEntityId = F2.intEntityId
+	-- LEFT JOIN tblEMEntityLocation F2 ON F.strLocationName = A2.strPayTo AND D.intEntityId = F2.intEntityId
 	LEFT JOIN tblSMCompanyLocation E ON E.strLocationNumber = A2.strShipTo
 	LEFT JOIN tblSMTerm G ON G.strTermCode = A3.strTermCode
 	LEFT JOIN tblSMCurrency H ON H.strCurrency = A.strCurrency
