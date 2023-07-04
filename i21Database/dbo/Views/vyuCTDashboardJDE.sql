@@ -1,7 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuCTDashboardJDE]
 
 AS
-
 WITH containers as (
 	select intLoadId,strContainerNumber from tblLGLoadContainer
 ),
@@ -35,6 +34,7 @@ lgLoad AS (
 		, ysnDocsReceived = LO.ysnDocumentsReceived
 		, dblQuantity = SUM(LD.dblQuantity)
 		, strForwardingAgentEntity = FA.strName
+		, dtmLastWeighing = WC.dtmLastWeighingDate
 	FROM tblLGLoad LO WITH(NOLOCK)
 	JOIN tblLGLoadDetail LD WITH(NOLOCK) ON LO.intLoadId = LD.intLoadId
 	LEFT JOIN tblEMEntity SL ON SL.intEntityId = LO.intShippingLineEntityId
@@ -42,6 +42,8 @@ lgLoad AS (
 	LEFT JOIN tblLGReasonCode EA ON EA.intReasonCodeId = LO.intETAPOLReasonCodeId
 	LEFT JOIN tblLGReasonCode ES ON ES.intReasonCodeId = LO.intETSPOLReasonCodeId
 	LEFT JOIN tblLGReasonCode PD ON PD.intReasonCodeId = LO.intETAPODReasonCodeId
+	LEFT JOIN tblLGWeightClaim WC ON WC.intLoadId = LO.intLoadId
+	LEFT JOIN tblLGWeightClaimDetail WD ON WD.intWeightClaimId = WC.intWeightClaimId
 	LEFT JOIN (
 		SELECT DISTINCT c1.intLoadId
 			, strContainerNumber = SUBSTRING((SELECT ', ' + c2.strContainerNumber  AS [text()]
@@ -81,7 +83,8 @@ lgLoad AS (
 		, PD.strReasonCodeDescription
 		, LO.ysnDocumentsReceived
 		, con.strContainerNumber
-		, FA.strName)
+		, FA.strName
+		, WC.dtmLastWeighingDate)
 , cer AS (
 	SELECT cr.intContractDetailId
 		, cr.intContractCertificationId
@@ -215,6 +218,7 @@ SELECT CD.intContractDetailId
 	, CD.intSubBookId AS intDetailSubBookId
 	, strForwardingAgentEntity = isnull(LG1.strForwardingAgentEntity, LG.strForwardingAgentEntity)
 	, LL.strName AS strLogisticsLeadName
+	, dtmLastWeighing = isnull(LG1.dtmLastWeighing, LG.dtmLastWeighing)
 FROM tblCTContractDetail CD WITH(NOLOCK)
 JOIN tblCTContractHeader CH WITH(NOLOCK) ON CH.intContractHeaderId = CD.intContractHeaderId
 JOIN tblEMEntity EY WITH(NOLOCK) ON EY.intEntityId = CH.intEntityId
