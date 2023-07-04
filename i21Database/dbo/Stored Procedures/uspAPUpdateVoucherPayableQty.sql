@@ -124,6 +124,7 @@ ELSE SAVE TRAN @SavePoint
 				AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(A.intLoadShipmentDetailId,-1)
 				AND ISNULL(C.intTicketDistributionAllocationId,-1) = ISNULL(A.intTicketDistributionAllocationId,-1)
 				AND ISNULL(C.intLoadShipmentCostId,-1) = ISNULL(A.intLoadShipmentCostId,-1)
+				AND ISNULL(C.intLoadHeaderId,-1) = ISNULL(A.intLoadHeaderId,-1)
 				AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1)
 				AND ISNULL(C.intCustomerStorageId,-1) = ISNULL(A.intCustomerStorageId,-1)
 				AND ISNULL(C.intSettleStorageId,-1) = ISNULL(A.intSettleStorageId,-1)
@@ -146,6 +147,7 @@ ELSE SAVE TRAN @SavePoint
 				AND ISNULL(C.intTicketDistributionAllocationId,-1) = ISNULL(A.intTicketDistributionAllocationId,-1)
 				AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(A.intLoadShipmentDetailId,-1)
 				AND ISNULL(C.intLoadShipmentCostId,-1) = ISNULL(A.intLoadShipmentCostId,-1)
+				AND ISNULL(C.intLoadHeaderId,-1) = ISNULL(A.intLoadHeaderId,-1)
 				AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1)
 				AND ISNULL(C.intCustomerStorageId,-1) = ISNULL(A.intCustomerStorageId,-1)
 				AND ISNULL(C.intSettleStorageId,-1) = ISNULL(A.intSettleStorageId,-1)
@@ -240,7 +242,8 @@ ELSE SAVE TRAN @SavePoint
 				,B.[intInventoryShipmentChargeId]
 				,B.[intLoadShipmentId]				
 				,B.[intLoadShipmentDetailId]	
-				,B.[intLoadShipmentCostId]	
+				,B.[intLoadShipmentCostId]  
+				,B.[intLoadHeaderId]
 				,B.[intCustomerStorageId]	
 				,B.[intSettleStorageId]
 				,B.[intItemId]						
@@ -379,7 +382,8 @@ ELSE SAVE TRAN @SavePoint
 			,[intInventoryShipmentChargeId]
 			,[intLoadShipmentId]				
 			,[intLoadShipmentDetailId]	
-			,[intLoadShipmentCostId]	
+			,[intLoadShipmentCostId]
+			,[intLoadHeaderId]
 			,[intCustomerStorageId]	
 			,[intSettleStorageId]
 			,[intItemId]						
@@ -499,7 +503,8 @@ ELSE SAVE TRAN @SavePoint
 			,[intInventoryShipmentChargeId]
 			,[intLoadShipmentId]				
 			,[intLoadShipmentDetailId]	
-			,[intLoadShipmentCostId]	
+			,[intLoadShipmentCostId]
+			,[intLoadHeaderId]
 			,[intCustomerStorageId]	
 			,[intSettleStorageId]
 			,[intItemId]						
@@ -798,7 +803,8 @@ ELSE SAVE TRAN @SavePoint
 				,D.[intInventoryShipmentChargeId]
 				,D.[intLoadShipmentId]				
 				,D.[intLoadShipmentDetailId]	
-				,D.[intLoadShipmentCostId]	
+				,D.[intLoadShipmentCostId]
+				,D.[intLoadHeaderId]
 				,D.[intItemId]						
 				,D.[intLinkingId]		
 				,D.[intTicketDistributionAllocationId]			
@@ -939,6 +945,7 @@ ELSE SAVE TRAN @SavePoint
 			,[intLoadShipmentId]				
 			,[intLoadShipmentDetailId]	
 			,[intLoadShipmentCostId]
+			,[intLoadHeaderId]
 			,[intItemId]						
 			,[intLinkingId]			
 			,[intTicketDistributionAllocationId]		
@@ -1056,7 +1063,8 @@ ELSE SAVE TRAN @SavePoint
 			,[intInventoryShipmentChargeId]
 			,[intLoadShipmentId]				
 			,[intLoadShipmentDetailId]		
-			,[intLoadShipmentCostId]		
+			,[intLoadShipmentCostId]
+			,[intLoadHeaderId]
 			,[intItemId]						
 			,[intLinkingId]				
 			,[intTicketDistributionAllocationId]	
