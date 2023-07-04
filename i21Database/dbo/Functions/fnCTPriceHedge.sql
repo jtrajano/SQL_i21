@@ -84,7 +84,7 @@ BEGIN
 	declare @tableTempDetail as table (
 		intPriceFixationDetailId int
 		,strHedgeMonth nvarchar(20) COLLATE Latin1_General_CI_AS
-		,strBroker nvarchar(20) COLLATE Latin1_General_CI_AS
+		,strBroker nvarchar(100) COLLATE Latin1_General_CI_AS
 		,strAccount nvarchar(20) COLLATE Latin1_General_CI_AS
 		,strFutOptTransactionId  nvarchar(20) COLLATE Latin1_General_CI_AS
 		,strInternalTradeNo nvarchar(20) COLLATE Latin1_General_CI_AS
