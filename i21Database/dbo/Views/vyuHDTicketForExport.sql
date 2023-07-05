@@ -92,6 +92,7 @@ AS
   ,tic.strUpgradeSpecialInstruction  
   ,rc.strRootCause 
   ,tic.dtmCompleted 
+  ,lob.strLineOfBusiness
  from  
   tblHDTicket tic  
   join tblHDTicketType typ on typ.intTicketTypeId = tic.intTicketTypeId  
@@ -114,4 +115,5 @@ AS
   left join tblHDUpgradeType ut on ut.intUpgradeTypeId = tic.intUpgradeTypeId  
   left join tblHDVersion uv on uv.intVersionId = tic.intUpgradeTargetVersionId  
   left join tblHDTicketRootCause rc on rc.intRootCauseId = tic.intRootCauseId  
+  left join tblSMLineOfBusiness lob on lob.intLineOfBusinessId = tic.intLineOfBusinessId
 GO
