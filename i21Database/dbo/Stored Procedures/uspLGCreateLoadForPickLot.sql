@@ -162,6 +162,7 @@ BEGIN TRY
 		SELECT PLD.dblGrossWt
 			,PLD.dblNetWt
 			,PLD.dblLotPickedQty
+			,0
 			,AD.intAllocationDetailId
 			,1
 			,PLH.intCustomerEntityId
