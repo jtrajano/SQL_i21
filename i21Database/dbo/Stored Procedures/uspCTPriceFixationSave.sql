@@ -800,7 +800,7 @@ BEGIN TRY
 				
 				UPDATE	CD
 				SET		CD.intPricingTypeId		=	1,
-						CD.dblFutures			=	dbo.[fnCTConvertPriceToTargetCommodityUOM](@intPriceCommodityUOMId,@intFinalPriceUOMId,(case when @ysnApplyFuturesFromPricing = 1 then (ISNULL(PF.dblPriceWORollArb,0) / isnull(PF.dblFX,1)) else  ISNULL(PF.dblPriceWORollArb,0) end))  / 
+						CD.dblFutures			=	dbo.[fnCTConvertPriceToTargetCommodityUOM](@intFinalPriceUOMId,@intPriceCommodityUOMId,(case when @ysnApplyFuturesFromPricing = 1 then (ISNULL(PF.dblPriceWORollArb,0) / isnull(PF.dblFX,1)) else  ISNULL(PF.dblPriceWORollArb,0) end))  / 
 													CASE	WHEN	@intFinalCurrencyId = @intCurrencyId	THEN 1 
 															WHEN	@intFinalCurrencyId <> @intCurrencyId	
 															AND		@ysnFinalSubCurrency = 1				THEN 100 
