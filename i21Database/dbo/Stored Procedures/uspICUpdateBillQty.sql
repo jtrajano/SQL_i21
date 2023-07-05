@@ -501,6 +501,7 @@ BEGIN
 						ELSE 0
 					END 
 				WHEN ISNULL(ReceiptCharge.dblQuantityPriced, 0) + ISNULL(u.dblToBillQty, 0) = 0 THEN 0
+				WHEN ROUND(ABS(ISNULL(ReceiptCharge.dblQuantityPriced, 0) + ISNULL(u.dblToBillQty, 0)), 2) BETWEEN 0.00 AND 0.03 THEN 0 -- tolerate up to 0.03 discrepancy due to pro-rated charges.
 				WHEN ISNULL(ReceiptCharge.dblQuantityPriced, 0) + ISNULL(u.dblToBillQty, 0) > ISNULL(ReceiptCharge.dblQuantity, 0) THEN 1 
 				ELSE 
 					0
