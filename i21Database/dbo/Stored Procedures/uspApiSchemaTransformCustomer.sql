@@ -54,19 +54,19 @@ AND RTRIM(LTRIM(ISNULL(strLocationName, ''))) = ''
 --WHERE SC.guiApiUniqueId = @guiApiUniqueId
 --AND EXISTS (SELECT TOP 1 NULL FROM tblEMEntity WHERE strEntityNo = strEntityNumber)
 
-INSERT INTO tblApiImportLogDetail(guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
-SELECT
-      guiApiImportLogDetailId = NEWID()
-    , guiApiImportLogId = @guiLogId
-    , strField = 'Customer Number'
-    , strValue = strCustomerNumber
-    , strLogLevel = 'Error'
-    , strStatus = 'Failed'
-    , intRowNo = intRowNumber
-    , strMessage = 'Customer Number ('+ SC.strCustomerNumber + ') has special characters.'
-FROM tblApiSchemaCustomer SC
-WHERE guiApiUniqueId = @guiApiUniqueId
-AND PATINDEX('%[^a-zA-Z0-9]%', RTRIM(LTRIM(SC.strCustomerNumber))) > 0
+--INSERT INTO tblApiImportLogDetail(guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+--SELECT
+--      guiApiImportLogDetailId = NEWID()
+--    , guiApiImportLogId = @guiLogId
+--    , strField = 'Customer Number'
+--    , strValue = strCustomerNumber
+--    , strLogLevel = 'Error'
+--    , strStatus = 'Failed'
+--    , intRowNo = intRowNumber
+--    , strMessage = 'Customer Number ('+ SC.strCustomerNumber + ') has special characters.'
+--FROM tblApiSchemaCustomer SC
+--WHERE guiApiUniqueId = @guiApiUniqueId
+--AND PATINDEX('%[^a-zA-Z0-9]%', RTRIM(LTRIM(SC.strCustomerNumber))) > 0
 
 ----COMMENTED OUT FOR UPDATE PURPOSES - AR-16432
 --INSERT INTO tblApiImportLogDetail(guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
