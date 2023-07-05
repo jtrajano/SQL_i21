@@ -18,7 +18,7 @@ RETURNS TABLE AS RETURN
 									ELSE B.dblTotal - (CASE WHEN ISNULL(A.ysnFinalVoucher,0) = 1 THEN B.dblProvisionalPayment ELSE 0 END) 
 									END
 								WHEN B.intInventoryReceiptItemId IS NULL THEN (
-									CASE WHEN B.intLoadShipmentCostId > 0 
+									CASE WHEN B.intLoadShipmentCostId > 0 OR B.intLoadDetailId > 0
 										THEN 
 											CASE WHEN B.intComputeTotalOption = 0 AND B.intWeightUOMId IS NOT NULL AND B.intWeightClaimDetailId IS NULL
 												THEN B.dblNetWeight * B.dblWeightUnitQty
@@ -57,7 +57,7 @@ RETURNS TABLE AS RETURN
 									ELSE B.dblTotal - (CASE WHEN ISNULL(A.ysnFinalVoucher,0) = 1 THEN B.dblProvisionalPayment ELSE 0 END)
 									END
 								WHEN B.intInventoryReceiptItemId IS NULL THEN (
-									CASE WHEN B.intLoadShipmentCostId > 0 
+									CASE WHEN B.intLoadShipmentCostId > 0 OR B.intLoadDetailId > 0
 										THEN 
 											CASE WHEN B.intComputeTotalOption = 0 AND B.intWeightUOMId IS NOT NULL AND B.intWeightClaimDetailId IS NULL
 												THEN B.dblNetWeight * B.dblWeightUnitQty
