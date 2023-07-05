@@ -1466,11 +1466,6 @@
     <Build Include="dbo\Stored Procedures\uspMFCreateUpdatePickListFromInventoryShipment.sql" />
     <Build Include="dbo\Functions\fnICGetInventoryReceiptTotal.sql" />
     <Build Include="dbo\Stored Procedures\uspCTSplitItemContract.sql" />
-    <Build Include="dbo\Views\vyuARDistinctGLCompanyAccountIds.sql" />
-    <Build Include="dbo\Tables\tblApiSchemaVendorXref.sql" />
-    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformVendorXref.sql" />
-    <Build Include="dbo\Tables\tblApiSchemaCustomerXref.sql" />
-    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformCustomerXref.sql" />
     <Build Include="dbo\Stored Procedures\uspSCTicketApplyProcessForIntransit.sql" />
     <Build Include="dbo\Stored Procedures\uspSCTicketApplyUnpostForInTransit.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGetItemPriceByLevel.sql" />
