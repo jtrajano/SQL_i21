@@ -20,6 +20,8 @@
 	, @intPasswordIntervalDays AS INT OUTPUT
 	, @intPasswordIncrementNo AS INT OUTPUT
 	, @ysnConsignmentStore AS BIT OUTPUT
+	, @ysnUsesThirdPartyInterfaceForXmlFiles AS BIT OUTPUT
+	, @intPurgeInterval AS INT OUTPUT
 AS
 BEGIN
 	BEGIN TRY
@@ -61,6 +63,8 @@ BEGIN
 			, @intPasswordIntervalDays = Reg.intSAPPHIREPasswordIntervalDays
 			, @intPasswordIncrementNo = Reg.intSAPPHIREPasswordIncrementNo
 			, @ysnConsignmentStore = ST.ysnConsignmentStore
+			, @ysnUsesThirdPartyInterfaceForXmlFiles = ISNULL(Reg.ysnUsesThirdPartyInterfaceForXmlFiles, 0)
+			, @intPurgeInterval = ISNULL(Reg.intPurgeInterval, 0)
 		FROM tblSTRegister Reg
 		JOIN tblSTStore ST
 			ON Reg.intRegisterId = ST.intRegisterId

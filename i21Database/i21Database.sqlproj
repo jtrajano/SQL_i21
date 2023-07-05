@@ -1771,6 +1771,8 @@
     <Build Include="dbo\Stored Procedures\uspSTCSAddNewRecipeForBlendedFuel.sql" />
     <Build Include="dbo\Functions\fnMFGetErrorMessage.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetErrorMessage.sql" />
+    <None Include="Scripts\Post-Deployment\ST\56_FileFieldMapping_Passport_FGMT.sql" />
+    <None Include="Scripts\Post-Deployment\ST\55_FileFieldMapping_Passport_FGML.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
