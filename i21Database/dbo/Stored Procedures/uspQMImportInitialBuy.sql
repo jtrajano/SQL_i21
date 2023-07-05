@@ -613,6 +613,42 @@ BEGIN TRY
 			END
 		END
 
+		-- if it is AUC then trigger BUYER1 validation
+		IF EXISTS (
+		          SELECT 1 
+		          FROM tblQMSample S
+		          INNER JOIN tblARMarketZone MZ ON MZ.intMarketZoneId = S.intMarketZoneId
+		          WHERE ISNULL(intContractDetailId, 0) = 0 AND MZ.strMarketZoneCode = 'AUC'
+		          AND S.intSampleId = @intSampleId
+		)
+		BEGIN  
+		    IF EXISTS (
+				SELECT 1 
+				FROM tblQMSample S 
+				WHERE S.intSampleId = @intSampleId AND @dblB1QtyBought > S.dblRepresentingQty
+			)
+		    BEGIN
+				UPDATE tblQMImportCatalogue
+				SET ysnProcessed = 1, ysnSuccess = 0, strLogResult = 'BUYER1 Qty cannot be greater than QUANTITY '
+				WHERE intImportCatalogueId = @intImportCatalogueId
+
+				GOTO CONT
+			END  
+		
+		    IF EXISTS (
+				SELECT 1 
+				FROM tblQMSample S 
+				WHERE S.intSampleId = @intSampleId AND @intB1QtyUOMId <> S.intRepresentingUOMId
+			)
+		    BEGIN
+				UPDATE tblQMImportCatalogue
+				SET ysnProcessed = 1, ysnSuccess = 0, strLogResult = 'BUYER1 Qty UOM should be the same as QUANTITY UOM '
+				WHERE intImportCatalogueId = @intImportCatalogueId
+
+				GOTO CONT
+			END 
+		END
+
 		EXEC uspQMGenerateSampleCatalogueImportAuditLog
 			@intSampleId  = @intSampleId
 			,@intUserEntityId = @intEntityUserId
