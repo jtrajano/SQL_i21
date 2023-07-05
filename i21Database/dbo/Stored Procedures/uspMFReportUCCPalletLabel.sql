@@ -35,6 +35,7 @@ BEGIN TRY
 				 , '' AS 'strLotNumber'
 				 , '' AS 'strItemNo'
 				 , '' AS 'strBOLNumber'
+				 , '' AS 'strStorageLocationName'
 
 			RETURN
 		END
@@ -200,6 +201,7 @@ BEGIN TRY
 		 , PL.strParentLotNumber	AS strLotNumber
 		 , I.strItemNo				AS strItemNo	
 		 , S.strBOLNumber			AS strBOLNumber
+		 , StorageLocation.strName	AS strStorageLocationName
 	FROM tblMFOrderManifest OM
 	JOIN tblMFOrderHeader OH ON OH.intOrderHeaderId = OM.intOrderHeaderId
 	JOIN tblMFOrderDetail OD ON OD.intOrderDetailId = OM.intOrderDetailId
@@ -213,6 +215,9 @@ BEGIN TRY
 	LEFT JOIN tblICLot L ON L.intLotId = OM.intLotId
 	LEFT JOIN tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
 	LEFT JOIN tblMFTask T ON T.intOrderHeaderId = OH.intOrderHeaderId AND T.intLotId = OM.intLotId
+	OUTER APPLY (SELECT TOP 1 strName
+				 FROM tblICStorageLocation AS ICStorageLocation
+				 WHERE ICStorageLocation.intStorageLocationId = L.intLotId) AS StorageLocation
 	WHERE OM.intOrderManifestId IN 
 	(
 		SELECT *
