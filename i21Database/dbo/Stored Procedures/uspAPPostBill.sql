@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspAPPostBill
+﻿ALTER PROCEDURE uspAPPostBill
 	@batchId			AS NVARCHAR(40)		= NULL,
 	@billBatchId		AS NVARCHAR(40)		= NULL,
 	@transactionType	AS NVARCHAR(30)		= NULL,
@@ -86,6 +86,18 @@ BEGIN
 	DECLARE @intFunctionalCurrencyId  AS INT 
 	SET @intFunctionalCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
 END 
+
+DECLARE	@OverrideCompanySegment  BIT
+		,@OverrideLocationSegment  BIT
+		,@OverrideLineOfBusinessSegment BIT
+SELECT TOP 1
+		@OverrideCompanySegment = ISNULL([ysnOverrideCompanySegment], 0),
+		@OverrideLocationSegment = ISNULL([ysnOverrideLocationSegment], 0),
+		@OverrideLineOfBusinessSegment = ISNULL([ysnOverrideLineOfBusinessSegment], 0)
+FROM tblAPCompanyPreference
+
+DECLARE @GainLossAccount INT
+SELECT TOP 1 @GainLossAccount = intAccountsPayableRealizedId FROM tblSMMultiCurrency
 
 
 SET @recapId = '1'
@@ -1545,6 +1557,93 @@ BEGIN
 		SET @invalidCount = @invalidCount + @failedAdjustment;
 		SET @totalRecords = @totalRecords - @failedAdjustment;
 	END
+
+	--HANDLE DECIMAL LOSS
+	INSERT INTO @GLEntries(
+		[dtmDate],
+		[strBatchId],
+		[intAccountId],
+		[dblDebit]  ,
+		[dblCredit] ,
+		[dblDebitUnit],
+		[dblCreditUnit],
+		[strDescription],
+		[strCode],    
+		[strReference],
+		[intCurrencyId],
+		[intCurrencyExchangeRateTypeId],
+		[dblExchangeRate],
+		[dtmDateEntered] ,
+		[dtmTransactionDate],
+		[strJournalLineDescription],
+		[intJournalLineNo],
+		[ysnIsUnposted],    
+		[intUserId],
+		[intEntityId],
+		[strTransactionId],
+		[intTransactionId],
+		[strTransactionType],
+		[strTransactionForm],
+		[strModuleName],
+		[intConcurrencyId],
+		[dblDebitForeign],
+		[dblDebitReport],
+		[dblCreditForeign],
+		[dblCreditReport],
+		[dblReportingRate],
+		[dblForeignRate],
+		[strRateType])
+	SELECT 
+		MIN(A.[dtmDate]),
+		A.[strBatchId]  ,
+		@GainLossAccount,
+		SUM(dblCredit - dblDebit),
+		0,
+		0,
+		0,
+		'Decimal loss due to rounding.',
+		'AP',    
+		NULL,
+		@intFunctionalCurrencyId,
+		NULL,
+		1,
+		MIN(A.[dtmDateEntered]),
+		MIN(A.[dtmTransactionDate]),
+		'Posted Decimal Loss',
+		4,
+		A.[ysnIsUnposted],    
+		A.[intUserId],
+		A.[intEntityId],
+		A.[strTransactionId],
+		A.[intTransactionId],
+		'Bill',
+		A.[strTransactionForm],
+		A.[strModuleName],
+		A.[intConcurrencyId],
+		0,
+		0,
+		0,
+		0,
+		1,
+		1,
+		NULL
+	FROM @GLEntries A
+	OUTER APPLY (
+		SELECT TOP 1 intOverrideAccount
+		FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], @GainLossAccount, @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
+	) OVERRIDESEGMENT
+	GROUP BY 
+		A.[strBatchId],
+		A.[ysnIsUnposted],    
+		A.[intUserId],
+		A.[intEntityId],
+		A.[strTransactionId],
+		A.[intTransactionId],
+		A.[strTransactionForm],
+		A.[strModuleName],
+		A.[intConcurrencyId],
+		OVERRIDESEGMENT.intOverrideAccount
+	HAVING SUM(dblCredit - dblDebit) = -0.01 OR SUM(dblCredit - dblDebit) = 0.01
 END
 ELSE
 BEGIN
