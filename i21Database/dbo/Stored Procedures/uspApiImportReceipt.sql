@@ -8,11 +8,17 @@ UPDATE rs
 SET
 	rs.intCurrencyId = COALESCE(rs.intCurrencyId, v.intCurrencyId),
 	rs.intShipFromEntityId = COALESCE(rs.intShipFromEntityId, v.intEntityId),
-	rs.intShipFromLocationId = COALESCE(rs.intShipFromLocationId, x.intEntityLocationId),
+	rs.intShipFromLocationId = COALESCE(rs.intShipFromLocationId, defaultShipFromLoc.intEntityLocationId),
 	rs.intFreightTermId = COALESCE(rs.intFreightTermId, x.intFreightTermId)
 FROM tblRestApiReceiptStaging rs
 JOIN tblAPVendor v ON v.intEntityId = rs.intEntityId
 JOIN tblEMEntity e ON e.intEntityId = v.intEntityId
+OUTER APPLY (
+	SELECT TOP 1 l.intEntityLocationId
+	FROM tblEMEntityLocation l
+	WHERE l.intEntityId = COALESCE(rs.intShipFromEntityId, v.intEntityId)
+	AND l.ysnDefaultLocation = 1
+) defaultShipFromLoc
 OUTER APPLY (
 	SELECT TOP 1 l.strLocationName, l.intEntityLocationId, l.intFreightTermId
 	FROM tblEMEntityLocation l
@@ -58,6 +64,25 @@ SELECT CASE WHEN s.intShipFromEntityId IS NULL THEN 'shipFromEntityId is require
 	, 'shipFromEntityId', 'Error',  CAST(s.intShipFromEntityId AS NVARCHAR(50))
 FROM tblRestApiReceiptStaging s
 WHERE s.intShipFromEntityId IS NULL
+	AND s.guiUniqueId = @guiUniqueId
+
+INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
+SELECT CASE WHEN s.intShipFromLocationId IS NULL THEN 'intShipFromLocationId is required.' ELSE 'Cannot find the intShipFromLocationId ''' + CAST(s.intShipFromLocationId AS NVARCHAR(50)) + '''' END
+	, 'shipFromEntityId', 'Error',  CAST(s.intShipFromLocationId AS NVARCHAR(50))
+FROM tblRestApiReceiptStaging s
+WHERE s.intShipFromLocationId IS NULL
+	AND s.guiUniqueId = @guiUniqueId
+
+INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
+SELECT 'The intShipFromLocationId ' + CAST(s.intShipFromLocationId AS NVARCHAR(50)) + ' (' + ISNULL(n.strLocationName, '') + ') is not a valid location of the shipFromEntityId ' + CAST(s.intShipFromEntityId AS NVARCHAR(50)) + ' (' + ISNULL(v.strName, '') + ').'
+	, 'intShipFromLocationId', 'Error',  CAST(s.intShipFromLocationId AS NVARCHAR(50))
+FROM tblRestApiReceiptStaging s
+LEFT JOIN tblEMEntityLocation el ON el.intEntityId = s.intShipFromEntityId
+	AND el.intEntityLocationId = s.intShipFromLocationId
+LEFT JOIN tblEMEntityLocation n ON n.intEntityLocationId = s.intShipFromLocationId
+LEFT JOIN vyuAPVendor v ON v.intEntityId = s.intShipFromEntityId
+WHERE s.intShipFromLocationId IS NOT NULL
+	AND el.intEntityLocationId IS NULL
 	AND s.guiUniqueId = @guiUniqueId
 
 INSERT INTO @Logs (strError, strField, strLogLevel, strValue)

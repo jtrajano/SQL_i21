@@ -434,6 +434,7 @@ SET @query = '
 		,A.intAccountId
 		,D.strAccountId
 		,EC.strClass
+		,S.strCode + '' - '' + CD.strCompanyName AS strCompanyDetailName
 		,(CASE WHEN ' + @ysnFilter + ' = 1 THEN ''As Of'' ELSE ''All Dates'' END ) as strDateDesc
 		, '+ @dtmDateFilter +' as dtmDateFilter
 		,tmpAgingSummaryTotal.dblTotal
@@ -510,7 +511,9 @@ SET @query = '
 		ON A.intBillId = tmpAgingSummaryTotal.intBillId
 		LEFT JOIN (dbo.tblAPVendor B INNER JOIN dbo.tblEMEntity C ON B.[intEntityId] = C.intEntityId)
 		ON B.[intEntityId] = A.[intEntityVendorId]
-		LEFT JOIN dbo.tblGLAccount D ON  A.intAccountId = D.intAccountId
+		LEFT JOIN dbo.vyuGLAccountDetail D ON  A.intAccountId = D.intAccountId
+		LEFT JOIN tblGLCompanyDetails CD ON CD.intAccountSegmentId = D.intCompanySegmentId
+		LEFT JOIN tblGLAccountSegment S ON S.intAccountSegmentId = CD.intAccountSegmentId
 		LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C.intEntityClassId
 		WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
 		UNION ALL --voided deleted voucher
@@ -525,6 +528,7 @@ SET @query = '
 		,A.intAccountId
 		,D.strAccountId
 		,EC.strClass
+		,S.strCode + '' - '' + CD.strCompanyName AS strCompanyDetailName
 		,(CASE WHEN ' + @ysnFilter + ' = 1 THEN ''As Of'' ELSE ''All Dates'' END ) as strDateDesc
 		, '+ @dtmDateFilter +' as dtmDateFilter
 		,tmpAgingSummaryTotal.dblTotal
@@ -589,7 +593,9 @@ SET @query = '
 		ON A.intBillId = tmpAgingSummaryTotal.intBillId
 		LEFT JOIN (dbo.tblAPVendor B INNER JOIN dbo.tblEMEntity C ON B.[intEntityId] = C.intEntityId)
 		ON B.[intEntityId] = A.[intEntityVendorId]
-		LEFT JOIN dbo.tblGLAccount D ON  A.intAccountId = D.intAccountId
+		LEFT JOIN dbo.vyuGLAccountDetail D ON  A.intAccountId = D.intAccountId
+		LEFT JOIN tblGLCompanyDetails CD ON CD.intAccountSegmentId = D.intCompanySegmentId
+		LEFT JOIN tblGLAccountSegment S ON S.intAccountSegmentId = CD.intAccountSegmentId
 		LEFT JOIN dbo.tblSMTerm T ON A.intTermsId = T.intTermID
 		LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C.intEntityClassId
 		LEFT JOIN vyuAPVoucherCommodity F ON F.intBillId = tmpAgingSummaryTotal.intBillId
@@ -606,6 +612,7 @@ SET @query = '
 		,A.intAccountId
 		,D.strAccountId
 		,EC.strClass
+		,S.strCode + '' - '' + CD.strCompanyName AS strCompanyDetailName
 		,(CASE WHEN ' + @ysnFilter + ' = 1 THEN ''As Of'' ELSE ''All Dates'' END ) as strDateDesc
 		, '+ @dtmDateFilter +' as dtmDateFilter
 		,tmpAgingSummaryTotal.dblTotal
@@ -657,6 +664,8 @@ SET @query = '
 		LEFT JOIN (dbo.tblAPVendor B INNER JOIN dbo.tblEMEntity C ON B.[intEntityId] = C.intEntityId)
 		ON B.[intEntityId] = A.[intEntityCustomerId]
 		LEFT JOIN dbo.vyuGLAccountDetail D ON  A.intAccountId = D.intAccountId
+		LEFT JOIN tblGLCompanyDetails CD ON CD.intAccountSegmentId = D.intCompanySegmentId
+		LEFT JOIN tblGLAccountSegment S ON S.intAccountSegmentId = CD.intAccountSegmentId
 		LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C.intEntityClassId
 		WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
 		AND D.strAccountCategory = ''AP Account''

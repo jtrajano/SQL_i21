@@ -39,6 +39,9 @@ SELECT
 	, ReceiptItemSource.strERPItemNumber
 	, ReceiptItemSource.strOrigin
 	, ReceiptItemSource.strContainer
+	, dblGross = ReceiptItem.dblGross
+	, dblNet =  ReceiptItem.dblNet
+	, dblTare = ReceiptItem.dblTare
 
 
 FROM tblICInventoryReceiptItem ReceiptItem

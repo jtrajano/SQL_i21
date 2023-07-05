@@ -779,9 +779,11 @@ CROSS APPLY (
 	SELECT TOP 1 ICX.strCustomerProduct
 			   , ICX.strProductDescription
 	FROM tblICItemCustomerXref ICX
+	LEFT JOIN tblICItemLocation IL ON ICX.intItemLocationId = IL.intItemLocationId
+	LEFT JOIN tblSMCompanyLocation CL ON IL.intLocationId = CL.intCompanyLocationId
 	WHERE ICX.intItemId = I.intItemId
 	  AND ICX.intCustomerId = I.intEntityCustomerId
-	  AND (ICX.intItemLocationId IS NULL OR (ICX.intItemLocationId IS NOT NULL AND ICX.intItemLocationId = I.intCompanyLocationId))
+	  AND (ICX.intItemLocationId IS NULL OR (ICX.intItemLocationId IS NOT NULL AND CL.intCompanyLocationId = I.intCompanyLocationId))
 	ORDER BY ICX.intItemCustomerXrefId ASC
 ) XREF
 WHERE I.intItemId IS NOT NULL

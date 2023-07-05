@@ -1757,12 +1757,22 @@
     <Build Include="dbo\Views\vyuAPCorriganPaymentToIPayables.sql" />
     <Build Include="dbo\Views\vyuCTItemXrefSetup.sql" />
     <Build Include="dbo\Stored Procedures\uspTRProcessTransportLoadFromMbil.sql" />
+    <Build Include="dbo\Tables\tblSMPowerBIPipelineStages.sql" />
     <Build Include="dbo\Stored Procedures\uspCTSplitItemContract.sql" />
     <Build Include="dbo\Views\vyuARDistinctGLCompanyAccountIds.sql" />
     <Build Include="dbo\Tables\tblApiSchemaVendorXref.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformVendorXref.sql" />
     <Build Include="dbo\Tables\tblApiSchemaCustomerXref.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformCustomerXref.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCTicketApplyProcessForIntransit.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCTicketApplyUnpostForInTransit.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTGetItemPriceByLevel.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetCoverageReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCSAddNewRecipeForBlendedFuel.sql" />
+    <Build Include="dbo\Functions\fnMFGetErrorMessage.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetErrorMessage.sql" />
+    <None Include="Scripts\Post-Deployment\ST\56_FileFieldMapping_Passport_FGMT.sql" />
+    <None Include="Scripts\Post-Deployment\ST\55_FileFieldMapping_Passport_FGML.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -9781,8 +9791,6 @@
     <Build Include="dbo\Views\vyuRKGetFuturesVsUnfixedSaleContract.sql" />
     <Build Include="dbo\Functions\fCTConvertUOMtoUnit.sql" />
     <Build Include="dbo\Functions\fnCMGetReconGridResult.sql" />
-    <Build Include="dbo\Stored Procedures\uspCMGridClear.sql" />
-    <Build Include="dbo\Stored Procedures\uspCMGridSelect.sql" />
     <Build Include="dbo\Tables\tblCMGridSelectedRow.sql" />
     <Build Include="dbo\Stored Procedures\uspCMGetBankReconDebitCreditValues.sql" />
     <Build Include="dbo\Stored Procedures\uspLGContractVsMarketDifferentialAnalysis.sql" />
@@ -11684,6 +11692,7 @@
     <Build Include="dbo\Functions\fnGRCreateGLEntriesForPercentDiscounts.sql" />
     <Build Include="dbo\Functions\fnGRGetPercentDiscounts.sql" />
     <Build Include="dbo\Stored Procedures\uspMFProductionReport.sql" />
+    <Build Include="dbo\Views\vyuSCDirectAPClearingGLAccount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -12159,6 +12168,7 @@
     <Build Include="dbo\Stored Procedures\uspGLUpdateFiscalAccountOverride.sql" />
     <Build Include="dbo\Functions\fnGLOverrideTableOfAccounts.sql" />
     <Build Include="dbo\Tables\tblGLREMaskAccount.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMUpdateLoadShipmentDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

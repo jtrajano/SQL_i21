@@ -327,7 +327,7 @@ BEGIN
 		,intPayToId						=	F.intEntityLocationId	
 		,strPayTo						=	A2.strPayTo
 		,intCurrencyId					=	H.intCurrencyID
-		,dblCost						=	A4.dblTotal
+		,dblCost						=	A4.dblTotal * (CASE WHEN A.dblTotal < 0 THEN -1 ELSE 1 END)
 		,dblQuantityToBill				=	IIF(A4.dblQuantity=0,1,A4.dblQuantity)
 		,dblQuantityOrdered				=	IIF(A4.dblQuantity=0,1,A4.dblQuantity)
 		,intContactId					=	C3.intEntityId
@@ -355,7 +355,7 @@ BEGIN
 	LEFT JOIN (tblEMEntityToContact C2 INNER JOIN tblEMEntity C3 ON C2.intEntityId = C3.intEntityId)
 		ON C2.ysnDefaultContact = 1 AND C2.intEntityId = C.intEntityId
 	LEFT JOIN tblEMEntityLocation F ON F.strLocationName = A2.strPayTo AND D.intEntityId = F.intEntityId
-	LEFT JOIN tblEMEntityLocation F2 ON F.strLocationName = A2.strPayTo AND D.intEntityId = F2.intEntityId
+	-- LEFT JOIN tblEMEntityLocation F2 ON F.strLocationName = A2.strPayTo AND D.intEntityId = F2.intEntityId
 	LEFT JOIN tblSMCompanyLocation E ON E.strLocationNumber = A2.strShipTo
 	LEFT JOIN tblSMTerm G ON G.strTermCode = A3.strTermCode
 	LEFT JOIN tblSMCurrency H ON H.strCurrency = A.strCurrency
@@ -374,10 +374,14 @@ BEGIN
 	END CATCH
 END
 
+	DECLARE @defaultAPAccount NVARCHAR(50) = '200000-0000-0000-0090'
+	DECLARE @apAccountId INT = (SELECT TOP 1 intAccountId FROM tblGLAccount WHERE strAccountId = @defaultAPAccount)
+
 	INSERT INTO @voucherPayables(
 		intPartitionId
 		,strVendorOrderNumber
 		,intTransactionType
+		,intAPAccount
 		,intEntityVendorId
 		,intLocationId
 		,intShipToId
@@ -403,6 +407,7 @@ END
 		intPartitionId			= 	intPartitionId, --1 voucher per 1 payable
 		strVendorOrderNumber	=	strVendorOrderNumber,
 		intTransactionType 		=	intTransactionType,
+		intAPAccount			=	@apAccountId,
 		intEntityVendorId		=	intEntityVendorId,
 		intLocationId			=	intShipToId,
 		intShipToId				=	intShipToId,
@@ -425,6 +430,37 @@ END
 	FROM #tmppayablesInfo
 	WHERE
 		intEntityVendorId IS NOT NULL
+
+	--REMOVE MATCHING VOUCHER
+	DECLARE @voucherExists TABLE(
+		strVendorOrderNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+		intEntityVendorId INT,
+		intTransactionType INT,
+		dtmDate DATETIME
+	)
+
+	INSERT INTO @voucherExists
+	SELECT
+		B.strVendorOrderNumber,
+		B.intEntityVendorId,
+		B.intTransactionType,
+		B.dtmDate
+	FROM @voucherPayables A
+	INNER JOIN tblAPBill B 
+	ON 
+		A.intEntityVendorId = B.intEntityVendorId
+	AND	A.strVendorOrderNumber = B.strVendorOrderNumber
+	AND A.dtmDate = B.dtmDate
+	AND A.intTransactionType = B.intTransactionType
+
+	DELETE A
+	FROM @voucherPayables A
+	INNER JOIN @voucherExists B
+	ON
+		A.intEntityVendorId = B.intEntityVendorId
+	AND	A.strVendorOrderNumber = B.strVendorOrderNumber
+	AND A.dtmDate = B.dtmDate
+	AND A.intTransactionType = B.intTransactionType
 
 	--SELECT '' [tmppayablesInfo], * FROM #tmppayablesInfo
 	--SELECT ''[voucherPayables],* FROM @voucherPayables
@@ -471,6 +507,13 @@ END
 		WHERE intDetailAccountId IS NULL
 	) tblErrors
 	ORDER BY intPartitionId
+
+	INSERT INTO @invalidPayables
+	SELECT
+	DISTINCT
+		A.strVendorOrderNumber,
+		'Line with Invoice No. ' + A.strVendorOrderNumber + ': Invoice already exists. '
+	FROM @voucherExists A
 
 	--VOUCHER AND POST VALID PAYABLES
 	DECLARE @createdVoucher NVARCHAR(MAX);

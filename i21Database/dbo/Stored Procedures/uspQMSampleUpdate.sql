@@ -1149,6 +1149,27 @@ DECLARE @ysnSuccess BIT
 IF EXISTS (SELECT 1 FROM tblQMCompanyPreference WHERE ysnCreateBatchOnSampleSave = 1)
 -- AND EXISTS (SELECT 1 FROM tblQMSample WHERE intSampleId = @intSampleId AND ((ISNULL(dblB1QtyBought, 0) <> 0 AND ISNULL(dblB1Price, 0) <> 0) OR ISNULL(intContractDetailId, 0) <> 0))
 BEGIN
+
+-- if it is AUC then trigger BUYER1 validation
+  IF EXISTS (
+          SELECT 1 
+          FROM tblQMSample S
+          INNER JOIN tblARMarketZone MZ ON MZ.intMarketZoneId = S.intMarketZoneId
+          WHERE ISNULL(intContractDetailId, 0) = 0 AND MZ.strMarketZoneCode = 'AUC'
+          AND S.intSampleId = @intSampleId
+  )
+  BEGIN  
+      IF EXISTS (SELECT 1 FROM tblQMSample S WHERE S.intSampleId = @intSampleId AND S.dblB1QtyBought > S.dblRepresentingQty)
+      BEGIN  
+          RAISERROR ('Buyer 1 Qty cannot be greater than Quantity. ', 16, 1)  
+      END  
+  
+      IF EXISTS (SELECT 1 FROM tblQMSample S WHERE S.intSampleId = @intSampleId AND S.intB1QtyUOMId <> S.intRepresentingUOMId)
+      BEGIN  
+          RAISERROR ('Buyer 1 Qty UOM should be the same as Quantity UOM. ', 16, 1)  
+      END 
+  END
+
   IF EXISTS(
     SELECT 1
     FROM tblQMSample S
@@ -1590,6 +1611,35 @@ BEGIN
         ,@intInputSuccess OUTPUT
         ,@strBatchId OUTPUT
         ,0
+
+      /* Update Load detail for non-auction sample */
+      IF EXISTS(
+        SELECT 1 FROM tblQMSample S
+        INNER JOIN tblARMarketZone MZ ON MZ.intMarketZoneId = S.intMarketZoneId
+        WHERE intSampleId = @intSampleId AND ISNULL(intContractDetailId, 0) <> 0 AND MZ.strMarketZoneCode <> 'AUC'
+      )
+      BEGIN
+        IF EXISTS (
+          SELECT 1
+          FROM tblQMSample S
+          INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = S.intContractDetailId
+          WHERE S.intItemId <> CD.intItemId
+          AND S.intSampleId = @intSampleId
+        )
+          RAISERROR('Item No. should match the item in the contract sequence.', 16, 1)
+        
+        DECLARE @intBatchToUpdateId INT
+
+				SELECT @intBatchToUpdateId = intBatchId
+				FROM tblMFBatch B
+				INNER JOIN tblQMSample S ON S.strBatchNo = B.strBatchId AND S.intLocationId = B.intLocationId
+				WHERE S.intSampleId = @intSampleId
+        AND B.intLocationId = B.intBuyingCenterLocationId
+
+        EXEC uspQMUpdateLoadShipmentDetail
+          @intBatchToUpdateId
+          ,@intLastModifiedUserId
+      END
 
       UPDATE tblQMSample
       SET strBatchNo = @strBatchId

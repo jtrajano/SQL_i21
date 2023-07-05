@@ -61,10 +61,10 @@ BEGIN TRY
 	-- From Location Code
 	LEFT JOIN tblSMCity FROM_LOC_CODE ON FROM_LOC_CODE.strCity = IMP.strFromLocationCode
 	-- Receiving Storage Location
-	LEFT JOIN tblSMCompanyLocation MU ON MU.strLocationName = IMP.strB1GroupNumber
+	LEFT JOIN tblSMCompanyLocation TBO ON TBO.strLocationName = IMP.strBuyingCenter
 	LEFT JOIN tblSMCompanyLocationSubLocation RSL ON IMP.strReceivingStorageLocation IS NOT NULL
 		AND RSL.strSubLocationName = IMP.strReceivingStorageLocation
-		AND RSL.intCompanyLocationId = MU.intCompanyLocationId
+		AND RSL.intCompanyLocationId = TBO.intCompanyLocationId
 	-- Format log message
 	OUTER APPLY (
 		SELECT strLogMessage = CASE 
@@ -611,6 +611,42 @@ BEGIN TRY
 
 				GOTO CONT
 			END
+		END
+
+		-- if it is AUC then trigger BUYER1 validation
+		IF EXISTS (
+		          SELECT 1 
+		          FROM tblQMSample S
+		          INNER JOIN tblARMarketZone MZ ON MZ.intMarketZoneId = S.intMarketZoneId
+		          WHERE ISNULL(intContractDetailId, 0) = 0 AND MZ.strMarketZoneCode = 'AUC'
+		          AND S.intSampleId = @intSampleId
+		)
+		BEGIN  
+		    IF EXISTS (
+				SELECT 1 
+				FROM tblQMSample S 
+				WHERE S.intSampleId = @intSampleId AND @dblB1QtyBought > S.dblRepresentingQty
+			)
+		    BEGIN
+				UPDATE tblQMImportCatalogue
+				SET ysnProcessed = 1, ysnSuccess = 0, strLogResult = 'BUYER1 Qty cannot be greater than QUANTITY '
+				WHERE intImportCatalogueId = @intImportCatalogueId
+
+				GOTO CONT
+			END  
+		
+		    IF EXISTS (
+				SELECT 1 
+				FROM tblQMSample S 
+				WHERE S.intSampleId = @intSampleId AND @intB1QtyUOMId <> S.intRepresentingUOMId
+			)
+		    BEGIN
+				UPDATE tblQMImportCatalogue
+				SET ysnProcessed = 1, ysnSuccess = 0, strLogResult = 'BUYER1 Qty UOM should be the same as QUANTITY UOM '
+				WHERE intImportCatalogueId = @intImportCatalogueId
+
+				GOTO CONT
+			END 
 		END
 
 		EXEC uspQMGenerateSampleCatalogueImportAuditLog

@@ -221,6 +221,7 @@ BEGIN TRY
 	IF @strMessageType = 'Production Order'
 	BEGIN
 		SET @strHeader = '<tr>
+							<th>&nbsp;Plant</th>
 							<th>&nbsp;Order No</th>
 							<th>&nbsp;Item No</th>
 							<th>&nbsp;Message</th>
@@ -233,6 +234,7 @@ BEGIN TRY
 			)
 		BEGIN
 			SELECT @strDetail = @strDetail + '<tr>' + 
+				 '<td>&nbsp;' + ISNULL(t.strCompanyLocation, '') + '</td>' + 
 				   '<td>&nbsp;' + ISNULL(t.strOrderNo, '') + '</td>' + 
 				   '<td>&nbsp;' + ISNULL(t.strItem, '') + '</td>' + 
 				   '<td>&nbsp;' + ISNULL(t.strErrorMessage, '') + '</td>' + 
@@ -250,6 +252,7 @@ BEGIN TRY
 	IF @strMessageType = 'Inventory Adjustment'
 	BEGIN
 		SET @strHeader = '<tr>
+							<th>&nbsp;Plant</th>
 							<th>&nbsp;Type</th>
 							<th>&nbsp;Lot No</th>
 							<th>&nbsp;Item No</th>
@@ -265,6 +268,7 @@ BEGIN TRY
 			)
 		BEGIN
 			SELECT @strDetail = @strDetail + '<tr>' + 
+					 '<td>&nbsp;' + ISNULL(t.strCompanyLocation, '') + '</td>' + 
 				   '<td>&nbsp;' + CASE 
 						WHEN t.intTransactionTypeId in (8,-8,0)
 							THEN 'Stock Consumption'
@@ -299,9 +303,9 @@ BEGIN TRY
 	IF @strMessageType = 'Recipe'
 	BEGIN
 		SET @strHeader = '<tr>
+							<th>&nbsp;Location</th>
 							<th>&nbsp;Recipe Name</th>
 							<th>&nbsp;Item No</th>
-							<th>&nbsp;Location</th>
 							<th>&nbsp;Valid From</th>
 							<th>&nbsp;Valid To</th>
 							<th>&nbsp;Message</th>
@@ -315,9 +319,9 @@ BEGIN TRY
 			)
 		BEGIN
 			SELECT @strDetail = @strDetail + '<tr>' + 
+					 '<td>&nbsp;' + ISNULL(t.strLocationName, '') + '</td>' + 
 				   '<td>&nbsp;' + ISNULL(t.strRecipeName, '') + '</td>' + 
 				   '<td>&nbsp;' + ISNULL(t.strItemNo, '') + '</td>' + 
-				   '<td>&nbsp;' + ISNULL(t.strLocationName, '') + '</td>' + 
 				   '<td>&nbsp;' + ISNULL(CONVERT(VARCHAR,t.strValidFrom,106) , '') + '</td>' + 
 				   '<td>&nbsp;' + ISNULL(CONVERT(VARCHAR,t.strValidTo,106), '') + '</td>' + 
 				   '<td>&nbsp;' + ISNULL(t.strMessage, '') + '</td>' + 

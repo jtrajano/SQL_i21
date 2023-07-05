@@ -34,6 +34,8 @@ SELECT Header.intQuoteHeaderId
 	, dblTax = ISNULL(Detail.dblTax, 0.000000)
 	, Detail.intShipToLocationId
 	, strShipTo = ShipToLocation.strLocationName
+	, intItemCustomerXrefId = Detail.intItemCustomerXrefId
+	, strCustomerProduct = CX.strCustomerProduct
 FROM tblTRQuoteDetail Detail
 LEFT JOIN tblTRQuoteHeader Header ON Header.intQuoteHeaderId = Detail.intQuoteHeaderId
 LEFT JOIN vyuARCustomer Customer ON Customer.intEntityId = Header.intEntityCustomerId
@@ -42,3 +44,4 @@ LEFT JOIN vyuAPVendor Terminal ON Terminal.intEntityId = Detail.intTerminalId
 LEFT JOIN vyuTRSupplyPointView SupplyPoint ON SupplyPoint.intSupplyPointId = Detail.intSupplyPointId
 LEFT JOIN tblEMEntityLocation ShipToLocation ON ShipToLocation.intEntityLocationId = Detail.intShipToLocationId
 LEFT JOIN tblSMTaxGroup TaxGroup ON TaxGroup.intTaxGroupId = Detail.intTaxGroupId
+LEFT JOIN tblICItemCustomerXref CX ON Detail.intItemCustomerXrefId = CX.intItemCustomerXrefId
