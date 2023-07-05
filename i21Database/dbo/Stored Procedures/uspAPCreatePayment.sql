@@ -297,8 +297,8 @@ BEGIN
 		[intAccountId],
 		[dblDiscount],
 		[dblWithheld],
-		SUM(dblAmountDue),
-		SUM(dblPayment) - dblDiscount + dblInterest,
+		SUM(dblAmountDue) - [dblPaid],
+		(SUM(dblPayment) - dblDiscount + dblInterest) - [dblPaid],
 		[dblInterest],
 		SUM(dblTotal)
 		FROM (
@@ -308,15 +308,16 @@ BEGIN
 				[intAccountId]	= A.intAccountId,
 				[dblDiscount]	= A.dblDiscount,
 				[dblWithheld]	= CAST(@withholdAmount * @rate AS DECIMAL(18,2)),
-				[dblAmountDue]	= CAST((B.dblTotal + B.dblTax) - ((ISNULL(A.dblPayment,0) / A.dblTotal) * (B.dblTotal + B.dblTax)) AS DECIMAL(18,2)), --handle transaction with prepaid
-				[dblPayment]	= CAST((B.dblTotal + B.dblTax) - ((ISNULL(A.dblPayment,0) / A.dblTotal) * (B.dblTotal + B.dblTax)) AS DECIMAL(18,2)),
+				[dblAmountDue]	= CAST((B.dblTotal + B.dblTax) AS DECIMAL(18,2)), --handle transaction with prepaid
+				[dblPayment]	= CAST((B.dblTotal + B.dblTax) AS DECIMAL(18,2)),
+				[dblPaid]		= A.dblPayment,
 				[dblInterest]	= A.dblInterest,
 				[dblTotal]		= (B.dblTotal + B.dblTax)
 			FROM tblAPBill A
 			INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 			WHERE A.intBillId IN (SELECT [intID] FROM #tmpBillsId)
 		) vouchers
-	GROUP BY intPaymentId, intBillId, intAccountId, dblDiscount, dblInterest, dblWithheld
+	GROUP BY intPaymentId, intBillId, intAccountId, dblDiscount, dblInterest, dblWithheld, dblPaid
 	'
 
 	EXEC sp_executesql @queryPayment,
