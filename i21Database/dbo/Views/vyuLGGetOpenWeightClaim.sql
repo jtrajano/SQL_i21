@@ -98,6 +98,7 @@ FROM tblLGPendingClaim PC
 					I.intItemId
 					,I.strItemNo
 					,I.strDescription
+					,I.intProductTypeId
 					,C.strCommodityCode 
 					,OG2.strCountry
 				 FROM tblICItem I 
