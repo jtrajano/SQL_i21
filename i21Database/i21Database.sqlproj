@@ -1337,6 +1337,8 @@
     <Build Include="dbo\Stored Procedures\uspSTCSAddNewRecipeForBlendedFuel.sql" />
     <Build Include="dbo\Functions\fnMFGetErrorMessage.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetErrorMessage.sql" />
+    <None Include="Scripts\Post-Deployment\ST\56_FileFieldMapping_Passport_FGMT.sql" />
+    <None Include="Scripts\Post-Deployment\ST\55_FileFieldMapping_Passport_FGML.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -10328,7 +10330,7 @@
     <Build Include="dbo\Views\vyuCMResponsiblePartyMatchingBDEP.sql" />
     <Build Include="dbo\Views\vyuGLLocationAccountId.sql" />
     <Build Include="dbo\Views\vyuGLCompanyAccountId.sql" />
-    <Build Include="dbo\Views\vyuGLCompanyOutOfBalance.sql" /> 
+    <Build Include="dbo\Views\vyuGLCompanyOutOfBalance.sql" />
     <None Include="Scripts\Post-Deployment\GL\vyuGLCompanyAccountId.sql" />
     <Build Include="dbo\Views\vyuGRTransferClearing.sql" />
     <Build Include="dbo\Views\vyuGRTransferChargesClearing.sql" />
