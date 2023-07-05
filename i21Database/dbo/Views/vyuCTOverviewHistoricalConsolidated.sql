@@ -118,6 +118,7 @@ SELECT
 	,intDetailBookId
 	,intDetailSubBookId
 	,strLogisticsLeadName
+	,dtmLastWeighing
 FROM [vyuCTDashboardJDEHistorical]
 
 UNION ALL
@@ -239,5 +240,6 @@ SELECT
 	,intDetailBookId
 	,intDetailSubBookId
 	,strLogisticsLeadName
+	,dtmLastWeighing
 FROM vyuCTDashboardJDE
 
