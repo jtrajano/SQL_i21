@@ -20,9 +20,10 @@ BEGIN
 			@strCustomerContract		NVARCHAR(50),
 			@strThanks					NVARCHAR(MAX) = 'Thank you for your business.',
 			@ysnContractSlspnOnEmail	BIT = 0,
-			@strSalespersonName		NVARCHAR(255) = ''
+			@strSalespersonName		NVARCHAR(255) = '',
+			@ysnEnableUserProfileSignature BIT = 0
 
-	SELECT @strDefaultContractReport = strDefaultContractReport, @ysnContractSlspnOnEmail = ysnContractSlspnOnEmail FROM tblCTCompanyPreference
+	SELECT @strDefaultContractReport = strDefaultContractReport, @ysnContractSlspnOnEmail = ysnContractSlspnOnEmail, @ysnEnableUserProfileSignature = ysnEnableUserProfileSignature FROM tblCTCompanyPreference
 
 	DECLARE @loop TABLE
 	(
@@ -254,15 +255,21 @@ BEGIN
 
 	IF (@strMailType IN ('Sample Instruction', 'Release Instruction', 'Release Instructions') or (@strMailType = 'Contract' and @strDefaultContractReport = 'ContractJDE'))
 		SET @body += '<br>'
-	SET @body +=@strThanks+'<br><br>'
+				
+	SET @body += CASE WHEN @ysnEnableUserProfileSignature = 0 THEN @strThanks+'<br><br>' ELSE  '' END 
 
 	IF @strMailType = 'Item Contract'
 	BEGIN
 	SET @body +='Sincerely, <br> '+@strSalespersonName
 	END
 	ELSE
-	SET @body +='Sincerely, <br>'
-		
+	SET @body += CASE WHEN @ysnEnableUserProfileSignature = 0 THEN 'Sincerely, <br>' ELSE  '' END
+	
+	IF @ysnEnableUserProfileSignature = 1 
+	BEGIN 
+		SET @strSalespersonName = ''
+	END
+
 	IF (@strMailType = 'Contract')
 	BEGIN
 		SET @body +=@strSalespersonName

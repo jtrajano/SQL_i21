@@ -149,6 +149,7 @@ AS
 			,CP.ysnEnableNetWeightAdjustment
 			,CP.ysnSequenceImportToCreateCBLogs
 			,CP.ysnEnableItemXrefVendorProduct
+			,CP.ysnEnableUserProfileSignature
 	FROM	tblCTCompanyPreference		CP
 	LEFT JOIN	tblICUnitMeasure			U1	ON	U1.intUnitMeasureId			=	CP.intCleanCostUOMId
 	LEFT JOIN	tblSMCurrency				C1	ON	C1.intCurrencyID			=	CP.intCleanCostCurrencyId
@@ -164,3 +165,7 @@ AS
 	LEFT JOIN	tblICItem					DFI	ON	DFI.intItemId				=	CP.intDefaultFreightItemId
 	LEFT JOIN	tblICItem					DII	ON	DII.intItemId				=	CP.intDefaultInsuranceItemId
 	LEFT JOIN	tblICItem					CIFI	ON	CIFI.intItemId			=	CP.intCIFInstoreId
+
+
+	
+	
