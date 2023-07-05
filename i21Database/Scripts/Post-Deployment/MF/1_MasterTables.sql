@@ -2696,6 +2696,24 @@ BEGIN
     VALUES('LidlUCCPalletLabelWithoutWeight',1,1)
 END
 GO
+IF NOT EXISTS(SELECT 1 FROM tblMFReportLabel WHERE strReportName = 'HEBPalletLabel')
+BEGIN
+    INSERT INTO tblMFReportLabel(strReportName,ysnShow,intConcurrencyId)
+    VALUES('HEBPalletLabel',1,1)
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFReportLabel WHERE strReportName = 'ICIFoodsPalletLabel')
+BEGIN
+    INSERT INTO tblMFReportLabel(strReportName,ysnShow,intConcurrencyId)
+    VALUES('ICIFoodsPalletLabel',1,1)
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFReportLabel WHERE strReportName = 'SSCCPalletLabel')
+BEGIN
+    INSERT INTO tblMFReportLabel(strReportName,ysnShow,intConcurrencyId)
+    VALUES('SSCCPalletLabel',1,1)
+END
+GO
 IF NOT EXISTS (
 		SELECT *
 		FROM tblMFInventoryShipmentRestrictionType
