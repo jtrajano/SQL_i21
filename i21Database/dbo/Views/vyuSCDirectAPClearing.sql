@@ -4,7 +4,7 @@ AS
     ----DIRECT TICKET
         ----SPOT
         SELECT
-            strMark = '10'
+            strMark = '10A'
             -- original select
             ,intEntityVendorId = SC.intEntityId
             ,dtmDate = SC.dtmTicketDateTime
@@ -48,7 +48,7 @@ AS
         UNION
         ----CONTRACT priced
         SELECT
-            strMark = '10'
+            strMark = '11A'
             -- original select
             ,intEntityVendorId = SC.intEntityId
             ,dtmDate = SC.dtmTicketDateTime
@@ -97,7 +97,7 @@ AS
         UNION
         ---LOAD (priced contract)
         SELECT
-            strMark = '10'
+            strMark = '12B'
             -- original select
             ,intEntityVendorId = SC.intEntityId
             ,dtmDate = SC.dtmTicketDateTime
@@ -150,7 +150,7 @@ AS
     ---DIRECT TICKET VOUCHER
         ----SPOT
         SELECT
-            strMark = '10'
+            strMark = '10B'
             -- original select
             ,intEntityVendorId = SC.intEntityId
             ,dtmDate = SC.dtmTicketDateTime
@@ -202,15 +202,15 @@ AS
         UNION
         ----CONTRACT priced
         SELECT
-            strMark = '10'
+            strMark = '11B'
             -- original select
             ,intEntityVendorId = SC.intEntityId
             ,dtmDate = SC.dtmTicketDateTime
             ,SC.strTicketNumber
             ,intTicketId = SC.intTicketId
-            ,intBillId = NULL
-            ,strBillId = NULL
-            ,intBillDetailId = NULL
+            ,bill.intBillId
+            ,bill.strBillId
+            ,billDetail.intBillDetailId
             ,intScalTicketId = SC.intTicketId
             ,SC.intItemId
             ,intItemUOMId = SC.intItemUOMIdTo
@@ -259,15 +259,15 @@ AS
         UNION
         ---LOAD (priced contract)
         SELECT
-            strMark = '10'
+            strMark = '12B'
             -- original select
             ,intEntityVendorId = SC.intEntityId
             ,dtmDate = SC.dtmTicketDateTime
             ,SC.strTicketNumber
             ,intTicketId = SC.intTicketId
-            ,intBillId = NULL
-            ,strBillId = NULL
-            ,intBillDetailId = NULL
+            ,bill.intBillId
+            ,bill.strBillId
+            ,billDetail.intBillDetailId
             ,intScalTicketId = SC.intTicketId
             ,SC.intItemId
             ,intItemUOMId = SC.intItemUOMIdTo

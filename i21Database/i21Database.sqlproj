@@ -11692,6 +11692,7 @@
     <Build Include="dbo\Functions\fnGRCreateGLEntriesForPercentDiscounts.sql" />
     <Build Include="dbo\Functions\fnGRGetPercentDiscounts.sql" />
     <Build Include="dbo\Stored Procedures\uspMFProductionReport.sql" />
+    <Build Include="dbo\Views\vyuSCDirectAPClearingGLAccount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
