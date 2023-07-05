@@ -378,7 +378,7 @@ BEGIN
 		 , strRecordNumber
 	FROM dbo.tblARPayment P WITH (NOLOCK)
 	INNER JOIN @ADCUSTOMERS C ON P.intEntityCustomerId = C.intEntityCustomerId
-	LEFT JOIN dbo.tblARNSFStagingTableDetail NSF ON P.intPaymentId = NSF.intTransactionId AND NSF.strTransactionType = 'Payment'
+	LEFT JOIN dbo.tblARNSFStagingTableDetail NSF ON P.intPaymentId = NSF.intTransactionId AND NSF.strTransactionType = 'Payment' AND ysnProcessed = 1
 	WHERE P.ysnPosted = 1
 	  AND (P.ysnProcessedToNSF = 0 OR (P.ysnProcessedToNSF = 1 AND NSF.dtmDate > @dtmDateToLocal))
 	  AND P.dtmDatePaid BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
