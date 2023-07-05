@@ -627,6 +627,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\ST\52_FileFieldMapping_Commander_Category.sql
 :r .\ST\53_FileFieldMapping_Passport_FGMA.sql
 :r .\ST\54_FileFieldMapping_Passport_FGMD.sql
+:r .\ST\55_FileFieldMapping_Passport_FGML.sql
+:r .\ST\56_FileFieldMapping_Passport_FGMT.sql
 :r .\ST\35_RegisterSetupEntries.sql
 :r .\ST\36_CStoreSQLJobScheduler.sql
 :r .\ST\40_Rename_And_Alter_int_trl_dept_number.sql

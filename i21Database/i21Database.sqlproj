@@ -1333,6 +1333,8 @@
     <Build Include="dbo\Views\vyuTRGetFreightCommissionFreight.sql" />
     <Build Include="dbo\Views\vyuTRGetFreightCommissionLine.sql" />
     <Build Include="dbo\Stored Procedures\uspTRFreightCommissionDriverTotal.sql" />
+    <None Include="Scripts\Post-Deployment\ST\56_FileFieldMapping_Passport_FGMT.sql" />
+    <None Include="Scripts\Post-Deployment\ST\55_FileFieldMapping_Passport_FGML.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
