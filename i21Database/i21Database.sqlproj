@@ -11771,6 +11771,7 @@
     <Build Include="dbo\Functions\fnGRCreateGLEntriesForPercentDiscounts.sql" />
     <Build Include="dbo\Functions\fnGRGetPercentDiscounts.sql" />
     <Build Include="dbo\Stored Procedures\uspMFProductionReport.sql" />
+    <Build Include="dbo\Views\vyuSCDirectAPClearingGLAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspGRSaveVoidedPayments.sql" />
     <Build Include="dbo\Tables\tblGRReversedSettlementsWithVoidedPayment.sql" />
   </ItemGroup>
