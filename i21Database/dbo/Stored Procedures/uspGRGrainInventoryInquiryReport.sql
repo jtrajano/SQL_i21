@@ -2170,13 +2170,45 @@ BEGIN
 		,@dtmReportDate
 		,strUOM
 	FROM @ReportData
+	WHERE strLabel <> 'NET ADJUSTMENTS'
 	GROUP BY intRowNum
 		,strLabel
 		,strSign
 		,strCommodityCode
 		,intCommodityId
 		,strUOM
+	UNION ALL
+	SELECT 
+		intRowNum
+		,strLabel
+		,CASE WHEN dblUnits < 0 THEN '-' ELSE '+' END
+		,ABS(dblUnits)
+		,strCommodityCode
+		,intCommodityId
+		,intCompanyLocationId		
+		,strLocationName
+		,@dtmReportDate
+		,strUOM
+	FROM (
+		SELECT
+			intRowNum
+			,strLabel
+			,dblUnits = SUM(CASE WHEN strSign = '+' THEN dblUnits ELSE dblUnits * -1 END)
+			,strCommodityCode
+			,intCommodityId
+			,intCompanyLocationId = 999
+			,strLocationName = 'ALL LOCATIONS'
+			,strUOM
+		FROM @ReportData
+		WHERE strLabel = 'NET ADJUSTMENTS'
+		GROUP BY intRowNum
+			,strLabel
+			,strCommodityCode
+			,intCommodityId
+			,strUOM
+	) A
 END
+
 
 DECLARE @LocsWithNoInventory AS Id
 
