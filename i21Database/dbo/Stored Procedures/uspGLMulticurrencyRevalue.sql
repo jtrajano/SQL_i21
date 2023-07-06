@@ -100,6 +100,7 @@ BEGIN
 	,strCurrency COLLATE Latin1_General_CI_AS strCurrency
 FROM vyuARMultiCurrencyRevalue A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
 WHERE strTransactionDate <= @dtmDate
+AND (@dtmDate <= dtmDatePaid OR dtmDatePaid IS NULL)
 AND intCurrencyId <> @intDefaultCurrencyId
 END
 

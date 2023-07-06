@@ -28,6 +28,7 @@ SELECT DISTINCT
 	,dblCredit					= 0 --Calcuate By GL
 	,intAccountId				= ISNULL(ARID.intSalesAccountId, ARID.intAccountId)
 	,intCompanyLocationId 		= ARI.intCompanyLocationId
+	,dtmDatePaid				= PAYMENT.dtmDatePaid
 FROM 
 	tblARInvoiceDetail ARID
 INNER JOIN
@@ -60,8 +61,16 @@ LEFT JOIN
 LEFT JOIN 
 	tblSMCurrency SMC 
 		ON  ARI.intCurrencyId = SMC.intCurrencyID
-WHERE
-	ARI.ysnPosted = 1 
-	AND ARI.ysnPaid = 0
+LEFT JOIN (
+	SELECT
+		 intInvoiceId
+		,dtmDatePaid = MAX(dtmDatePaid)
+	FROM tblARPayment ARP
+	INNER JOIN tblARPaymentDetail ARPD
+	ON  ARP.intPaymentId = ARPD.intPaymentId
+	WHERE ARP.ysnPosted = 1
+	GROUP BY ARPD.intInvoiceId
+) PAYMENT ON PAYMENT.intInvoiceId = ARID.intInvoiceId
+WHERE ARI.ysnPosted = 1 
 
 
