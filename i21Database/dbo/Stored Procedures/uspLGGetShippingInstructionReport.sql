@@ -538,6 +538,8 @@ FROM (
 		,intReportLogoWidth = ISNULL(CP.intReportLogoWidth,0)			
 		,strShipmentPeriod = UPPER(CONVERT(NVARCHAR,CD.dtmStartDate,106)) + ' - ' + UPPER(CONVERT(NVARCHAR,CD.dtmEndDate,106))
 		,strLSShipmentPeriod = CONVERT(NVARCHAR,L.dtmStartDate,101) + ' - ' + CONVERT(NVARCHAR,L.dtmEndDate,101)
+		,dtmStartDate = L.dtmStartDate
+		,dtmEndDate = L.dtmEndDate
 		,strMarkingInstruction = L.strMarks
 		,strPositionInfo = DATENAME(mm, CD.dtmEndDate) + ' / ' + CAST(DATEPART(yy, CD.dtmEndDate) AS NVARCHAR(10)) + ' ' + POS.strPosition
 		,strInstructionText = CASE
