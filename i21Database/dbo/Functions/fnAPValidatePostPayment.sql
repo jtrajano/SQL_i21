@@ -636,6 +636,19 @@ BEGIN
 		AND PD.dblPayment <> 0
 		AND PD.dblDiscount <> 0
 		AND CL.intDiscountAccountId IS NULL
+		--DO NOT ALLOW PAYMENT EARLIER THAN THE INVOICE DATE
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		SELECT
+			'Payment date is earlier than invoice date.',
+			'Payable',
+			A.strPaymentRecordNum,
+			A.intPaymentId
+		FROM tblAPPayment A 
+		INNER JOIN tblAPPaymentDetail B
+			ON A.intPaymentId = B.intPaymentId
+		INNER JOIN tblAPBill C
+			ON B.intBillId = C.intBillId
+		WHERE  A.[dtmDatePaid] < C.[dtmBillDate]
 
 		--DO NOT ALLOW TO POST PAYMENT FOR VOUCHERS OF VENDOR WITH CURRENTLY ON HOLD
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
