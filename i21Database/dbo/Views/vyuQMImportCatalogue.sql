@@ -124,7 +124,7 @@ LEFT JOIN tblQMSample AS QMSample ON ImportCatalogue.intSampleId = QMSample.intS
 LEFT JOIN tblICItem I ON I.intItemId = QMSample.intItemId
 -- Appearance
 OUTER APPLY (
-     SELECT TOP 1 TR.strPropertyValue
+     SELECT TOP 1 strPropertyValue = (CASE WHEN TR.strPropertyValue = '' THEN NULL ELSE TR.strPropertyValue END)
      ,TR.dblPinpointValue
      FROM tblQMTestResult TR
      JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
@@ -134,7 +134,7 @@ OUTER APPLY (
      ) APPEARANCE
 -- Hue
 OUTER APPLY (
-     SELECT TOP 1 TR.strPropertyValue
+     SELECT TOP 1 strPropertyValue = (CASE WHEN TR.strPropertyValue = '' THEN NULL ELSE TR.strPropertyValue END)
      ,TR.dblPinpointValue
      FROM tblQMTestResult TR
      JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
@@ -144,7 +144,7 @@ OUTER APPLY (
      ) HUE
 -- Intensity
 OUTER APPLY (
-     SELECT TOP 1 TR.strPropertyValue
+     SELECT TOP 1 strPropertyValue = (CASE WHEN TR.strPropertyValue = '' THEN NULL ELSE TR.strPropertyValue END)
      ,TR.dblPinpointValue
      FROM tblQMTestResult TR
      JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
@@ -154,7 +154,7 @@ OUTER APPLY (
      ) INTENSITY
 -- Taste
 OUTER APPLY (
-     SELECT TOP 1 TR.strPropertyValue
+     SELECT TOP 1 strPropertyValue = (CASE WHEN TR.strPropertyValue = '' THEN NULL ELSE TR.strPropertyValue END)
      ,TR.dblPinpointValue
      FROM tblQMTestResult TR
      JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
@@ -164,7 +164,7 @@ OUTER APPLY (
      ) TASTE
 -- Mouth Feel
 OUTER APPLY (
-     SELECT TOP 1 TR.strPropertyValue
+     SELECT TOP 1 strPropertyValue = (CASE WHEN TR.strPropertyValue = '' THEN NULL ELSE TR.strPropertyValue END)
      ,TR.dblPinpointValue
      FROM tblQMTestResult TR
      JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
@@ -174,7 +174,7 @@ OUTER APPLY (
      ) MOUTH_FEEL
 -- Density
 OUTER APPLY (
-     SELECT TOP 1 TR.strPropertyValue
+     SELECT TOP 1 strPropertyValue = (CASE WHEN TR.strPropertyValue = '' THEN NULL ELSE TR.strPropertyValue END)
      ,TR.dblPinpointValue
      FROM tblQMTestResult TR
      JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
@@ -184,7 +184,7 @@ OUTER APPLY (
      ) Density
 -- Moisture
 OUTER APPLY (
-     SELECT TOP 1 TR.strPropertyValue
+     SELECT TOP 1 strPropertyValue = (CASE WHEN TR.strPropertyValue = '' THEN NULL ELSE TR.strPropertyValue END)
      ,TR.dblPinpointValue
      FROM tblQMTestResult TR
      JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
@@ -194,7 +194,7 @@ OUTER APPLY (
      ) Moisture
 -- Fines
 OUTER APPLY (
-     SELECT TOP 1 TR.strPropertyValue
+     SELECT TOP 1 strPropertyValue = (CASE WHEN TR.strPropertyValue = '' THEN NULL ELSE TR.strPropertyValue END)
      ,TR.dblPinpointValue
      FROM tblQMTestResult TR
      JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
@@ -204,7 +204,7 @@ OUTER APPLY (
      ) Fines
 -- Volume
 OUTER APPLY (
-     SELECT TOP 1 TR.strPropertyValue
+     SELECT TOP 1 strPropertyValue = (CASE WHEN TR.strPropertyValue = '' THEN NULL ELSE TR.strPropertyValue END)
      ,TR.dblPinpointValue
      FROM tblQMTestResult TR
      JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
@@ -214,7 +214,7 @@ OUTER APPLY (
      ) Volume
 -- Dust Level
 OUTER APPLY (
-     SELECT TOP 1 TR.strPropertyValue
+     SELECT TOP 1 strPropertyValue = (CASE WHEN TR.strPropertyValue = '' THEN NULL ELSE TR.strPropertyValue END)
      ,TR.dblPinpointValue
      FROM tblQMTestResult TR
      JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
