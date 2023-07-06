@@ -582,6 +582,20 @@ BEGIN
 			A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
 		AND payDetails.dblPayment != A.dblAmountPaid
 
+		--DO NOT ALLOW PAYMENT EARLIER THAN THE INVOICE DATE
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		SELECT
+			'Payment date is earlier than invoice date.',
+			'Payable',
+			A.strPaymentRecordNum,
+			A.intPaymentId
+		FROM tblAPPayment A 
+		INNER JOIN tblAPPaymentDetail B
+			ON A.intPaymentId = B.intPaymentId
+		INNER JOIN tblAPBill C
+			ON B.intBillId = C.intBillId
+		WHERE  A.[dtmDatePaid] < C.[dtmBillDate]
+
 	END
 	ELSE
 	BEGIN
