@@ -909,6 +909,9 @@ WHERE ISNULL(LC.ysnInventoryCost, 0) = 1 AND BD.intLoadShipmentCostId IS NOT NUL
 AND (LD.intPriceCurrencyId <> LC.intCurrencyId OR BD.dblOldCost IS NOT NULL)
 --DON'T INCLUDE CANCELLED PAYABLE
 AND B.ysnCancelledPayable != 1
+AND ISNULL(B.ysnFinalVoucher, 0) = 0
+AND ISNULL(B.ysnConvertedToDebitMemo, 0) = 0
+
 --INVENTORY COST DECREASE TRANSIT
 UNION ALL
 SELECT 
@@ -951,6 +954,9 @@ WHERE ISNULL(LC.ysnInventoryCost, 0) = 1 AND BD.intLoadShipmentCostId IS NOT NUL
 AND (LD.intPriceCurrencyId <> LC.intCurrencyId OR BD.dblOldCost IS NOT NULL)
 --DON'T INCLUDE CANCELLED PAYABLE
 AND B.ysnCancelledPayable != 1
+AND ISNULL(B.ysnFinalVoucher, 0) = 0
+AND ISNULL(B.ysnConvertedToDebitMemo, 0) = 0
+
 --INVENTORY GOODS INCREASE TRANSIT
 UNION ALL
 SELECT 
@@ -990,6 +996,9 @@ WHERE BD.intLoadDetailId IS NOT NULL AND BD.intInventoryReceiptItemId IS NULL AN
 AND BD.dblOldCost IS NOT NULL
 --DON'T INCLUDE CANCELLED PAYABLE
 AND B.ysnCancelledPayable != 1
+AND ISNULL(B.ysnFinalVoucher, 0) = 0
+AND ISNULL(B.ysnConvertedToDebitMemo, 0) = 0
+
 --INVENTORY COST DECREASE TRANSIT
 UNION ALL
 SELECT 
@@ -1029,6 +1038,91 @@ WHERE BD.intLoadDetailId IS NOT NULL AND BD.intInventoryReceiptItemId IS NULL AN
 AND BD.dblOldCost IS NOT NULL
 --DON'T INCLUDE CANCELLED PAYABLE
 AND B.ysnCancelledPayable != 1
+AND ISNULL(B.ysnFinalVoucher, 0) = 0
+AND ISNULL(B.ysnConvertedToDebitMemo, 0) = 0
+
+/* FINAL VOUCHER */
+UNION ALL
+SELECT 
+	[intItemId] = BD.intItemId
+	,[intOtherChargeItemId] = NULL
+	,[intItemLocationId] = IL.intItemLocationId
+	,[dtmDate] = B.dtmDate
+	,[dblValue] = FV.dblValue
+	,[intTransactionId] = B.intBillId
+	,[intTransactionDetailId] = BD.intBillDetailId
+	,[strTransactionId] = B.strBillId
+	,[intTransactionTypeId] = 27 --Voucher
+	,[intLotId] = NULL
+	,[intSourceTransactionId] = L.intLoadId
+	,[strSourceTransactionId] = L.strLoadNumber
+	,[intSourceTransactionDetailId] = LD.intLoadDetailId
+	,[intFobPointId] = FP.intFobPointId
+	,[intInTransitSourceLocationId] = IL.intItemLocationId
+	,[intCurrencyId] = B.intCurrencyId
+	,[intForexRateTypeId] = BD.intCurrencyExchangeRateTypeId
+	,[dblForexRate] = BD.dblRate
+	,[intSourceEntityId] = NULL
+	,[strSourceType] = NULL
+	,[strSourceNumber] = NULL 
+	,[strBOLNumber] = NULL 
+	,[intTicketId] = NULL 
+FROM @voucherIds IDS
+INNER JOIN tblAPBill B ON B.intBillId = IDS.intId
+CROSS APPLY (
+	SELECT dblForeignTotal [dblValue] FROM fnAPGetFinalVoucherItemCostAdjGLEntry(B.intBillId)
+) FV
+INNER JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId
+INNER JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = BD.intLoadDetailId
+INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+INNER JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId AND IL.intLocationId = LD.intPCompanyLocationId
+LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = B.intFreightTermId
+LEFT JOIN tblICFobPoint FP ON FP.strFobPoint = FT.strFobPoint
+WHERE BD.intLoadDetailId IS NOT NULL AND BD.intInventoryReceiptItemId IS NULL AND ISNULL(FP.intFobPointId, 0) NOT IN (2) 
+AND BD.dblOldCost IS NOT NULL
+AND B.ysnCancelledPayable != 1
+AND ISNULL(B.ysnFinalVoucher, 0) = 1
+
+/* DEBIT MEMO - CONVERTED */
+UNION ALL
+SELECT 
+	[intItemId] = BD.intItemId
+	,[intOtherChargeItemId] = NULL
+	,[intItemLocationId] = IL.intItemLocationId
+	,[dtmDate] = B.dtmDate
+	,[dblValue] = DM.dblValue
+	,[intTransactionId] = B.intBillId
+	,[intTransactionDetailId] = BD.intBillDetailId
+	,[strTransactionId] = B.strBillId
+	,[intTransactionTypeId] = 27 --Voucher
+	,[intLotId] = NULL
+	,[intSourceTransactionId] = L.intLoadId
+	,[strSourceTransactionId] = L.strLoadNumber
+	,[intSourceTransactionDetailId] = LD.intLoadDetailId
+	,[intFobPointId] = FP.intFobPointId
+	,[intInTransitSourceLocationId] = IL.intItemLocationId
+	,[intCurrencyId] = B.intCurrencyId
+	,[intForexRateTypeId] = BD.intCurrencyExchangeRateTypeId
+	,[dblForexRate] = BD.dblRate
+	,[intSourceEntityId] = NULL
+	,[strSourceType] = NULL
+	,[strSourceNumber] = NULL 
+	,[strBOLNumber] = NULL 
+	,[intTicketId] = NULL 
+FROM @voucherIds IDS
+INNER JOIN tblAPBill B ON B.intBillId = IDS.intId
+CROSS APPLY (
+	SELECT dblForeignTotal [dblValue] FROM fnAPGetDebitMemoItemCostAdjGLEntry(B.intBillId)
+) DM
+INNER JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId
+INNER JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = BD.intLoadDetailId
+INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+INNER JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId AND IL.intLocationId = LD.intPCompanyLocationId
+LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = B.intFreightTermId
+LEFT JOIN tblICFobPoint FP ON FP.strFobPoint = FT.strFobPoint
+WHERE BD.intLoadDetailId IS NOT NULL AND BD.intInventoryReceiptItemId IS NULL AND ISNULL(FP.intFobPointId, 0) NOT IN (2) 
+AND B.ysnCancelledPayable != 1
+AND ISNULL(B.ysnConvertedToDebitMemo, 0) = 1
 
 IF ISNULL(@post,0) = 1
 BEGIN	

@@ -2149,7 +2149,7 @@ BEGIN
 		[intEntityId]					=	@intUserId,
 		[strTransactionId]				=	A.strBillId, 
 		[intTransactionId]				=	A.intBillId, 
-		[strTransactionType]			=	'Finalize Voucher',
+		[strTransactionType]			=	'Bill',
 		[strTransactionForm]			=	@SCREEN_NAME,
 		[strModuleName]					=	@MODULE_NAME,
 		[dblDebitForeign]				=	0,      
@@ -2171,32 +2171,32 @@ BEGIN
 			LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity D ON D.intEntityId = C.intEntityId)
 				ON A.intEntityVendorId = C.[intEntityId]
 			OUTER APPLY
-            (
-                SELECT R.intBillDetailId,
-					CASE WHEN R.intInventoryReceiptChargeId > 0 THEN 3 ELSE 1 END intFormat,
-					(R.dblTotal - R.dblProvisionalTotal) AS dblTotal, 
-					R.dblRate  AS dblRate, 
-					exRates.intCurrencyExchangeRateTypeId, 
-					exRates.strCurrencyExchangeRateType,
-					dblUnits = (CASE WHEN item.intItemId IS NULL OR R.intInventoryReceiptChargeId > 0 
-											OR R.intLoadId > 0 OR item.strType NOT IN ('Inventory','Finished Good', 'Raw Material') THEN R.dblQtyReceived
-									ELSE
-									dbo.fnCalculateQtyBetweenUOM(CASE WHEN R.intWeightUOMId > 0 
+      (
+        SELECT R.intBillDetailId,
+				CASE WHEN R.intInventoryReceiptChargeId > 0 THEN 3 ELSE 1 END intFormat,
+				(R.dblTotal - R.dblProvisionalTotal) AS dblTotal,
+				R.dblRate  AS dblRate,
+				exRates.intCurrencyExchangeRateTypeId,
+				exRates.strCurrencyExchangeRateType,
+				dblUnits = (CASE WHEN item.intItemId IS NULL OR R.intInventoryReceiptChargeId > 0
+											 OR item.strType NOT IN ('Inventory','Finished Good', 'Raw Material') THEN R.dblQtyReceived - R.dblProvisionalQtyReceived
+										ELSE
+											dbo.fnCalculateQtyBetweenUOM(CASE WHEN R.intWeightUOMId > 0
 											THEN R.intWeightUOMId ELSE R.intUnitOfMeasureId END, 
-											itemUOM.intItemUOMId, CASE WHEN R.intWeightUOMId > 0 THEN R.dblNetWeight ELSE R.dblQtyReceived END)
-								END) - R.dblProvisionalWeight,
-					R.strComment										
-                FROM dbo.tblAPBillDetail R
+											itemUOM.intItemUOMId,
+											CASE WHEN R.intWeightUOMId > 0 THEN R.dblNetWeight - R.dblProvisionalWeight ELSE R.dblQtyReceived - R.dblProvisionalQtyReceived END)
+										END),
+				R.strComment
+        FROM dbo.tblAPBillDetail R
 				LEFT JOIN tblICItem item ON item.intItemId = R.intItemId
-                LEFT JOIN dbo.tblSMCurrencyExchangeRateType exRates ON R.intCurrencyExchangeRateTypeId = exRates.intCurrencyExchangeRateTypeId
+        LEFT JOIN dbo.tblSMCurrencyExchangeRateType exRates ON R.intCurrencyExchangeRateTypeId = exRates.intCurrencyExchangeRateTypeId
 				OUTER APPLY (
 					SELECT TOP 1 stockUnit.*
 					FROM tblICItemUOM stockUnit 
-					WHERE 
-						item.intItemId = stockUnit.intItemId 
+					WHERE item.intItemId = stockUnit.intItemId 
 					AND stockUnit.ysnStockUnit = 1
 				) itemUOM
-                WHERE R.intBillId = A.intBillId
+        WHERE R.intBillId = A.intBillId
 				UNION ALL --taxes
 				SELECT R.intBillDetailId,
 					2 intFormat,
@@ -2260,7 +2260,7 @@ BEGIN
 		[intEntityId]						=	@intUserId,
 		[strTransactionId]				=	A.strBillId, 
 		[intTransactionId]				=	A.intBillId, 
-		[strTransactionType]			=	'Finalize Voucher',
+		[strTransactionType]			=	'Bill',
 		[strTransactionForm]			=	@SCREEN_NAME,
 		[strModuleName]					=	@MODULE_NAME,
 		[dblDebitForeign]				=	CAST(Details.dblTotal AS DECIMAL(18,2)),      
@@ -2289,18 +2289,18 @@ BEGIN
 				exRates.intCurrencyExchangeRateTypeId, 
 				exRates.strCurrencyExchangeRateType,
 				dblUnits = (CASE WHEN item.intItemId IS NULL OR R.intInventoryReceiptChargeId > 0 OR item.strType NOT IN ('Inventory','Finished Good', 'Raw Material') 
-												THEN R.dblQtyReceived
+												THEN R.dblQtyReceived - R.dblProvisionalQtyReceived
 											ELSE 
 												dbo.fnCalculateQtyBetweenUOM
 														(CASE WHEN R.intWeightUOMId > 0 THEN R.intWeightUOMId ELSE R.intUnitOfMeasureId END, 
 														itemUOM.intItemUOMId, 
-														CASE WHEN R.intWeightUOMId > 0 THEN R.dblNetWeight ELSE R.dblQtyReceived END)
-										END) - R.dblProvisionalWeight,
+														CASE WHEN R.intWeightUOMId > 0 THEN R.dblNetWeight - R.dblProvisionalWeight ELSE R.dblQtyReceived - R.dblProvisionalQtyReceived END)
+										END),
 					R.strComment,
 					R.intAccountId
-                FROM dbo.tblAPBillDetail R
+        FROM dbo.tblAPBillDetail R
 				LEFT JOIN tblICItem item ON item.intItemId = R.intItemId
-                LEFT JOIN dbo.tblSMCurrencyExchangeRateType exRates ON R.intCurrencyExchangeRateTypeId = exRates.intCurrencyExchangeRateTypeId
+        LEFT JOIN dbo.tblSMCurrencyExchangeRateType exRates ON R.intCurrencyExchangeRateTypeId = exRates.intCurrencyExchangeRateTypeId
 				OUTER APPLY (
 					SELECT TOP 1 stockUnit.*
 					FROM tblICItemUOM stockUnit 

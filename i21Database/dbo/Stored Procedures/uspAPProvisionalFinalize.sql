@@ -133,9 +133,9 @@ BEGIN
 			BD.dblProvisionalCost = BD2.dblCost,
 			BD.dblProvisionalWeight = BD2.dblNetWeight * (@dblProvisionalPercentage / 100),
 			BD.dblProvisionalQtyReceived = BD2.dblQtyReceived * (@dblProvisionalPercentage / 100),
-			BD.dblProvisionalTotal = (@dblProvisionalPercentage / 100) * BD2.dblTotal,
+			BD.dblProvisionalTotal = CAST((@dblProvisionalPercentage / 100) * BD2.dblTotal AS DECIMAL(18,2)),
 			BD.dblProvisionalPercentage = @dblProvisionalPercentage,
-			BD.dblFinalVoucherTotal = BD2.dblTotal - ((@dblProvisionalPercentage / 100) * BD2.dblTotal),
+			BD.dblFinalVoucherTotal = CAST(BD2.dblTotal - ((@dblProvisionalPercentage / 100) * BD2.dblTotal) AS DECIMAL(18,2)),
 			BD.ysnStage = 0
 		FROM tblAPBillDetail BD
 		INNER JOIN tblAPBillDetail BD2 ON BD2.intLoadDetailId = BD.intLoadDetailId AND BD2.intBillId = @billId
@@ -180,9 +180,9 @@ BEGIN
 			BD.dblProvisionalCost = BD2.dblCost,
 			BD.dblProvisionalWeight = BD2.dblNetWeight * (@dblProvisionalPercentage / 100),
 			BD.dblProvisionalQtyReceived = BD2.dblQtyReceived * (@dblProvisionalPercentage / 100),
-			BD.dblProvisionalTotal = (@dblProvisionalPercentage / 100) * BD2.dblTotal,
+			BD.dblProvisionalTotal = CAST((@dblProvisionalPercentage / 100) * BD2.dblTotal AS DECIMAL(18,2)),
 			BD.dblProvisionalPercentage = @dblProvisionalPercentage,
-			BD.dblFinalVoucherTotal = BD2.dblTotal - ((@dblProvisionalPercentage / 100) * BD2.dblTotal),
+			BD.dblFinalVoucherTotal = CAST(BD2.dblTotal - ((@dblProvisionalPercentage / 100) * BD2.dblTotal) AS DECIMAL(18,2)),
 			BD.ysnStage = 0
 		FROM tblAPBillDetail BD
 		INNER JOIN tblAPBillDetail BD2 ON BD2.intInventoryReceiptItemId = BD.intInventoryReceiptItemId AND BD2.intBillId = @billId

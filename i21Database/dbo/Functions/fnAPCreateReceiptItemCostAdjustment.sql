@@ -513,11 +513,11 @@ BEGIN
 		,[intCostUOMId]						=	voucherCostUOM.intItemUOMId 
 		,[dblNewValue]						= 
 												CAST(
-												dbo.fnMultiply(
+												(dbo.fnMultiply(
 													--[Voucher Qty]
 													CASE WHEN B.intWeightUOMId IS NULL 
-														THEN (E2.dblOrderQty - B.dblProvisionalQtyReceived) 
-													ELSE (E2.dblNet - B.dblProvisionalWeight ) END
+														THEN E2.dblOrderQty 
+													ELSE E2.dblNet END
 													,--[Receipt Cost]
 													CASE WHEN E2.ysnSubCurrency = 1 AND E1.intSubCurrencyCents <> 0 THEN 
 															CASE 
@@ -553,16 +553,16 @@ BEGIN
 																) 
 															END 
 													END
-												)
+												) - B.dblFinalVoucherTotal) * -1
 												AS DECIMAL(18,2))
 
 		,[dblNewForexValue] = 
 												CAST(
-												dbo.fnMultiply(
+												(dbo.fnMultiply(
 													--[Voucher Qty]
 													CASE WHEN B.intWeightUOMId IS NULL 
-														THEN (E2.dblOrderQty - B.dblProvisionalQtyReceived) 
-													ELSE (E2.dblNet - B.dblProvisionalWeight) END									
+														THEN E2.dblOrderQty 
+													ELSE E2.dblNet END									
 													,--[Receipt Cost]
 													CASE WHEN E2.ysnSubCurrency = 1 AND E1.intSubCurrencyCents <> 0 THEN 
 															dbo.fnCalculateCostBetweenUOM(
@@ -578,7 +578,7 @@ BEGIN
 																, E2.dblUnitCost
 															) 														
 													END
-												)
+												) - B.dblFinalVoucherTotal) * -1
 												AS DECIMAL(18,2))
 		,[intCurrencyId] 					=	E1.intCurrencyId
 		,[intTransactionId]					=	A.intBillId

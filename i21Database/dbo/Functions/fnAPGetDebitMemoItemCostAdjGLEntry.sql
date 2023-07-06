@@ -8,23 +8,10 @@ RETURNS TABLE AS RETURN
   B.intBillDetailId  
   ,B.strMiscDescription
   ,dblTotal = -CAST(
-                    (ISNULL(IR.dblTotal, LS.dblTotal) 
-                    - 
-                    (B.dblOldCost 
-                    * (CASE WHEN B.intComputeTotalOption = 0 AND B.intWeightUOMId > 0 
-                       THEN B.dblOldNetWeight 
-                       ELSE B.dblFinalQtyReceived END)
-                      )
+                    (ISNULL(IR.dblTotal, LS.dblTotal) - B.dblFinalVoucherTotal
                     ) * ISNULL(NULLIF(B.dblRate,0),1) AS  DECIMAL(18, 2)
                   )
-  ,dblForeignTotal = -CAST(ISNULL(IR.dblTotal, LS.dblTotal) 
-                      - 
-                      (B.dblOldCost 
-                        * (CASE WHEN B.intComputeTotalOption = 0 AND B.intWeightUOMId > 0 
-                            THEN B.dblOldNetWeight 
-                            ELSE B.dblFinalQtyReceived END)
-                        ) AS  DECIMAL(18, 2)
-                      ) 
+  ,dblForeignTotal = -CAST(ISNULL(IR.dblTotal, LS.dblTotal) - B.dblFinalVoucherTotal AS DECIMAL(18, 2)) 
   ,(CASE WHEN F.intItemId IS NULL THEN B.dblQtyReceived - B.dblOldNetWeight  
     ELSE  
      CASE WHEN F.strType = 'Inventory' THEN --units is only of inventory item  
@@ -34,13 +21,7 @@ RETURNS TABLE AS RETURN
              CASE WHEN B.intWeightUOMId > 0 THEN B.dblNetWeight ELSE B.dblQtyReceived END)  
      ELSE 0 END  
   END) as dblTotalUnits  
-  ,CASE   
-   WHEN B.intInventoryReceiptItemId IS NULL
-    THEN [dbo].[fnGetItemGLAccount](B.intItemId, loc.intItemLocationId, 'Inventory In-Transit')
-   WHEN B.intLoadShipmentCostId > 0 OR B.intInventoryReceiptChargeId > 0 OR F.strType = 'Non-Inventory'  
-    THEN [dbo].[fnGetItemGLAccount](B.intItemId, loc.intItemLocationId, 'Other Charge Expense')  
-   ELSE [dbo].[fnGetItemGLAccount](B.intItemId, loc.intItemLocationId, 'AP Clearing')  
-  END AS intAccountId  
+  ,[dbo].[fnGetItemGLAccount](B.intItemId, loc.intItemLocationId, 'AP Clearing') intAccountId  
   ,G.intCurrencyExchangeRateTypeId  
   ,G.strCurrencyExchangeRateType  
   ,ISNULL(NULLIF(B.dblRate,0),1) AS dblRate  
@@ -84,7 +65,7 @@ RETURNS TABLE AS RETURN
                     ,E.dblUnitCost  
                 )   
                 / CASE WHEN B.ysnSubCurrency > 0 THEN ISNULL(NULLIF(A.intSubCurrencyCents, 0),1) ELSE 1 END   
-                * B.dblNetWeight  
+                * ISNULL(E.dblNet, B.dblNetWeight)  
   
               -- If Gross/Net UOM is missing: compute by the receive qty.   
               ELSE   
@@ -95,7 +76,7 @@ RETURNS TABLE AS RETURN
                   , E.dblUnitCost  
                 )   
                 / CASE WHEN B.ysnSubCurrency > 0 THEN ISNULL(NULLIF(A.intSubCurrencyCents, 0),1) ELSE 1 END    
-                * B.dblQtyReceived  
+                * ISNULL(E.dblOrderQty, B.dblQtyReceived)  
             END)     
    END AS DECIMAL(18, 2)  
   )  
@@ -132,7 +113,5 @@ RETURNS TABLE AS RETURN
  AND B.intCustomerStorageId IS NULL  
  AND ISNULL(A.ysnConvertedToDebitMemo, 0) = 1  
  AND A.intTransactionType = 3
- AND B.intInventoryReceiptItemId IS NULL 
- AND B.intInventoryReceiptChargeId IS NULL
   
 )  

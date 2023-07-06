@@ -59,6 +59,13 @@ BEGIN TRY
   INTO #tmpBillDetail FROM tblAPBillDetail  
   WHERE intBillId = @billId  
   
+  UPDATE A
+  SET 
+     A.dblFinalVoucherTotal = A.dblTotal
+    ,A.dblFinalQtyReceived = A.dblQtyReceived
+    ,A.dblOldNetWeight = A.dblNetWeight
+  FROM tblAPBillDetail A
+  WHERE intBillId = @billId
   
   SELECT @rowCount = COUNT(*) FROM #tmpBillDetail  
   
@@ -114,9 +121,6 @@ BEGIN TRY
       SET dblTotal = @detailTotal  
          ,dblNetWeight = @weight   
          ,dblCost = @averageCost  
-         ,dblOldNetWeight = @oldNetWeight
-         ,dblOldCost = @finalVoucherCost
-         ,dblFinalQtyReceived = @qty
          ,dblQtyReceived = @weight
          ,dblQtyOrdered = @weight
       WHERE intBillDetailId = @intBillDetailId  
@@ -131,7 +135,6 @@ BEGIN TRY
        ,A.dblOldCost = B.dblOldCost
        ,dblQtyReceived = B.dblQtyReceived
        ,dblQtyOrdered = B.dblQtyOrdered
-       ,dblFinalQtyReceived = B.dblFinalQtyReceived
        ,A.dblTax = (TX.dblTax * @percentage) - TX.dblAdjustedTax
   FROM tblAPBillDetail A INNER JOIN #tmpBillDetail B  
   ON A.intBillDetailId = B.intBillDetailId AND A.intBillId = @billId  
