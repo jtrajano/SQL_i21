@@ -589,6 +589,7 @@ BEGIN
 				AND @intFOBPointId = 2
 				AND ot.intTransactionTypeId = 46
 				AND ot.dblQty < 0
+				AND ot.intItemUOMId <> NULL
 				) originalShipment
 		WHERE t.strTransactionId = @strTransactionId
 			AND t.ysnIsUnposted = 0
