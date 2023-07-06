@@ -508,6 +508,7 @@ INSERT tblARPostInvoiceDetail WITH (TABLOCK)
     ,dblPercentage
     ,dblProvisionalTotal
     ,dblBaseProvisionalTotal
+    ,dblProvisionalTotalTax
     ,dblBaseProvisionalTotalTax
     ,dblTotalTax
     ,dblBaseTotalTax
@@ -665,6 +666,7 @@ SELECT
     ,dblPercentage                      = ARID.dblPercentage
     ,dblProvisionalTotal                = ARID.dblProvisionalTotal
     ,dblBaseProvisionalTotal            = ROUND(ARID.dblProvisionalTotal * ARID.dblCurrencyExchangeRate, dbo.fnARGetDefaultDecimal())
+    ,dblProvisionalTotalTax         = ARID.dblBaseProvisionalTotalTax
     ,dblBaseProvisionalTotalTax         = ARID.dblBaseProvisionalTotalTax
     ,dblTotalTax                        = ARID.dblTotalTax
     ,dblBaseTotalTax                    = dbo.fnRoundBanker(ISNULL(ARID.dblTotalTax * ARID.dblCurrencyExchangeRate, @ZeroDecimal), @Precision)
@@ -843,6 +845,7 @@ INSERT tblARPostInvoiceDetail WITH (TABLOCK)
     ,dblPercentage
     ,dblProvisionalTotal
     ,dblBaseProvisionalTotal
+    ,dblProvisionalTotalTax
     ,dblBaseProvisionalTotalTax
     ,dblTotalTax
     ,dblBaseTotalTax
@@ -1060,6 +1063,7 @@ SELECT
     ,dblPercentage                      = ARID.dblPercentage
     ,dblProvisionalTotal                = ARID.dblProvisionalTotal
     ,dblBaseProvisionalTotal            = ROUND(ARID.dblProvisionalTotal * ARID.dblCurrencyExchangeRate, dbo.fnARGetDefaultDecimal())
+    ,dblProvisionalTotalTax         = ARID.dblBaseProvisionalTotalTax
     ,dblBaseProvisionalTotalTax         = ARID.dblBaseProvisionalTotalTax
     ,dblTotalTax                        = ARID.dblTotalTax
     ,dblBaseTotalTax                    = dbo.fnRoundBanker(ISNULL(ARID.dblTotalTax * ARID.dblCurrencyExchangeRate, @ZeroDecimal), @Precision)
@@ -1226,6 +1230,7 @@ INSERT tblARPostInvoiceDetail WITH (TABLOCK)
     ,dblPercentage
     ,dblProvisionalTotal
     ,dblBaseProvisionalTotal
+    ,dblProvisionalTotalTax
     ,dblBaseProvisionalTotalTax
     ,dblTotalTax
     ,dblBaseTotalTax
@@ -1379,6 +1384,7 @@ SELECT
     ,dblPercentage                      = ARID.dblPercentage
     ,dblProvisionalTotal                = ARID.dblProvisionalTotal
     ,dblBaseProvisionalTotal            = ROUND(ARID.dblProvisionalTotal * ARID.dblCurrencyExchangeRate, dbo.fnARGetDefaultDecimal())
+    ,dblProvisionalTotalTax         = ARID.dblBaseProvisionalTotalTax
     ,dblBaseProvisionalTotalTax         = ARID.dblBaseProvisionalTotalTax
     ,dblTotalTax                        = ARID.dblTotalTax
     ,dblBaseTotalTax                    = dbo.fnRoundBanker(ISNULL(ARID.dblTotalTax * ARID.dblCurrencyExchangeRate, @ZeroDecimal), @Precision)
@@ -1418,6 +1424,7 @@ SET dblBaseInvoiceTotal		= dbo.fnRoundBanker(CASE WHEN ARPIH.dblPercentage <> 10
 								ELSE (ARPID.dblBaseLineItemGLAmount + ARPID.dblBaseTax) - ARPID.dblBaseDiscountAmount
 							  END, @Precision)
 	,dblAverageExchangeRate	= ARPID.dblCurrencyExchangeRate
+    ,dblProvisionalTotal    = ARPID.dblProvisionalTotal
 FROM tblARPostInvoiceHeader ARPIH
 INNER JOIN (
     SELECT
@@ -1427,7 +1434,8 @@ INNER JOIN (
         ,dblBaseDiscountAmount      = SUM(dblBaseDiscountAmount)
         ,dblBaseProvisionalTotal    = SUM(dblBaseProvisionalTotal)
         ,dblBaseProvisionalTotalTax = SUM(dblBaseProvisionalTotalTax)
-		,dblCurrencyExchangeRate	= AVG(dblCurrencyExchangeRate)
+        ,dblProvisionalTotal        = SUM(dblProvisionalTotal) - SUM(dblProvisionalTotalTax)
+		,dblCurrencyExchangeRate	= AVG(CAST(dblCurrencyExchangeRate AS NUMERIC(18, 10)))
     FROM tblARPostInvoiceDetail
     WHERE strSessionId = @strSessionId
     GROUP BY intInvoiceId

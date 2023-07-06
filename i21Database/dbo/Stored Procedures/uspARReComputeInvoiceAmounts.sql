@@ -262,22 +262,23 @@ SET
 	,[dblAmountDue]				= CASE WHEN intSourceId = 5 THEN ISNULL(T.[dblTotal], @ZeroDecimal) - ISNULL(T.[dblTotalTax], @ZeroDecimal) ELSE [dblAmountDue] END
 	,[dblBaseAmountDue]			= CASE WHEN intSourceId = 5 THEN ISNULL(T.[dblBaseTotal], @ZeroDecimal) - ISNULL(T.[dblBaseTotalTax], @ZeroDecimal) ELSE [dblBaseAmountDue] END
 	,[dblTotalStandardWeight]	= ISNULL(T.[dblTotalStandardWeight], @ZeroDecimal)
-	,dblProvisionalTotal		= ISNULL(T.dblProvisionalTotal, @ZeroDecimal)
+	,dblProvisionalTotal		= ISNULL(T.dblProvisionalTotal, @ZeroDecimal) + ISNULL(T.dblProvisionalTotalTax, @ZeroDecimal)
 FROM (
 	SELECT 
-		 [dblTotalTax]				= SUM([dblTotalTax])
-		,[dblBaseTotalTax]			= SUM([dblBaseTotalTax])
-		,[dblTotal]					= SUM([dblTotal])
-		,[dblBaseTotal]				= SUM([dblBaseTotal])
-		,[dblTotalStandardWeight]	= SUM(dbo.fnRoundBanker(([dblStandardWeight] * [dblQtyShipped]), dbo.fnARGetDefaultDecimal()))
-		,dblProvisionalTotal		= SUM(dblProvisionalTotal)
-		,[intInvoiceId]				= [intInvoiceId]
+		 dblTotalTax			= SUM(dblTotalTax)
+		,dblBaseTotalTax		= SUM(dblBaseTotalTax)
+		,dblTotal				= SUM(dblTotal)
+		,dblBaseTotal			= SUM(dblBaseTotal)
+		,dblTotalStandardWeight	= SUM(dbo.fnRoundBanker(([dblStandardWeight] * [dblQtyShipped]), dbo.fnARGetDefaultDecimal()))
+		,dblProvisionalTotal	= SUM(dblProvisionalTotal)
+		,dblProvisionalTotalTax	= SUM(dblProvisionalTotalTax)
+		,intInvoiceId			= intInvoiceId
 	FROM
 		tblARInvoiceDetail
 	WHERE
-		[intInvoiceId] = @InvoiceIdLocal
+		intInvoiceId = @InvoiceIdLocal
 	GROUP BY
-		[intInvoiceId]
+		intInvoiceId
 ) T
 WHERE
 	tblARInvoice.[intInvoiceId] = T.[intInvoiceId]
@@ -285,9 +286,9 @@ WHERE
 
 UPDATE ARI
 SET
-	 [dblInvoiceTotal]		= (ARI.[dblInvoiceSubtotal] + ARI.[dblTax] + ARI.[dblShipping])
-	,[dblAmountDue]			= CASE WHEN ARI.strType = 'Provisional' THEN ARI.dblProvisionalTotal
-								ELSE ISNULL(ARI.[dblInvoiceSubtotal] + ARI.[dblTax] + ARI.[dblShipping] + ARI.[dblInterest], @ZeroDecimal) - ISNULL(ARI.dblPayment + ARI.[dblDiscount], @ZeroDecimal)
+	 dblInvoiceTotal		= (ARI.dblInvoiceSubtotal + ARI.dblTax + ARI.dblShipping)
+	,dblAmountDue			= CASE WHEN ARI.strType = 'Provisional' THEN ARI.dblProvisionalTotal
+								ELSE ISNULL(ARI.dblInvoiceSubtotal + ARI.dblTax + ARI.dblShipping + ARI.dblInterest, @ZeroDecimal) - ISNULL(ARI.dblPayment + ARI.dblDiscount, @ZeroDecimal)
 								-
 								CASE WHEN ARI.intSourceId = 2 AND ARI.intOriginalInvoiceId IS NOT NULL
 								THEN CASE WHEN ISNULL(ARI.ysnExcludeFromPayment, 0) = 0 THEN PRO.dblPayment ELSE PRO.dblInvoiceTotal END
@@ -295,8 +296,8 @@ SET
 								END
 							  END
 FROM tblARInvoice ARI
-LEFT JOIN tblARInvoice PRO ON ARI.[intOriginalInvoiceId] = PRO.[intInvoiceId]
+LEFT JOIN tblARInvoice PRO ON ARI.intOriginalInvoiceId = PRO.intInvoiceId
 WHERE
-	ARI.[intInvoiceId] = @InvoiceIdLocal
+	ARI.intInvoiceId = @InvoiceIdLocal
 
 END
