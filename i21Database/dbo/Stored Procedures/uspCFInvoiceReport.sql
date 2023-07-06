@@ -563,7 +563,6 @@ BEGIN
 			,ysnPosted							BIT
 			,ysnPostedCSV						BIT
 			,ysnPrintMiscellaneous				BIT
-			,ysnShowSST							BIT
 			,ysnSummaryByCard					BIT
 			,ysnSummaryByDepartmentProduct		BIT
 			,ysnSummaryByDepartment				BIT
@@ -671,7 +670,6 @@ BEGIN
 			,ysnPosted					
 			,ysnPostedCSV				
 			,ysnPrintMiscellaneous		
-			,ysnShowSST
 			,ysnSummaryByCard			
 			,ysnSummaryByDepartmentProduct
 			,ysnSummaryByDepartment		
@@ -779,7 +777,6 @@ BEGIN
 			,ysnPosted					
 			,ysnPostedCSV				
 			,ysnPrintMiscellaneous		
-			,ysnShowSST
 			,ysnSummaryByCard		
 			,ysnSummaryByDepartmentProduct	
 			,ysnSummaryByDepartment		
@@ -921,7 +918,6 @@ BEGIN
 		,dblTaxExceptSST			
 		--,dblInvoiceTotal			
 		,ysnPrintMiscellaneous		
-		,ysnShowSST
 		,ysnSummaryByCard			
 		,ysnSummaryByDepartmentProduct
 		,ysnSummaryByDepartment		
@@ -1025,7 +1021,6 @@ BEGIN
 		,dblTaxExceptSST			
 		--,dblInvoiceTotal			
 		,ysnPrintMiscellaneous		
-		,ysnShowSST
 		,ysnSummaryByCard			
 		,ysnSummaryByDepartmentProduct
 		,ysnSummaryByDepartment		

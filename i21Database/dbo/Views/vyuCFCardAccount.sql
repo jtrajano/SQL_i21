@@ -6,7 +6,7 @@ A.intAccountId, A.intCustomerId, A.intDiscountDays, A.intDiscountScheduleId, A.i
                          A.dblBonusCommissionRate, A.dblRegularCommissionRate, A.ysnPrintTimeOnInvoices, A.ysnPrintTimeOnReports, A.intTermsCode, A.strBillingSite, A.strPrimarySortOptions, 
                          A.strSecondarySortOptions, A.ysnSummaryByCard, A.ysnSummaryByDepartmentProduct, A.ysnSummaryByVehicle, A.ysnSummaryByMiscellaneous, A.ysnSummaryByProduct, A.ysnSummaryByDepartment, A.ysnSummaryByCardProd,A.ysnSummaryByDeptCardProd,
                          A.ysnVehicleRequire, A.intAccountStatusCodeId, A.strPrintRemittancePage, A.strInvoiceProgramName, A.intPriceRuleGroup, A.strPrintPricePerGallon, 
-                         A.ysnPPTransferCostForRemote, A.ysnPPTransferCostForNetwork, A.ysnShowSST,A.ysnPrintMiscellaneous, A.intFeeProfileId, A.strPrintSiteAddress, A.dtmLastBillingCycleDate, 
+                         A.ysnPPTransferCostForRemote, A.ysnPPTransferCostForNetwork, A.ysnPrintMiscellaneous, A.intFeeProfileId, A.strPrintSiteAddress, A.dtmLastBillingCycleDate, 
                          A.intRemotePriceProfileId, A.intExtRemotePriceProfileId, A.intLocalPriceProfileId, A.intCreatedUserId, A.dtmCreated, A.intLastModifiedUserId, A.dtmLastModified, 
                          A.intConcurrencyId, C.intCardId, C.intNetworkId, C.strCardNumber, C.strCardDescription, C.intAccountId AS EXPR1, C.strCardForOwnUse, C.intExpenseItemId, 
                          C.intDefaultFixVehicleNumber, C.intDepartmentId, C.dtmLastUsedDated, C.intCardTypeId, C.dtmIssueDate, C.ysnActive, C.ysnCardLocked, C.strCardPinNumber, 
