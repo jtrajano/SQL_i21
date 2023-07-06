@@ -177,6 +177,7 @@ END
 			AND TR.strOrigin = 'Terminal'
 			AND IC.strType != 'Non-Inventory'
 			AND (TR.dblUnitCost != 0 or TR.dblFreightRate != 0 or TR.dblPurSurcharge != 0)
+			AND DD.intLoadDistributionDetailId IS NOT NULL
     group by TR.intLoadReceiptId,DH.strDestination,  DH.intCompanyLocationId,DD.intLoadDistributionDetailId
 	ORDER BY intEntityVendorId
 		,strBillOfLadding
