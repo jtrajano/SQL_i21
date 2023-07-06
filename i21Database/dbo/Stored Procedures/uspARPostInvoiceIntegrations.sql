@@ -70,7 +70,7 @@ BEGIN
 													THEN ABS(ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblProvisionalAmount, @ZeroDecimal))
 													ELSE CASE WHEN ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) > ISNULL(ARIR.dblPayment, @ZeroDecimal) THEN ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(ARIR.dblPayment, @ZeroDecimal) ELSE @ZeroDecimal END
 													END
-												ELSE CASE WHEN ARI.strType = 'Provisional' THEN ISNULL(ARI.dblProvisionalTotal, @ZeroDecimal) ELSE ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblPayment, @ZeroDecimal) END
+												ELSE CASE WHEN ARI.strType = 'Provisional' THEN ISNULL(ARI.dblProvisionalTotal, @ZeroDecimal) ELSE ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) END - ISNULL(ARI.dblPayment, @ZeroDecimal)
 												END) 
 											END)
 		,ARI.dblDiscount				= @ZeroDecimal
