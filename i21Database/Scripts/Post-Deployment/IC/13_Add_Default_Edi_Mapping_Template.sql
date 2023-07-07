@@ -1,7 +1,7 @@
-﻿IF NOT EXISTS(SELECT * FROM tblICEdiMapTemplate WHERE strName = 'Inventory Receipts')
-BEGIN
+﻿DECLARE @dtmDateCreated DATETIME = GETDATE()
 
-	DECLARE @dtmDateCreated DATETIME = GETDATE()
+IF NOT EXISTS(SELECT * FROM tblICEdiMapTemplate WHERE strName = 'Inventory Receipts')
+BEGIN
 
 	INSERT INTO tblICEdiMapTemplate(strName, dtmDateCreated, intConcurrencyId)
 	SELECT 'Inventory Receipts', @dtmDateCreated, 1
@@ -59,9 +59,6 @@ END
 
 IF NOT EXISTS(SELECT * FROM tblICEdiMapTemplate WHERE strName = 'Inventory Receipts - CoreMark')
 BEGIN
-
-	DECLARE @dtmDateCreated DATETIME = GETDATE()
-
 	INSERT INTO tblICEdiMapTemplate(strName, dtmDateCreated, intConcurrencyId)
 	SELECT 'Inventory Receipts - CoreMark', @dtmDateCreated, 1
 
