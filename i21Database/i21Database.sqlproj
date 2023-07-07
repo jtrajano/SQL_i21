@@ -502,7 +502,7 @@
     <Build Include="dbo\Views\vyuCMSwapInPayablesMultiCurrencyRevalue.sql" />
     <Build Include="dbo\Views\vyuCMSwapInReceivablesMultiCurrencyRevalue.sql" />
     <Build Include="dbo\Views\vyuCMSwapInReceivablesInTransitMultiCurrencyRevalue.sql" />
-    <Build Include="dbo\Views\vyuCMSwapPayableMultiCurrencyRevalue.sql" />   
+    <Build Include="dbo\Views\vyuCMSwapPayableMultiCurrencyRevalue.sql" />
     <Build Include="dbo\Views\vyuCMSwapReceivableMultiCurrencyRevalue.sql" />
     <Build Include="dbo\Stored Procedures\uspRKCreateOtcForwardFromCT.sql" />
     <Build Include="dbo\Views\vyuRKGetOtcForwards.sql" />
@@ -1833,6 +1833,8 @@
     <Build Include="dbo\Stored Procedures\uspMFGetErrorMessage.sql" />
     <None Include="Scripts\Post-Deployment\ST\56_FileFieldMapping_Passport_FGMT.sql" />
     <None Include="Scripts\Post-Deployment\ST\55_FileFieldMapping_Passport_FGML.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetScheduleWorkOrder.sql" />
+    <Build Include="dbo\Views\vyuMFScheduleRule.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
