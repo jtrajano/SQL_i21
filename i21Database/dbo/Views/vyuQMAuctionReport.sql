@@ -2,6 +2,7 @@ CREATE VIEW vyuQMAuctionReport
 AS
 SELECT intSampleId					= S.intSampleId
 	 , strSaleNumber				= S.strSaleNumber
+	 , strCompanyLocationName		= CompanyLocation.strLocationName
 	 , strSampleNote				= S.strSampleNote
 	 , strBrokerName				= E.strName
 	 , strAuctionPrice				= CAST(CAST(ISNULL(AUCPRICE.dblMinPrice, 0) AS DECIMAL(18,2)) AS NVARCHAR(100)) + ' - ' + CAST(CAST(ISNULL(AUCPRICE.dblMaxPrice, 0) AS DECIMAL(18,2)) AS NVARCHAR(100))
@@ -32,6 +33,7 @@ FROM tblQMSample S
 LEFT JOIN tblEMEntity SUP ON S.intEntityId = SUP.intEntityId
 LEFT JOIN tblEMEntity E ON S.intBrokerId = E.intEntityId
 LEFT JOIN tblSMCompanyLocationSubLocation SL ON S.intCompanyLocationSubLocationId = SL.intCompanyLocationSubLocationId
+LEFT JOIN tblSMCompanyLocation AS CompanyLocation ON S.intCompanyLocationId = CompanyLocation.intCompanyLocationId
 LEFT JOIN tblICItem ITEM ON S.intItemId = ITEM.intItemId
 LEFT JOIN tblICCommodityAttribute GRADE ON GRADE.intCommodityAttributeId = S.intGradeId
 LEFT JOIN tblICUnitMeasure SIUM ON SIUM.intUnitMeasureId = S.intSampleUOMId
