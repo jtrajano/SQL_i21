@@ -655,8 +655,8 @@ BEGIN TRY
 		,dtmManufacturingDate = NULL
 		,dblSampleQty = NULL
 		,intTotalNumberOfPackageBreakups = NULL
-		,intNetWtPerPackagesUOMId = NULL
-		,intRepresentingUOMId = NULL
+		,intNetWtPerPackagesUOMId = UOM.intUnitMeasureId
+		,intRepresentingUOMId = UOM.intUnitMeasureId
 		,intNoOfPackages = NULL
 		,intNetWtSecondPackageBreakUOMId = NULL
 		,intNoOfPackagesSecondPackageBreak = NULL
@@ -693,13 +693,15 @@ BEGIN TRY
 		,strBroker = NULL
 		,strBuyingOrderNumber = NULL
 		,intBatchId = BATCH_TBO.intBatchId
-		,strTINNumber = IMP.strTINNumber
+		,strTINNumber = CASE WHEN IMP.strTINNumber = '0' THEN NULL ELSE IMP.strTINNumber END
 		,intSubBookId = NULL
 		,strPackageType=strPackageType
 		,SeasonCropYear.intCropYearId
 		,intWgtUnitMeasureId=NULL
 	FROM tblQMImportCatalogue IMP
 	INNER JOIN tblQMImportLog IL ON IL.intImportLogId = IMP.intImportLogId
+	LEFT JOIN tblICUnitMeasure UOM ON IMP.strNoOfPackagesUOM IS NOT NULL
+		AND UOM.strSymbol = IMP.strNoOfPackagesUOM
 	-- Sample Type
 	LEFT JOIN tblQMSampleType SAMPLE_TYPE ON IMP.strSampleTypeName IS NOT NULL
 		AND SAMPLE_TYPE.strSampleTypeName = IMP.strSampleTypeName
@@ -1208,7 +1210,7 @@ BEGIN TRY
 						WHERE intUnitMeasureId = @intRepresentingUOMId;
 
 						UPDATE tblQMImportCatalogue
-						SET strLogResult = 'Unit of Measure '''+ @strUnitMeasureLog +''' does not exists on Item ''' + @strItemLog +'''.' 
+						SET strLogResult = 'Unit of Measure '''+ ISNULL(@strUnitMeasureLog, '') +''' does not exists on Item ''' + ISNULL(@strItemLog, '') +'''.' 
 							,ysnProcessed = 1
 							,ysnSuccess = 0
 						WHERE intImportCatalogueId = @intImportCatalogueId;
@@ -1234,11 +1236,12 @@ BEGIN TRY
 							) B
 						WHERE S.intSampleId = @intSampleId
 
-						IF ISNULL(@strOldTINNumber, '') <> IsNULL(@strTINNumber, '') 
-							OR ISNULL(@intOldCompanyLocationId, 0) <> @intMixingUnitLocationId
+						IF (ISNULL(@strOldTINNumber, '') <> IsNULL(@strTINNumber, '') 
+							OR ISNULL(@intOldCompanyLocationId, 0) <> @intMixingUnitLocationId)
+							AND (ISNULL(@intBatchId, 0) <> 0)
 						BEGIN
 							-- Delink old TIN number if there's an existing one and the TIN number has changed.
-							IF @strOldTINNumber IS NOT NULL
+							IF ISNULL(@strOldTINNumber, '') <> '' AND ISNULL(@intOldCompanyLocationId, 0) <> 0
 							BEGIN
 								EXEC uspQMUpdateTINBatchId @strTINNumber = @strOldTINNumber
 									,@intBatchId = @intProductValueId
@@ -1248,11 +1251,14 @@ BEGIN TRY
 							END
 
 							-- Link new TIN number with the pre-shipment sample / batch
-							EXEC uspQMUpdateTINBatchId @strTINNumber = @strTINNumber
-								,@intBatchId = @intProductValueId
-								,@intCompanyLocationId = @intMixingUnitLocationId
-								,@intEntityId = @intEntityUserId
-								,@ysnDelink = 0
+							IF ISNULL(@strTINNumber, '') <> ''
+							BEGIN
+								EXEC uspQMUpdateTINBatchId @strTINNumber = @strTINNumber
+									,@intBatchId = @intProductValueId
+									,@intCompanyLocationId = @intMixingUnitLocationId
+									,@intEntityId = @intEntityUserId
+									,@ysnDelink = 0
+							END
 
 							UPDATE tblQMSample
 							SET intTINClearanceId = (
@@ -1343,7 +1349,7 @@ BEGIN TRY
 					WHERE intUnitMeasureId = @intRepresentingUOMId;
 
 					UPDATE tblQMImportCatalogue
-					SET strLogResult = 'Unit of Measure '''+ @strUnitMeasureLog +''' does not exists on Item ''' + @strItemLog +'''.' 
+					SET strLogResult = 'Unit of Measure '''+ ISNULL(@strUnitMeasureLog, '') +''' does not exists on Item ''' + ISNULL(@strItemLog, '') +'''.' 
 						,ysnProcessed = 1
 						,ysnSuccess = 0
 					WHERE intImportCatalogueId = @intImportCatalogueId;
@@ -1473,8 +1479,8 @@ BEGIN TRY
 				,dtmTestingEndDate = DATEADD(mi, DATEDIFF(mi, GETDATE(), GETUTCDATE()), @dtmDateCreated)
 				,dtmSamplingEndDate = DATEADD(mi, DATEDIFF(mi, GETDATE(), GETUTCDATE()), @dtmDateCreated)
 				,strCountry = @strCountry
-				,intLocationId = @intTBOLocationId
-				,intCompanyLocationId = @intTBOLocationId
+				,intLocationId = ISNULL(T.intCompanyLocationId, @intTBOLocationId) -- Check for MU first in case of direct pre-shipment import, TBO as default if not coming from direct pre-shipment
+				,intCompanyLocationId = ISNULL(T.intCompanyLocationId, @intTBOLocationId) -- Check for MU first in case of direct pre-shipment import, TBO as default if not coming from direct pre-shipment
 				,intCompanyLocationSubLocationId = @intCompanyLocationSubLocationId
 				,strComment = @strComments
 				,intCreatedUserId = @intEntityUserId
@@ -1523,18 +1529,23 @@ BEGIN TRY
 				,intCropYearId = @intCropYearId
 
 				-- Populated for bulking process only
-				,intCurrencyId = (SELECT CUR.intCurrencyID
-									FROM tblQMImportCatalogue IMP
-									INNER JOIN tblSMCurrency CUR ON CUR.strCurrency = IMP.strCurrency
-									WHERE ISNULL(IMP.strBatchNo, '') <> ''
-									AND IMP.intImportCatalogueId = @intImportCatalogueId)
-				,intBookId = (SELECT BOOK.intBookId
-									FROM tblQMImportCatalogue IMP
-									INNER JOIN tblSMCompanyLocation MU
-										ON MU.strLocationName = CASE WHEN ISNULL(IMP.strGroupNumber, '') <> '' AND ISNULL(IMP.strContractNumber, '') <> '' THEN IMP.strGroupNumber ELSE IMP.strB1GroupNumber END
-									INNER JOIN tblCTBook BOOK ON BOOK.strBook = MU.strLocationName
-									WHERE ISNULL(IMP.strBatchNo, '') <> ''
-									AND IMP.intImportCatalogueId = @intImportCatalogueId)
+				,intCurrencyId = T.intCurrencyID
+				,intBookId = T.intBookId
+			FROM (SELECT intNum = 1) R
+			OUTER APPLY (
+				SELECT TOP 1
+					CUR.intCurrencyID
+					,BOOK.intBookId
+					,MU.intCompanyLocationId
+				FROM tblQMImportCatalogue IMP
+				INNER JOIN tblSMCompanyLocation MU
+					ON MU.strLocationName = CASE WHEN ISNULL(IMP.strGroupNumber, '') <> '' AND ISNULL(IMP.strContractNumber, '') <> '' THEN IMP.strGroupNumber ELSE IMP.strB1GroupNumber END
+				INNER JOIN tblCTBook BOOK ON BOOK.strBook = MU.strLocationName
+				LEFT JOIN tblSMCurrency CUR ON CUR.strCurrency = IMP.strCurrency
+				WHERE ISNULL(IMP.strBatchNo, '') <> ''
+				AND IMP.intImportCatalogueId = @intImportCatalogueId
+			) T
+
 			SET @intSampleId = SCOPE_IDENTITY()
 
 			-- Sample Detail
