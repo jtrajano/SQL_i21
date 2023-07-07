@@ -7,6 +7,9 @@ BEGIN TRY
 		,@strHeader NVARCHAR(MAX)
 		,@strDetail NVARCHAR(MAX) = ''
 		,@strMessage NVARCHAR(MAX)
+	DECLARE @intLotErrorCount INT
+		,@intLotSuccessCount INT
+		,@strSummaryDetail NVARCHAR(MAX) = ''
 
 	SET @strStyle = '<style type="text/css" scoped>
 						table.GeneratedTable {
@@ -46,6 +49,8 @@ BEGIN TRY
 						</style>'
 	SET @strHtml = '<html>
 						<body>
+							@summary
+
 						<table class="GeneratedTable">
 							<tbody>
 								@header
@@ -150,8 +155,65 @@ BEGIN TRY
 		END
 	END
 
+	IF @strMessageType = 'Stock'
+	BEGIN
+		SELECT @intLotErrorCount = 0
+			,@intLotSuccessCount = 0
+
+		SELECT @intLotErrorCount = COUNT(1)
+		FROM tblIPLotError WITH (NOLOCK)
+		WHERE ysnMailSent = 0
+
+		SELECT @intLotSuccessCount = COUNT(1)
+		FROM tblIPLotArchive WITH (NOLOCK)
+		WHERE ysnMailSent = 0
+
+		IF @intLotErrorCount > 0
+			OR @intLotSuccessCount > 0
+		BEGIN
+			SET @strSummaryDetail = '<p><b>
+										Total Lots: ' + CONVERT(VARCHAR, (@intLotSuccessCount + @intLotErrorCount)) + '</br>
+										Processed Lots: ' + CONVERT(VARCHAR, @intLotSuccessCount) + '</br>
+										Failed Lots: ' + CONVERT(VARCHAR, @intLotErrorCount) + '</b></p>'
+			
+			UPDATE tblIPLotArchive
+			SET ysnMailSent = 1
+			WHERE ysnMailSent = 0
+		END
+
+		IF EXISTS (
+			SELECT 1
+			FROM tblIPLotError WITH (NOLOCK)
+			WHERE ysnMailSent = 0
+			)
+		BEGIN
+			SET @strHeader = '<tr>
+				<th>&nbsp;Lot No.</th>
+				<th>&nbsp;Item No.</th>
+				<th>&nbsp;Storage Location</th>
+				<th>&nbsp;Storage Unit</th>
+				<th>&nbsp;Message</th>
+			</tr>'
+
+			SELECT @strDetail = @strDetail + '<tr>' + 
+				'<td>&nbsp;' + ISNULL(strLotNumber, '') + '</td>' + 
+				'<td>&nbsp;' + ISNULL(strItemNo, '') + '</td>' + 
+				'<td>&nbsp;' + ISNULL(strSubLocationName, '') + '</td>' + 
+				'<td>&nbsp;' + ISNULL(strStorageLocationName, '') + '</td>' + 
+				'<td>&nbsp;' + ISNULL(strErrorMessage, '') + '</td>' + 
+			'</tr>'
+			FROM tblIPLotError t WITH (NOLOCK)
+			WHERE ysnMailSent = 0
+
+			UPDATE tblIPLotError
+			SET ysnMailSent = 1
+			WHERE ysnMailSent = 0
+		END
+	END
+
 	SET @strHtml = REPLACE(@strHtml, '@header', ISNULL(@strHeader, ''))
 	SET @strHtml = REPLACE(@strHtml, '@detail', ISNULL(@strDetail, ''))
+	SET @strHtml = REPLACE(@strHtml, '@summary', ISNULL(@strSummaryDetail, ''))
 	SET @strMessage = @strStyle + @strHtml
 
 	IF ISNULL(@strDetail, '') = ''
