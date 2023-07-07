@@ -1837,6 +1837,7 @@
     <Build Include="dbo\Stored Procedures\uspIPProcessSAPStock_DA.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetScheduleWorkOrder.sql" />
     <Build Include="dbo\Views\vyuMFScheduleRule.sql" />
+    <Build Include="dbo\Views\vyuMFYield.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
