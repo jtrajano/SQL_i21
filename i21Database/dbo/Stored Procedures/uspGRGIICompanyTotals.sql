@@ -264,6 +264,8 @@ BEGIN
 				,UM_REF.intCommodityUnitMeasureId
 		) A
 
+		
+
 		DECLARE @dblReversedSettlementsWithNoPayment DECIMAL(18,6)
 		DECLARE @dblDPReversedSettlementsWithPayment DECIMAL(18,6)
 		DECLARE @dblSettlementsWithDeletedPayment DECIMAL(18,6)
@@ -279,7 +281,9 @@ BEGIN
 				,dblPaid = CASE WHEN AP.intBillId IS NOT NULL AND SH.strType = 'Reverse Settlement' THEN SUM(ISNULL(SH.dblUnits,0)) ELSE 0 END
 				,dblPaid2 = CASE WHEN AP.intBillId IS NOT NULL AND SH.strType = 'Settlement' THEN SUM(ISNULL(SH.dblUnits,0)) ELSE 0 END
 				,dblPaid3 = CASE WHEN AP.intBillId IS NOT NULL AND dbo.fnRemoveTimeOnDate(SH_2.dtmHistoryDate) = dbo.fnRemoveTimeOnDate(SH.dtmHistoryDate) AND SH.strType = 'Reverse Settlement' THEN SUM(ISNULL(SH.dblUnits,0)) ELSE 0 END
-				,dblPaid4 = CASE WHEN AP.intBillId IS NULL AND dbo.fnRemoveTimeOnDate(SH_2.dtmHistoryDate) < dbo.fnRemoveTimeOnDate(SH.dtmHistoryDate) AND SH.strType = 'Reverse Settlement' THEN SUM(ISNULL(SH.dblUnits,0)) ELSE 0 END
+				,dblPaid4 = CASE WHEN AP.intBillId IS NULL AND (
+					dbo.fnRemoveTimeOnDate(SH_2.dtmHistoryDate) < dbo.fnRemoveTimeOnDate(SH.dtmHistoryDate) 
+						AND dbo.fnRemoveTimeOnDate(SH.dtmHistoryDate) >= @dtmReportDate AND dbo.fnRemoveTimeOnDate(SH_2.dtmHistoryDate) < @dtmReportDate) AND SH.strType = 'Reverse Settlement' THEN SUM(ISNULL(SH.dblUnits,0)) ELSE 0 END
 			FROM tblGRStorageHistory SH
 			INNER JOIN tblGRCustomerStorage CS
 				ON CS.intCustomerStorageId = SH.intCustomerStorageId
@@ -301,10 +305,12 @@ BEGIN
 					AND SH_2.strType = 'Settlement'
 			WHERE ((SH.strType = 'Reverse Settlement' AND SH.intSettleStorageId IS NULL) OR (SH.strType = 'Settlement' AND SH.intSettleStorageId IS NOT NULL))
 				AND CS.intCommodityId = @intCommodityId
-				AND dbo.fnRemoveTimeOnDate(SH.dtmHistoryDate) = @dtmReportDate
+				AND dbo.fnRemoveTimeOnDate(SH.dtmHistoryDate) >= @dtmReportDate
 				AND SH.strSettleTicket NOT IN (SELECT strSettleStorageTicket FROM tblGRReversedSettlementsWithVoidedPayments)
 			GROUP BY AP.intBillId, SH.strType, SH_2.dtmHistoryDate,SH.dtmHistoryDate
 		) A
+
+		--select '@dblSettlementReversedOnDiffDay'=ISNULL(@dblSettlementReversedOnDiffDay,0),'@dblVoidedPaymentOldVoucherAddInBeginning'=ISNULL(@dblVoidedPaymentOldVoucherAddInBeginning,0) ,'@dblVoidedPaymentOldVoucher'=ISNULL(@dblVoidedPaymentOldVoucher,0)
 
 		/****BEGINNING****/
 		INSERT INTO @CompanyOwnedData
@@ -782,7 +788,6 @@ BEGIN
 		AND ((BD.intSettleStorageId IS NULL AND BD.intCustomerStorageId IS NULL AND BD.intInventoryReceiptItemId IS NULL AND BD.intContractDetailId IS NULL)
 				OR (BD.intSettleStorageId IS NULL AND BD.intCustomerStorageId IS NULL AND BD.intInventoryReceiptItemId IS NOT NULL AND IR.intOwnershipType = 1)
 			)
-
 
 	UPDATE C
 	--SET dblTotalIncrease = ISNULL(@dblSODecrease,0) + ISNULL(@dblIACustomerOwned,0) + ISNULL(DP.total,0) + ISNULL(RS.dblUnits,0)
