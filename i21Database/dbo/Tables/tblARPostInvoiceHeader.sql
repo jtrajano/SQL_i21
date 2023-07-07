@@ -148,9 +148,7 @@ CREATE TABLE tblARPostInvoiceHeader (
     ,[intSubLocationId]                     INT             NULL
     ,[intStorageLocationId]                 INT             NULL
     ,[ysnAutoBlend]                         BIT             NULL DEFAULT 0
-    ,[ysnBlended]                           BIT             NULL DEFAULT 0  
-    ,[dblQuantity]                          NUMERIC(18,6)   NULL DEFAULT 0
-    ,[dblMaxQuantity]                       NUMERIC(18,6)   NULL DEFAULT 0	
+    ,[ysnBlended]                           BIT             NULL DEFAULT 0 
     ,[strOptionType]                        NVARCHAR(30)    COLLATE Latin1_General_CI_AS    NULL
     ,[strSourceType]                        NVARCHAR(30)    COLLATE Latin1_General_CI_AS    NULL
     ,[strPostingMessage]                    NVARCHAR(MAX)   COLLATE Latin1_General_CI_AS    NULL
