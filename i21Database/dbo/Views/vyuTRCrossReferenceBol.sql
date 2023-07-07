@@ -16,7 +16,7 @@ SELECT CRB.intCrossReferenceBolId,
     CL.strLocationName strCompanyLocationName,
     CRB.intItemId,
     I.strItemNo,
-    I.strLocationName strItemLocationName,
+    strLocationName = NULL,
     CRB.intDriverId,
     EMD.strName strDriverName,
     CRB.intTruckId,
@@ -34,7 +34,7 @@ LEFT JOIN tblTRSupplyPoint SP ON SP.intSupplyPointId = CRB.intSupplyPointId
 LEFT JOIN tblEMEntity EMC ON EMC.intEntityId = CRB.intCustomerId
 LEFT JOIN tblEMEntityLocation ELC ON ELC.intEntityLocationId = CRB.intCustomerLocationId 
 LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CRB.intCompanyLocationId
-LEFT JOIN vyuICGetItemStock I ON I.intItemId = CRB.intItemId
+LEFT JOIN vyuICSearchItem I ON I.intItemId = CRB.intItemId
 LEFT JOIN tblEMEntity EMD ON EMD.intEntityId = CRB.intDriverId
 LEFT JOIN tblSCTruckDriverReference DR ON DR.intTruckDriverReferenceId = CRB.intTruckId
 LEFT JOIN tblSMShipViaTrailer ST ON ST.intEntityShipViaTrailerId = CRB.intTrailerId
