@@ -71,6 +71,7 @@ SELECT lh.intLoadHeaderId
 	, ISNULL(dd.dblGross,dd.dblDeliveredQty) as dblDistributionDetailGross
 	, ISNULL(dd.dblNet,dd.dblDeliveredQty) as dblDistributionDetailNet
 	, dh.strDeliveryNumber
+	, DOD.strReleasePONumber
 FROM tblMBILPickupDetail pd
 JOIN tblMBILDeliveryDetail dd ON dd.intPickupDetailId = pd.intPickupDetailId
 LEFT JOIN tblTRSupplyPoint sp ON sp.intEntityVendorId = pd.intEntityId AND sp.intEntityLocationId = pd.intEntityLocationId
@@ -84,3 +85,4 @@ LEFT JOIN tblEMEntityLocation cel ON cel.intEntityLocationId = dh.intEntityLocat
 LEFT JOIN tblTMDispatch tm on tm.intDispatchID = dd.intTMDispatchId
 LEFT JOIN tblTMSite tms on tm.intSiteID = tms.intSiteID
 LEFT JOIN vyuLGLoadDetailView LGLoadDetail ON LGLoadDetail.intLoadDetailId = pd.intLoadDetailId
+LEFT JOIN tblLGDispatchOrderDetail DOD on DOD.intDispatchOrderDetailId = dd.intDispatchOrderDetailId

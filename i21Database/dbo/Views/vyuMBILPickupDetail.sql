@@ -28,6 +28,7 @@ SELECT  detail.intPickupDetailId
        ,detail.dblGross
        ,detail.dblNet
        ,detail.strItemUOM
+       ,dispatchorder.strReleasePONumber
 FROM tblMBILPickupDetail detail              
 INNER JOIN tblMBILLoadHeader load on detail.intLoadHeaderId = load.intLoadHeaderId        
 INNER JOIN tblICItem item on detail.intItemId = item.intItemId        
@@ -37,4 +38,5 @@ LEFT JOIN tblEMEntity Salesperson ON Salesperson.intEntityId = detail.intSalespe
 left join tblEMEntityLocation location on detail.intEntityLocationId = location.intEntityLocationId and detail.intEntityId = location.intEntityId                
 left join tblSMCompanyLocation companylocation on detail.intCompanyLocationId = companylocation.intCompanyLocationId                
 left join tblSMCompanySetup company on 1=1 
+left join tblLGDispatchOrderDetail dispatchorder on dispatchorder.intDispatchOrderDetailId = detail.intDispatchOrderDetailId
 WHERE load.ysnDispatched = 1
