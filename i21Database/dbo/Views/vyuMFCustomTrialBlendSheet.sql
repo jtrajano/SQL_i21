@@ -87,7 +87,7 @@ LEFT JOIN (
 		,strFW = ISNULL(strFW, '') -- FW
 		,dblSumQuantity = CAST(OIL.dblSumQuantity AS NUMERIC(38, 0)) -- Sum Qty ***
 		,strTINNumber = TinClearance.strTINNumber -- TIN Number
-		,intAge = DATEDIFF(D, ISNULL(Lot.dtmDateCreated, Lot.dtmManufacturedDate), GETDATE()) -- Age
+		,intAge = DATEDIFF(D, ISNULL(Lot.dtmManufacturedDate, Lot.dtmDateCreated), GETDATE()) -- Age
 		,strLeaf = Batch.strLeafSize + ' - ' + Batch.strLeafStyle -- Leaf 
 		,dblIssuedQuantity = IL.dblIssuedQuantity
 		,dblPercentage = CASE 
