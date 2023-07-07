@@ -1282,7 +1282,7 @@ BEGIN TRY
 			,[intTempDetailIdForTaxes]				= IE.intTempDetailIdForTaxes
 			,[strBOLNumberDetail]					= IE.strBOLNumberDetail 
 			,[ysnBlended]							= IE.ysnBlended
-			,[intLoadDistributionDetailId]   = CASE WHEN @ysnComboFreight = 1 THEN NULL ELSE IE.intLoadDistributionDetailId END
+			,[intLoadDistributionDetailId]			= IE.intLoadDistributionDetailId-- CASE WHEN @ysnComboFreight = 1 THEN NULL ELSE IE.intLoadDistributionDetailId END
 		FROM #tmpSourceTableFinal IE
 		INNER JOIN tblICItem Item ON Item.intItemId = @intSurchargeItemId
 		WHERE (ISNULL(IE.dblFreightRate, 0) != 0 AND IE.ysnComboFreight = 0 AND IE.intId > 0 AND ISNULL(IE.dblSurcharge, 0) != 0)
@@ -1364,7 +1364,7 @@ BEGIN TRY
 			,[intTempDetailIdForTaxes]				= IE.intTempDetailIdForTaxes
 			,[strBOLNumberDetail]					= IE.strBOLNumberDetail 
 			,[ysnBlended]							= IE.ysnBlended
-			,[intLoadDistributionDetailId]   = CASE WHEN @ysnComboFreight = 1 THEN NULL ELSE IE.intLoadDistributionDetailId END    
+			,[intLoadDistributionDetailId]			= NULL--CASE WHEN @ysnComboFreight = 1 THEN NULL ELSE IE.intLoadDistributionDetailId END    
 		FROM #tmpSourceTableFinal IE
 		INNER JOIN tblICItem Item ON Item.intItemId = @intSurchargeItemId
 		WHERE (ISNULL(IE.dblComboFreightRate, 0) != 0 AND IE.ysnComboFreight = 1 AND IE.intId > 0 AND ISNULL(IE.dblSurcharge, 0) != 0)
