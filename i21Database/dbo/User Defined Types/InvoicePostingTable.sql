@@ -146,7 +146,8 @@
     ,[intSubLocationId]                     INT             NULL
     ,[intStorageLocationId]                 INT             NULL
     ,[ysnAutoBlend]                         BIT             NULL
-    ,[ysnBlended]                           BIT             NULL    
+    ,[ysnBlended]                           BIT             NULL
+    ,[dblQuantity]                          NUMERIC(18,6)   NULL
     ,[strOptionType]                        NVARCHAR(30)    COLLATE Latin1_General_CI_AS    NULL
     ,[strSourceType]                        NVARCHAR(30)    COLLATE Latin1_General_CI_AS    NULL
     ,[strPostingMessage]                    NVARCHAR(MAX)   COLLATE Latin1_General_CI_AS    NULL
