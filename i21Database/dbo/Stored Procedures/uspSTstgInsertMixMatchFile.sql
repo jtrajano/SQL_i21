@@ -304,12 +304,12 @@ BEGIN
 									WHERE ST.intStoreId = @intStoreId
 										AND PSL.strPromoType = 'M' 
 										AND (
-										       CAST(PSL.dtmPromoBegPeriod AS DATE) >= CAST(@dtmBeginningChangeDate AS DATE)
-										       AND 
-											   CAST(PSL.dtmPromoEndPeriod AS DATE)  <= CAST(@dtmEndingChangeDate AS DATE)
-										       AND 
-											   CAST(PSL.dtmPromoEndPeriod AS DATE)  >= GETDATE()
-											) -- ST-1227
+											CAST(@dtmBeginningChangeDate AS DATE) >= CAST(PSL.dtmPromoBegPeriod AS DATE)
+											 AND 
+											CAST(@dtmEndingChangeDate AS DATE) <= CAST(PSL.dtmPromoEndPeriod AS DATE) 
+											AND 
+											CAST(PSL.dtmPromoEndPeriod AS DATE)  >= GETDATE()
+										) -- ST-1227
 								END
 
 								-- INSERT @tblTempWeekDayAvailability
