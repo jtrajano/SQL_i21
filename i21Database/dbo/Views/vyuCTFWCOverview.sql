@@ -87,7 +87,7 @@ AS
 			LEFT JOIN tblICUnitMeasure			ICQM WITH (NOLOCK) ON ICQM.intUnitMeasureId	  = ICQ.intUnitMeasureId
 			--LEFT JOIN vyuLGAllocationStatus     LGAS WITH (NOLOCK) ON LGAS.strPurchaseContractNumber = CH.strContractNumber  AND LGAS.intContractDetailId = CTD.intContractDetailId
 			LEFT JOIN tblICStorageLocation		SL	 WITH (NOLOCK) ON SL.intStorageLocationId = CTD.intStorageLocationId
-			LEFT JOIN tblCTBook					CTB	 WITH (NOLOCK) ON CTB.intBookId			  = CH.intBookId
+			LEFT JOIN tblCTBook					CTB	 WITH (NOLOCK) ON CTB.intBookId			  = CTD.intBookId
 			LEFT JOIN tblSMCity					LP	 WITH (NOLOCK) ON LP.intCityId			  =	CTD.intLoadingPortId
 			LEFT JOIN tblSMCity					DP	 WITH (NOLOCK) ON DP.intCityId			  =	CTD.intDestinationPortId
 			LEFT JOIN tblMFLocationLeadTime		MFL	 WITH (NOLOCK) ON CTD.intLoadingPortId    = MFL.intPortOfDispatchId AND  CTD.intDestinationPortId = MFL.intPortOfArrivalId		
