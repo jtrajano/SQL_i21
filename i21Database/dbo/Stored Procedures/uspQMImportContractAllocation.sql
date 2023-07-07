@@ -63,7 +63,7 @@ BEGIN TRY
 				END + CASE 
 				WHEN (
 						SAMPLE_STATUS.intSampleStatusId IS NULL
-						AND ISNULL(IMP.strSampleStatus, '') <> ''
+						-- AND ISNULL(IMP.strSampleStatus, '') <> ''
 						)
 					THEN 'SAMPLE STATUS, '
 				ELSE ''
@@ -104,7 +104,7 @@ BEGIN TRY
 			OR (CD.intContractDetailId IS NULL AND ISNULL(IMP.intContractItem, 0) >0)
 			OR (
 				SAMPLE_STATUS.intSampleStatusId IS NULL
-				AND ISNULL(IMP.strSampleStatus, '') <> ''
+				-- AND ISNULL(IMP.strSampleStatus, '') <> ''
 				)
 			OR (
 				BOOK.intBookId IS NULL
