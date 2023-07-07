@@ -62,7 +62,14 @@ BEGIN TRY
 							   END
 	) MSG
 	WHERE IMP.intImportLogId = @intImportLogId
-		AND ISNULL(IMP.strBatchNo, '') = '' -- Having no batch number indicates that the import is an Auction or Non-Action sample
+		AND (
+			ISNULL(IMP.strBatchNo, '') = '' -- Having no batch number indicates that the import is an Auction or Non-Action sample
+			OR
+			(ISNULL(IMP.strBatchNo, '') <> '' -- Having a batch number in the CSV that has no TBO batch indicates that the import is a direct pre-shipment import
+				AND NOT EXISTS
+				(SELECT 1 FROM tblMFBatch B WHERE B.strBatchId = IMP.strBatchNo AND B.intLocationId = B.intBuyingCenterLocationId)
+			)
+		)
 		AND IMP.ysnSuccess = 1
 		AND 
 		(
@@ -189,7 +196,14 @@ BEGIN TRY
 							   END
 	) MSG
 	WHERE IMP.intImportLogId = @intImportLogId
-		AND ISNULL(IMP.strBatchNo, '') = ''
+		AND (
+			ISNULL(IMP.strBatchNo, '') = ''
+			OR
+			(ISNULL(IMP.strBatchNo, '') <> ''
+				AND NOT EXISTS
+				(SELECT 1 FROM tblMFBatch B WHERE B.strBatchId = IMP.strBatchNo AND B.intLocationId = B.intBuyingCenterLocationId)
+			)
+		)
 		AND 
 		(
 			SY.intSaleYearId IS NULL
@@ -197,6 +211,7 @@ BEGIN TRY
 		 OR CT.intCatalogueTypeId IS NULL
 		 OR E.intEntityId IS NULL
 		)
+		AND IMP.ysnSuccess = 1
 
 	-- End Validate Key Fields for Pre-Shipment Sample
 
