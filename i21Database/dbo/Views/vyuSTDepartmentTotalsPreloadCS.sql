@@ -28,6 +28,7 @@ SELECT DISTINCT
 	ELSE ISNULL(StoreDepartments.strSubcategoryLotTracking, 'No')
 	END AS strLotTracking
 , StoreDepartments.strRegisterCode
+, StoreDepartments.ysnFuelCategory
 FROM dbo.tblICCategory AS Cat 
 INNER JOIN dbo.vyuSTStoreDepartments AS StoreDepartments 
 	ON StoreDepartments.intCategoryId = Cat.intCategoryId
