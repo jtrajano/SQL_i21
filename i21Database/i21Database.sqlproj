@@ -1849,6 +1849,7 @@
     <Build Include="dbo\Tables\tblICInventoryValueAdjustmentLog.sql" />
     <Build Include="dbo\Functions\fnCreateInTransitValueAdjDescription.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCSSetDefaultDepartmentSetup.sql" />
+    <None Include="Scripts\Post-Deployment\ST\57_TagDepartmentCategoriesForFuel.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
