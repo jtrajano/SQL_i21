@@ -26,6 +26,7 @@
     [ysnLotteryItemAdded]                BIT             CONSTRAINT [DF_tblSTCheckoutDepartmetTotals_ysnLotteryItemAdded] DEFAULT ((0)) NULL,
     [intSubcategoriesId]                 INT             NULL,
     [strRegisterCode]                    NVARCHAR(50)    COLLATE Latin1_General_CI_AS NULL,
+    [ysnFuelCategory]		             BIT             NULL,
     CONSTRAINT [PK_tblSTCheckoutDepartmetTotals_intDepartmentTotalId] PRIMARY KEY CLUSTERED ([intDepartmentTotalId] ASC) WITH (FILLFACTOR = 70),
     CONSTRAINT [FK_tblSTCheckoutDepartmetTotals_tblICCategory] FOREIGN KEY ([intCategoryId]) REFERENCES [dbo].[tblICCategory] ([intCategoryId]),
     CONSTRAINT [FK_tblSTCheckoutDepartmetTotals_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [dbo].[tblICItem] ([intItemId]),

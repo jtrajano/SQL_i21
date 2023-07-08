@@ -12,6 +12,7 @@ AS BEGIN
     LEFT JOIN  tblICItem b
     ON          a.intItemId = b.intItemId
     WHERE       a.intCheckoutId = @intCheckoutId 
+    AND         a.ysnFuelCategory = 1
 
     RETURN      @dblDepartmentTotalsForFuel
 

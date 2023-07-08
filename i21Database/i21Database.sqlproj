@@ -1325,6 +1325,7 @@
     <Build Include="dbo\Stored Procedures\uspTMGetOverageQty.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCSAddNewRecipeForBlendedFuel.sql" />
     <Build Include="dbo\Views\vyuTMGetEntityLocationDetail.sql" />
+    <None Include="Scripts\Post-Deployment\ST\57_TagDepartmentCategoriesForFuel.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

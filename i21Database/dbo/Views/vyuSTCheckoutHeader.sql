@@ -29,7 +29,7 @@ SELECT
       ,chk.[dblTotalPaidOuts]  
       ,chk.[dblEnteredPaidOuts]  
       
-   ,dblTotalPaidOutsOrig = (SELECT SUM(ISNULL(po.dblAmount, 0))  
+      ,dblTotalPaidOutsOrig = (SELECT SUM(ISNULL(po.dblAmount, 0))  
          FROM tblSTCheckoutPaymentOptions po  
          WHERE po.intCheckoutId = chk.intCheckoutId)  
   
