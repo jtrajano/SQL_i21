@@ -1351,6 +1351,7 @@
     <Build Include="dbo\Views\vyuTRGetFreightCommissionFreight.sql" />
     <Build Include="dbo\Views\vyuTRGetFreightCommissionLine.sql" />
     <Build Include="dbo\Stored Procedures\uspTRFreightCommissionDriverTotal.sql" />
+    <Build Include="dbo\Views\vyuAPVoucherIdWithDM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
