@@ -96,6 +96,8 @@ SET ANSI_WARNINGS ON
 			/*Quality and Optionality Premium*/
 			, [dblQualityPremium] 
  			, [dblOptionalityPremium] 
+			,[intSubLocationId]
+			,[intStorageLocationId]
 		)
 		SELECT 
 			 GP.[intEntityVendorId]			
@@ -177,6 +179,8 @@ SET ANSI_WARNINGS ON
 			/*Quality and Optionality Premium*/
 			,GP.[dblQualityPremium] 
  			,GP.[dblOptionalityPremium] 
+			,GP.[intSubLocationId]
+			,GP.[intStorageLocationId]
 		FROM dbo.fnICGeneratePayables (@intReceiptId, @ysnPost, DEFAULT, DEFAULT) GP
 	END
 	
