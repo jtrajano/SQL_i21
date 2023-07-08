@@ -159,7 +159,7 @@ SELECT
 	,dblProvisionalPayment				= CASE WHEN ysnFromProvisional = 1 AND dblProvisionalAmount > 0 THEN RELATEDINVOICE.dblPayment ELSE 0 END 
 	,dblProvisionalBasePayment			= CASE WHEN ysnFromProvisional = 1 AND dblBaseProvisionalAmount > 0 THEN RELATEDINVOICE.dblBasePayment ELSE 0 END 
 	,ysnHasCreditApprover				= CAST(CASE WHEN CUSTOMERCREDITAPPROVER.intApproverCount > 0 OR USERCREDITAPPROVER.intApproverCount > 0 THEN 1 ELSE 0 END AS BIT)
-	,dblCreditStopDays					= ISNULL(CUSTOMERAGING.dblCreditStopDays, 0)
+	,dblCreditStopDays					= CAST(0 AS NUMERIC(18, 6)) --ISNULL(CUSTOMERAGING.dblCreditStopDays, 0)
 	,intCreditStopDays					= CUS.intCreditStopDays
 	,ysnInvoiceReturned					= ISNULL(RELATEDINVOICE.ysnReturned,0)
 	,ysnInterCompany					= ISNULL(INV.ysnInterCompany,0)
@@ -315,11 +315,11 @@ OUTER APPLY(
 	AND SC.strScreenName = 'Invoice'
 	WHERE SRA.intEntityUserSecurityId = INV.intEntityId
 ) USERCREDITAPPROVER
-OUTER APPLY(
-	SELECT TOP 1 dblCreditStopDays
-	FROM dbo.vyuARCustomerInquiry
-	WHERE intEntityCustomerId = INV.intEntityCustomerId
-) CUSTOMERAGING
+-- OUTER APPLY(
+-- 	SELECT TOP 1 dblCreditStopDays
+-- 	FROM dbo.vyuARCustomerInquiry
+-- 	WHERE intEntityCustomerId = INV.intEntityCustomerId
+-- ) CUSTOMERAGING
 OUTER APPLY(
 	SELECT TOP 1 strCompanyName
 	FROM dbo.tblSMInterCompany
