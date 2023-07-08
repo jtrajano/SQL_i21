@@ -74,6 +74,8 @@ SET ANSI_WARNINGS ON
 			,[ysnReturn]
 			,[intBookId]
 			,[intSubBookId]
+			,[intSubLocationId]
+			,[intStorageLocationId]
 		)
 		SELECT 
 			 GP.[intEntityVendorId]			
@@ -131,6 +133,8 @@ SET ANSI_WARNINGS ON
 			,GP.[ysnReturn]	 
 			,GP.[intBookId]
 			,GP.[intSubBookId]
+			,GP.[intSubLocationId]
+			,GP.[intStorageLocationId]
 		FROM dbo.fnICGeneratePayables (@intReceiptId, @ysnPost, DEFAULT) GP
 	END
 	
