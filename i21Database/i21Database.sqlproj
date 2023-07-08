@@ -1838,6 +1838,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetScheduleWorkOrder.sql" />
     <Build Include="dbo\Views\vyuMFScheduleRule.sql" />
     <Build Include="dbo\Views\vyuMFYield.sql" />
+    <Build Include="dbo\Views\vyuAPVoucherIdWithDM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
