@@ -1425,6 +1425,7 @@
     <None Include="Scripts\Post-Deployment\ST\55_FileFieldMapping_Passport_FGML.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCSSetDefaultDepartmentSetup.sql" />
     <None Include="Scripts\Post-Deployment\ST\57_TagDepartmentCategoriesForFuel.sql" />
+    <Build Include="dbo\Views\vyuAPVoucherIdWithDM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
