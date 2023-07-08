@@ -19,7 +19,8 @@ SELECT		a.intStoreDepartmentId,
 			(SELECT TOP 1 x.intItemId FROM tblICItem x WHERE x.intSubcategoriesId = a.intSubcategoriesId) intSubcategoryItemId,
 			(SELECT TOP 1 x.strItemNo FROM tblICItem x WHERE x.intSubcategoriesId = a.intSubcategoriesId) strSubcategoryItemNo,
 			(SELECT TOP 1 x.strDescription FROM tblICItem x WHERE x.intSubcategoriesId = a.intSubcategoriesId) strSubcategoryItemDescription,
-			(SELECT TOP 1 x.strLotTracking FROM tblICItem x WHERE x.intSubcategoriesId = a.intSubcategoriesId) strSubcategoryLotTracking
+			(SELECT TOP 1 x.strLotTracking FROM tblICItem x WHERE x.intSubcategoriesId = a.intSubcategoriesId) strSubcategoryLotTracking,
+			a.ysnFuelCategory
 FROM		tblSTStoreDepartments a
 INNER JOIN	tblSTStore b
 ON			a.intStoreId = b.intStoreId

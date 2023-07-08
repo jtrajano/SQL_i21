@@ -13,6 +13,7 @@
     [strCompanyName]                                    NVARCHAR(20)    NULL, 
     [strApplicationRootPath]                            NVARCHAR(250)   NULL, 
     [ysnConsEnableAutomaticPollingStatusReportEmail]    BIT             NOT NULL DEFAULT 0,
+    [ysnFuelCategoryDoneTagging]                        BIT             NOT NULL DEFAULT 0,
     CONSTRAINT [PK_tblSTCompanyPreference]  PRIMARY KEY CLUSTERED ([intCompanyPreferenceId] ASC) WITH (FILLFACTOR = 70)
 );
 
