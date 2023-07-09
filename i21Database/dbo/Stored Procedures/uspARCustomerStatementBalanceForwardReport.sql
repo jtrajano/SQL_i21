@@ -435,6 +435,51 @@ SELECT intInvoiceId			= NULL
 	 , intTermId			= NULL
 	 , strInvoiceNumber		= NULL
 	 , strRecordNumber		= P.strRecordNumber
+	 , strInvoiceOriginId   = NULL
+	 , strBOLNumber			= NULL
+	 , strPaymentInfo		= ''PAYMENT REF: '' + ISNULL(P.strPaymentInfo, '''')
+	 , strTransactionType	= ''Payment''
+	 , dblInvoiceTotal		= 0.00
+	 , dblBalance			= 0.00
+	 , dblPayment			= PD.dblPayment
+	 , dtmDate				= P.dtmDatePaid
+	 , dtmDueDate			= NULL
+	 , dtmShipDate			= NULL
+	 , dtmDatePaid			= P.dtmDatePaid
+	 , strType				= NULL
+	 , strComment			= ISNULL(P.strPaymentInfo, '''') + CASE WHEN ISNULL(P.strNotes, '''') <> '''' THEN '' - '' + P.strNotes ELSE '''' END
+	 , strTicketNumbers		= NULL
+FROM dbo.tblARPayment P WITH (NOLOCK)
+INNER JOIN (
+	SELECT intPaymentId
+	     , PD.dblPayment
+	FROM dbo.tblARPaymentDetail PD WITH (NOLOCK)
+	INNER JOIN (
+		SELECT intInvoiceId
+		FROM dbo.tblARInvoice WITH (NOLOCK)
+		WHERE ysnPosted = 1
+		  AND ISNULL(ysnProcessedToNSF, 0) = 0
+		  AND dtmPostDate < '+ @strDateFrom +'
+		  AND strType <> ''CF Tran''
+	) I ON I.intInvoiceId = PD.intInvoiceId
+	WHERE PD.dblPayment <> 0
+) PD ON P.intPaymentId = PD.intPaymentId
+WHERE ysnInvoicePrepayment = 0
+  AND P.dblAmountPaid = 0
+  AND ysnPosted = 1
+  AND ISNULL(P.ysnProcessedToNSF, 0) = 0
+  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'  
+GROUP BY P.intPaymentId, intEntityCustomerId, intLocationId, strRecordNumber, strPaymentInfo, dblAmountPaid, dtmDatePaid, strNotes, PD.dblPayment
+
+UNION ALL
+
+SELECT intInvoiceId			= NULL
+	 , intEntityCustomerId	= P.intEntityCustomerId
+	 , intPaymentId			= P.intPaymentId
+	 , intCompanyLocationId	= P.intLocationId
+	 , intTermId			= NULL
+	 , strInvoiceNumber		= NULL
+	 , strRecordNumber		= P.strRecordNumber
 	 , strInvoiceOriginId	= NULL
 	 , strBOLNumber			= NULL
 	 , strPaymentInfo		= ''PAYMENT REF: '' + ISNULL(P.strPaymentInfo, '''')
