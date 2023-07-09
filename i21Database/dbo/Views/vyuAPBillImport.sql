@@ -22,6 +22,7 @@ SELECT
 	0.00 dblWithheld ,
 	Currency.strCurrency,
 	OrderBy.strFullName strOrderedBy,
+	A.dblTotalController,
 	A.intBillId
 FROM
 	dbo.tblAPBill A
