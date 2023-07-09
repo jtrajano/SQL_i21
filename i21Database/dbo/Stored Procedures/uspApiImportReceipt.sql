@@ -108,7 +108,7 @@ INNER JOIN tblRestApiReceiptItemStaging ri ON ri.intRestApiReceiptStagingId = r.
 LEFT JOIN tblICItem i ON i.intItemId = ri.intItemId
 LEFT JOIN tblICItemLocation il ON il.intLocationId = r.intLocationId
 	AND il.intItemId = i.intItemId
-WHERE i.intItemId IS NULL
+WHERE il.intItemLocationId IS NULL
 	AND r.guiUniqueId = @guiUniqueId
 
 INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
@@ -233,6 +233,7 @@ FROM tblRestApiReceiptStaging r
         AND um.intUnitMeasureId = ri.intReceiveUOMId
 WHERE r.guiUniqueId = @guiUniqueId
 
+
 INSERT INTO @OtherCharges(
 	  intEntityVendorId
 	, strReceiptType
@@ -300,6 +301,7 @@ INNER JOIN tblICLot l ON l.intLotId = lot.intLotId
 INNER JOIN tblICItem i ON i.intItemId = ri.intItemId
 WHERE r.guiUniqueId = @guiUniqueId
 	AND i.strLotTracking <> 'No'
+
 
 IF EXISTS(SELECT TOP 1 1 FROM @ReceiptEntries)
 BEGIN
