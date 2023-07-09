@@ -4,6 +4,12 @@
 	,@ysnPost BIT
 	,@intEntityUserSecurityId INT
 AS
+
+BEGIN
+	DECLARE @ysnOverrideLOBSegment AS BIT
+	SELECT @ysnOverrideLOBSegment = ysnOverrideLOBSegment FROM tblLGCompanyPreference
+END
+
 BEGIN
 	DECLARE @voucherPayable VoucherPayable
 	DECLARE @DefaultCurrencyId INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
@@ -293,7 +299,7 @@ BEGIN
 					SELECT intItemUOMId = dbo.fnGetMatchingItemUOMId(ICI.[intItemId], LD.intItemUOMId)
 				) IUOM
 				OUTER APPLY dbo.fnGetItemGLAccountAsTable(
-								A.intItemId,
+								CASE WHEN ISNULL(@ysnOverrideLOBSegment, 0) = 1 THEN LD.intItemId ELSE A.intItemId END,
 								ItemLoc.intItemLocationId,
 								'AP Clearing'
 							) itemAccnt

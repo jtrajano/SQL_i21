@@ -388,8 +388,9 @@ BEGIN TRY
 			FROM @voucherDetailData VDD
 				INNER JOIN tblCTContractDetail CD ON VDD.intContractDetailId = CD.intContractDetailId
 				INNER JOIN tblLGLoad L on VDD.intLoadId = L.intLoadId
+				INNER JOIN tblLGLoadDetail LD on L.intLoadId = LD.intLoadId
 				INNER JOIN tblICItem I ON I.intItemId = VDD.intItemId
-				INNER JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId AND IL.intLocationId = CD.intCompanyLocationId
+				INNER JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId AND IL.intLocationId = CD.intCompanyLocationId
 				LEFT JOIN tblSMCurrency CUR ON VDD.intCurrencyId = CUR.intCurrencyID
 				LEFT JOIN tblLGLoadCost LC ON LC.intLoadCostId = VDD.intLoadCostId
 				OUTER APPLY tblLGCompanyPreference CP
