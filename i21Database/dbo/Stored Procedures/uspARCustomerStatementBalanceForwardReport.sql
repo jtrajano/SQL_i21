@@ -710,6 +710,37 @@ BEGIN
 	WHERE P.ysnInvoicePrepayment = 0    
 	GROUP BY P.intPaymentId, intEntityCustomerId, intCompanyLocationId, strRecordNumber, strPaymentInfo, dblAmountPaid, dtmDatePaid, strNotes    
 
+	UNION ALL
+
+	SELECT intEntityCustomerId		= P.intEntityCustomerId
+		, intPaymentId				= P.intPaymentId
+		, intCompanyLocationId		= P.intCompanyLocationId
+		, strRecordNumber			= P.strRecordNumber
+		, strPaymentInfo			= 'PAYMENT REF: ' + ISNULL(P.strPaymentInfo, '')
+		, strTransactionType		= 'Payment'
+		, dblPayment				= PD.dblPayment
+		, dtmDate					= P.dtmDatePaid
+		, dtmDatePaid				= P.dtmDatePaid
+		, strComment				= ISNULL(P.strPaymentInfo, '') + CASE WHEN ISNULL(P.strNotes, '') <> '' THEN ' - ' + P.strNotes ELSE '' END    
+	FROM #PAYMENTS P WITH (NOLOCK)
+	INNER JOIN (
+		SELECT intPaymentId
+			 , PD.dblPayment
+		FROM dbo.tblARPaymentDetail PD WITH (NOLOCK)
+		INNER JOIN (
+			SELECT intInvoiceId
+			FROM dbo.tblARInvoice WITH (NOLOCK)
+			WHERE ysnPosted = 1
+			  AND ISNULL(ysnProcessedToNSF, 0) = 0
+			  AND dtmPostDate < @dtmDateFromLocal
+			  AND strType <> 'CF Tran'
+		) I ON I.intInvoiceId = PD.intInvoiceId
+		WHERE PD.dblPayment <> 0
+	) PD ON P.intPaymentId = PD.intPaymentId
+	WHERE P.ysnInvoicePrepayment = 0
+	  AND P.dblAmountPaid = 0
+	GROUP BY P.intPaymentId, P.intEntityCustomerId, P.intLocationId, P.strRecordNumber, P.strPaymentInfo, P.dtmDatePaid, P.strNotes, PD.dblPayment
+
 	UNION ALL    
 
 	SELECT intEntityCustomerId		= P.intEntityCustomerId    
