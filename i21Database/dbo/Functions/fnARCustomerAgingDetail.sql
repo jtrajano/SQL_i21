@@ -564,8 +564,8 @@ BEGIN
 	)
 	SELECT intOriginalInvoiceId	= I.intOriginalInvoiceId
 		 , strDocumentNumber	= ID.strDocumentNumber
-		 , dblRefundTotal		= SUM(ID.dblTotal)
-		 , dblBaseRefundTotal	= SUM(ID.dblBaseTotal)
+		 , dblRefundTotal		= SUM(I.dblPayment)
+		 , dblBaseRefundTotal	= SUM(I.dblBasePayment)
 	FROM tblARInvoiceDetail ID
 	INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
 	INNER JOIN @ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
