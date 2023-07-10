@@ -53,6 +53,7 @@ SELECT CP.intCompanyPreferenceId
            WHEN CP.intSendBolAttachmentOptionId = 2 THEN 'Send to All Customer that received the Product'    
            WHEN CP.intSendBolAttachmentOptionId = 3 THEN 'Do not send'    
            ELSE NULL END) COLLATE Latin1_General_CI_AS    
+	, strDistributionUnitsRounding
 FROM tblTRCompanyPreference CP
 LEFT JOIN tblSMImportFileHeader Import on Import.intImportFileHeaderId = CP.intRackPriceImportMappingId
 LEFT JOIN tblSMImportFileHeader ImportBol ON ImportBol.intImportFileHeaderId = CP.intBolImportFormatId 
