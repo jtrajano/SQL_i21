@@ -38,6 +38,8 @@ BEGIN TRY
 	LEFT JOIN tblQMSampleType AS SampleType ON SampleType.strSampleTypeName = IMP.strSampleTypeName
 	LEFT JOIN tblCTBook AS Book ON (Book.strBook = IMP.strB1GroupNumber OR Book.strBookDescription = IMP.strB1GroupNumber)
 	LEFT JOIN tblSMCompanyLocation Buyer1GroupNumber ON Buyer1GroupNumber.strLocationName = Book.strBook
+	LEFT JOIN tblQMGardenMark GardenMark ON GardenMark.strGardenMark = IMP.strGardenMark
+	LEFT JOIN tblMFBatch TBO_B ON TBO_B.strBatchId = IMP.strBatchNo AND TBO_B.intLocationId = TBO_B.intBuyingCenterLocationId
 	OUTER APPLY 
 	(
 		SELECT strLogMessage = CASE WHEN (Colour.intCommodityAttributeId IS NULL AND ISNULL(IMP.strColour, '') <> '') THEN 'COLOUR, '
@@ -58,6 +60,9 @@ BEGIN TRY
 							 + CASE WHEN (Buyer1GroupNumber.intCompanyLocationId IS NULL AND ISNULL(IMP.strB1GroupNumber, '') <> '') THEN 'BUYER1 GROUP NUMBER, '
 									ELSE ''
 							   END
+							+ CASE WHEN (GardenMark.intGardenMarkId IS NULL AND ISNULL(IMP.strGardenMark, '') <> '' AND TBO_B.intBatchId IS NULL AND ISNULL(IMP.strBatchNo, '') <> '') THEN 'GARDEN MARK, '
+									ELSE ''
+							   END
 	) MSG
 	WHERE IMP.intImportLogId = @intImportLogId
 		AND IMP.ysnSuccess = 1
@@ -69,6 +74,7 @@ BEGIN TRY
 		 OR (Item.intItemId IS NULL AND ISNULL(IMP.strTealingoItem, '') <> '')
 		 OR (SampleType.intSampleTypeId IS NULL AND ISNULL(IMP.strSampleTypeName, '') <> '')
 		 OR (Buyer1GroupNumber.intCompanyLocationId IS NULL AND ISNULL(IMP.strB1GroupNumber, '') <> '')
+		 OR (GardenMark.intGardenMarkId IS NULL AND ISNULL(IMP.strGardenMark, '') <> '' AND TBO_B.intBatchId IS NULL AND ISNULL(IMP.strBatchNo, '') <> '')
 		)
 
 	/* End of Validate Foreign Key Fields. */
@@ -841,8 +847,21 @@ BEGIN TRY
 			,intLastModifiedUserId = @intEntityUserId
 			,dtmLastModified = @dtmDateCreated
 			,intSampleStatusId = 3 -- Approved
+			-- For direct pre-shipment sample only
+			,strChopNumber = CASE WHEN ISNULL(PS_CHOP_GARDEN.strChopNumber, '') = '' THEN S.strChopNumber ELSE PS_CHOP_GARDEN.strChopNumber END
+			,intGardenMarkId = ISNULL(PS_CHOP_GARDEN.intGardenMarkId, S.intGardenMarkId)
 			-- ,intBookId = Case When @intImportType=2 then @intBookId Else intBookId End 
 		FROM tblQMSample S
+		-- If the import type is for pre-shipment sample and there is no existing TBO batch, then it is a direct pre-shipment sample import
+		OUTER APPLY (
+			SELECT IC.strChopNumber, GM.intGardenMarkId
+			FROM tblQMImportCatalogue IC
+			LEFT JOIN tblMFBatch B ON B.strBatchId = IC.strBatchNo AND B.intLocationId = B.intBuyingCenterLocationId
+			LEFT JOIN tblQMGardenMark GM ON GM.strGardenMark = IC.strGardenMark
+			WHERE @intImportType = 2 -- Pre-shipment sample
+			AND IC.intImportCatalogueId = @intImportCatalogueId
+			AND B.intBatchId IS NULL -- TBO batch does not exist
+		) PS_CHOP_GARDEN
 		WHERE S.intSampleId = @intSampleId
 
 		-- EXEC dbo.uspMFBatchPreStage @intBatchId = @intProductValueId
