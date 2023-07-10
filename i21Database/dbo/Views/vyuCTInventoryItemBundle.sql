@@ -4,7 +4,7 @@ AS
 	--column mapping change here should also update vyuCTInventoryItem
 	SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intItemId, intLocationId) AS INT), 
 	* FROM (
-	SELECT	
+	SELECT	DISTINCT
 			IM.intItemId,
 			IM.strItemNo,
 			IM.strType,
@@ -54,7 +54,7 @@ AS
 
 	UNION ALL
 
-	SELECT	
+	SELECT	DISTINCT
 			IM.intItemId,
 			IM.strItemNo,
 			IM.strType,
@@ -102,7 +102,7 @@ AS
 
 	UNION ALL
 
-	SELECT	
+	SELECT	DISTINCT
 			IM.intItemId,
 			IM.strItemNo,
 			IM.strType,
