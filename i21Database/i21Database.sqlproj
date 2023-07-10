@@ -1839,6 +1839,7 @@
     <Build Include="dbo\Views\vyuMFScheduleRule.sql" />
     <Build Include="dbo\Views\vyuMFYield.sql" />
     <Build Include="dbo\Views\vyuAPVoucherIdWithDM.sql" />
+    <Build Include="dbo\Functions\fnRKGetM2MValuationAverageCost.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
