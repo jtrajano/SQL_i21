@@ -26,8 +26,8 @@ SELECT
     F.intGLFiscalYearPeriodId,
     F.intFiscalYearId
 FROM Ordered A   
-OUTER APPLY(  
-    SELECT TOP 1 intGLFiscalYearPeriodId 
+OUTER APPLY(
+    SELECT TOP 1 intGLFiscalYearPeriodId, intFiscalYearId
     FROM tblGLFiscalYearPeriod   
     WHERE dtmNextDepreciation BETWEEN dtmStartDate AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmEndDate, 101) + ' 23:59:59.000')
 )F  
