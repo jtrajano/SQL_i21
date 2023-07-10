@@ -17,6 +17,7 @@ CREATE TABLE [dbo].[tblGRGIIPhysicalInventory]
 	,strUOM NVARCHAR(40) COLLATE Latin1_General_CI_AS
 	,dblIACompanyOwned DECIMAL(18,6) DEFAULT 0
 	,dblIACustomerOwned DECIMAL(18,6) DEFAULT 0
+	,dblShippedCustomerOwned DECIMAL(18,6) DEFAULT 0
 )
 GO
 CREATE NONCLUSTERED INDEX [IX_tblGRGIIPhysicalInventory_intCommodityId]

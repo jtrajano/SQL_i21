@@ -679,7 +679,7 @@ BEGIN
 		SET @dblInternalTransfersShipped = NULL
 		SET @dblInternalTransfersDiff = NULL
 
-		SELECT @dblShipped = SUM(ISNULL(dblShipped,0))
+		SELECT @dblShipped = SUM(ISNULL(dblShipped,0) - ISNULL(dblShippedCustomerOwned,0))
 			,@dblInternalTransfersReceived = SUM(ISNULL(dblInternalTransfersReceived,0))
 			,@dblInternalTransfersShipped = SUM(ISNULL(dblInternalTransfersShipped,0))
 		FROM tblGRGIIPhysicalInventory 
