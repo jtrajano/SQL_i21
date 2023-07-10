@@ -57,6 +57,7 @@ DECLARE @PhysicalInventoryData AS TABLE (
 	,strUOM NVARCHAR(40) COLLATE Latin1_General_CI_AS
 	,dblIACompanyOwned DECIMAL(18,6) DEFAULT 0
 	,dblIACustomerOwned DECIMAL(18,6) DEFAULT 0
+	,dblShippedCustomerOwned DECIMAL(18,6) DEFAULT 0
 )
 
 CREATE TABLE #tblInOut
@@ -265,6 +266,7 @@ SELECT @dtmReportDate
 	,C.strUOM	
 	,0
 	,0
+	,0
 FROM tblSMCompanyLocation CL
 OUTER APPLY (
 	SELECT * FROM #Coms
@@ -308,6 +310,7 @@ BEGIN
 		,dblNetAdjustments = NET_ADJUSTMENTS.dblAdjustments
 		,dblIACompanyOwned = NET_ADJUSTMENTS_COMPANY_OWNED.dblAdjustments
 		,dblIACustomerOwned = NET_ADJUSTMENTS_CUSTOMER_OWNED.dblAdjustments
+		,dblShippedCustomerOwned = SHIPPED_CUSTOMER_OWNED.TOTAL
 	FROM @PhysicalInventoryData PID
 	LEFT JOIN (
 		SELECT TOTAL = ABS(SUM(ISNULL(dblInvIn,0)) - SUM(ISNULL(dblInvOut,0)))
@@ -395,7 +398,19 @@ BEGIN
 	) NET_ADJUSTMENTS_CUSTOMER_OWNED
 		ON NET_ADJUSTMENTS_CUSTOMER_OWNED.intCommodityId = PID.intCommodityId
 			AND NET_ADJUSTMENTS_CUSTOMER_OWNED.strLocationName = PID.strLocationName
-
+	LEFT JOIN (
+		SELECT TOTAL = ABS(SUM(ISNULL(dblInvIn,0)) - SUM(ISNULL(dblInvOut,0)))
+			,intCommodityId
+			,strLocationName
+		FROM #tblInOut
+		WHERE strTransactionType IN ('Inventory Shipment','Outbound Shipment','Invoice')
+			AND dtmDate IS NOT NULL
+			AND strOwnership = 'Customer Owned'
+		GROUP BY intCommodityId
+			,strLocationName
+	) SHIPPED_CUSTOMER_OWNED
+		ON SHIPPED_CUSTOMER_OWNED.intCommodityId = PID.intCommodityId
+			AND SHIPPED_CUSTOMER_OWNED.strLocationName = PID.strLocationName
 
 	DELETE FROM @tblCommodities WHERE intCommodityId = @intCommodityId2
 END
@@ -421,6 +436,7 @@ SELECT
 	,strUOM
 	,dblIACompanyOwned
 	,dblIACustomerOwned
+	,dblShippedCustomerOwned
 FROM @PhysicalInventoryData
 
 INSERT INTO @PhysicalInventoryData
@@ -438,6 +454,7 @@ SELECT @dtmReportDate
 	,SUM(ISNULL(dblNetAdjustments,0))
 	,SUM(ISNULL(dblEndInventory,0))
 	,strUOM
+	,0
 	,0
 	,0
 FROM @PhysicalInventoryData
