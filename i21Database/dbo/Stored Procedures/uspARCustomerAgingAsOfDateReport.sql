@@ -542,7 +542,7 @@ INSERT INTO #CASHREFUNDS (
 )
 SELECT intOriginalInvoiceId	= I.intOriginalInvoiceId
 	, strDocumentNumber		= ID.strDocumentNumber
-	, dblRefundTotal		= SUM(ID.dblTotal)
+	, dblRefundTotal		= SUM(I.dblPayment)
 	, intAccountId          = I.intAccountId
 FROM tblARInvoiceDetail ID
 INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
