@@ -2334,10 +2334,10 @@ UPDATE tblSMCSVDynamicImport SET
 			END
 			ELSE
 			BEGIN
-				IF(TRY_PARSE(@shipvia AS INT) IS NULL )
+				IF(TRY_PARSE(@warehouse AS INT) IS NULL )
 				BEGIN
 					SET @IsValid = 0
-					SET @ValidationMessage = @ValidationMessage + '' ''+''Ship Via should be numeric''
+					SET @ValidationMessage = @ValidationMessage + '' ''+''Warehouse should be numeric''
 				END
 				ELSE 
 				BEGIN
