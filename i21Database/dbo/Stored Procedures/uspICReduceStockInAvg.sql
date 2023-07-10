@@ -63,21 +63,35 @@ BEGIN
 					dblAvailable = ROUND(cb.dblQty, 6) 
 				FROM
 					tblICInventoryStockAsOfDate cb
+				OUTER APPLY (
+					SELECT TOP 1 xt.intTransactionId
+					FROM tblICInventoryTransaction xt
+					WHERE xt.strTransactionId = @strTransactionId
+						AND xt.strTransactionForm IN ('Produce', 'Consume')
+				) workOrder
 				WHERE
 					cb.intItemId = @intItemId
 					AND cb.intItemLocationId = @intItemLocationId
 					AND cb.intItemUOMId = @intItemUOMId
-					AND FLOOR(CAST(cb.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDate AS FLOAT))
+					--AND FLOOR(CAST(cb.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDate AS FLOAT))
+					AND (FLOOR(CAST(cb.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDate AS FLOAT)) OR workOrder.intTransactionId IS NOT NULL)
 			) asOfDate
 			OUTER APPLY (
 				SELECT	TOP 1 
 						intInventoryFIFOId
 				FROM	tblICInventoryFIFO cb 
+				OUTER APPLY (
+					SELECT TOP 1 xt.intTransactionId
+					FROM tblICInventoryTransaction xt
+					WHERE xt.strTransactionId = @strTransactionId
+						AND xt.strTransactionForm IN ('Produce', 'Consume')
+				) workOrder
 				WHERE	cb.intItemId = @intItemId
 						AND cb.intItemLocationId = @intItemLocationId
 						AND cb.intItemUOMId = @intItemUOMId
 						AND cb.dblStockAvailable <> 0
-						AND FLOOR(CAST(cb.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDate AS FLOAT))						
+						--AND FLOOR(CAST(cb.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDate AS FLOAT))						
+						AND (FLOOR(CAST(cb.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDate AS FLOAT)) OR workOrder.intTransactionId IS NOT NULL)
 						AND ISNULL(asOfDate.dblAvailable, 0) >= ROUND(@dblQty, 6)
 				ORDER BY 
 					cb.dtmDate ASC, intInventoryFIFOId ASC 
