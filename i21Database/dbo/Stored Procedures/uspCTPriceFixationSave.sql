@@ -828,7 +828,7 @@ BEGIN TRY
 						CD.dblTotalCost			=	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity) * 
 													(	
 														(
-															dbo.[fnCTConvertPriceToTargetCommodityUOM](@intBasisUOMId,@intFinalPriceUOMId,ISNULL(CASE WHEN CD.intPricingTypeId = 3 THEN PF.dblOriginalBasis ELSE CD.dblBasis END,0)) / 
+															dbo.[fnCTConvertPriceToTargetCommodityUOM](@intBasisUOMId,@intPriceCommodityUOMId,ISNULL(CASE WHEN CD.intPricingTypeId = 3 THEN PF.dblOriginalBasis ELSE CD.dblBasis END,0)) / 
 															CASE	WHEN	@intBasisCurrencyId = @intCurrencyId	THEN 1 
 																	WHEN	@intBasisCurrencyId <> @intCurrencyId	
 																	AND		@ysnBasisSubCurrency = 1				THEN 100 
@@ -838,7 +838,7 @@ BEGIN TRY
 														(
 															CASE WHEN CH.intPricingTypeId = 8 THEN CD.dblRatio ELSE 1 END *
 															(
-																dbo.[fnCTConvertPriceToTargetCommodityUOM](@intPriceCommodityUOMId,@intFinalPriceUOMId,(case when @ysnApplyFuturesFromPricing = 1 then (ISNULL(PF.dblPriceWORollArb,0) / isnull(PF.dblFX,1)) else  ISNULL(dblPriceWORollArb,0) end))  / 
+																dbo.[fnCTConvertPriceToTargetCommodityUOM](@intFinalPriceUOMId,@intPriceCommodityUOMId,(case when @ysnApplyFuturesFromPricing = 1 then (ISNULL(PF.dblPriceWORollArb,0) / isnull(PF.dblFX,1)) else  ISNULL(dblPriceWORollArb,0) end))  / 
 																CASE	WHEN	@intFinalCurrencyId = @intCurrencyId	THEN 1 
 																		WHEN	@intFinalCurrencyId <> @intCurrencyId	
 																		AND		@ysnFinalSubCurrency = 1				THEN 100 
