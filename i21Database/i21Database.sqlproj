@@ -1324,6 +1324,7 @@
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformCustomerXref.sql" />
     <Build Include="dbo\Stored Procedures\uspTMGetOverageQty.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCSAddNewRecipeForBlendedFuel.sql" />
+    <Build Include="dbo\Views\vyuTMGetEntityLocationDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
