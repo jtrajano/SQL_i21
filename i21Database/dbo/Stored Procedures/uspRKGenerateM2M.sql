@@ -2510,7 +2510,7 @@ BEGIN TRY
 				, strRegion 
 				, strSeason 
 				, strClass 
-				, strProductLine 
+				, strProductLine  
 				, strBook
 				, intBookId
 				, strSubBook
@@ -4751,6 +4751,7 @@ BEGIN TRY
 			, intMTMPointId
 			, dblRate
 			, intTransactionCurrencyId
+			, intM2MTransactionTypeId
 		)
 		SELECT 
 		      intM2MHeaderId
@@ -4838,6 +4839,7 @@ BEGIN TRY
 			, intMTMPointId
 			, dblRate
 			, intTransactionCurrencyId
+			, intM2MTransactionTypeId
 		FROM #tmpM2MTransaction
 
 		-- Differential Basis
