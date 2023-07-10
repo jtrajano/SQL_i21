@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspARCustomerPaymentHistoryReport]
-	@xmlParam NVARCHAR(MAX) = NULL
+	@xmlParam NVARCHAR(MAX) = NULL,
+	@customerId INT = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
