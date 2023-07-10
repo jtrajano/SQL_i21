@@ -178,8 +178,7 @@ SELECT intEntityCustomerId	= C.intEntityId
 FROM tblARCustomer C WITH (NOLOCK)
 INNER JOIN tblEMEntity EC ON C.intEntityId = EC.intEntityId
 INNER JOIN tblEMEntityLocation EL ON EL.intEntityId = C.intEntityId AND EL.ysnDefaultLocation = 1
-WHERE @strCustomerName IS NULL 
-   OR (@strCustomerName IS NOT NULL AND EC.strName = @strCustomerName)
+WHERE (( @customerId IS NULL AND (@strCustomerName IS NULL OR EC.strName LIKE '%'+@strCustomerName+'%'))OR EC.intEntityId = @customerId)
 
 --RECORD NUMBER FILTERS
 IF ISNULL(@strRecordNumberFrom, '') <> ''
