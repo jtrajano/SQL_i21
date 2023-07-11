@@ -158,21 +158,22 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 		dtmDate = CONVERT(VARCHAR(10),dtmTransactionDate,110)
 		,strTransactionNumber
 		,strDistributionType
-		,dblIn = CASE WHEN dblTotal > 0 THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal) ELSE 0 END
-		,dblOut = CASE WHEN dblTotal < 0 THEN ABS(dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal)) ELSE 0 END
+		,dblIn = CASE WHEN dblOrigQty > 0 THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblOrigQty) ELSE 0 END
+		,dblOut = CASE WHEN dblOrigQty < 0 THEN ABS(dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblOrigQty)) ELSE 0 END
 		,ST.intStorageScheduleTypeId
-		,DP.strStorageTypeCode
-		,DP.strCommodityCode
-		,DP.strTransactionType
+		,offsite.strStorageTypeCode
+		,offsite.strCommodityCode
+		,offsite.strTransactionType
 	INTO #OffsiteStorage
-	FROM dbo.fnRKGetBucketDelayedPricing(@dtmLastDayMonthYear,@intCommodityId,NULL) DP
+	FROM vyuRKGetSummaryLog offsite
 	INNER JOIN tblSMCompanyLocation CL
-		ON CL.intCompanyLocationId = DP.intLocationId
-			AND ((CL.ysnLicensed = case when @strLicensed = 'Licensed' then 1 else 0 end) or @strLicensed = 'ALL')
+		ON CL.intCompanyLocationId = offsite.intLocationId
+			AND ((CL.ysnLicensed = case when @strLicensed = 'Licensed' then 1 else 0 end) or @strLicensed = 'All')
 	JOIN tblGRStorageType ST 
-		ON ST.strStorageTypeDescription = DP.strDistributionType 			
+		ON ST.strStorageTypeDescription = offsite.strDistributionType 			
 			AND ysnCustomerStorage = 1			
-	WHERE DP.intCommodityId = @intCommodityId	 and DP.intLocationId = @intLocationId
+	WHERE offsite.intCommodityId = @intCommodityId	 and offsite.intLocationId = @intLocationId
+	and intTicketId is not null
 	
 	
 	while (@intMonth = MONTH(@dtmMonthYear))
