@@ -143,3 +143,7 @@ LEFT JOIN tblLGLoad L ON L.intLoadId = W.intLoadId
 LEFT JOIN tblLGWarehouseRateMatrixHeader WRMH ON WRMH.intWarehouseRateMatrixHeaderId = W.intWarehouseRateMatrixHeaderId
 LEFT JOIN tblMFMachine M ON M.intMachineId = W.intMachineId
 LEFT JOIN tblEMEntity E1 ON E1.intEntityId = WRMH.intVendorEntityId
+	WHERE R.intVersionNo = ( 
+			SELECT MAX(intVersionNo) 
+			FROM tblMFRecipe R
+			WHERE R.intItemId = W.intItemId)
