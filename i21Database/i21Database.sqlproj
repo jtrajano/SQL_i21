@@ -1426,6 +1426,7 @@
     <Build Include="dbo\Stored Procedures\uspSTCSSetDefaultDepartmentSetup.sql" />
     <None Include="Scripts\Post-Deployment\ST\57_TagDepartmentCategoriesForFuel.sql" />
     <Build Include="dbo\Views\vyuAPVoucherIdWithDM.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGUpdateLogisticsLoadFromTM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
