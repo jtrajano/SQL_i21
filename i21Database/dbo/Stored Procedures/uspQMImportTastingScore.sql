@@ -1288,13 +1288,7 @@ BEGIN TRY
 				,strFines
 				,intCountryId
 
-				,dblOriginalTeaTaste
-				,dblOriginalTeaHue
-				,dblOriginalTeaIntensity
-				,dblOriginalTeaMouthfeel
-				,dblOriginalTeaAppearance
-				,dblOriginalTeaVolume
-				,dblOriginalTeaMoisture
+				,strERPPONumber
 				)
 			SELECT strBatchId = @strBatchNo
 				,intSales = CAST(S.strSaleNumber AS INT)
@@ -1327,7 +1321,7 @@ BEGIN TRY
 					END
 				,strBuyingOrderNumber = BT.strBuyingOrderNumber
 				,intSubBookId = S.intSubBookId
-				,strContainerNumber = S.strContainerNumber
+				,strContainerNumber = BT.strContainerNumber
 				,intCurrencyId = S.intCurrencyId
 				,dtmProductionBatch = S.dtmManufacturingDate
 				,dtmTeaAvailableFrom = BT.dtmTeaAvailableFrom
@@ -1436,13 +1430,8 @@ BEGIN TRY
 				,strFines = Fines.strPropertyValue 
 				,intCountryId=S.intCountryID
 
-				,dblOriginalTeaTaste = BT.dblTeaTaste
-				,dblOriginalTeaHue = BT.dblTeaHue
-				,dblOriginalTeaIntensity = BT.dblTeaIntensity
-				,dblOriginalTeaMouthfeel = BT.dblTeaMouthFeel
-				,dblOriginalTeaAppearance = BT.dblTeaAppearance
-				,dblOriginalTeaVolume = BT.dblTeaVolume
-				,dblOriginalTeaMoisture = BT.dblTeaMoisture
+				
+				,strERPPONumber=BT.strERPPONumber
 			FROM tblQMSample S
 			INNER JOIN tblQMImportCatalogue IMP ON IMP.intSampleId = S.intSampleId
 			INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
@@ -1577,10 +1566,22 @@ BEGIN TRY
 
 			-- Start insert/update batch
 			IF EXISTS (
-					SELECT *
+					SELECT 1
 					FROM @MFBatchTableType
 					)
 			BEGIN
+				UPDATE MF
+				SET
+					dblOriginalTeaTaste = ISNULL(BT.dblTeaTaste, MF.dblTeaTaste)
+					,dblOriginalTeaHue = ISNULL(BT.dblTeaHue, MF.dblTeaHue)
+					,dblOriginalTeaIntensity = ISNULL(BT.dblTeaIntensity, MF.dblTeaIntensity)
+					,dblOriginalTeaMouthfeel = ISNULL(BT.dblTeaMouthFeel, MF.dblTeaMouthFeel)
+					,dblOriginalTeaAppearance = ISNULL(BT.dblTeaAppearance, MF.dblTeaAppearance)
+					,dblOriginalTeaVolume = ISNULL(BT.dblTeaVolume, MF.dblTeaVolume)
+					,dblOriginalTeaMoisture = ISNULL(BT.dblTeaMoisture, MF.dblTeaMoisture)
+				FROM @MFBatchTableType MF
+				LEFT JOIN tblMFBatch BT ON BT.strBatchId = MF.strBatchId AND BT.intLocationId = MF.intLocationId
+
 				EXEC uspMFUpdateInsertBatch @MFBatchTableType
 					,@intInput
 					,@intInputSuccess

@@ -1364,11 +1364,11 @@ BEGIN
       ,strAWBSampleReference = S.strAWBSampleReference
       ,dblBasePrice = CASE WHEN CD.intContractDetailId IS NULL THEN S.dblB1Price ELSE CD.dblCashPrice END
       ,ysnBoughtAsReserved = S.ysnBoughtAsReserve
-      ,dblBoughtPrice = CASE WHEN CD.intContractDetailId IS NULL THEN S.dblB1Price ELSE CD.dblCashPrice END
+      ,dblBoughtPrice = ISNULL(CASE WHEN CD.intContractDetailId IS NULL THEN S.dblB1Price ELSE CD.dblCashPrice END, BT.dblBoughtPrice)
       ,dblBulkDensity = BT.dblBulkDensity
       ,strBuyingOrderNumber = CASE WHEN CD.intContractDetailId IS NULL THEN S.strBuyingOrderNo ELSE CH.strExternalContractNumber END
       ,intSubBookId = S.intSubBookId
-      ,strContainerNumber = S.strContainerNumber
+      ,strContainerNumber = BT.strContainerNumber
       ,intCurrencyId = S.intCurrencyId
       ,dtmProductionBatch = S.dtmManufacturingDate
       ,dtmTeaAvailableFrom = BT.dtmTeaAvailableFrom
