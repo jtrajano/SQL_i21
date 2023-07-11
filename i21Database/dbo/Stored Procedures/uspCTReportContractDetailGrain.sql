@@ -107,8 +107,13 @@ BEGIN TRY
 							               END	
 			,strTerm					 = strTerm
 			,strFutureMonth				 = REPLACE(MO.strFutureMonth,' ','('+MO.strSymbol+') ')
-			,strFutureMonthZee			 = CASE	WHEN intPricingTypeId = 1 THEN '' ELSE REPLACE(MO.strFutureMonth,' ','('+MO.strSymbol+') ') END
-			,strQuantity				 = CAST(CAST(dblDetailQuantity AS DECIMAL(18,6)) AS NVARCHAR(30)) + ' ' + strItemUOM
+			,strFutureMonthZee			 = CASE	WHEN intPricingTypeId = 1 THEN '' ELSE REPLACE(MO.strFutureMonth,' ','('+MO.strSymbol+') ') END			
+			,strQuantity				 = CASE WHEN SCS.strCompanyName LIKE '%R T Rogers Oil%' 
+												THEN  convert(nvarchar(30),CAST(ISNULL(dblDetailQuantity,0) AS DECIMAL(24,2))) + ' ' + strItemUOM
+												WHEN SCS.strCompanyName LIKE '%RT Rogers Oil%' 
+												THEN  convert(nvarchar(30),CAST(ISNULL(dblDetailQuantity,0) AS DECIMAL(24,2))) + ' ' + strItemUOM
+										   ELSE  CAST(CAST(dblDetailQuantity AS DECIMAL(18,6)) AS NVARCHAR(30)) + ' ' + strItemUOM
+										   END
 			,strPrice					 = convert(nvarchar(30),(CASE	
 													WHEN intPricingTypeId IN (1,6)	THEN	CAST(ISNULL(dblCashPrice,0) AS DECIMAL(24,4))
 													WHEN intPricingTypeId = 2		THEN	CAST(ISNULL(dblBasis,0)		AS DECIMAL(24,4))
@@ -134,6 +139,7 @@ BEGIN TRY
 			FROM	vyuCTContractDetailView DV
 			LEFT JOIN	tblRKFuturesMonth	MO	ON	MO.intFutureMonthId = DV.intFutureMonthId
 			CROSS JOIN tblCTCompanyPreference   CP
+			CROSS JOIN tblSMCompanySetup SCS
 			WHERE	DV.intContractDetailId	=	@intContractDetailId
 
 			INSERT INTO @ContractDetailGrain
