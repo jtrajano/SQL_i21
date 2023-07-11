@@ -330,7 +330,7 @@ BEGIN TRY
 		LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = CT.intCurrencyId
 		LEFT JOIN dbo.tblGLAccount apClearing ON apClearing.intAccountId = itemAccnt.intAccountId
 		LEFT JOIN tblCMBankAccount BA ON BA.intBankAccountId = L.intBankAccountId
-		LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadContainerId = LD.intLoadDetailId
+		LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId
 		LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId AND ISNULL(LC.ysnRejected, 0) = 0
 		OUTER APPLY (
 			SELECT 
