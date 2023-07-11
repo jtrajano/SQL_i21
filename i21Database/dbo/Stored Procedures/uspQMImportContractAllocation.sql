@@ -701,19 +701,21 @@ BEGIN TRY
 				,@strBatchId OUTPUT
 				,0
 
-			UPDATE B
-			SET B.intLocationId = L.intCompanyLocationId
-				,strBatchId = @strBatchId
-				,intSampleId=NULL
-				,dblOriginalTeaTaste = dblTeaTaste
-				,dblOriginalTeaHue = dblTeaHue
-				,dblOriginalTeaIntensity = dblTeaIntensity
-				,dblOriginalTeaMouthfeel = dblTeaMouthFeel
-				,dblOriginalTeaAppearance = dblTeaAppearance
-				,strPlant=L.strVendorRefNoPrefix
-			FROM @MFBatchTableType B
-			JOIN tblCTBook Bk ON Bk.intBookId = B.intBookId
-			JOIN tblSMCompanyLocation L ON L.strLocationName = Bk.strBook
+				UPDATE B
+				SET B.intLocationId = L.intCompanyLocationId
+					,strBatchId = @strBatchId
+					,intSampleId=NULL
+					,dblOriginalTeaTaste = dblTeaTaste
+					,dblOriginalTeaHue = dblTeaHue
+					,dblOriginalTeaIntensity = dblTeaIntensity
+					,dblOriginalTeaMouthfeel = dblTeaMouthFeel
+					,dblOriginalTeaAppearance = dblTeaAppearance
+					,dblOriginalTeaVolume = dblTeaVolume
+					,dblOriginalTeaMoisture = dblTeaMoisture
+					,strPlant=L.strVendorRefNoPrefix
+				FROM @MFBatchTableType B
+				JOIN tblCTBook Bk ON Bk.intBookId = B.intBookId
+				JOIN tblSMCompanyLocation L ON L.strLocationName = Bk.strBook
 
 			EXEC uspMFUpdateInsertBatch @MFBatchTableType
 				,@intInput
