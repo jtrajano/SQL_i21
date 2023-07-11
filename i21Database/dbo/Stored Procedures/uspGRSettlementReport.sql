@@ -497,7 +497,7 @@ BEGIN
 				,strDSSplitNumber				= NULL
 				,ysnPosted						= PYMT.ysnPosted
 				,strPaymentRecordNumber			= PYMT.strPaymentRecordNum
-				,dtmDatePaid					= dbo.fnGRConvertDateToReportDateFormat(PYMT.dtmDatePaid)
+				,dtmDatePaid					= dbo.fnGRConvertDateToReportDateFormat(PYMT.dtmDateCreated)
 			FROM tblCMBankTransaction BNKTRN
 			JOIN tblAPPayment PYMT 
 				ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
@@ -801,7 +801,7 @@ BEGIN
 				,strDSSplitNumber				= NULL
 				,ysnPosted						= PYMT.ysnPosted
 				,strPaymentRecordNumber			= PYMT.strPaymentRecordNum
-				,dtmDatePaid					= dbo.fnGRConvertDateToReportDateFormat(PYMT.dtmDatePaid)
+				,dtmDatePaid					= dbo.fnGRConvertDateToReportDateFormat(PYMT.dtmDateCreated)
 			FROM tblCMBankTransaction BNKTRN
 			JOIN tblAPPayment PYMT 
 				ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
@@ -1072,7 +1072,7 @@ BEGIN
 				,strDSSplitNumber				= NULL
 				,ysnPosted						= PYMT.ysnPosted
 				,strPaymentRecordNumber			= PYMT.strPaymentRecordNum
-				,dtmDatePaid					= dbo.fnGRConvertDateToReportDateFormat(PYMT.dtmDatePaid)
+				,dtmDatePaid					= dbo.fnGRConvertDateToReportDateFormat(PYMT.dtmDateCreated)
 			FROM tblCMBankTransaction BNKTRN	
 			JOIN tblAPPayment PYMT 
 				ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
@@ -1379,7 +1379,7 @@ BEGIN
 				,strDSSplitNumber				= ES.strSplitNumber
 				,ysnPosted						= PYMT.ysnPosted
 				,strPaymentRecordNumber			= PYMT.strPaymentRecordNum
-				,dtmDatePaid					= dbo.fnGRConvertDateToReportDateFormat(PYMT.dtmDatePaid)
+				,dtmDatePaid					= dbo.fnGRConvertDateToReportDateFormat(PYMT.dtmDateCreated)
 			FROM tblCMBankTransaction BNKTRN	
 			JOIN tblAPPayment PYMT 
 				ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
@@ -1723,7 +1723,7 @@ BEGIN
 				,strDSSplitNumber				= NULL
 				,ysnPosted						= PYMT.ysnPosted
 				,strPaymentRecordNumber			= PYMT.strPaymentRecordNum
-				,dtmDatePaid					= dbo.fnGRConvertDateToReportDateFormat(PYMT.dtmDatePaid)
+				,dtmDatePaid					= dbo.fnGRConvertDateToReportDateFormat(PYMT.dtmDateCreated)
 			FROM tblAPPayment PYMT 
 			JOIN tblAPPaymentDetail PYMTDTL 
 				ON PYMT.intPaymentId = PYMTDTL.intPaymentId
@@ -2015,7 +2015,7 @@ BEGIN
 				,strDSSplitNumber				= NULL
 				,ysnPosted						= PYMT.ysnPosted
 				,strPaymentRecordNumber			= PYMT.strPaymentRecordNum
-				,dtmDatePaid					= dbo.fnGRConvertDateToReportDateFormat(PYMT.dtmDatePaid)
+				,dtmDatePaid					= dbo.fnGRConvertDateToReportDateFormat(PYMT.dtmDateCreated)
 			FROM tblAPPayment PYMT
 			JOIN tblAPPaymentDetail PYMTDTL 
 				ON PYMT.intPaymentId = PYMTDTL.intPaymentId
@@ -2588,7 +2588,7 @@ BEGIN
 				,strDSSplitNumber				= ES.strSplitNumber
 				,ysnPosted						= PYMT.ysnPosted
 				,strPaymentRecordNumber			= PYMT.strPaymentRecordNum
-				,dtmDatePaid					= dbo.fnGRConvertDateToReportDateFormat(PYMT.dtmDatePaid)
+				,dtmDatePaid					= dbo.fnGRConvertDateToReportDateFormat(PYMT.dtmDateCreated)	
 			FROM tblAPPayment PYMT 
 			JOIN tblAPPaymentDetail PYMTDTL 
 				ON PYMT.intPaymentId = PYMTDTL.intPaymentId
