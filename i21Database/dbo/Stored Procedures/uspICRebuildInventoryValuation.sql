@@ -1912,11 +1912,11 @@ BEGIN
 						,ICTrans.dblQty  
 						,ISNULL(ItemUOM.dblUnitQty, ICTrans.dblUOMQty)
 						,dblCost  = 
-							dbo.fnCalculateCostBetweenUOM (
+							ISNULL(dbo.fnCalculateCostBetweenUOM (
 								StockUOM.intItemUOMId
 								,ICTrans.intItemUOMId
-								,ISNULL(Lot.dblLastCost, itemPricing.dblLastCost) 
-							)
+								,COALESCE(Lot.dblLastCost, itemPricing.dblLastCost, 0) 
+							), 0)
 						,ICTrans.dblSalesPrice  
 						,ICTrans.intCurrencyId  
 						,ICTrans.dblExchangeRate  
@@ -2229,11 +2229,11 @@ BEGIN
 						,ICTrans.dblQty  
 						,ISNULL(ItemUOM.dblUnitQty, ICTrans.dblUOMQty) 
 						,dblCost  = 
-								dbo.fnCalculateCostBetweenUOM (
+								ISNULL(dbo.fnCalculateCostBetweenUOM (
 									StockUOM.intItemUOMId
 									,ICTrans.intItemUOMId
-									,ISNULL(lot.dblLastCost, itemPricing.dblLastCost)
-								)
+									,COALESCE(lot.dblLastCost, itemPricing.dblLastCost, 0)
+								), 0)
 						,ICTrans.dblSalesPrice  
 						,ICTrans.intCurrencyId  
 						,ICTrans.dblExchangeRate  
@@ -2419,7 +2419,7 @@ BEGIN
 							,TransferSource.dtmDate  
 							,-TransferSource.dblQty
 							,ISNULL(ItemUOM.dblUnitQty, TransferSource.dblUOMQty)
-							,TransferSource.dblCost 
+							,ISNULL(TransferSource.dblCost , 0)
 							,0
 							,NULL
 							,1
@@ -2787,11 +2787,11 @@ BEGIN
 							,RebuildInvTrans.dblQty  
 							,ISNULL(ItemUOM.dblUnitQty, RebuildInvTrans.dblUOMQty) 
 							,dblCost = 
-								dbo.fnCalculateCostBetweenUOM(
+								ISNULL(dbo.fnCalculateCostBetweenUOM(
 									AdjDetail.intItemUOMId
 									, RebuildInvTrans.intItemUOMId
 									, AdjDetail.dblCost
-								)								
+								), 0)								
 							,RebuildInvTrans.dblSalesPrice  
 							,RebuildInvTrans.intCurrencyId  
 							,RebuildInvTrans.dblExchangeRate  
@@ -2888,7 +2888,7 @@ BEGIN
 							,Adj.dtmAdjustmentDate
 							,dblQty = 
 											-- Try to use the Weight UOM Qty. 
-									CASE	WHEN SourceLot.intWeightUOMId IS NOT NULL AND NewLot.intWeightUOMId IS NOT NULL THEN -- There is a new weight UOM Id. 
+									ISNULL(CASE	WHEN SourceLot.intWeightUOMId IS NOT NULL AND NewLot.intWeightUOMId IS NOT NULL THEN -- There is a new weight UOM Id. 
 												ISNULL(
 													AdjDetail.dblNewWeight
 													,CASE	-- New Lot has the same weight UOM Id. 	
@@ -2942,7 +2942,7 @@ BEGIN
 																)
 													END 
 												) 
-									END
+									END, 0)
 
 							,dblUOMQty = 
 										CASE	WHEN NewLot.intWeightUOMId IS NOT NULL AND SourceLot.intWeightUOMId IS NOT NULL THEN 
@@ -2953,7 +2953,7 @@ BEGIN
 
 							,dblCost = 
 											-- Try to get the cost in terms of Weight UOM. 
-									CASE	WHEN SourceLot.intWeightUOMId IS NOT NULL AND NewLot.intWeightUOMId IS NOT NULL THEN -- There is a new weight UOM Id. 
+									ISNULL(CASE	WHEN SourceLot.intWeightUOMId IS NOT NULL AND NewLot.intWeightUOMId IS NOT NULL THEN -- There is a new weight UOM Id. 
 												CASE	-- New Lot has the same weight UOM Id. 	
 														WHEN NewLot.intWeightUOMId = SourceLot.intWeightUOMId AND SourceLot.intWeightUOMId = FromStock.intItemUOMId THEN															
 																	-- Compute a new cost if there is a new weight. 
@@ -3127,7 +3127,7 @@ BEGIN
 																)
 														END
 													)
-									END
+									END, 0)
 							,dblSalesPrice			= 0
 							,intCurrencyId			= NULL 
 							,dblExchangeRate		= 1
@@ -3328,11 +3328,11 @@ BEGIN
 							,RebuildInvTrans.dblQty  
 							,ISNULL(ItemUOM.dblUnitQty, RebuildInvTrans.dblUOMQty) 
 							,dblCost = 
-								dbo.fnCalculateCostBetweenUOM(
+								ISNULL(dbo.fnCalculateCostBetweenUOM(
 									AdjDetail.intItemUOMId
 									, RebuildInvTrans.intItemUOMId
 									, AdjDetail.dblCost
-								)							
+								), 0)							
 							,RebuildInvTrans.dblSalesPrice  
 							,RebuildInvTrans.intCurrencyId  
 							,RebuildInvTrans.dblExchangeRate  
@@ -3426,7 +3426,7 @@ BEGIN
 							,dblUOMQty = 
 									NewItemUOM.dblUnitQty
 							,dblCost = 
-									CASE 
+									ISNULL(CASE 
 										WHEN AdjDetail.dblNewCost IS NULL THEN 
 											FromStock.dblCost
 										ELSE
@@ -3435,7 +3435,7 @@ BEGIN
 												,NewItemUOM.intItemUOMId --dbo.fnGetMatchingItemUOMId(AdjDetail.intNewItemId, AdjDetail.intItemUOMId)
 												,AdjDetail.dblNewCost
 											)
-									END
+									END, 0)
 							,dblSalesPrice			= 0
 							,intCurrencyId			= NULL 
 							,dblExchangeRate		= 1
@@ -3530,7 +3530,7 @@ BEGIN
 								,dblUOMQty = 
 										NewItemUOM.dblUnitQty
 								,dblCost = 
-										CASE 
+										ISNULL(CASE 
 											WHEN AdjDetail.dblNewCost IS NULL THEN 
 												FromStock.dblCost
 											ELSE
@@ -3539,7 +3539,7 @@ BEGIN
 													,NewItemUOM.intItemUOMId--dbo.fnGetMatchingItemUOMId(AdjDetail.intNewItemId, AdjDetail.intItemUOMId)
 													,AdjDetail.dblNewCost
 												)
-										END
+										END, 0)
 								,dblSalesPrice			= 0
 								,intCurrencyId			= NULL 
 								,dblExchangeRate		= 1
@@ -3693,11 +3693,11 @@ BEGIN
 						,ICTrans.dblQty  
 						,ISNULL(ItemUOM.dblUnitQty, ICTrans.dblUOMQty) 
 						,dblCost  = 
-								dbo.fnCalculateCostBetweenUOM (
+								ISNULL(dbo.fnCalculateCostBetweenUOM (
 									StockUOM.intItemUOMId
 									,ICTrans.intItemUOMId
-									,ISNULL(lot.dblLastCost, itemPricing.dblLastCost) 
-								)
+									,COALESCE(lot.dblLastCost, itemPricing.dblLastCost, 0) 
+								), 0)
 						,ICTrans.dblSalesPrice  
 						,ICTrans.intCurrencyId  
 						,ICTrans.dblExchangeRate  
@@ -3988,7 +3988,7 @@ BEGIN
 						,RebuildInvTrans.dblQty  
 						,ISNULL(ItemUOM.dblUnitQty, RebuildInvTrans.dblUOMQty) 
 						,dblCost  = 
-								ISNULL(
+								COALESCE(
 									dbo.fnCalculateCostBetweenUOM(
 											StockUOM.intItemUOMId
 											,RebuildInvTrans.intItemUOMId
@@ -3997,10 +3997,10 @@ BEGIN
 														itemPricing.dblAverageCost 
 													ELSE
 														-- Otherwise, get the last cost. 														
-														COALESCE(lot.dblLastCost, itemPricing.dblLastCost) 
+														COALESCE(lot.dblLastCost, itemPricing.dblLastCost, 0) 
 											END 
 									)
-									,RebuildInvTrans.dblCost
+									,RebuildInvTrans.dblCost, 0
 								)
 						,RebuildInvTrans.dblSalesPrice  
 						,RebuildInvTrans.intCurrencyId  
@@ -4360,7 +4360,7 @@ BEGIN
 						,RebuildInvTrans.dblQty  
 						,ISNULL(ItemUOM.dblUnitQty, RebuildInvTrans.dblUOMQty) 
 						,dblCost  = 
-							CASE 
+							ISNULL(CASE 
 								WHEN (RebuildInvTrans.dblQty > 0 AND Receipt.intInventoryReceiptId IS NOT NULL) THEN
 									CASE	
 										WHEN ReceiptItem.ysnSubCurrency = 1 AND ISNULL(Receipt.intSubCurrencyCents, 1) <> 0 THEN 
@@ -4450,7 +4450,7 @@ BEGIN
 									END
 									ELSE 
 									RebuildInvTrans.dblCost
-							END
+							END, 0)
 
 						,RebuildInvTrans.dblSalesPrice  
 						,RebuildInvTrans.intCurrencyId  
@@ -4546,7 +4546,7 @@ BEGIN
 					WHERE	ISNULL(itemCost.intCurrencyId, @intFunctionalCurrencyId) = @intFunctionalCurrencyId 
 
 					UPDATE	itemCost
-					SET		dblCost = dbo.fnMultiply(dblCost, ISNULL(dblForexRate, 1)) 
+					SET		dblCost = ISNULL(dbo.fnMultiply(dblCost, ISNULL(dblForexRate, 1)), 0) 
 							,dblSalesPrice = dbo.fnMultiply(dblSalesPrice, ISNULL(dblForexRate, 1)) 
 							,dblValue = dbo.fnMultiply(dblValue, ISNULL(dblForexRate, 1)) 
 					FROM	@ItemsToPost itemCost
@@ -4609,7 +4609,7 @@ BEGIN
 							,r.[dtmReceiptDate] 
 							,dblQty = -ri.dblOpenReceive  
 							,t.[dblUOMQty] 
-							,t.[dblCost] 
+							,ISNULL(t.[dblCost], 0)
 							,t.[dblValue] 
 							,t.[dblSalesPrice] 
 							,t.[intCurrencyId] 
@@ -4751,7 +4751,7 @@ BEGIN
 							,[dtmDate]				= tp.dtmDate 
 							,[dblQty]				= dbo.fnCalculateQtyBetweenUOM(ri.intUnitMeasureId, t.intItemUOMId, -ri.dblOpenReceive)
 							,[dblUOMQty]			= t.dblUOMQty
-							,[dblCost]				= t.dblCost
+							,[dblCost]				= ISNULL(t.dblCost, 0)
 							,[dblSalesPrice]		= tp.dblSalesPrice
 							,[intCurrencyId]		= tp.intCurrencyId
 							,[dblExchangeRate]		= tp.dblExchangeRate
@@ -4921,7 +4921,7 @@ BEGIN
 					-- and Add the other charge. 
 					UPDATE	owned
 					SET		owned.dblCost = 
-								CASE 
+								ISNULL(CASE 
 									WHEN owned_total.dblQty = 0 THEN owned.dblCost
 									ELSE 
 										dbo.fnDivide(
@@ -4929,7 +4929,7 @@ BEGIN
 											, owned_total.dblQty
 										)
 										+ dbo.fnGetOtherChargesFromInventoryReceipt(owned.intTransactionDetailId, owned.intItemUOMId) -- If applicable, add the other charge to the item cost. 
-								END 
+								END, 0) 
 					FROM	@ItemsToPost owned CROSS APPLY (
 								SELECT 
 									dblValue = SUM(-t.dblQty * t.dblCost + t.dblValue) 
@@ -5257,11 +5257,11 @@ BEGIN
 						,ICTrans.dblQty  
 						,ISNULL(ItemUOM.dblUnitQty, ICTrans.dblUOMQty) 
 						,dblCost  = 
-								dbo.fnCalculateCostBetweenUOM (
+								ISNULL(dbo.fnCalculateCostBetweenUOM (
 									StockUOM.intItemUOMId
 									,ICTrans.intItemUOMId
-									,ISNULL(lot.dblLastCost, itemPricing.dblLastCost) 
-								)
+									,COALESCE(lot.dblLastCost, itemPricing.dblLastCost, 0) 
+								), 0)
 						,ICTrans.dblSalesPrice  
 						,ICTrans.intCurrencyId  
 						,ICTrans.dblExchangeRate  
@@ -5613,7 +5613,7 @@ BEGIN
 						,RebuildInvTrans.dtmDate  
 						,RebuildInvTrans.dblQty  
 						,ISNULL(ItemUOM.dblUnitQty, RebuildInvTrans.dblUOMQty) 
-						,dblCost  = CASE 
+						,dblCost  = ISNULL(CASE 
 										WHEN RebuildInvTrans.dblQty < 0 THEN 
 											CASE	
 												WHEN dbo.fnGetCostingMethod(RebuildInvTrans.intItemId, RebuildInvTrans.intItemLocationId) = @AVERAGECOST THEN 
@@ -5630,7 +5630,7 @@ BEGIN
 											END 
 										 ELSE 
 											RebuildInvTrans.dblCost
-									END 
+									END, 0) 
 						,RebuildInvTrans.dblSalesPrice  
 						,RebuildInvTrans.intCurrencyId  
 						,RebuildInvTrans.dblExchangeRate  
@@ -5852,7 +5852,7 @@ BEGIN
 						,adj.dtmAdjustmentDate
 						,adjDetail.dblAdjustByQuantity
 						,iu.dblUnitQty
-						,ISNULL(adjDetail.dblNewCost, adjDetail.dblCost) 
+						,ISNULL(ISNULL(adjDetail.dblNewCost, adjDetail.dblCost), 0) 
 						,0
 						,@intFunctionalCurrencyId
 						,1
@@ -6065,7 +6065,7 @@ BEGIN
 						,adj.dtmAdjustmentDate
 						,adjDetail.dblAdjustByQuantity
 						,iu.dblUnitQty
-						,ISNULL(adjDetail.dblNewCost, adjDetail.dblCost) 
+						,ISNULL(ISNULL(adjDetail.dblNewCost, adjDetail.dblCost) , 0)
 						,0
 						,@intFunctionalCurrencyId
 						,1
@@ -6285,7 +6285,7 @@ BEGIN
 						,RebuildInvTrans.dtmDate  
 						,RebuildInvTrans.dblQty  
 						,ISNULL(ItemUOM.dblUnitQty, RebuildInvTrans.dblUOMQty) 
-						,dblCost  = CASE 
+						,dblCost  = ISNULL(CASE 
 										WHEN RebuildInvTrans.dblQty < 0 THEN 
 											CASE	
 												WHEN Adj.intAdjustmentType = @AdjustmentTypeOpeningInventory THEN 
@@ -6327,7 +6327,7 @@ BEGIN
 											END
 										 ELSE 
 											RebuildInvTrans.dblCost
-									END 
+									END, 0) 
 						,RebuildInvTrans.dblSalesPrice  
 						,RebuildInvTrans.intCurrencyId  
 						,RebuildInvTrans.dblExchangeRate  
