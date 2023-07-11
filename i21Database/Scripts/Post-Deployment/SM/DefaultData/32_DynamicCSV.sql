@@ -2332,17 +2332,14 @@ UPDATE tblSMCSVDynamicImport SET
 			BEGIN
 				SET @warehouseId = NULL
 			END
+			ELSE IF NOT EXISTS(Select TOP 1 1 from tblSMCompanyLocation Where strLocationName = @warehouse)
+			BEGIN
+				SET @IsValid = 0
+				SET @ValidationMessage = @ValidationMessage + '' ''+''Warehouse :''+@warehouse+'' is not Exist''
+			END
 			ELSE
 			BEGIN
-				IF(TRY_PARSE(@shipvia AS INT) IS NULL )
-				BEGIN
-					SET @IsValid = 0
-					SET @ValidationMessage = @ValidationMessage + '' ''+''Ship Via should be numeric''
-				END
-				ELSE 
-				BEGIN
-					SET @warehouseId = CONVERT(INT,@warehouse)
-				END
+				Select TOP 1 @warehouseId = intCompanyLocationId from tblSMCompanyLocation Where strLocationName = @warehouse
 			END
 
 
