@@ -3,7 +3,7 @@ CREATE TABLE [dbo].[tblSTCheckoutFuelTotals]
 	[intFuelTotalsId] INT NOT NULL IDENTITY, 
 	[intCheckoutId] INT,
     [intFuelingPositionId] INT NOT NULL,
-    [intProductNumber] INT NOT NULL,
+    [intProductNumber] NVARCHAR(10) NOT NULL,
     [dblFuelVolume] DECIMAL(18, 6) NOT NULL,
     [dblFuelMoney] DECIMAL(18, 6) NOT NULL,
     [intConcurrencyId] INT NULL, 
