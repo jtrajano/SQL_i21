@@ -1860,6 +1860,7 @@
     <Build Include="dbo\Views\vyuLGNotifyPartyGroupView.sql" />
     <Build Include="dbo\Stored Procedures\uspLGUpdateNotifyPartyGroup.sql" />
     <None Include="Scripts\Post-Deployment\EM\2310_FixCMBankTransactionNonExistentEFT.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGUpdateLogisticsLoadFromTM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
