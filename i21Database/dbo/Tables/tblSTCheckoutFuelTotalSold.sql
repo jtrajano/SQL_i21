@@ -2,7 +2,7 @@
 (
 	[intFuelTotalSoldId] [int] IDENTITY(1,1) NOT NULL,
 	[intCheckoutId] [int] NULL,
-	[intProductNumber] [int] NOT NULL,
+	[intProductNumber] NVARCHAR(10) NOT NULL,
 	[dblDollarsSold] [decimal](18, 6) NOT NULL,
 	[dblGallonsSold] [decimal](18, 6) NOT NULL,
 	[intConcurrencyId] [int] NULL,
