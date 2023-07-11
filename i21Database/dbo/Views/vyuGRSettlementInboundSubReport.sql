@@ -108,11 +108,10 @@ AS
 			INNER JOIN tblICItem Item2 
 				ON Item2.intItemId = DCode.intItemId
 			WHERE QM.dblGradeReading <> 0
-				AND (QM.strSourceType = (CASE WHEN Bill.intCustomerStorageId IS NULL THEN 'Scale' ELSE 'Storage' END)
-				AND (QM.intTicketId = (CASE WHEN Bill.intCustomerStorageId IS NULL THEN Bill.intScaleTicketId ELSE QM.intTicketId END)
-						OR
-					QM.intTicketFileId = (CASE WHEN Bill.intCustomerStorageId IS NULL THEN QM.intTicketFileId ELSE Bill.intCustomerStorageId END))
-				)
+				AND ((QM.strSourceType = 'Scale' AND QM.intTicketId = Bill.intScaleTicketId AND Bill.intCustomerStorageId IS NULL)
+					OR
+					(QM.strSourceType = 'Storage' AND QM.intTicketFileId = Bill.intCustomerStorageId  AND Bill.intCustomerStorageId IS NOT NULL)
+					)
 				AND Item2.intItemId NOT IN (SELECT intItemId FROM tblAPBillDetail WHERE intBillId = Bill.intBillId)
 		) QM
 
@@ -281,6 +280,7 @@ AS
 					--) AS S5
 				) S3
 				) S4
+				WHERE (strDiscountCode IS NOT NULL OR strDiscountCodeDescription IS NOT NULL)
 GROUP BY intPaymentId
 	,strDiscountCode
 	,strDiscountCodeDescription
