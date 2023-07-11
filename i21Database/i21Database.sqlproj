@@ -1859,6 +1859,7 @@
     <Build Include="dbo\Views\vyuLGStorageLocation.sql" />
     <Build Include="dbo\Views\vyuLGNotifyPartyGroupView.sql" />
     <Build Include="dbo\Stored Procedures\uspLGUpdateNotifyPartyGroup.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGUpdateLogisticsLoadFromTM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
