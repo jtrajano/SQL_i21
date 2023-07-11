@@ -136,3 +136,7 @@ LEFT JOIN tblSOSalesOrderDetail SOD ON SOD.intSalesOrderDetailId = W.intSalesOrd
 LEFT JOIN tblSOSalesOrder SO ON SO.intSalesOrderId = SOD.intSalesOrderId
 LEFT JOIN tblEMEntity E ON E.intEntityId = SO.intEntitySalespersonId
 LEFT JOIN tblLGLoad L ON L.intLoadId = W.intLoadId
+	WHERE R.intVersionNo = ( 
+			SELECT MAX(intVersionNo) 
+			FROM tblMFRecipe R
+			WHERE R.intItemId = W.intItemId)
