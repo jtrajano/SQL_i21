@@ -21,7 +21,7 @@ SELECT	@intCheckoutId,
 		1
 FROM	@UDT_Translog a
 JOIN dbo.tblSTPumpItem SPI 
-	ON ISNULL(CAST(a.intProductNumber as NVARCHAR(10)), '') COLLATE Latin1_General_CI_AS IN (ISNULL(SPI.strRegisterFuelId1, ''), ISNULL(SPI.strRegisterFuelId2, ''))
+	ON ISNULL(a.intProductNumber, '') COLLATE Latin1_General_CI_AS IN (ISNULL(SPI.strRegisterFuelId1, ''), ISNULL(SPI.strRegisterFuelId2, ''))
 JOIN dbo.tblICItemUOM UOM 
 	ON UOM.intItemUOMId = SPI.intItemUOMId
 JOIN dbo.tblSTStore S 
