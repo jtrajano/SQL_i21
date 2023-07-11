@@ -857,12 +857,10 @@ BEGIN TRY
 
 		IF @intImportType=2 AND @intItemId<>@intOriginalItemId AND @intItemId<>@intDefaultItemId AND @intOriginalItemId<>@intDefaultItemId
 		BEGIN
-			SELECT @strBatchId=NULL
-			SELECT @strBatchId=strBatchId FROM tblMFBatch WHERE intBatchId=@intBatchId
-			IF EXISTS(SELECT *FROM tblICLot WHERE strLotNumber=@strBatchId and intItemId<>@intItemId)
+			IF EXISTS(SELECT *FROM tblICLot WHERE strLotNumber=@strBatchNo and intItemId<>@intItemId)
 			BEGIN
 				SELECT @intLotId=NULL
-				SELECT @intLotId=intLotId FROM tblICLot WHERE strLotNumber=@strBatchId
+				SELECT @intLotId=intLotId FROM tblICLot WHERE strLotNumber=@strBatchNo
 				EXEC dbo.uspMFLotItemChange @intLotId =@intLotId
 								,@intNewItemId =@intItemId
 								,@intUserId =@intEntityUserId
