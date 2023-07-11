@@ -1783,6 +1783,7 @@
     <Build Include="dbo\Views\vyuRKGetSequenceMonth.sql" />
     <Build Include="dbo\Functions\fnRKIsDerivativeLocked.sql" />
     <Build Include="dbo\Views\vyuSTPromotionItemListDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGUpdateLogisticsLoadFromTM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
