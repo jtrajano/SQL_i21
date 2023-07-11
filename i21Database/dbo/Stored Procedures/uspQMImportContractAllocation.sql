@@ -713,6 +713,8 @@
 					,dblOriginalTeaIntensity = dblTeaIntensity
 					,dblOriginalTeaMouthfeel = dblTeaMouthFeel
 					,dblOriginalTeaAppearance = dblTeaAppearance
+					,dblOriginalTeaVolume = dblTeaVolume
+					,dblOriginalTeaMoisture = dblTeaMoisture
 					,strPlant=L.strVendorRefNoPrefix
 				FROM @MFBatchTableType B
 				JOIN tblCTBook Bk ON Bk.intBookId = B.intBookId
