@@ -1,72 +1,15 @@
 ﻿CREATE VIEW [dbo].[vyuHDRoughCutCapacity]
 AS 
 SELECT
-	strSourceName		= S.strName
-	,strTicketNumber	= HDT.strTicketNumber
-	,strSubject			= HDT.strSubject
-	,strCustomerName	= C.strName
-	,intProjectId		= Project.intProjectId
-	,strProjectName		= Project.strProjectName
-	,dtmGoLive			= Project.dtmGoLive
-	,A.intRoughCountCapacityId
-	,A.intSourceEntityId
-	,A.intTicketId
-	,A.intCustomerEntityId
-	,A.dblPlanFirstWeek
-	,A.dblPlanSecondWeek
-	,A.dblPlanThirdWeek
-	,A.dblPlanForthWeek
-	,A.dblPlanFifthWeek
-	,A.dblPlanSixthWeek
-	,A.dblPlanSeventhWeek
-	,A.dblPlanEighthWeek
-	,A.dblPlanNinthWeek
-	,A.dblPlanTenthWeek
-	,A.dblPlanEleventhWeek
-	,A.dblPlanTwelfthWeek
-	,A.dblEstimateFirstWeek
-	,A.dblEstimateSecondWeek
-	,A.dblEstimateThirdWeek
-	,A.dblEstimateForthWeek
-	,A.dblEstimateFifthWeek
-	,A.dblEstimateSixthWeek
-	,A.dblEstimateSeventhWeek
-	,A.dblEstimateEighthWeek
-	,A.dblEstimateNinthWeek
-	,A.dblEstimateTenthWeek
-	,A.dblEstimateEleventhWeek
-	,A.dblEstimateTwelfthWeek
-	,A.dblFirstWeek
-	,A.dblSecondWeek
-	,A.dblThirdWeek
-	,A.dblForthWeek
-	,A.dblFifthWeek
-	,A.dblSixthWeek
-	,A.dblSeventhWeek
-	,A.dblEighthWeek
-	,A.dblNinthWeek
-	,A.dblTenthWeek
-	,A.dblEleventhWeek
-	,A.dblTwelfthWeek
-	,A.dtmPlanDate
-	,A.ysnBillable
-	,A.intEntityId
-	,A.intConcurrencyId
+	strSourceName = S.strName
+	,strTicketNumber = HDT.strTicketNumber
+	,strSubject = HDT.strSubject
+	,strCustomerName = C.strName
+	,A.*
 FROM [dbo].[tblHDRoughCutCapacity] A
 LEFT JOIN [dbo].[tblHDTicket] HDT ON HDT.intTicketId = A.intTicketId
 LEFT JOIN [dbo].[tblEMEntity] S ON S.intEntityId = A.intSourceEntityId
 LEFT JOIN [dbo].[tblEMEntity] C ON C.intEntityId = A.intCustomerEntityId
-OUTER APPLY
-(
-	SELECT TOP 1  Project.intProjectId
-				, Project.strProjectName
-				, Project.dtmGoLive
-	FROM [dbo].[tblHDProjectTask] ProjectTask
-	LEFT JOIN [dbo].[tblHDProject] Project ON Project.intProjectId = ProjectTask.intProjectId
-	WHERE ProjectTask.intTicketId = A.intTicketId
-
-) Project
-
 WHERE
 	dblPlanFirstWeek IS NOT NULL
 	OR dblPlanSecondWeek IS NOT NULL
@@ -104,5 +47,3 @@ WHERE
 	OR dblTenthWeek IS NOT NULL
 	OR dblEleventhWeek IS NOT NULL
 	OR dblTwelfthWeek IS NOT NULL
-
-GO
