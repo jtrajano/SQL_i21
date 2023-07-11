@@ -53,10 +53,13 @@ BEGIN TRY
   ,@ysnMultipleContractSeq BIT  
  DECLARE @intOrgSampleTypeId INT  
   ,@intOrgItemId INT  
+  ,@intOrginalSampleItemId INT  
   ,@intOrgCountryID INT  
   ,@intOrgCompanyLocationSubLocationId INT  
   ,@intRelatedSampleId INT  
   ,@intCurrentRelatedSampleId INT  
+
+ DECLARE @intDefaultItemId INT
 
  DECLARE @intCountryID INT
   
@@ -123,6 +126,10 @@ DECLARE @ysnSuccess BIT
     ,1  
     )  
  END  
+
+ SELECT @intOrginalSampleItemId = intItemId
+ FROM tblQMSample
+ WHERE intSampleId = @intSampleId
   
  -- Quantity Check  
  IF ISNULL(@intSampleUOMId, 0) > 0  
@@ -1686,6 +1693,30 @@ BEGIN
 								,@intUserId = @intLastModifiedUserId
 								,@intOriginalItemId = @intOriginalItemId
 								,@intItemId = @intItemId
+
+        SELECT TOP 1 @intDefaultItemId = intDefaultItemId FROM tblQMCatalogueImportDefaults
+
+        IF @intItemId <> @intOrginalSampleItemId AND @intItemId <> @intDefaultItemId AND @intOrginalSampleItemId <> @intDefaultItemId
+          AND EXISTS(SELECT 1 FROM tblICLot WHERE strLotNumber=@strBatchId and intItemId <> @intItemId)
+        BEGIN
+          DECLARE
+            @dtmCurrentDate DATETIME
+            ,@strNewLotNumber	nvarchar(50)
+
+          SELECT @dtmCurrentDate = Convert(CHAR, GETDATE(), 101)
+          SELECT @intLotId=NULL
+          SELECT @intLotId=intLotId FROM tblICLot WHERE strLotNumber=@strBatchId
+          EXEC dbo.uspMFLotItemChange @intLotId =@intLotId
+                  ,@intNewItemId = @intItemId
+                  ,@intUserId = @intLastModifiedUserId
+                  ,@strNewLotNumber  = @strNewLotNumber OUTPUT
+                  ,@dtmDate =@dtmCurrentDate
+                  ,@strReasonCode  = NULL
+                  ,@strNotes  = NULL
+                  ,@ysnBulkChange  = 0
+                  ,@ysnProducedItemChange  = 0
+                  ,@dblPhysicalCount  = NULL
+        END
 			END			
     END
   END
