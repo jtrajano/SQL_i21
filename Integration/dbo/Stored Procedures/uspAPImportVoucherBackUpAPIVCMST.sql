@@ -293,7 +293,7 @@ BEGIN
 	-- 		AND G.apchk_cbk_no = A.apivc_cbk_no
 	-- 		--AND G.apchk_chk_amt <> 0
 	-- ) PaymentInfo
-	WHERE 1 = CASE WHEN ISDATE(A.apivc_gl_rev_dt) = 1 AND CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
+	WHERE 1 = CASE WHEN ISDATE(A.apivc_gl_rev_dt) = 1 AND CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN CAST(@DateFrom AS DATE) AND CAST(@DateTo AS DATE) THEN 1 ELSE 0 END
 	AND A.apivc_comment IN ('CCD Reconciliation', 'CCD Reconciliation Reversal')
 	AND NOT EXISTS(
 		SELECT 1 FROM tblAPapivcmst H

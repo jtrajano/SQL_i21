@@ -228,7 +228,7 @@ BEGIN
         WHERE   A.aptrx_ivc_no = B.apegl_ivc_no  
 			AND A.aptrx_vnd_no = B.apegl_vnd_no
         ) apeglmst		
-	WHERE 1 = (CASE WHEN ISDATE(A.aptrx_gl_rev_dt) = 1 AND CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END)
+	WHERE 1 = (CASE WHEN ISDATE(A.aptrx_gl_rev_dt) = 1 AND CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN CAST(@DateFrom AS DATE) AND CAST(@DateTo AS DATE) THEN 1 ELSE 0 END)
 	AND A.aptrx_trans_type IN ('I', 'C', 'A')
 END
 
