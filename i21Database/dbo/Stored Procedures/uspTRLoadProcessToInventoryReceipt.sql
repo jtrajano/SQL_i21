@@ -208,8 +208,8 @@ END
 		,dblFreightRate    = min(TR.dblFreightRate)  
 		,intSourceId    = min(TR.intLoadReceiptId)  
 		,intSourceType     = 3 -- Source type for transports is 3   
-		,dblGross     =  ISNULL(SUM(DD.dblDistributionGrossSalesUnits),0)--select * from tblTRLoadDistributionDetail
-		,dblNet      =  ISNULL(SUM(DD.dblDistributionNetSalesUnits),0)
+		,dblGross     =  CASE WHEN ISNULL(@ysnAllowDifferentUnits,1) = 1 THEN  ISNULL(SUM(DD.dblDistributionGrossSalesUnits),0) ELSE SUM(DD.dblUnits) END--select * from tblTRLoadDistributionDetail
+		,dblNet      =  CASE WHEN ISNULL(@ysnAllowDifferentUnits,1) = 1 THEN  ISNULL(SUM(DD.dblDistributionNetSalesUnits),0) ELSE SUM(DD.dblUnits) END
 
 		,intInventoryReceiptId		= min(TR.intInventoryReceiptId)
 		,dblSurcharge				= min(TR.dblPurSurcharge)
