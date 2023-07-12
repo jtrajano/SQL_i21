@@ -230,10 +230,10 @@
 	SELECT 
 	'INVOICE' AS strMode
 	, HISTORY.intTransactionTypeId
-	, INVOICE.strInvoiceNumber AS strTransactionId
+	, ISNULL(INVOICE.strInvoiceNumber,HISTORY.strInvoice) AS strTransactionId
 	, STORAGE.strStorageTicketNumber AS strStorageTicketNo
 	, HISTORY.strType AS strTransactionType
-	, INVOICE.dtmDate AS dtmTransactionDate
+	, ISNULL(INVOICE.dtmDate,HISTORY.dtmHistoryDate) AS dtmTransactionDate
 
 
 
@@ -265,7 +265,7 @@
 				AND STORAGE_TYPE.ysnGrainBankType = 1
 		JOIN tblGRStorageHistory HISTORY
 			ON STORAGE.intCustomerStorageId = HISTORY.intCustomerStorageId
-		JOIN tblARInvoice INVOICE
+		LEFT JOIN tblARInvoice INVOICE
 			ON HISTORY.intInvoiceId = INVOICE.intInvoiceId		
 		OUTER APPLY(
 			SELECT intGrainBankUnitMeasureId FROM tblGRCompanyPreference
@@ -277,3 +277,6 @@
 		AND STORAGE.intStorageTypeId = @STORAGE_SCHEDULE_TYPE_ID		
 		AND STORAGE.intCustomerStorageId = @CUSTOMER_STORAGE
 		*/
+GO
+
+
