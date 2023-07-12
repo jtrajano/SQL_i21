@@ -1342,6 +1342,7 @@
     <Build Include="dbo\Stored Procedures\uspSTCSSetDefaultDepartmentSetup.sql" />
     <None Include="Scripts\Post-Deployment\ST\57_TagDepartmentCategoriesForFuel.sql" />
     <Build Include="dbo\Stored Procedures\uspLGUpdateLogisticsLoadFromTM.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDGetClusterFilter.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
