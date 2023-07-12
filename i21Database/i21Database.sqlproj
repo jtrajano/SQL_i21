@@ -11865,6 +11865,7 @@
     <Build Include="dbo\Views\vyuCTContractAmendmentViewZug.sql" />
     <Build Include="dbo\Views\vyuCTContractCostViewZug.sql" />
     <Build Include="dbo\Stored Procedures\uspQMUpdateLoadShipmentDetail.sql" />
+    <Build Include="dbo\Functions\fnCTGetSampleDetailAllocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
