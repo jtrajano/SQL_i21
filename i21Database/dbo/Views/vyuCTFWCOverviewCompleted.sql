@@ -95,7 +95,7 @@ AS
 			LEFT JOIN tblQMSaleYear				SY	 WITH (NOLOCK) ON SY.intSaleYearId		  = MFB.intSalesYear
 			LEFT JOIN tblSMPurchasingGroup		PG	 WITH (NOLOCK) ON PG.intPurchasingGroupId = CTD.intPurchasingGroupId
 			LEFT JOIN tblARMarketZone			MZ   WITH (NOLOCK) ON MZ.intMarketZoneId	  = CTD.intMarketZoneId
-			OUTER APPLY dbo.fnCTGetSampleDetail(CTD.intContractDetailId) QA
+			OUTER APPLY dbo.fnCTGetSampleDetailAllocation(CTD.intContractDetailId) QA
 			WHERE CTD.intContractStatusId IN ( 5) --Open, Unconfirmed,Re-Open
 
 			
