@@ -3,7 +3,7 @@
 	@post				BIT,
 	@recap				BIT,
 	@userId				INT,
-	@batchId			NVARCHAR(50) = NULL,
+	@batchId			NVARCHAR(20) = NULL,
 	@success			BIT = 0 OUTPUT,
 	@invalidCount		INT = 0 OUTPUT,
 	@successfulCount	INT = 0 OUTPUT,
