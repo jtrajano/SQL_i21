@@ -475,6 +475,11 @@ BEGIN TRY
 				AND DD.intItemId = @intItemId
 			GROUP BY DD.intItemId
 			
+			IF EXISTS(SELECT TOP 1 1 FROM tblTRCompanyPreference WHERE ISNULL(strDistributionUnitsRounding,'With decimals') = 'With decimals' OR  ISNULL(strDistributionUnitsRounding,'') = '' )
+			BEGIN
+				SET @dblDistributedQuantityNet = ROUND(@dblDistributedQuantityNet,2)
+			END
+
 			IF (@ysnAllowDifferentUnits = 1)
 			BEGIN
 				IF ((@dblReceivedQuantityGross != @dblDistributedQuantityGross) OR (@dblReceivedQuantityNet != @dblDistributedQuantityNet))
