@@ -63,7 +63,8 @@ AS
 				strTimeStamp =  CONVERT(VARCHAR(20),getdate(), 100),
 				dtmManufacturingDate = MFB.dtmProductionBatch,
 				dblNetWeight = CTD.dblNetWeight,
-				CTD.strReference 
+				CTD.strReference,
+				MFB.intBatchId
 			FROM	tblCTContractHeader	CH	
 			INNER JOIN tblCTContractDetail		CTD  WITH (NOLOCK) ON CTD.intContractHeaderId = CH.intContractHeaderId
 			LEFT JOIN tblCTContractStatus		CTS  WITH (NOLOCK) ON CTS.intContractStatusId = CTD.intContractStatusId
