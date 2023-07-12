@@ -184,6 +184,11 @@ BEGIN TRY
 		END
 
 
+		IF EXISTS(SELECT TOP 1 1 FROM tblSCTicketApplyTicket WHERE intTicketId = @intTicketId)
+		BEGIN
+			RAISERROR('Ticket is part of ticket apply process and cannot be undistributed individually.', 11, 1);
+		END
+
 		IF ISNULL(@ysnDeliverySheet, 0) = 0
 		BEGIN
 			SELECT @intLoadId = LGLD.intLoadId ,@intLoadDetailId = LGLD.intLoadDetailId
