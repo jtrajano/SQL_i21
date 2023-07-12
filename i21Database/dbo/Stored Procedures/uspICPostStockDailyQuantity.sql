@@ -426,82 +426,82 @@ BEGIN
 	WITH	(HOLDLOCK) 
 	AS		DailyTransaction	
 	USING (
+			SELECT	
+				[intItemId] = @intItemId 
+				,[intItemLocationId] = @intItemLocationId 
+				,[intInTransitSourceLocationId] = @intInTransitSourceLocationId
+				,[intCompanyLocationId] = [location].intCompanyLocationId
+				,[intSubLocationId] = @intSubLocationId
+				,[intStorageLocationId] = @intStorageLocationId
+				,[intItemUOMId] = @intItemUOMId
+				,[intCompanyId] = NULL 
+				,[dtmDate] = @dtmDate
+				,[dblQty] = @dblQty 
+				,[dblValue] = ROUND(dbo.fnMultiply(ISNULL(@dblQty, 0), ISNULL(@dblCost, 0)) + ISNULL(@dblValue, 0), 2)
+				,[dblValueRounded] = ROUND(dbo.fnMultiply(ISNULL(@dblQty, 0), ISNULL(@dblCost, 0)) + ISNULL(@dblValue, 0), 2)
+			FROM
+				[dbo].[fnICGetCompanyLocation](@intItemLocationId, @intInTransitSourceLocationId) [location]
 			--SELECT	
-			--	[intItemId] = @intItemId 
-			--	,[intItemLocationId] = @intItemLocationId 
-			--	,[intInTransitSourceLocationId] = @intInTransitSourceLocationId
-			--	,[intCompanyLocationId] = [location].intCompanyLocationId
-			--	,[intSubLocationId] = @intSubLocationId
-			--	,[intStorageLocationId] = @intStorageLocationId
-			--	,[intItemUOMId] = @intItemUOMId
-			--	,[intCompanyId] = NULL 
-			--	,[dtmDate] = @dtmDate
-			--	,[dblQty] = @dblQty 
-			--	,[dblValue] = ROUND(dbo.fnMultiply(@dblQty, @dblCost) + @dblValue, 2)
-			--	,[dblValueRounded] = ROUND(dbo.fnMultiply(@dblQty, @dblCost) + @dblValue, 2)
-			--FROM
-			--	[dbo].[fnICGetCompanyLocation](@intItemLocationId, @intInTransitSourceLocationId) [location]
-			SELECT	
-				[intItemId] 
-				,[intItemLocationId] 
-				,[intInTransitSourceLocationId] 
-				,[intCompanyLocationId]
-				,[intSubLocationId] 
-				,[intStorageLocationId] 
-				,[intItemUOMId] 
-				,[intCompanyId] 
-				,[dtmDate] 
-				,[dblQty] = SUM(dblQty) 
-				,[dblValue] = SUM(ROUND(dbo.fnMultiply(t.dblQty, t.dblCost) + t.dblValue, 2))
-				,[dblValueRounded] = SUM(ROUND(dbo.fnMultiply(ISNULL(t.dblQty, 0), ISNULL(t.dblCost, 0)) + ISNULL(t.dblValue, 0), 2))
-			FROM 
-				tblICInventoryTransaction t 
-			WHERE
-				(
-					t.intInventoryTransactionId = @intInventoryTransactionId			
-					OR (
-						t.strBatchId = @strBatchId
-						AND t.strTransactionId = @strTransactionId 
-					)
-				)
-				-- Do not read the inventory transaction if it will not reduce the stock. 
-				AND ISNULL(t.dblQty, 0) >= 0 
-			GROUP BY
-				[intItemId] 
-				,[intItemLocationId] 
-				,[intInTransitSourceLocationId] 
-				,[intCompanyLocationId]
-				,[intSubLocationId] 
-				,[intStorageLocationId] 
-				,[intItemUOMId] 
-				,[intCompanyId] 
-				,[dtmDate] 
-			UNION ALL 
-			-- Read the reduce stock separately in case the reduce stock is merged as one record in the valuation.
-			SELECT	
-				[intItemId] 
-				,[intItemLocationId] 
-				,[intInTransitSourceLocationId] 
-				,[intCompanyLocationId]
-				,[intSubLocationId] 
-				,[intStorageLocationId] 
-				,[intItemUOMId] 
-				,[intCompanyId] 
-				,[dtmDate] 
-				,[dblQty] = ISNULL(@dblQty, t.dblQty)
-				,[dblValue] = ROUND(dbo.fnMultiply(ISNULL(@dblQty, t.dblQty), t.dblCost) + t.dblValue, 2)
-				,[dblValueRounded] = ROUND(dbo.fnMultiply(ISNULL(@dblQty, t.dblQty), ISNULL(t.dblCost, 0)) + ISNULL(t.dblValue, 0), 2)
-			FROM 
-				tblICInventoryTransaction t 
-			WHERE
-				(
-					t.intInventoryTransactionId = @intInventoryTransactionId			
-					OR (
-						t.strBatchId = @strBatchId
-						AND t.strTransactionId = @strTransactionId 
-					)
-				)
-				AND ISNULL(t.dblQty, 0) < 0  
+			--	[intItemId] 
+			--	,[intItemLocationId] 
+			--	,[intInTransitSourceLocationId] 
+			--	,[intCompanyLocationId]
+			--	,[intSubLocationId] 
+			--	,[intStorageLocationId] 
+			--	,[intItemUOMId] 
+			--	,[intCompanyId] 
+			--	,[dtmDate] 
+			--	,[dblQty] = SUM(dblQty) 
+			--	,[dblValue] = SUM(ROUND(dbo.fnMultiply(t.dblQty, t.dblCost) + t.dblValue, 2))
+			--	,[dblValueRounded] = SUM(ROUND(dbo.fnMultiply(ISNULL(t.dblQty, 0), ISNULL(t.dblCost, 0)) + ISNULL(t.dblValue, 0), 2))
+			--FROM 
+			--	tblICInventoryTransaction t 
+			--WHERE
+			--	(
+			--		t.intInventoryTransactionId = @intInventoryTransactionId			
+			--		OR (
+			--			t.strBatchId = @strBatchId
+			--			AND t.strTransactionId = @strTransactionId 
+			--		)
+			--	)
+			--	-- Do not read the inventory transaction if it will not reduce the stock. 
+			--	AND ISNULL(t.dblQty, 0) >= 0 
+			--GROUP BY
+			--	[intItemId] 
+			--	,[intItemLocationId] 
+			--	,[intInTransitSourceLocationId] 
+			--	,[intCompanyLocationId]
+			--	,[intSubLocationId] 
+			--	,[intStorageLocationId] 
+			--	,[intItemUOMId] 
+			--	,[intCompanyId] 
+			--	,[dtmDate] 
+			--UNION ALL 
+			---- Read the reduce stock separately in case the reduce stock is merged as one record in the valuation.
+			--SELECT	
+			--	[intItemId] 
+			--	,[intItemLocationId] 
+			--	,[intInTransitSourceLocationId] 
+			--	,[intCompanyLocationId]
+			--	,[intSubLocationId] 
+			--	,[intStorageLocationId] 
+			--	,[intItemUOMId] 
+			--	,[intCompanyId] 
+			--	,[dtmDate] 
+			--	,[dblQty] = ISNULL(@dblQty, t.dblQty)
+			--	,[dblValue] = ROUND(dbo.fnMultiply(ISNULL(@dblQty, t.dblQty), t.dblCost) + t.dblValue, 2)
+			--	,[dblValueRounded] = ROUND(dbo.fnMultiply(ISNULL(@dblQty, t.dblQty), ISNULL(t.dblCost, 0)) + ISNULL(t.dblValue, 0), 2)
+			--FROM 
+			--	tblICInventoryTransaction t 
+			--WHERE
+			--	(
+			--		t.intInventoryTransactionId = @intInventoryTransactionId			
+			--		OR (
+			--			t.strBatchId = @strBatchId
+			--			AND t.strTransactionId = @strTransactionId 
+			--		)
+			--	)
+			--	AND ISNULL(t.dblQty, 0) < 0  
 	) AS StockToUpdate
 		ON 
 			DailyTransaction.[intItemId] = StockToUpdate.intItemId 
