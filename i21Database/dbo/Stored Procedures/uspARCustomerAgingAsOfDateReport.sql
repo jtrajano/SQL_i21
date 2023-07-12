@@ -393,7 +393,7 @@ SELECT I.intInvoiceId
 	 , I.strTransactionType
 	 , I.strType
 	 , I.strInvoiceNumber
-	 , I.dblInvoiceTotal
+	 , ABS(I.dblInvoiceTotal - CASE WHEN I.intSourceId = 2 THEN ISNULL(ARIProvisional.dblPayment, 0) ELSE 0 END)
 	 , I.dblAmountDue
 	 , I.dblDiscount
 	 , I.dblInterest
@@ -403,6 +403,12 @@ INNER JOIN #ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN #ADLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 LEFT JOIN #FORGIVENSERVICECHARGE SC ON I.intInvoiceId = SC.intInvoiceId 
 INNER JOIN #AGINGGLACCOUNTS GL ON GL.intAccountId = I.intAccountId AND (GL.strAccountCategory IN ('AR Account', 'Customer Prepayments') OR (I.strTransactionType = 'Cash Refund' AND GL.strAccountCategory = 'AP Account'))
+LEFT JOIN (
+	SELECT 
+			intInvoiceId
+		,dblPayment
+	FROM tblARInvoice
+) ARIProvisional ON I.intOriginalInvoiceId = ARIProvisional.intInvoiceId
 WHERE ysnPosted = 1
   AND ysnProcessedToNSF = 0	
   AND strTransactionType <> 'Cash Refund'

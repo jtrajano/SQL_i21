@@ -318,11 +318,11 @@ END
 
 --UPDATE CUSTOMER AR BALANCE
 UPDATE CUSTOMER
-SET CUSTOMER.dblARBalance = CUSTOMER.dblARBalance + CASE WHEN @Post = 1 THEN dblTotalInvoice ELSE -dblTotalInvoice END
+SET CUSTOMER.dblARBalance = CUSTOMER.dblARBalance + dblTotalInvoice * CASE WHEN @Post = 1 THEN 1 ELSE -1 END
 FROM dbo.tblARCustomer CUSTOMER WITH (NOLOCK)
 INNER JOIN (
 	SELECT [intEntityCustomerId] = [intEntityCustomerId]
-		 , [dblTotalInvoice]     = SUM(CASE WHEN [ysnIsInvoicePositive] = 1 THEN [dblInvoiceTotal] - ISNULL(REFUND.dblRefundTotal, 0) ELSE -[dblInvoiceTotal] - ISNULL(REFUND.dblRefundTotal, 0) END)
+		 , [dblTotalInvoice]     = SUM((ABS(dblInvoiceTotal - CASE WHEN intSourceId = 2 THEN ISNULL(ARIProvisional.dblPayment, 0) ELSE 0 END) * CASE WHEN ysnIsInvoicePositive = 1 THEN 1 ELSE -1 END) - ISNULL(REFUND.dblRefundTotal, 0))
 	FROM tblARPostInvoiceHeader IH
 	OUTER APPLY (
 		SELECT dblRefundTotal = SUM(CM.dblInvoiceTotal)
@@ -336,6 +336,12 @@ INNER JOIN (
 		  AND CM.strTransactionType = 'Credit Memo'
 		  AND IH.strTransactionType = 'Cash Refund'
 	) REFUND
+	LEFT JOIN (
+		SELECT 
+			 intInvoiceId
+			,dblPayment
+		FROM tblARInvoice
+	) ARIProvisional ON intOriginalInvoiceId = ARIProvisional.intInvoiceId
 	WHERE IH.strTransactionType <> 'Cash'
 	  AND IH.strSessionId = @strSessionId
 	GROUP BY [intEntityCustomerId]

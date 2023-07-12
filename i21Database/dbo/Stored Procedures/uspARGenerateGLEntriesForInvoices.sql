@@ -384,7 +384,7 @@ SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) 
     ,[intAccountId]                 = I.[intAccountId]
     ,[dblDebit]                     = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN I.[dblBaseInvoiceTotal] ELSE @ZeroDecimal END
     ,[dblCredit]                    = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE I.[dblBaseInvoiceTotal] END
-    ,[dblDebitUnit]                 = ARID.[dblUnitQtyShipped]
+    ,[dblDebitUnit]                 = CASE WHEN ARID.dblUnitQtyShipped <> ARID.dblShipmentNetWt AND ARID.dblShipmentNetWt > 0 THEN ARID.dblShipmentNetWt ELSE ARID.dblUnitQtyShipped END
     ,[dblCreditUnit]                = @ZeroDecimal
     ,[strDescription]               = I.[strDescription]
     ,[strCode]                      = @CODE
@@ -414,8 +414,10 @@ SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) 
     ,[strSessionId]                 = @strSessionId
 FROM tblARPostInvoiceHeader I
 LEFT OUTER JOIN (
-    SELECT [dblUnitQtyShipped]		= SUM([dblUnitQtyShipped])
-         , [intInvoiceId]			= [intInvoiceId]
+    SELECT 
+         dblShipmentNetWt	= SUM(dblShipmentNetWt)
+        ,dblUnitQtyShipped  = SUM(dblUnitQtyShipped)
+        ,intInvoiceId	    = intInvoiceId
     FROM tblARPostInvoiceDetail
     WHERE strSessionId = @strSessionId
     GROUP BY [intInvoiceId]
@@ -1174,7 +1176,7 @@ SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) 
     ,[dblDebit]                     = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE I.[dblBaseLineItemGLAmount] END
     ,[dblCredit]                    = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN I.[dblBaseLineItemGLAmount] ELSE @ZeroDecimal END
     ,[dblDebitUnit]                 = @ZeroDecimal
-    ,[dblCreditUnit]                = I.[dblUnitQtyShipped]
+    ,[dblCreditUnit]                = CASE WHEN I.dblUnitQtyShipped <> I.dblShipmentNetWt AND I.dblShipmentNetWt > 0 THEN I.dblShipmentNetWt ELSE I.dblUnitQtyShipped END
     ,[strDescription]               = I.[strDescription]
     ,[strCode]                      = @CODE
     ,[strReference]                 = I.[strCustomerNumber]

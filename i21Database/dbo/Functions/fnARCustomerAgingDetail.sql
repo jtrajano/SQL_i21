@@ -118,7 +118,7 @@ BEGIN
 		,strAccountCategory	NVARCHAR (100)   COLLATE Latin1_General_CI_AS	NULL
 	)
 	DECLARE @CASHREFUNDS TABLE (
-		 intOriginalInvoiceId			INT												NULL
+		 intOriginalInvoiceId		INT												NULL
 		,strDocumentNumber			NVARCHAR (25)   COLLATE Latin1_General_CI_AS	NULL
 		,dblRefundTotal				NUMERIC(18, 6)									NULL DEFAULT 0
 		,dblBaseRefundTotal			NUMERIC(18, 6)									NULL DEFAULT 0
@@ -393,7 +393,7 @@ BEGIN
 		 , strType					= I.strType
 		 , strBOLNumber				= I.strBOLNumber
 		 , strInvoiceNumber			= I.strInvoiceNumber
-		 , dblInvoiceTotal			= I.dblInvoiceTotal
+		 , dblInvoiceTotal			= ABS(I.dblInvoiceTotal - CASE WHEN I.intSourceId = 2 THEN ISNULL(ARIProvisional.dblPayment, 0) ELSE 0 END)
 		 , dblAmountDue				= I.dblAmountDue
 		 , dblDiscount				= I.dblDiscount
 		 , dblInterest				= I.dblInterest
@@ -401,13 +401,13 @@ BEGIN
 		 , dtmDueDate				= CASE WHEN I.ysnOverrideCashFlow = 1 AND @ysnOverrideCashFlowLocal = 1 THEN I.dtmCashFlowDate ELSE DATEADD(DAYOFYEAR, @intGracePeriodLocal, I.dtmDueDate) END 
 		 , dtmDate					= CAST(I.dtmDate AS DATE)
 		 , ysnPaid					= I.ysnPaid
-		 , dblBaseInvoiceTotal		= I.dblBaseInvoiceTotal
+		 , dblBaseInvoiceTotal		= ABS(I.dblBaseInvoiceTotal - CASE WHEN I.intSourceId = 2 THEN ISNULL(ARIProvisional.dblBasePayment, 0) ELSE 0 END)
 		 , intCurrencyId			= I.intCurrencyId
 		 , strCurrency				= CUR.strCurrency
 		 , dblCurrencyExchangeRate	= I.dblCurrencyExchangeRate
 		 , dblCurrencyRevalueRate	= ISNULL(GLRD.dblNewForexRate, I.dblCurrencyExchangeRate)
 		 , intAccountId				= I.intAccountId
-	FROM dbo.tblARInvoice I WITH (NOLOCK)
+	FROM tblARInvoice I WITH (NOLOCK)
 	INNER JOIN @ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
 	INNER JOIN @ADLOCATION CL ON I.intCompanyLocationId = CL.intId
 	LEFT JOIN @FORGIVENSERVICECHARGE SC ON I.intInvoiceId = SC.intInvoiceId 
@@ -428,6 +428,13 @@ BEGIN
 			 , strCurrency 
 		FROM tblSMCurrency WITH (NOLOCK)  
 	) CUR ON I.intCurrencyId = CUR.intCurrencyID
+	LEFT JOIN (
+		SELECT 
+			 intInvoiceId
+			,dblPayment
+			,dblBasePayment
+		FROM tblARInvoice
+	) ARIProvisional ON I.intOriginalInvoiceId = ARIProvisional.intInvoiceId
 	WHERE I.ysnPosted = 1  
 	  AND I.ysnProcessedToNSF = 0
 	  AND I.strTransactionType <> 'Cash Refund'
