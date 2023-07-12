@@ -82,6 +82,6 @@ OUTER APPLY(
 	SELECT intUTCOffset from [tblCMCompanyPreferenceOption]
 )O
 OUTER APPLY(
-	SELECT TOP 1 ysnRemittanceAdvice_DisplayVendorAccountNumber ysnDisplayVendorAccountNumber FROM tblAPCompanyPreference
+	SELECT TOP 1 ysnRemittanceAdvice_DisplayVendorAccountNumber ysnDisplayVendorAccountNumber FROM tblCMCompanyPreferenceOption
 )CP
 WHERE CHK.intBankTransactionTypeId IN (22, 23, 123)
