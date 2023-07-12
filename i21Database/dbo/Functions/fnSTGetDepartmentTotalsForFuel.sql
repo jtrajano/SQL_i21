@@ -5,9 +5,9 @@
 RETURNS DECIMAL(18,2)
 AS BEGIN
 
-   DECLARE     @dblDepartmentTotalsForFuel DECIMAL(18,2) = 0
+	DECLARE     @dblDepartmentTotalsForFuel DECIMAL(18,2) = 0
 
-    SELECT      @dblDepartmentTotalsForFuel = ISNULL(SUM(dblTotalSalesAmountComputed),0)
+    SELECT      @dblDepartmentTotalsForFuel = ISNULL(SUM(dblTotalSalesAmountComputed), 0)
 	FROM        tblSTCheckoutDepartmetTotals a
 	JOIN		tblSTCheckoutHeader ch
 	ON			a.intCheckoutId = ch.intCheckoutId
