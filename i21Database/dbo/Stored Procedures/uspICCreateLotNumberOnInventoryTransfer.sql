@@ -162,8 +162,8 @@ BEGIN
 			,strCondition
 			,[intWeightUOMId]
 			,[dblWeight]
-			--,[dblGrossWeight]
-			--,[dblWeightPerQty]
+			,[dblGrossWeight]
+			,[dblWeightPerQty]
 			,[intBookId]
 			,[intSubBookId]
 			,[strCertificate]
@@ -219,8 +219,17 @@ BEGIN
 						CASE WHEN @ysnPost = 0 THEN -TransferItem.dblNet ELSE TransferItem.dblNet END
 					ELSE 0
 				END 
-			--,[dblGrossWeight] 		= CASE WHEN TransferItem.intGrossNetUOMId IS NOT NULL THEN TransferItem.dblGross ELSE NULL END
-			--,[dblWeightPerQty]		= CASE WHEN TransferItem.intGrossNetUOMId IS NOT NULL THEN CASE WHEN ISNULL(NULLIF(TransferItem.dblNet, 0), 0) = 0 THEN 0 ELSE TransferItem.dblQuantity / TransferItem.dblNet END ELSE NULL END
+			,[dblGrossWeight] 			= CASE WHEN TransferItem.intGrossNetUOMId IS NOT NULL THEN TransferItem.dblGross ELSE SourceLot.dblGrossWeight END
+			,[dblWeightPerQty]			= 
+					CASE 
+						WHEN TransferItem.intGrossNetUOMId IS NOT NULL THEN 
+							CASE 
+								WHEN ISNULL(NULLIF(TransferItem.dblNet, 0), 0) = 0 THEN 0 
+								ELSE dbo.fnCalculateWeightUnitQty(TransferItem.dblQuantity, TransferItem.dblNet) --TransferItem.dblQuantity / TransferItem.dblNet 
+							END 
+						ELSE 
+							SourceLot.dblWeightPerQty 
+					END
 			,[intBookId]				= SourceLot.intBookId
 			,[intSubBookId]				= SourceLot.intSubBookId
 			,[strCertificate]			= SourceLot.strCertificate
@@ -233,8 +242,24 @@ BEGIN
 			,ysnWeighed					= SourceLot.ysnWeighed
 			,strSealNo					= SourceLot.strSealNo
 			,intLotStatusId				= SourceLot.intLotStatusId 
-			,[dblTare]					= SourceLot.dblTare
-			,[dblTarePerQty]			= SourceLot.dblTarePerQty
+			,[dblTare]					= --SourceLot.dblTare
+				CASE 
+					WHEN TransferItem.intGrossNetUOMId IS NOT NULL AND ISNULL(TransferItem.dblTare, 0) <> 0 THEN 
+						CASE WHEN @ysnPost = 0 THEN -TransferItem.dblTare ELSE TransferItem.dblTare END
+					ELSE 
+						SourceLot.dblTare
+				END
+			,[dblTarePerQty]			= --SourceLot.dblTarePerQty
+					CASE 
+						WHEN TransferItem.intGrossNetUOMId IS NOT NULL AND ISNULL(TransferItem.dblTare, 0) <> 0 THEN 
+							CASE 
+								WHEN ISNULL(NULLIF(TransferItem.dblNet, 0), 0) = 0 THEN 0 
+								ELSE dbo.fnCalculateWeightUnitQty(TransferItem.dblQuantity, TransferItem.dblTare) --TransferItem.dblQuantity / TransferItem.dblNet 
+							END 
+						ELSE 
+							SourceLot.dblTarePerQty 
+					END
+
 			,[strWarrantNo]				= SourceLot.strWarrantNo
 			,[intWarrantStatus]			= SourceLot.intWarrantStatus
 	FROM	dbo.tblICInventoryTransfer [Transfer] INNER JOIN dbo.tblICInventoryTransferDetail TransferItem

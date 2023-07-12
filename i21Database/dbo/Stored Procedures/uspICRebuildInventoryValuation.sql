@@ -2570,6 +2570,8 @@ BEGIN
 				ELSE 
 				BEGIN
 					DELETE FROM @ItemsToPost
+
+					-- Receive Lot that has a valid Gross/Net UOM. 
 					INSERT INTO @ItemsToPost (
 							intItemId  
 							,intItemLocationId 
@@ -2603,13 +2605,147 @@ BEGIN
 							,dbo.fnICGetItemLocation(Detail.intItemId, Header.intToLocationId)
 							,TransferSource.intItemUOMId  
 							,TransferSource.dtmDate  
-							,-TransferSource.dblQty
+							,dblQty = -- -TransferSource.dblQty
+								CASE 
+									WHEN Detail.intGrossNetUOMId = TransferSource.intItemUOMId AND Detail.intLotId IS NOT NULL THEN 
+										Detail.dblNet
+									ELSE	
+										TransferSourceQty.dblQty 
+								END	
+
 							,ISNULL(ItemUOM.dblUnitQty, TransferSource.dblUOMQty)
-							,TransferSource.dblCost 
+							,dblCost = --TransferSource.dblCost 
+								CASE 
+									WHEN Detail.intGrossNetUOMId = TransferSource.intItemUOMId AND Detail.intLotId IS NOT NULL THEN 
+										dbo.fnDivide(TransferSourceQty.dblValue, Detail.dblNet) 
+									ELSE	
+										ISNULL(TransferSourceQty.dblCost, 0)
+								END
+							,dblForexCost = --TransferSource.dblForexCost  
+								CASE 
+									WHEN Detail.intGrossNetUOMId = TransferSource.intItemUOMId AND Detail.intLotId IS NOT NULL THEN 
+										dbo.fnDivide(TransferSourceQty.dblForexValue, Detail.dblNet) 
+									ELSE	
+										ISNULL(TransferSourceQty.dblForexCost, 0)
+								END
+							,dblSalesPrice = 0
+							,intCurrencyId = TransferSource.intCurrencyId
+							,dblExchangeRate = TransferSourceQty.dblExchangeRate --TransferSource.dblExchangeRate									
+							,TransferSource.intTransactionId  
+							,Detail.intInventoryTransferDetailId
+							,Header.strTransferNo
+							,TransferSource.intTransactionTypeId  
+							,Detail.intNewLotId 
+							,Detail.intToSubLocationId
+							,Detail.intToStorageLocationId
+							,ISNULL(Detail.strToLocationActualCostId, Header.strActualCostId)
+							,TransferSource.intForexRateTypeId
+							,dblForexRate = TransferSourceQty.dblForexRate --TransferSource.dblForexRate
+							,intCostingMethod = 
+								CASE 
+									WHEN ISNULL(Detail.strToLocationActualCostId, Header.strActualCostId) IS NOT NULL THEN @ACTUALCOST 
+									ELSE NULL 
+								END
+							,TransferSource.intSourceEntityId
+							,TransferSource.strBOLNumber
+							,TransferSource.intTicketId
+							,TransferSource.strSourceType
+							,TransferSource.strSourceNumber
+					FROM	tblICInventoryTransferDetail Detail INNER JOIN tblICInventoryTransfer Header 
+								ON Header.intInventoryTransferId = Detail.intInventoryTransferId
+							INNER JOIN tblICItem i
+								ON i.intItemId = Detail.intItemId
+							INNER JOIN #tmpRebuildList list
+								ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
+								AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
+							CROSS APPLY (
+								SELECT 
+									dblQty = SUM(-FromStockQty.dblQty) 
+									,dblCost = dbo.fnDivide(
+											SUM(dbo.fnMultiply(-FromStockQty.dblQty, FromStockQty.dblCost))
+											, SUM(-FromStockQty.dblQty)
+										)
+									,dblForexCost = dbo.fnDivide(
+											SUM(dbo.fnMultiply(-FromStockQty.dblQty, FromStockQty.dblForexCost))
+											, SUM(-FromStockQty.dblQty)
+										)
+									,dblValue = SUM(dbo.fnMultiply(-FromStockQty.dblQty, FromStockQty.dblCost))
+									,dblForexValue = SUM(dbo.fnMultiply(-FromStockQty.dblQty, FromStockQty.dblForexCost))
+									,dblForexRate = AVG(FromStockQty.dblForexRate)
+									,dblExchangeRate = AVG(FromStockQty.dblExchangeRate) 
+								FROM dbo.tblICInventoryTransaction FromStockQty 
+								WHERE
+									FromStockQty.intTransactionDetailId = Detail.intInventoryTransferDetailId 
+									AND FromStockQty.intTransactionId = Detail.intInventoryTransferId
+									AND FromStockQty.intItemId = Detail.intItemId
+									AND FromStockQty.strTransactionId = Header.strTransferNo
+									AND FromStockQty.dblQty < 0 
+									AND ISNULL(FromStockQty.ysnIsUnposted, 0) = 0
+									AND FromStockQty.strBatchId = @strBatchId
+							) TransferSourceQty
+							CROSS APPLY (
+								SELECT TOP 1 
+									FromStock.* 
+								FROM dbo.tblICInventoryTransaction FromStock 
+								WHERE
+									FromStock.intTransactionDetailId = Detail.intInventoryTransferDetailId 
+									AND FromStock.intTransactionId = Detail.intInventoryTransferId
+									AND FromStock.intItemId = Detail.intItemId
+									AND FromStock.strTransactionId = Header.strTransferNo
+									AND FromStock.dblQty < 0 
+									AND ISNULL(FromStock.ysnIsUnposted, 0) = 0
+									AND FromStock.strBatchId = @strBatchId
+							) TransferSource
+
+							LEFT JOIN dbo.tblICItemUOM ItemUOM
+								ON TransferSource.intItemId = ItemUOM.intItemId
+								AND TransferSource.intItemUOMId = ItemUOM.intItemUOMId
+					WHERE	Header.strTransferNo = @strTransactionId
+							AND TransferSource.strBatchId = @strBatchId
+							AND Detail.intGrossNetUOMId = TransferSource.intItemUOMId
+							AND Detail.intLotId IS NOT NULL 
+
+					-- Receive lotted item that has no valid Gross/net UOM or the other stock-tracking item types. 
+					INSERT INTO @ItemsToPost (
+							intItemId  
+							,intItemLocationId 
+							,intItemUOMId  
+							,dtmDate  
+							,dblQty  
+							,dblUOMQty  
+							,dblCost  
+							,dblForexCost
+							,dblSalesPrice  
+							,intCurrencyId  
+							,dblExchangeRate  
+							,intTransactionId  
+							,intTransactionDetailId  
+							,strTransactionId  
+							,intTransactionTypeId  
+							,intLotId 
+							,intSubLocationId
+							,intStorageLocationId		
+							,strActualCostId
+							,intForexRateTypeId
+							,dblForexRate
+							,intCostingMethod
+							,intSourceEntityId
+							,strBOLNumber
+							,intTicketId
+							,strSourceType
+							,strSourceNumber
+					)
+					SELECT 	Detail.intItemId  
+							,dbo.fnICGetItemLocation(Detail.intItemId, Header.intToLocationId)
+							,TransferSource.intItemUOMId  
+							,TransferSource.dtmDate  
+							,dblQty = -TransferSource.dblQty
+							,ISNULL(ItemUOM.dblUnitQty, TransferSource.dblUOMQty)
+							,dblCost = TransferSource.dblCost 
 							,TransferSource.dblForexCost  
-							,0
-							,NULL
-							,1
+							,dblSalesPrice = 0
+							,intCurrencyId = TransferSource.intCurrencyId
+							,dblExchangeRate = TransferSource.dblExchangeRate
 							,TransferSource.intTransactionId  
 							,Detail.intInventoryTransferDetailId
 							,Header.strTransferNo
@@ -2645,11 +2781,17 @@ BEGIN
 								AND TransferSource.strBatchId = @strBatchId
 								AND TransferSource.dblQty < 0
 								AND TransferSource.ysnIsUnposted = 0 
+
 							LEFT JOIN dbo.tblICItemUOM ItemUOM
 								ON TransferSource.intItemId = ItemUOM.intItemId
 								AND TransferSource.intItemUOMId = ItemUOM.intItemUOMId
 					WHERE	Header.strTransferNo = @strTransactionId
 							AND TransferSource.strBatchId = @strBatchId
+							-- Receive lotted item that has (1) no valid Gross/net UOM or (2) receive the other stock-tracking item types. 
+							AND (
+								(Detail.intLotId IS NOT NULL AND ISNULL(Detail.intGrossNetUOMId, 0) <> TransferSource.intItemUOMId) 
+								OR Detail.intLotId IS NULL 
+							) 
 
 					EXEC @intReturnValue = dbo.uspICRepostCosting
 						@strBatchId
