@@ -28,6 +28,7 @@ DECLARE @ReceiptStagingTable AS ReceiptStagingTable,
 		@FreightUOMId as int,
 		@FreightCostAllocationMethod AS INT,
 		@ysnAllowDifferentUnits BIT
+		
 SELECT	TOP 1 @defaultCurrency = CP.intDefaultCurrencyId		
 											FROM	dbo.tblSMCompanyPreference CP
 											WHERE	CP.intCompanyPreferenceId = 1 
@@ -147,7 +148,6 @@ END
 		,intSourceType     = 3 -- Source type for transports is 3   
 		,dblGross     =  ISNULL(SUM(DD.dblDistributionGrossSalesUnits),0)--select * from tblTRLoadDistributionDetail
 		,dblNet      =  ISNULL(SUM(DD.dblDistributionNetSalesUnits),0)
-
 		,intInventoryReceiptId		= min(TR.intInventoryReceiptId)
 		,dblSurcharge				= min(TR.dblPurSurcharge)
 		,ysnFreightInPrice			= CAST(MIN(CAST(TR.ysnFreightInPrice AS INT)) AS BIT)
