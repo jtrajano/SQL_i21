@@ -439,6 +439,8 @@ BEGIN
 				,[dblQty] = @dblQty 
 				,[dblValue] = ROUND(dbo.fnMultiply(@dblQty, @dblCost) + @dblValue, 2)
 				,[dblValueRounded] = ROUND(dbo.fnMultiply(@dblQty, @dblCost) + @dblValue, 2)
+				,[dblValue] = ROUND(dbo.fnMultiply(ISNULL(@dblQty, 0), ISNULL(@dblCost, 0)) + ISNULL(@dblValue, 0), 2)
+				,[dblValueRounded] = ROUND(dbo.fnMultiply(ISNULL(@dblQty, 0), ISNULL(@dblCost, 0)) + ISNULL(@dblValue, 0), 2)
 			FROM
 				[dbo].[fnICGetCompanyLocation](@intItemLocationId, @intInTransitSourceLocationId) [location]
 			--SELECT	
