@@ -3712,7 +3712,7 @@ BEGIN TRY
 		SELECT @TotalOrigPriced = SUM(dblQty) FROM (
 			SELECT intContractDetailId
 				, intTransactionReferenceDetailId
-				, dblQty = CASE WHEN intActionId = 17 THEN ABS(dblOrigQty)
+				, dblQty = CASE WHEN intActionId in (17,67) THEN ABS(dblOrigQty)
 					WHEN intActionId = 55 THEN 0
 					WHEN intActionId = 1 THEN ABS(dblOrigQty) END
 			FROM (
