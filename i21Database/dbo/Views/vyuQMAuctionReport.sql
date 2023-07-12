@@ -56,8 +56,8 @@ OUTER APPLY (
 	ORDER BY intCompanySetupID ASC
 ) COMP
 OUTER APPLY (
-	SELECT dblMinPrice	= MIN(ISNULL(dblB1Price, 0))
-		 , dblMaxPrice  = MAX(ISNULL(dblB1Price, 0))
+	SELECT dblMinPrice	= ISNULL(MIN(dblB1Price),0)
+		 , dblMaxPrice  = ISNULL(MAX(dblB1Price),0)
 	FROM tblQMSample A
 	WHERE A.intGardenMarkId=S.intGardenMarkId 
 		and A.intGradeId =S.intGradeId 
