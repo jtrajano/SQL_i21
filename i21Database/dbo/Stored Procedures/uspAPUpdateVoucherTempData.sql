@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspAPUpdateVoucherTempData](
+﻿alter PROCEDURE [dbo].[uspAPUpdateVoucherTempData](
 	@voucherIds NVARCHAR(MAX) = NULL
 	,@paySchedIds NVARCHAR(MAX) = NULL
 	,@invoiceIds NVARCHAR(MAX) = NULL  
@@ -199,8 +199,8 @@ BEGIN
 			END
 
 			UPDATE voucher
-				SET	@updatedPaymentAmt = CASE WHEN (CASE voucher.intTransactionType IN (1) THEN ABS(@tempPayment) ELSE @tempPayment END) != voucher.dblTempPayment --Payment have been edited
-						THEN (CASE voucher.intTransactionType IN (1) THEN ABS(@tempPayment) ELSE @tempPayment END)
+				SET	@updatedPaymentAmt = CASE WHEN (CASE when voucher.intTransactionType IN (1) THEN ABS(@tempPayment) ELSE @tempPayment END) != voucher.dblTempPayment --Payment have been edited
+						THEN (CASE when voucher.intTransactionType IN (1) THEN ABS(@tempPayment) ELSE @tempPayment END)
 						ELSE CASE WHEN voucher.ysnPrepayHasPayment = 0
 							 THEN ((voucher.dblTotal - ISNULL(appliedPrepays.dblPayment, 0)) - voucher.dblPaymentTemp) - @tempDiscount + @tempInterest
 							 ELSE voucher.dblAmountDue - @tempDiscount + @tempInterest END
