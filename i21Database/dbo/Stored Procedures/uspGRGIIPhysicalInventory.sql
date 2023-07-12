@@ -40,7 +40,8 @@ DECLARE @intCommodityId INT
 DECLARE @dtmReportDate DATETIME
 
 DECLARE @PhysicalInventoryData AS TABLE (
-	dtmReportDate DATETIME
+	intOrderId INT IDENTITY(1,1)
+	,dtmReportDate DATETIME
 	,strLicensed NVARCHAR(20) COLLATE Latin1_General_CI_AS
 	,intCommodityId INT
 	,strCommodityCode NVARCHAR(40) COLLATE Latin1_General_CI_AS
@@ -56,6 +57,7 @@ DECLARE @PhysicalInventoryData AS TABLE (
 	,strUOM NVARCHAR(40) COLLATE Latin1_General_CI_AS
 	,dblIACompanyOwned DECIMAL(18,6) DEFAULT 0
 	,dblIACustomerOwned DECIMAL(18,6) DEFAULT 0
+	,dblShippedCustomerOwned DECIMAL(18,6) DEFAULT 0
 )
 
 CREATE TABLE #tblInOut
@@ -118,7 +120,7 @@ SELECT	1 intItemId
 		,CL.strLocationName
 		,t.intInTransitSourceLocationId
 		,CL.ysnLicensed
-		,dblQty = SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(UM_REF.intCommodityUnitMeasureId,UM.intCommodityUnitMeasureId,t.dblQty))
+		,dblQty = SUM(QTY.dblResultQty)
 		,UOM.strUnitMeasure
 FROM tblICInventoryTransaction t
 INNER JOIN (
@@ -141,6 +143,7 @@ OUTER APPLY (
 	WHERE intCommodityId = I.intCommodityId
 		AND intUnitMeasureId = ISNULL(UOML.intUnitMeasureId,UOM2.intUnitMeasureId)
 ) UM_REF
+OUTER APPLY dbo.fnGRConvertQuantityToTargetCommodityUOM(UM_REF.intCommodityUnitMeasureId,UM.intCommodityUnitMeasureId,t.dblQty) QTY
 INNER JOIN tblICUnitMeasure UOM
 	ON UOM.intUnitMeasureId = UM.intUnitMeasureId
 INNER JOIN tblSMCompanyLocation CL 
@@ -165,7 +168,7 @@ SELECT	1 intItemId
 		--t.intTransactionTypeId,			
 		,NULL intInTransitSourceLocationId
 		,CL.ysnLicensed
-		,dblQty = SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(UM_REF.intCommodityUnitMeasureId,UM.intCommodityUnitMeasureId,t.dblQty))
+		,dblQty = SUM(QTY.dblResultQty)
 		,UOM.strUnitMeasure
 FROM tblICInventoryTransactionStorage t
 INNER JOIN (
@@ -190,6 +193,7 @@ OUTER APPLY (
 	WHERE intCommodityId = I.intCommodityId
 		AND intUnitMeasureId = ISNULL(UOML.intUnitMeasureId,UOM2.intUnitMeasureId)
 ) UM_REF
+OUTER APPLY dbo.fnGRConvertQuantityToTargetCommodityUOM(UM_REF.intCommodityUnitMeasureId,UM.intCommodityUnitMeasureId,t.dblQty) QTY
 INNER JOIN tblICUnitMeasure UOM
 	ON UOM.intUnitMeasureId = UM.intUnitMeasureId
 WHERE t.ysnIsUnposted <> 1
@@ -237,6 +241,48 @@ SELECT DISTINCT
 	,strCommodityDescription
 FROM @PhysicalInventoryData
 
+--add missing locs in commodities
+SELECT DISTINCT intCommodityId
+	,strCommodityCode
+	,strCommodityDescription
+	,strUOM
+INTO #Coms
+FROM @PhysicalInventoryData
+
+INSERT INTO @PhysicalInventoryData
+SELECT @dtmReportDate
+	,1
+	,C.intCommodityId
+	,C.strCommodityCode
+	,C.strCommodityDescription
+	,CL.strLocationName
+	,0
+	,NULL
+	,NULL
+	,NULL
+	,NULL
+	,NULL
+	,0
+	,C.strUOM	
+	,0
+	,0
+	,0
+FROM tblSMCompanyLocation CL
+OUTER APPLY (
+	SELECT * FROM #Coms
+) C
+OUTER APPLY (
+	SELECT P.strLocationName
+		,P.intCommodityId
+	FROM @PhysicalInventoryData P
+	WHERE P.strLocationName = CL.strLocationName
+		AND P.intCommodityId = C.intCommodityId
+) I
+WHERE CL.ysnLicensed = 1
+	AND I.strLocationName IS NULL
+
+DROP TABLE #Coms
+
 DECLARE @intCompanyLocationId INT
 DECLARE @strLocationName NVARCHAR(200)
 DECLARE @intCommodityId2 INT
@@ -264,6 +310,7 @@ BEGIN
 		,dblNetAdjustments = NET_ADJUSTMENTS.dblAdjustments
 		,dblIACompanyOwned = NET_ADJUSTMENTS_COMPANY_OWNED.dblAdjustments
 		,dblIACustomerOwned = NET_ADJUSTMENTS_CUSTOMER_OWNED.dblAdjustments
+		,dblShippedCustomerOwned = SHIPPED_CUSTOMER_OWNED.TOTAL
 	FROM @PhysicalInventoryData PID
 	LEFT JOIN (
 		SELECT TOTAL = ABS(SUM(ISNULL(dblInvIn,0)) - SUM(ISNULL(dblInvOut,0)))
@@ -351,57 +398,45 @@ BEGIN
 	) NET_ADJUSTMENTS_CUSTOMER_OWNED
 		ON NET_ADJUSTMENTS_CUSTOMER_OWNED.intCommodityId = PID.intCommodityId
 			AND NET_ADJUSTMENTS_CUSTOMER_OWNED.strLocationName = PID.strLocationName
-
+	LEFT JOIN (
+		SELECT TOTAL = ABS(SUM(ISNULL(dblInvIn,0)) - SUM(ISNULL(dblInvOut,0)))
+			,intCommodityId
+			,strLocationName
+		FROM #tblInOut
+		WHERE strTransactionType IN ('Inventory Shipment','Outbound Shipment','Invoice')
+			AND dtmDate IS NOT NULL
+			AND strOwnership = 'Customer Owned'
+		GROUP BY intCommodityId
+			,strLocationName
+	) SHIPPED_CUSTOMER_OWNED
+		ON SHIPPED_CUSTOMER_OWNED.intCommodityId = PID.intCommodityId
+			AND SHIPPED_CUSTOMER_OWNED.strLocationName = PID.strLocationName
 
 	DELETE FROM @tblCommodities WHERE intCommodityId = @intCommodityId2
 END
-
---add missing locs in commodities
-SELECT DISTINCT intCommodityId
-	,strCommodityCode
-	,strCommodityDescription
-	,strUOM
-INTO #Coms
-FROM @PhysicalInventoryData
-
-INSERT INTO @PhysicalInventoryData
-SELECT @dtmReportDate
-	,1
-	,C.intCommodityId
-	,C.strCommodityCode
-	,C.strCommodityDescription
-	,CL.strLocationName
-	,0
-	,NULL
-	,NULL
-	,NULL
-	,NULL
-	,NULL
-	,0
-	,C.strUOM	
-	,0
-	,0
-FROM tblSMCompanyLocation CL
-OUTER APPLY (
-	SELECT * FROM #Coms
-) C
-OUTER APPLY (
-	SELECT P.strLocationName
-		,P.intCommodityId
-	FROM @PhysicalInventoryData P
-	WHERE P.strLocationName = CL.strLocationName
-		AND P.intCommodityId = C.intCommodityId
-) I
-WHERE CL.ysnLicensed = 1
-	AND I.strLocationName IS NULL
-
-DROP TABLE #Coms
 
 UPDATE @PhysicalInventoryData
 SET dblBegInventory = ISNULL(dblBegInventory,0), dblEndInventory = ISNULL(dblBegInventory,0) + ISNULL(dblReceived,0) - ISNULL(dblShipped,0) + ISNULL(dblInternalTransfersReceived,0) - ISNULL(dblInternalTransfersShipped,0) + ISNULL(dblNetAdjustments,0)
 
 INSERT INTO tblGRGIIPhysicalInventory
-SELECT * 
+SELECT 
+	dtmReportDate
+	,strLicensed
+	,intCommodityId
+	,strCommodityCode
+	,strCommodityDescription
+	,strLocationName
+	,dblBegInventory
+	,dblReceived
+	,dblShipped
+	,dblInternalTransfersReceived
+	,dblInternalTransfersShipped
+	,dblNetAdjustments
+	,dblEndInventory
+	,strUOM
+	,dblIACompanyOwned
+	,dblIACustomerOwned
+	,dblShippedCustomerOwned
 FROM @PhysicalInventoryData
 
 INSERT INTO @PhysicalInventoryData
@@ -419,6 +454,7 @@ SELECT @dtmReportDate
 	,SUM(ISNULL(dblNetAdjustments,0))
 	,SUM(ISNULL(dblEndInventory,0))
 	,strUOM
+	,0
 	,0
 	,0
 FROM @PhysicalInventoryData
@@ -443,5 +479,6 @@ SELECT
 	,dblEndInventory
 	,strUOM
 FROM @PhysicalInventoryData
+ORDER BY intOrderId
 
 END
