@@ -18,10 +18,10 @@ SELECT
 	,strCommodityCode				= SourceTransfer.strCommodityCode
 	,intItemId						= SourceTransfer.intItemId
 	,strItemNo						= SourceTransfer.strItemNo
-	--,intFromStorageTypeId			= SourceTransfer.intStorageTypeId
-	--,strFromStorageTypeDescription	= SourceTransfer.strStorageTypeDescription
-	--,intToStorageTypeId				= SplitTransfer.intStorageTypeId
-	--,strToStorageTypeDescription	= SplitTransfer.strStorageTypeDescription
+	,intFromStorageTypeId			= SourceTransfer.intStorageTypeId
+	,strFromStorageTypeDescription	= SourceTransfer.strStorageTypeDescription
+	,intToStorageTypeId				= SplitTransfer.intStorageTypeId
+	,strToStorageTypeDescription	= SplitTransfer.strStorageTypeDescription
 	,strFromStorageSchedule			= SourceTransfer.strScheduleDescription
 	,strToStorageSchedule			= SplitTransfer.strScheduleDescription
 	,dblOriginalUnits				= SourceTransfer.dblOriginalUnits
@@ -45,8 +45,8 @@ FROM (
 			,Commodity.strCommodityCode
 			,TS.intItemId
 			,Item.strItemNo
-			--,TSource.intStorageTypeId
-			--,STSource.strStorageTypeDescription
+			,TSource.intStorageTypeId
+			,STSource.strStorageTypeDescription
 			,SSource.strScheduleDescription
 			,intCustomerStorageId		= TSource.intSourceCustomerStorageId
 			,CSSource.strStorageTicketNumber
@@ -85,8 +85,8 @@ INNER JOIN (
 			,strEntityName				= EMSplit.strName
 			,TSplit.intCompanyLocationId
 			,CLSplit.strLocationName
-			--,TSplit.intStorageTypeId
-			--,STSplit.strStorageTypeDescription
+			,TSplit.intStorageTypeId
+			,STSplit.strStorageTypeDescription
 			,SR.strScheduleDescription
 			,dblOriginalUnits			= ISNULL(TSR.dblUnitQty,TSplit.dblUnits)
 			,dblSplitPercent			= TSplit.dblSplitPercent
