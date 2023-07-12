@@ -23,6 +23,7 @@ DECLARE @vouchers AS TABLE(
 	,intInventoryShipmentChargeId INT NULL
 	,intLoadShipmentDetailId INT NULL
 	,intLoadShipmentCostId INT NULL
+	,intLoadShipmentContainerId INT NULL
 	,intCustomerStorageId INT NULL
 	,intSettleStorageId INT NULL
 	,intTicketDistributionAllocationId INT NULL
@@ -44,6 +45,7 @@ DECLARE @payablesDeleted AS TABLE(
 	,intInventoryShipmentChargeId INT NULL
 	,intLoadShipmentDetailId INT NULL
 	,intLoadShipmentCostId INT NULL
+	,intLoadShipmentContainerId INT NULL
 	,intCustomerStorageId INT NULL
 	,intSettleStorageId INT NULL
 	,intTicketDistributionAllocationId INT NULL
@@ -86,6 +88,7 @@ BEGIN
 		,B.intInventoryShipmentChargeId
 		,B.intLoadDetailId
 		,B.intLoadShipmentCostId
+		,B.intLoadShipmentContainerId
 		,B.intCustomerStorageId
 		,B.intSettleStorageId
 		,B.intTicketDistributionAllocationId
@@ -106,9 +109,9 @@ BEGIN
 		AND ISNULL(C.intInventoryReceiptItemId,-1) = ISNULL(B.intInventoryReceiptItemId,-1)
 		AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(B.intLoadDetailId,-1)
 		AND ISNULL(C.intLoadShipmentCostId,-1) = ISNULL(B.intLoadShipmentCostId,-1)
+		AND ISNULL(C.intLoadShipmentContainerId,-1) = ISNULL(B.intLoadShipmentContainerId,-1)
 		AND ISNULL(C.intInventoryShipmentChargeId,-1) = ISNULL(B.intInventoryShipmentChargeId,-1)
 		AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1)
-		AND ISNULL(C.intLoadShipmentCostId,-1) = ISNULL(B.intLoadShipmentCostId,-1)
 		AND ISNULL(C.intCustomerStorageId,-1) = ISNULL(B.intCustomerStorageId,-1)
 		AND ISNULL(C.intSettleStorageId,-1) = ISNULL(B.intSettleStorageId,-1)
 		AND ISNULL(C.intTicketDistributionAllocationId,-1) = ISNULL(B.intTicketDistributionAllocationId,-1)
@@ -132,6 +135,7 @@ BEGIN
 			,deleted.intInventoryShipmentChargeId
 			,deleted.intLoadShipmentDetailId
 			,deleted.intLoadShipmentCostId
+			,deleted.intLoadShipmentContainerId
 			,deleted.intCustomerStorageId
 			,deleted.intSettleStorageId
 			,deleted.intTicketDistributionAllocationId
@@ -153,6 +157,7 @@ BEGIN
 			AND ISNULL(A.intInventoryShipmentChargeId,-1) = ISNULL(B.intInventoryShipmentChargeId,-1)
 			AND ISNULL(A.intLoadShipmentDetailId,-1) = ISNULL(B.intLoadShipmentDetailId,-1)
 			AND ISNULL(A.intLoadShipmentCostId,-1) = ISNULL(B.intLoadShipmentCostId,-1)
+			AND ISNULL(A.intLoadShipmentContainerId,-1) = ISNULL(B.intLoadShipmentContainerId,-1)
 			AND ISNULL(A.intCustomerStorageId,-1) = ISNULL(B.intCustomerStorageId,-1)
 			AND ISNULL(A.intSettleStorageId,-1) = ISNULL(B.intSettleStorageId,-1)
 			AND ISNULL(A.intTicketDistributionAllocationId,-1) = ISNULL(B.intTicketDistributionAllocationId,-1)
@@ -184,6 +189,7 @@ BEGIN
 			AND ISNULL(A.intInventoryShipmentChargeId,-1) = ISNULL(B.intInventoryShipmentChargeId,-1)
 			AND ISNULL(A.intLoadShipmentDetailId,-1) = ISNULL(B.intLoadShipmentDetailId,-1)
 			AND ISNULL(A.intLoadShipmentCostId,-1) = ISNULL(B.intLoadShipmentCostId,-1)
+			AND ISNULL(A.intLoadShipmentContainerId,-1) = ISNULL(B.intLoadShipmentContainerId,-1)
 			AND ISNULL(A.intCustomerStorageId,-1) = ISNULL(B.intCustomerStorageId,-1)
 			AND ISNULL(A.intSettleStorageId,-1) = ISNULL(B.intSettleStorageId,-1)
 			AND ISNULL(A.intTicketDistributionAllocationId,-1) = ISNULL(B.intTicketDistributionAllocationId,-1)
@@ -216,6 +222,7 @@ BEGIN
 			,deleted.intInventoryShipmentChargeId
 			,deleted.intLoadShipmentDetailId
 			,deleted.intLoadShipmentCostId
+			,deleted.intLoadShipmentContainerId
 			,deleted.intCustomerStorageId
 			,deleted.intSettleStorageId
 			,deleted.intTicketDistributionAllocationId
@@ -238,6 +245,7 @@ BEGIN
 			AND ISNULL(A.intInventoryShipmentChargeId,-1) = ISNULL(B.intInventoryShipmentChargeId,-1)
 			AND ISNULL(A.intLoadShipmentDetailId,-1) = ISNULL(B.intLoadShipmentDetailId,-1)
 			AND ISNULL(A.intLoadShipmentCostId,-1) = ISNULL(B.intLoadShipmentCostId,-1)
+			AND ISNULL(A.intLoadShipmentContainerId,-1) = ISNULL(B.intLoadShipmentContainerId,-1)
 			AND ISNULL(A.intCustomerStorageId,-1) = ISNULL(B.intCustomerStorageId,-1)
 			AND ISNULL(A.intSettleStorageId,-1) = ISNULL(B.intSettleStorageId,-1)
 			AND ISNULL(A.intTicketDistributionAllocationId,-1) = ISNULL(B.intTicketDistributionAllocationId,-1)
@@ -255,6 +263,7 @@ BEGIN
 			AND ISNULL(A.intInventoryShipmentChargeId,-1) = ISNULL(C.intInventoryShipmentChargeId,-1)
 			AND ISNULL(A.intLoadShipmentDetailId,-1) = ISNULL(C.intLoadShipmentDetailId,-1)
 			AND ISNULL(A.intLoadShipmentCostId,-1) = ISNULL(C.intLoadShipmentCostId,-1)
+			AND ISNULL(A.intLoadShipmentContainerId,-1) = ISNULL(C.intLoadShipmentContainerId,-1)
 			AND ISNULL(A.intCustomerStorageId,-1) = ISNULL(C.intCustomerStorageId,-1)
 			AND ISNULL(A.intSettleStorageId,-1) = ISNULL(C.intSettleStorageId,-1)
 			AND ISNULL(A.intTicketDistributionAllocationId,-1) = ISNULL(C.intTicketDistributionAllocationId,-1)

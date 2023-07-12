@@ -123,6 +123,7 @@ ELSE SAVE TRAN @SavePoint
 				AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(A.intLoadShipmentDetailId,-1)
 				AND ISNULL(C.intTicketDistributionAllocationId,-1) = ISNULL(A.intTicketDistributionAllocationId,-1)
 				AND ISNULL(C.intLoadShipmentCostId,-1) = ISNULL(A.intLoadShipmentCostId,-1)
+				AND ISNULL(C.intLoadShipmentContainerId,-1) = ISNULL(A.intLoadShipmentContainerId,-1)
 				AND ISNULL(C.intWeightClaimDetailId,-1) = ISNULL(A.intWeightClaimDetailId,-1)
 				AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1)
 				AND ISNULL(C.intCustomerStorageId,-1) = ISNULL(A.intCustomerStorageId,-1)
@@ -148,6 +149,7 @@ ELSE SAVE TRAN @SavePoint
 				AND ISNULL(C.intTicketDistributionAllocationId,-1) = ISNULL(A.intTicketDistributionAllocationId,-1)
 				AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(A.intLoadShipmentDetailId,-1)
 				AND ISNULL(C.intLoadShipmentCostId,-1) = ISNULL(A.intLoadShipmentCostId,-1)
+				AND ISNULL(C.intLoadShipmentContainerId,-1) = ISNULL(A.intLoadShipmentContainerId,-1)
 				AND ISNULL(C.intWeightClaimDetailId,-1) = ISNULL(A.intWeightClaimDetailId,-1)
 				AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1)
 				AND ISNULL(C.intCustomerStorageId,-1) = ISNULL(A.intCustomerStorageId,-1)
@@ -254,6 +256,7 @@ ELSE SAVE TRAN @SavePoint
 				,B.[intLoadShipmentId]				
 				,B.[intLoadShipmentDetailId]	
 				,B.[intLoadShipmentCostId]	
+				,B.[intLoadShipmentContainerId]
 				,B.[intWeightClaimId]
 				,B.[intWeightClaimDetailId]
 				,B.[intCustomerStorageId]	
@@ -399,6 +402,7 @@ ELSE SAVE TRAN @SavePoint
 			,[intLoadShipmentId]				
 			,[intLoadShipmentDetailId]	
 			,[intLoadShipmentCostId]	
+			,[intLoadShipmentContainerId]
 			,[intWeightClaimId]
 			,[intWeightClaimDetailId]
 			,[intCustomerStorageId]	
@@ -524,7 +528,8 @@ ELSE SAVE TRAN @SavePoint
 			,[intInventoryShipmentChargeId]
 			,[intLoadShipmentId]				
 			,[intLoadShipmentDetailId]	
-			,[intLoadShipmentCostId]	
+			,[intLoadShipmentCostId]
+			,[intLoadShipmentContainerId]	
 			,[intWeightClaimId]
 			,[intWeightClaimDetailId]
 			,[intCustomerStorageId]	
@@ -825,6 +830,7 @@ ELSE SAVE TRAN @SavePoint
 				,D.[intLoadShipmentId]				
 				,D.[intLoadShipmentDetailId]	
 				,D.[intLoadShipmentCostId]	
+				,D.[intLoadShipmentContainerId]
 				,D.[intWeightClaimId]
 				,D.[intWeightClaimDetailId]
 				,D.[intItemId]						
@@ -971,6 +977,7 @@ ELSE SAVE TRAN @SavePoint
 			,[intLoadShipmentId]				
 			,[intLoadShipmentDetailId]	
 			,[intLoadShipmentCostId]
+			,[intLoadShipmentContainerId]
 			,[intWeightClaimId]
 			,[intWeightClaimDetailId]
 			,[intItemId]						
@@ -1095,6 +1102,7 @@ ELSE SAVE TRAN @SavePoint
 			,[intLoadShipmentId]				
 			,[intLoadShipmentDetailId]		
 			,[intLoadShipmentCostId]	
+			,[intLoadShipmentContainerId]
 			,[intWeightClaimId]
 			,[intWeightClaimDetailId]
 			,[intItemId]						
