@@ -37,6 +37,7 @@ LEFT JOIN tblSMCompanyLocationSubLocation IL ON B.intStorageLocationId = IL.intC
 LEFT JOIN tblLGLoadDetail LD ON B.intBatchId = LD.intBatchId
 LEFT JOIN tblEMEntity E ON E.intEntityId = LD.intVendorEntityId
 LEFT JOIN tblSMCompanyLocation MU ON B.intMixingUnitLocationId = MU.intCompanyLocationId
+LEFT JOIN tblQMSample S ON S.intSampleId = B.intSampleId
 OUTER APPLY (
 	SELECT dblMinValue	= MIN(PPV.dblMinValue)
 		 , dblMaxValue 	= MAX(PPV.dblMaxValue)
@@ -63,4 +64,4 @@ OUTER APPLY (
 ) COMP
 WHERE B.strContainerNumber != ''
   AND B.strContainerNumber IS NOT NULL
-  AND B.intLocationId = B.intBuyingCenterLocationId
+  AND S.intLocationId = B.intBuyingCenterLocationId
