@@ -12272,6 +12272,7 @@
     <Build Include="dbo\Views\vyuCTAmendmentTab.sql" />
     <None Include="Scripts\Post-Deployment\MBIL\InsertDefaultMobileCompanyPref.sql" />
     <Build Include="dbo\Stored Procedures\uspQMUpdateLoadShipmentDetail.sql" />
+    <Build Include="dbo\Functions\fnCTGetSampleDetailAllocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
