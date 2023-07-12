@@ -1,4 +1,4 @@
-﻿alter PROCEDURE [dbo].[uspAPUpdateVoucherTempData](
+﻿CREATE PROCEDURE [dbo].[uspAPUpdateVoucherTempData](
 	@voucherIds NVARCHAR(MAX) = NULL
 	,@paySchedIds NVARCHAR(MAX) = NULL
 	,@invoiceIds NVARCHAR(MAX) = NULL  
