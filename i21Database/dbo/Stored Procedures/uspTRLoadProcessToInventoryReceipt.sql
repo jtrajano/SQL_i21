@@ -28,11 +28,15 @@ DECLARE @ReceiptStagingTable AS ReceiptStagingTable,
 		@intFreightItemId as int,
 		@SurchargeUOMId as int,
 		@FreightUOMId as int,
-		@FreightCostAllocationMethod AS INT
+		@FreightCostAllocationMethod AS INT,
+		@ysnAllowDifferentUnits BIT
 		
 SELECT	TOP 1 @defaultCurrency = CP.intDefaultCurrencyId		
 											FROM	dbo.tblSMCompanyPreference CP
 											WHERE	CP.intCompanyPreferenceId = 1 
+
+SELECT TOP 1 @ysnAllowDifferentUnits = ISNULL(ysnAllowDifferentUnits, 0)
+FROM tblTRCompanyPreference
 
 IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddItemReceiptResult')) 
 BEGIN 
@@ -180,15 +184,17 @@ END
 		,intContractDetailId		= min(TR.intContractDetailId)
 		,dtmDate					= min(TL.dtmLoadDateTime)
 		,intShipViaId				= min(TL.intShipViaId)
-		,dblQty      = 
+		,dblQty      = CASE WHEN ISNULL(@ysnAllowDifferentUnits,1) = 1 THEN 
 						ISNULL(
-					  CASE WHEN min(SP.strGrossOrNet) = 'Gross' THEN SUM(DD.dblDistributionGrossSalesUnits)
-				      WHEN min(SP.strGrossOrNet) = 'Net' THEN SUM(DD.dblDistributionNetSalesUnits) 
-					  --ELSE
-						  --SUM(DD.dblDistributionNetSalesUnits) 
-					  END  
-					  ,0)
-
+								CASE WHEN min(SP.strGrossOrNet) = 'Gross' THEN SUM(DD.dblDistributionGrossSalesUnits)
+								WHEN min(SP.strGrossOrNet) = 'Net' THEN SUM(DD.dblDistributionNetSalesUnits) 
+								--ELSE
+								--SUM(DD.dblDistributionNetSalesUnits) 
+							END  
+						,0)
+						ELSE
+							SUM(DD.dblUnits) 
+						END
 		,dblCost					= min(TR.dblUnitCost)  
 		,intCurrencyId				= @defaultCurrency 
 		,dblExchangeRate   = 1 -- Need to check this  
