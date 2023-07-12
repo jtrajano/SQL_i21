@@ -277,3 +277,6 @@
 		AND STORAGE.intStorageTypeId = @STORAGE_SCHEDULE_TYPE_ID		
 		AND STORAGE.intCustomerStorageId = @CUSTOMER_STORAGE
 		*/
+GO
+
+
