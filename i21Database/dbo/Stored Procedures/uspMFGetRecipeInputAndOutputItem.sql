@@ -1847,6 +1847,8 @@ BEGIN TRY
 				 FROM tblICItemLocation AS ICItemLocation
 				 WHERE ICItemLocation.intItemId = WC.intInputItemId AND ICItemLocation.intLocationId = @intLocationId) AS ItemLocation
 	WHERE dblInputQuantity > 0
+	
+	END
 
 	EXEC sp_xml_removedocument @idoc
 END TRY
