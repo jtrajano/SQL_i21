@@ -10,7 +10,7 @@
 			tblEMEntityType a
 			inner join tblEMEntity b on b.intEntityId = a.intEntityId
 		where
-			a.strType in ('Customer','Vendor','Prospect','Competitor','Partner','Employee', 'Lead')
+			a.strType in ('Customer','Vendor','Prospect','Competitor','Partner','Employee','Lead')
 		/*
 		select
 			intEntityCustomerId
