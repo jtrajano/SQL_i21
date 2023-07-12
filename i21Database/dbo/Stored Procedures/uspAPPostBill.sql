@@ -33,11 +33,12 @@ BEGIN
 	RETURN;
 END
 
-IF NULLIF(@param, '') IS NULL
+IF NULLIF(@param, '') IS NULL AND NULLIF(@billBatchId, '') IS NULL
 BEGIN
 	RAISERROR('@param is empty. No voucher to post.', 16, 1);
 	RETURN;
 END
+
 
 -- Start the transaction 
 BEGIN TRANSACTION
