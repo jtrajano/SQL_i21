@@ -3,6 +3,7 @@
 	[intRoughCountCapacityId] INT IDENTITY(1,1) NOT NULL,
 	[intSourceEntityId] INT NOT NULL,
 	[intTicketId] INT NOT NULL,
+	[intItemId] INT,
 	[intCustomerEntityId] INT NOT NULL,
 	[dblPlanFirstWeek] NUMERIC(18, 6) NULL,
 	[dblPlanSecondWeek] NUMERIC(18, 6) NULL,
