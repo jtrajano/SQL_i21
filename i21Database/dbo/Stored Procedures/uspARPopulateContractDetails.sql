@@ -96,9 +96,11 @@ SELECT intInvoiceDetailId			= ID.intInvoiceDetailId
 	, dblQty						= CASE WHEN ID.[strTransactionType] = 'Credit Memo' AND ID.[intLoadDetailId] IS NOT NULL AND ISNULL(CH.[ysnLoad], 0) = 1 
 											THEN 1 
 											ELSE 
-												CASE WHEN ID.intInventoryShipmentItemId IS NOT NULL AND ISI.intDestinationGradeId IS NOT NULL AND ISI.intDestinationWeightId IS NOT NULL AND ID.dblQtyShipped > ISNULL(ISI.dblQuantity, 0) AND ISNULL(CD.dblBalance, 0) = 0
+												CASE 
+													WHEN ID.intLoadDetailId IS NOT NULL THEN dbo.fnCalculateQtyBetweenUOM(IDD.intOrderUOMId, IDD.intItemWeightUOMId, IDD.dblQtyOrdered)
+													WHEN ID.intInventoryShipmentItemId IS NOT NULL AND ISI.intDestinationGradeId IS NOT NULL AND ISI.intDestinationWeightId IS NOT NULL AND ID.dblQtyShipped > ISNULL(ISI.dblQuantity, 0) AND ISNULL(CD.dblBalance, 0) = 0
 														THEN ID.dblQtyShipped - ISNULL(ISI.dblQuantity, 0)
-														ELSE ID.dblQtyShipped 
+													ELSE ID.dblQtyShipped 
 												END
 										END * (CASE WHEN ID.[ysnPost] = 0 THEN -1.000000 ELSE 1.000000 END) * (CASE WHEN ID.[ysnIsInvoicePositive] = 0 THEN -1.000000 ELSE 1.000000 END)
 	, dblQtyOrdered					= CASE WHEN ID.intSalesOrderDetailId IS NOT NULL OR (ID.intTicketId IS NOT NULL AND ISNULL(T.intTicketType, 0) <> 6 AND ISNULL(T.strInOutFlag, '') <> 'O') THEN IDD.dblQtyOrdered ELSE 0 END
