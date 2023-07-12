@@ -13,12 +13,14 @@ AS BEGIN
 	ON			a.intCheckoutId = ch.intCheckoutId
 	LEFT JOIN	tblICItem b
 	ON          a.intItemId = b.intItemId
+	-- CS-668
 	JOIN		tblSTStoreDepartments sdc
 	ON			(a.intCategoryId = sdc.intCategoryId OR a.intSubcategoriesId = sdc.intSubcategoriesId)
 	AND			ch.intStoreId = sdc.intStoreId
 	AND			a.strRegisterCode = sdc.strRegisterCode
 	WHERE       a.intCheckoutId = @intCheckoutId 
 	AND         sdc.ysnFuelCategory = 1
+	-- CS-668
 
     RETURN      @dblDepartmentTotalsForFuel
 
