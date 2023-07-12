@@ -320,6 +320,8 @@ BEGIN
 				)
 		END
 	END
+	--Update Price on Load Schedule from Tank Management
+	EXEC uspLGUpdateLogisticsLoadFromTM @intDispatchId, null 
 END
 
 GO
