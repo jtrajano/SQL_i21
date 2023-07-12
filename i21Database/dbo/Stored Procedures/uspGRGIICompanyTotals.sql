@@ -148,6 +148,9 @@ BEGIN
 			FROM tblAPBillDetail BD
 			INNER JOIN tblAPBill AP
 				ON AP.intBillId = BD.intBillId
+			INNER JOIN tblSMCompanyLocation CL
+				ON CL.intCompanyLocationId = AP.intShipToId
+					AND CL.ysnLicensed = 1
 			INNER JOIN tblICItem IC
 				ON IC.intItemId = BD.intItemId
 					AND IC.strType = 'Inventory'
@@ -234,6 +237,9 @@ BEGIN
 			FROM tblAPBillDetail BD
 			INNER JOIN tblAPBill AP
 				ON AP.intBillId = BD.intBillId
+			INNER JOIN tblSMCompanyLocation CL
+				ON CL.intCompanyLocationId = AP.intShipToId
+					AND CL.ysnLicensed = 1
 			INNER JOIN tblICItem IC
 				ON IC.intItemId = BD.intItemId
 					AND IC.strType = 'Inventory'
@@ -279,7 +285,7 @@ BEGIN
 		FROM (
 			SELECT dblUnpaid = CASE WHEN AP.intBillId IS NULL AND SH.strType = 'Reverse Settlement' AND dbo.fnRemoveTimeOnDate(SH.dtmHistoryDate) = @dtmReportDate THEN SUM(ISNULL(SH.dblUnits,0)) ELSE 0 END
 				,dblPaid = CASE WHEN AP.intBillId IS NOT NULL AND SH.strType = 'Reverse Settlement' THEN SUM(ISNULL(SH.dblUnits,0)) ELSE 0 END
-				,dblPaid2 = CASE WHEN AP.intBillId IS NOT NULL AND SH.strType = 'Settlement' THEN SUM(ISNULL(SH.dblUnits,0)) ELSE 0 END
+				,dblPaid2 = CASE WHEN AP.intBillId IS NOT NULL AND SH.strType = 'Settlement' AND dbo.fnRemoveTimeOnDate(SH_2.dtmHistoryDate) <> dbo.fnRemoveTimeOnDate(SH.dtmHistoryDate) THEN SUM(ISNULL(SH.dblUnits,0)) ELSE 0 END
 				,dblPaid3 = CASE WHEN AP.intBillId IS NOT NULL AND dbo.fnRemoveTimeOnDate(SH_2.dtmHistoryDate) = dbo.fnRemoveTimeOnDate(SH.dtmHistoryDate) AND SH.strType = 'Reverse Settlement' THEN SUM(ISNULL(SH.dblUnits,0)) ELSE 0 END
 				,dblPaid4 = CASE WHEN AP.intBillId IS NULL AND (
 					dbo.fnRemoveTimeOnDate(SH_2.dtmHistoryDate) < dbo.fnRemoveTimeOnDate(SH.dtmHistoryDate) 
@@ -293,6 +299,7 @@ BEGIN
 				ON IC.intCommodityId = CS.intCommodityId
 			INNER JOIN tblSMCompanyLocation CL
 				ON CL.intCompanyLocationId = CS.intCompanyLocationId
+					AND CL.ysnLicensed = 1
 			INNER JOIN tblICItemUOM UOM
 				ON UOM.intItemUOMId = CS.intItemUOMId
 			INNER JOIN tblICUnitMeasure UM
@@ -383,6 +390,9 @@ BEGIN
 			FROM tblAPBillDetail BD
 			INNER JOIN tblAPBill AP
 				ON AP.intBillId = BD.intBillId
+			INNER JOIN tblSMCompanyLocation CL
+				ON CL.intCompanyLocationId = AP.intShipToId
+					AND CL.ysnLicensed = 1
 			INNER JOIN tblICItem IC
 				ON IC.intItemId = BD.intItemId
 					AND IC.strType = 'Inventory'
@@ -637,6 +647,9 @@ BEGIN
 				ON ST_TO.intStorageScheduleTypeId = TS.intToStorageTypeId
 			INNER JOIN tblGRCustomerStorage CS
 				ON CS.intCustomerStorageId = TS.intFromCustomerStorageId
+			INNER JOIN tblSMCompanyLocation CL
+				ON CL.intCompanyLocationId = CS.intCompanyLocationId
+					AND CL.ysnLicensed = 1
 			INNER JOIN tblICItemUOM UOM
 				ON UOM.intItemUOMId = CS.intItemUOMId
 			INNER JOIN tblICUnitMeasure UM
@@ -666,7 +679,7 @@ BEGIN
 		SET @dblInternalTransfersShipped = NULL
 		SET @dblInternalTransfersDiff = NULL
 
-		SELECT @dblShipped = SUM(ISNULL(dblShipped,0))
+		SELECT @dblShipped = SUM(ISNULL(dblShipped,0) - ISNULL(dblShippedCustomerOwned,0))
 			,@dblInternalTransfersReceived = SUM(ISNULL(dblInternalTransfersReceived,0))
 			,@dblInternalTransfersShipped = SUM(ISNULL(dblInternalTransfersShipped,0))
 		FROM tblGRGIIPhysicalInventory 
@@ -762,6 +775,9 @@ BEGIN
 	FROM tblAPBillDetail BD
 	INNER JOIN tblAPBill AP
 		ON AP.intBillId = BD.intBillId
+	INNER JOIN tblSMCompanyLocation CL
+		ON CL.intCompanyLocationId = AP.intShipToId
+			AND CL.ysnLicensed = 1
 	INNER JOIN tblICItem IC
 		ON IC.intItemId = BD.intItemId
 			AND IC.strType = 'Inventory'
@@ -821,6 +837,9 @@ BEGIN
 			ON ST_TO.intStorageScheduleTypeId = TS.intToStorageTypeId
 		INNER JOIN tblGRCustomerStorage CS
 			ON CS.intCustomerStorageId = TS.intFromCustomerStorageId
+		INNER JOIN tblSMCompanyLocation CL
+			ON CL.intCompanyLocationId = CS.intCompanyLocationId
+				AND CL.ysnLicensed = 1
 		INNER JOIN tblICItemUOM UOM
 			ON UOM.intItemUOMId = CS.intItemUOMId
 		INNER JOIN tblICUnitMeasure UM
