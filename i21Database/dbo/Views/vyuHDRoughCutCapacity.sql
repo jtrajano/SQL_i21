@@ -8,10 +8,12 @@ SELECT
 	,intProjectId		= Project.intProjectId
 	,strProjectName		= Project.strProjectName
 	,dtmGoLive			= Project.dtmGoLive
+	,strItemNo			= Item.strItemNo
 	,A.intRoughCountCapacityId
 	,A.intSourceEntityId
 	,A.intTicketId
 	,A.intCustomerEntityId
+	,A.intItemId
 	,A.dblPlanFirstWeek
 	,A.dblPlanSecondWeek
 	,A.dblPlanThirdWeek
@@ -56,6 +58,7 @@ FROM [dbo].[tblHDRoughCutCapacity] A
 LEFT JOIN [dbo].[tblHDTicket] HDT ON HDT.intTicketId = A.intTicketId
 LEFT JOIN [dbo].[tblEMEntity] S ON S.intEntityId = A.intSourceEntityId
 LEFT JOIN [dbo].[tblEMEntity] C ON C.intEntityId = A.intCustomerEntityId
+LEFT JOIN [dbo].[tblICItem] Item ON Item.intItemId = A.intItemId
 OUTER APPLY
 (
 	SELECT TOP 1  Project.intProjectId
