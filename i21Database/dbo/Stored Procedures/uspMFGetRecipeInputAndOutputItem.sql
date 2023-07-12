@@ -68,7 +68,7 @@ BEGIN TRY
 	)
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
-		,@strXML
+							  , @strXML
 
 	SELECT @intLocationId = intLocationId
 		,@intWorkOrderId = intWorkOrderId
@@ -1764,37 +1764,44 @@ BEGIN TRY
 					)
 		END
 
-		SELECT WC.intContainerId
-			,WC.strContainerId
-			,SL.intStorageLocationId
-			,SL.strName AS strStorageLocationName
-			,SL.intSubLocationId AS intStorageSubLocationId
-			,WC.intInputItemId
-			,WC.strInputItemNo
-			,WC.strInputItemDescription
-			,WC.dblInputQuantity
-			,WC.intInputItemUOMId
-			,WC.intUnitMeasureId
-			,WC.strInputItemUnitMeasure
-			,L.intLotId intInputLotId
-			,L.strLotNumber strInputLotNumber
-			,IsNULL(PL.dblQty, WC.dblInputQuantity) dblInputLotQuantity
-			,UM.strUnitMeasure strInputLotUnitMeasure
-			,WC.ysnEmptyOutSource
-			,WC.dtmFeedTime
-			,WC.strReferenceNo
-			,WC.dtmActualInputDateTime
-			,WC.intRowNo
-			,IsNULL(PL.dblQty, WC.dblInputQuantity) dblReadingQuantity
-			,WC.intMainItemId
-		FROM #tblMFConsumptionDetail WC
-		LEFT JOIN @tblMFPickLots PL ON PL.intItemId = WC.intInputItemId
-		LEFT JOIN tblICLot L ON L.intLotId = IsNULL(PL.intLotId, WC.intInputLotId)
-		LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = L.intItemUOMId
-		LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-		LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = IsNULL(L.intStorageLocationId, WC.intStorageLocationId)
-		WHERE dblInputQuantity > 0
-	END
+	SELECT WC.intContainerId
+		 , WC.strContainerId
+		 , SL.intStorageLocationId
+		 , SL.strName			AS strStorageLocationName
+		 , SL.intSubLocationId	AS intStorageSubLocationId
+		 , WC.intInputItemId
+		 , WC.strInputItemNo
+		 , WC.strInputItemDescription
+		 , WC.dblInputQuantity
+		 , WC.intInputItemUOMId
+		 , WC.intUnitMeasureId
+		 , WC.strInputItemUnitMeasure
+		 , L.intLotId intInputLotId
+		 , L.strLotNumber strInputLotNumber
+		 , ISNULL(PL.dblQty, WC.dblInputQuantity) dblInputLotQuantity
+		 , UM.strUnitMeasure strInputLotUnitMeasure
+		 , WC.ysnEmptyOutSource
+		 , WC.dtmFeedTime
+		 , WC.strReferenceNo
+		 , WC.dtmActualInputDateTime
+		 , WC.intRowNo
+		 , ISNULL(PL.dblQty, WC.dblInputQuantity) dblReadingQuantity
+		 , WC.intMainItemId
+		 , Item.strLotTracking
+		 , ItemLocation.intAllowNegativeInventory
+	FROM #tblMFConsumptionDetail WC
+	LEFT JOIN @tblMFPickLots PL ON PL.intItemId = WC.intInputItemId
+	LEFT JOIN tblICLot L ON L.intLotId = IsNULL(PL.intLotId, WC.intInputLotId)
+	LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = L.intItemUOMId
+	LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
+	LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = IsNULL(L.intStorageLocationId, WC.intStorageLocationId)
+	OUTER APPLY (SELECT strLotTracking
+				 FROM tblICItem AS ICItem
+				 WHERE ICItem.intItemId = WC.intInputItemId) AS Item
+	OUTER APPLY (SELECT intAllowNegativeInventory
+				 FROM tblICItemLocation AS ICItemLocation
+				 WHERE ICItemLocation.intItemId = WC.intInputItemId AND ICItemLocation.intLocationId = @intLocationId) AS ItemLocation
+	WHERE dblInputQuantity > 0
 
 	EXEC sp_xml_removedocument @idoc
 END TRY
@@ -1803,12 +1810,15 @@ BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()
 
 	IF @idoc <> 0
-		EXEC sp_xml_removedocument @idoc
+		BEGIN
+			EXEC sp_xml_removedocument @idoc
+		END
 
-	RAISERROR (
-			@ErrMsg
-			,16
-			,1
-			,'WITH NOWAIT'
-			)
+	RAISERROR 
+	(
+		@ErrMsg
+	  , 16
+	  , 1
+	  , 'WITH NOWAIT'
+	)
 END CATCH
