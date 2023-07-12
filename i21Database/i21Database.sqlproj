@@ -1326,6 +1326,8 @@
     <Build Include="dbo\Stored Procedures\uspSTCSAddNewRecipeForBlendedFuel.sql" />
     <Build Include="dbo\Views\vyuTMGetEntityLocationDetail.sql" />
     <None Include="Scripts\Post-Deployment\ST\57_TagDepartmentCategoriesForFuel.sql" />
+    <Build Include="dbo\Views\vyuGLCOAiPayables.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLCorrigaCOAiPayables.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
