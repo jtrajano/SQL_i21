@@ -209,11 +209,11 @@ BEGIN TRY
 		SELECT @strDetailXML = @strDetailXML + '<Line>'
 		+ '<WHLoc>' + IsNULL(SL.strName ,'') + '</WHLoc>' 
 		+ '<Batch>' + L.strLotNumber   + '</Batch>' 
-		+ '<Chop>' + IsNULL(B.strTeaGardenChopInvoiceNumber,'') + '</Chop>' 
-		+ '<Mark>' + IsNULL(GM.strGardenMark ,'' ) + '</Mark>' 
+		+ '<Chop>' + dbo.fnEscapeXML(IsNULL(B.strTeaGardenChopInvoiceNumber,'')) + '</Chop>' 
+		+ '<Mark>' + dbo.fnEscapeXML(IsNULL(GM.strGardenMark ,'' )) + '</Mark>' 
 		+ '<Grade>'+IsNULL(B.strLeafGrade,'')+'</Grade>' 
 		+ '<TeaItem>' +  I.strItemNo + '</TeaItem>' 
-		+ '<Material>' + IsNULL(I.strShortName,'' ) + '</Material>' 
+		+ '<Material>' + IsNULL(OI.strShortName,IsNULL(I.strShortName,'' )) + '</Material>' 
 		+ '<MaterialDescription>' + I.strDescription  + '</MaterialDescription>' 
 		+ '<Origin>'+IsNULL(B.strTeaOrigin,'')+'</Origin>' 
 		+ '<Location>' + IsNULL(LTRIM(SUBSTRING(ISNULL(CS.strSubLocationName, ''), CHARINDEX('/', CS.strSubLocationName) + 1, LEN(CS.strSubLocationName))) , '')  + '</Location>' 
@@ -232,6 +232,7 @@ BEGIN TRY
 			AND WI.intWorkOrderId = @intWorkOrderId
 		JOIN dbo.tblMFBatch B ON B.intBatchId = LI.intBatchId
 		JOIN dbo.tblICItem I ON I.intItemId = WI.intItemId
+		LEFT JOIN dbo.tblICItem OI on OI.intItemId=B.intOriginalItemId
 		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = WI.intItemUOMId
 		JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 		JOIN tblICLot L ON L.intLotId = WI.intLotId

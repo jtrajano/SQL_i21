@@ -123,7 +123,7 @@ FROM (
 														THEN CONVERT(BIT, 1)
 													WHEN ARI.[strTransactionType] = 'Customer Prepayment' AND ISNULL(PREPAY.intPaymentId, 0) = 0
 														THEN CONVERT(BIT, 1)
-													WHEN ISNULL(ARI.ysnRefundProcessed, 0) = 1
+													WHEN ISNULL(ARI.ysnRefundProcessed, 0) = 1 AND ARI.dblAmountDue = 0
 														THEN CONVERT(BIT, 1)
 													ELSE CONVERT(BIT, 0) 
 													END)

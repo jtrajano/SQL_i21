@@ -48,6 +48,18 @@ SELECT [intTimeEntryId]					= TimeEntry.[intTimeEntryId]
 	   ,[strSelectedDate]				= TimeEntry.[strSelectedDate]
 	   ,[ysnFromApproval]				= CONVERT(BIT, 0)	
 	   ,strFiscalYear					= TimeEntryPeriodDetail.[strFiscalYear]
+	   ,ysnHasCoworkerGoal				= CASE WHEN CoworkerGoalDetail.intEntityId IS NOT NULL 
+														THEN CONVERT(BIT,1)
+											ELSE CONVERT(BIT,0)
+										  END
+	   ,ysnSupervisor					= CASE WHEN CoworkerSuperVisor.intEntityId IS NOT NULL 
+														THEN CONVERT(BIT,1)
+											ELSE CONVERT(BIT,0)
+										  END
+	   ,ysnEmployee					    = CASE WHEN Employee.intEntityId IS NOT NULL 
+														THEN CONVERT(BIT,1)
+											ELSE CONVERT(BIT,0)
+										  END
 FROM tblHDTimeEntry TimeEntry
 		LEFT JOIN tblEMEntity Entity
 ON Entity.intEntityId = TimeEntry.intEntityId
@@ -91,6 +103,11 @@ ON Entity.intEntityId = TimeEntry.intEntityId
 		FROM vyuHDExemptedAgent
 		WHERE intEntityId = TimeEntry.intEntityId	
 	) CoworkerSuperVisor
+	OUTER APPLY(
+		SELECT TOP 1 intEntityId
+		FROM tblPREmployee
+		WHERE intEntityId = TimeEntry.intEntityId	
+	) Employee
 	LEFT JOIN tblSMUserSecurity UserSecurity
 ON UserSecurity.intEntityId = Entity.intEntityId
 	OUTER APPLY 

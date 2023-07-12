@@ -273,7 +273,7 @@ BEGIN TRY
 	LEFT JOIN tblICUnitMeasure RIUM ON RIUM.intUnitMeasureId = S.intRepresentingUOMId
     WHERE CR.intCatalogueReconciliationId = @intCatalogueReconciliationId
       AND ((S.dblB1Price <> CRD.dblPreInvoicePrice AND CRD.dblPreInvoicePrice = CRD.dblBasePrice)
-        OR (S.dblRepresentingQty <> CRD.dblPreInvoiceQuantity AND CRD.dblPreInvoiceQuantity = CRD.dblQuantity)
+        OR (S.dblSampleQty <> CRD.dblPreInvoiceQuantity AND CRD.dblPreInvoiceQuantity = CRD.dblQuantity)
         OR (S.strChopNumber <> CRD.strPreInvoiceChopNo AND CRD.strPreInvoiceChopNo = CRD.strChopNo)
         OR (S.intGardenMarkId <> CRD.intPreInvoiceGardenMarkId AND CRD.intPreInvoiceGardenMarkId = CRD.intGardenMarkId)
         OR (S.intGradeId <> CRD.intPreInvoiceGradeId AND CRD.intPreInvoiceGradeId = CRD.intGradeId))

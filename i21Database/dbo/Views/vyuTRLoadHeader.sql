@@ -52,6 +52,7 @@ SELECT TL.intLoadHeaderId
 	, strSalesUnit = NULL
 	, strInvoiceType = NULL
 	, strSiteNumber = ''  
+	, IVX.strProductDescription AS strItemDescription  
 FROM tblTRLoadHeader TL
 LEFT JOIN tblTRLoadReceipt TR ON TL.intLoadHeaderId = TR.intLoadHeaderId
 LEFT JOIN vyuTRTerminal Terminal ON Terminal.[intEntityVendorId] = TR.intTerminalId
@@ -68,6 +69,7 @@ left join tblTRState e on e.intStateId = TL.intStateId
 left join tblSCTruckDriverReference dr on dr.intTruckDriverReferenceId = TL.intTruckDriverReferenceId
 left join tblSMShipViaTruck smtr on smtr.intEntityShipViaTruckId = TL.intTruckId
 LEFT JOIN tblLGDispatchOrder LGD ON LGD.intDispatchOrderId = TL.intDispatchOrderId
+LEFT JOIN tblICItemVendorXref IVX ON IVX.intItemVendorXrefId = TR.intItemVendorXrefId  
 
 
 UNION ALL
@@ -117,6 +119,7 @@ SELECT TL.intLoadHeaderId
 	, strSalesUnit = EL.strSaleUnits
 	, strInvoiceType = Invoice.strType
 	, strSiteNumber = RIGHT('000' + CAST(site.intSiteNumber AS NVARCHAR(4)),4) COLLATE Latin1_General_CI_AS
+	, ICX.strProductDescription AS strItemDescription  
 FROM tblTRLoadHeader TL
 JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = TL.intLoadHeaderId
 LEFT JOIN tblTRLoadDistributionDetail DD ON DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
@@ -137,3 +140,4 @@ LEFT JOIN tblTMDispatch TMD ON TMD.intDispatchID = DD.intTMOId
 LEFT JOIN tblTMDispatchHistory TMH ON TMH.intDispatchId = DD.intTMOId
 LEFT JOIN tblLGDispatchOrder LGD ON LGD.intDispatchOrderId = TL.intDispatchOrderId
 LEFT JOIN tblTMSite site ON DD.intSiteId = site.intSiteID
+LEFT JOIN tblICItemCustomerXref ICX ON ICX.intItemCustomerXrefId = DD.intItemCustomerXrefId  

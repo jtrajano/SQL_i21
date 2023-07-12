@@ -22,6 +22,8 @@ SELECT
 	,strFromStorageTypeDescription	= SourceTransfer.strStorageTypeDescription
 	,intToStorageTypeId				= SplitTransfer.intStorageTypeId
 	,strToStorageTypeDescription	= SplitTransfer.strStorageTypeDescription
+	,strFromStorageSchedule			= SourceTransfer.strScheduleDescription
+	,strToStorageSchedule			= SplitTransfer.strScheduleDescription
 	,dblOriginalUnits				= SourceTransfer.dblOriginalUnits
 	,dblSplitPercent				= SplitTransfer.dblSplitPercent
 	,dblDeductedUnits				= SplitTransfer.dblOriginalUnits
@@ -45,6 +47,7 @@ FROM (
 			,Item.strItemNo
 			,TSource.intStorageTypeId
 			,STSource.strStorageTypeDescription
+			,SSource.strScheduleDescription
 			,intCustomerStorageId		= TSource.intSourceCustomerStorageId
 			,CSSource.strStorageTicketNumber
 			,TSource.dblOriginalUnits
@@ -64,9 +67,11 @@ FROM (
 		INNER JOIN tblICItem Item
 			ON Item.intItemId = TS.intItemId
 		INNER JOIN tblGRStorageType STSource
-			ON STSource.intStorageScheduleTypeId = TSource.intStorageTypeId
+			ON STSource.intStorageScheduleTypeId = TSource.intStorageTypeId		
 		INNER JOIN tblGRCustomerStorage CSSource
 			ON CSSource.intCustomerStorageId = TSource.intSourceCustomerStorageId
+		INNER JOIN tblGRStorageScheduleRule SSource
+			ON SSource.intStorageScheduleRuleId = CSSource.intStorageScheduleId
 		INNER JOIN tblICCommodity Commodity
 			ON Commodity.intCommodityId = CSSource.intCommodityId
 		INNER JOIN tblSMUserSecurity US
@@ -82,6 +87,7 @@ INNER JOIN (
 			,CLSplit.strLocationName
 			,TSplit.intStorageTypeId
 			,STSplit.strStorageTypeDescription
+			,SR.strScheduleDescription
 			,dblOriginalUnits			= ISNULL(TSR.dblUnitQty,TSplit.dblUnits)
 			,dblSplitPercent			= TSplit.dblSplitPercent
 			,intSourceCustomerStorageId
@@ -92,7 +98,13 @@ INNER JOIN (
 			ON CLSplit.intCompanyLocationId = TSplit.intCompanyLocationId
 		INNER JOIN tblGRStorageType STSplit
 			ON STSplit.intStorageScheduleTypeId = TSplit.intStorageTypeId
-		LEFT JOIN tblGRTransferStorageReference TSR
+		LEFT JOIN (
+					tblGRTransferStorageReference TSR
+					INNER JOIN tblGRCustomerStorage CS
+						ON CS.intCustomerStorageId = TSR.intToCustomerStorageId
+					INNER JOIN tblGRStorageScheduleRule SR
+						ON SR.intStorageScheduleRuleId = CS.intStorageScheduleId
+				)
 			ON TSR.intTransferStorageSplitId  = TSplit.intTransferStorageSplitId 
 	) SplitTransfer 
 		ON SourceTransfer.intTransferStorageId = SplitTransfer.intTransferStorageId AND CASE WHEN (SplitTransfer.intSourceCustomerStorageId IS NOT NULL) THEN CASE WHEN SplitTransfer.intSourceCustomerStorageId = SourceTransfer.intCustomerStorageId THEN 1 ELSE 0 END ELSE  1 END = 1

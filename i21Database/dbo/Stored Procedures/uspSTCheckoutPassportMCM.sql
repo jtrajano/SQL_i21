@@ -144,6 +144,7 @@ BEGIN
 					, 0 [ysnLotteryItemAdded] 
 					, StoreDepartments.intCategoryId
 					, strRegisterCode
+					, ysnFuelCategory
 				FROM @UDT_MCM Chk
 				JOIN dbo.vyuSTStoreDepartments StoreDepartments 
 					ON CAST(ISNULL(Chk.intMerchandiseCode, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = CAST(StoreDepartments.strRegisterCode AS NVARCHAR(50))

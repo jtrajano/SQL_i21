@@ -61,7 +61,8 @@ WHERE ISNULL(@FromPosting, 0 ) = 0
   AND ARI.[strTransactionType] IN ('Invoice', 'Cash')
   AND ARI.strType NOT IN ('Transport Delivery', 'POS')
   AND ARID.[intInventoryShipmentItemId] IS NULL
-  AND ARID.[intLoadDetailId] IS NULL		
+  AND ARID.[intLoadDetailId] IS NULL
+  AND ARID.[intLoadDistributionDetailId] IS NULL
   AND (SC.[intTicketId] IS NULL OR (SC.[intTicketId] IS NOT NULL AND ISNULL(SC.[strTicketType],'') <> 'Direct Out'))
   AND ISNULL(ICI.[ysnAutoBlend], 0) = 0
 	
@@ -102,6 +103,7 @@ WHERE ISNULL(@FromPosting, 0 ) = 0
   AND ARI.strType NOT IN ('Transport Delivery', 'POS')
   AND ARID.[intInventoryShipmentItemId] IS NULL
   AND ARID.[intLoadDetailId] IS NULL  
+  AND ARID.[intLoadDistributionDetailId] IS NULL
   AND (SC.[intTicketId] IS NULL OR (SC.[intTicketId] IS NOT NULL AND ISNULL(SCT.[strTicketType],'') <> 'Direct Out'))
   AND ICGIS.[intComponentItemId] IS NOT NULL
   AND (

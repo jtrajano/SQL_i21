@@ -3,10 +3,10 @@ AS
 SELECT CPS.intCommitmentPricingSalesId
 	,CH.strContractNumber
 	,CD.intContractSeq
-	, CASE WHEN CPS.dblFXPrice = 0 OR CPS.dblFXPrice = NULL 
-		THEN ISNULL(CD.dblFXPrice, 0)
-			ELSE CPS.dblFXPrice
-		END AS dblFXPrice
+	,CASE WHEN CPS.dblFXPrice <> NULL 
+		THEN ROUND(CPS.dblFXPrice, 4)
+			ELSE ROUND(ISNULL(CD.dblFXPrice, 0), 4)
+		END AS dblFXPriceCD
 	,FM.strFutMarketName
 	,B.strBook
 	,SB.strSubBook

@@ -20,7 +20,7 @@ BEGIN TRY
 	DECLARE @dblTotalCommission DECIMAL (18,6) = 0  
 	DECLARE @strItemNo NVARCHAR(250)  
 	DECLARE @strItemDescription NVARCHAR(500) 
-	DECLARE @strMessage NVARCHAR(MAX)  
+	DECLARE @strMessage NVARCHAR(MAX)
 	
 	DECLARE @intPumpTotalsId INT
 	DECLARE @ysnAutoBlend BIT 
@@ -30,6 +30,9 @@ BEGIN TRY
 	DECLARE @ysnStopProcessingFinal BIT = 0
 	DECLARE @intLatestWarningId INT = (SELECT DISTINCT TOP 1 intCheckoutProcessErrorWarningId FROM tblSTCheckoutProcessErrorWarning WHERE intCheckoutProcessId = @intCheckoutProcessId ORDER BY intCheckoutProcessErrorWarningId DESC)
 	DECLARE @intSubLocationId INT
+
+	DECLARE @ysnNegativeCommissionCalculated BIT = 0
+	DECLARE @strListOfNegativeCommissionItems NVARCHAR(MAX)  
   
 	DECLARE MY_CURSOR CURSOR LOCAL STATIC READ_ONLY FORWARD_ONLY
 	FOR  
@@ -80,7 +83,7 @@ BEGIN TRY
 		IF @ysnAutoBlend = 0
 		BEGIN
 			BEGIN TRY
-				SET @intSubLocationId = (SELECT intCompanyLocationSubLocationId FROM tblTMSite WHERE intLocationId = @intCompanyLocationId AND intProduct = @intItemId);
+				SET @intSubLocationId = (SELECT TOP 1 intCompanyLocationSubLocationId FROM tblTMSite WHERE intLocationId = @intCompanyLocationId AND intProduct = @intItemId);
 				EXEC [dbo].[uspICCalculateCost] @intItemId, @intCompanyLocationId, @dblQty, NULL, @Cost OUT, @intItemUOMId, NULL, NULL, @intSubLocationId, NULL
 			END TRY
 			BEGIN CATCH
@@ -126,7 +129,7 @@ BEGIN TRY
 					SET @MFGCost = NULL
 
 					BEGIN TRY
-						SET @intSubLocationId = (SELECT intCompanyLocationSubLocationId FROM tblTMSite WHERE intLocationId = @intCompanyLocationId AND intProduct = @intMFGItemId);
+						SET @intSubLocationId = (SELECT TOP 1 intCompanyLocationSubLocationId FROM tblTMSite WHERE intLocationId = @intCompanyLocationId AND intProduct = @intMFGItemId);
 						EXEC [dbo].[uspICCalculateCost] @intMFGItemId, @intCompanyLocationId, @dblQty, NULL, @MFGCost OUT, @intMFGItemUOMId, NULL, NULL, @intSubLocationId, NULL
 					END TRY
 					BEGIN CATCH
@@ -160,11 +163,10 @@ BEGIN TRY
 		-- MARGIN = ((Qty Sold) * (Unit Price)) - (Cost in Inventory)  - ((Qty Sold) * (Consignor Markup/dblConsCommissionRawMarkup))  
 		-- COMMISSION = (MARGIN) * (Commission Rate/dblConsCommissionDealerPercentage)      
 		--BEGIN TRAN	
-
-		SET @dblMargin = (@dblQty * @dblPrice) - (ISNULL(@Cost,0) * @dblQty) - (@dblQty * @dblMarkUp)  
-		SET @dblCommission = @dblMargin * @dblDealerPercentage  
-		SET @dblTotalCommission += @dblCommission 	
-		SET @dblPriceMargin = 0.5 * @dblPrice;
+		
+		SET @dblMargin = (@dblQty * @dblPrice) - (ISNULL(@Cost,0) * @dblQty) - (@dblQty * @dblMarkUp);  
+		SET @dblCommission = @dblMargin * @dblDealerPercentage;
+		SET @dblPriceMargin = 0.5 * @dblPrice;		
 
 		IF @dblCommission < 0
 		BEGIN
@@ -177,11 +179,12 @@ BEGIN TRY
 			SET @strCost = (SELECT FORMAT(@Cost, 'N', 'en-us'));
 			SET @strCommission = (SELECT FORMAT(@dblCommission, 'N', 'en-us'));
 
-			SET @strMessage = 'Negative Dealer commissions have been calculated for fuel grade ' + @strItemNo + '-' + @strItemDescription + ' (Price: ' + @strPrice + ', Cost: ' + @strCost + ', Commission for this Item: ' + @strCommission + ') ' +
-								' which is an indication that this fuel''s cost basis isn''t correctly set. Please correct the cost basis before processing this day.'
+			SET @strMessage = '$0 Commissions were calculated for fuel grade ' + @strItemNo + '-' + @strItemDescription + ' (Price: ' + @strPrice + ', Cost: ' + @strCost + ') '
 
 			INSERT tblSTCheckoutProcessErrorWarning (intCheckoutProcessId, intCheckoutId, strMessageType, strMessage, intConcurrencyId)
-			VALUES (@intCheckoutProcessId, @intCheckoutId, 'F', @strMessage, 1) 
+			VALUES (@intCheckoutProcessId, @intCheckoutId, 'W', @strMessage, 1)
+					
+			SET @dblCommission = 0;
 		END
 
 		IF ISNULL(@Cost, 0) = 0 OR ISNULL(@Cost, 0) < @dblPriceMargin
@@ -190,12 +193,14 @@ BEGIN TRY
 			SET @ysnStopProcessingFinal = 1;
 			BREAK
 		END
+
+		SET @dblTotalCommission += @dblCommission; 
   
 		--- END INSERT FORMULA FOR CALCULATING DEALER COMMISSION HERE....  
 		FETCH NEXT FROM MY_CURSOR INTO @intPumpTotalsId, @ysnAutoBlend
 	END  
 	CLOSE MY_CURSOR  
-	DEALLOCATE MY_CURSOR  
+	DEALLOCATE MY_CURSOR  	
 
 	IF @ysnStopProcessing = 1
 	BEGIN
