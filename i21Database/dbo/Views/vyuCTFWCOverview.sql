@@ -96,5 +96,5 @@ AS
 			AND (SELECT  dbo.[fnCTGetSeqDisplayField](CTD.intContractDetailId, 'Origin')) = MFL.strOrigin
 			LEFT JOIN tblSMPurchasingGroup		PG	 WITH (NOLOCK) ON PG.intPurchasingGroupId = CTD.intPurchasingGroupId
 			LEFT JOIN tblARMarketZone			MZ   WITH (NOLOCK) ON MZ.intMarketZoneId	  = CTD.intMarketZoneId
-			OUTER APPLY dbo.fnCTGetSampleDetail(CTD.intContractDetailId) QA
+			OUTER APPLY dbo.fnCTGetSampleDetailAllocation(CTD.intContractDetailId) QA
 			WHERE CTD.intContractStatusId IN ( 1,2,4) --Open, Unconfirmed,Re-Open
