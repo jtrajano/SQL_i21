@@ -1343,6 +1343,8 @@
     <None Include="Scripts\Post-Deployment\ST\57_TagDepartmentCategoriesForFuel.sql" />
     <Build Include="dbo\Stored Procedures\uspLGUpdateLogisticsLoadFromTM.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDGetClusterFilter.sql" />
+    <Build Include="dbo\Views\vyuGLCOAiPayables.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLCorrigaCOAiPayables.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
