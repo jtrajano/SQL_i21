@@ -39,7 +39,7 @@ OUTER APPLY (
   FROM tblICItem ii
   WHERE ii.strItemNo = sr.strItemNo OR ii.strDescription = sr.strItemNo
 ) e
-WHERE sr.guiApiUniqueId = @guiApiUniqueId
+WHERE sr.guiApiUniqueId = @guiApiUniqueId AND NULLIF(sr.strItemNo,'') IS NOT NULL
 AND e.intItemId IS NULL
 
 INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
@@ -83,7 +83,7 @@ SELECT
     , strMessage = 'The Location Name ' + ISNULL(sr.strLocationName, '') + ' does not exist.'
 FROM tblApiSchemaRecipe sr
 LEFT JOIN tblSMCompanyLocation l ON l.strLocationName = sr.strLocationName
-WHERE sr.guiApiUniqueId = @guiApiUniqueId
+WHERE sr.guiApiUniqueId = @guiApiUniqueId AND NULLIF(sr.strLocationName,'') IS NOT NULL
 AND l.intCompanyLocationId IS NULL
 
 INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
@@ -127,7 +127,7 @@ SELECT
     , strMessage = 'The Manufacturing Process ' + ISNULL(sr.strManufacturingProcess, '') + ' does not exist.'
 FROM tblApiSchemaRecipe sr
 LEFT JOIN tblMFManufacturingProcess p ON p.strProcessName = sr.strManufacturingProcess
-WHERE sr.guiApiUniqueId = @guiApiUniqueId
+WHERE sr.guiApiUniqueId = @guiApiUniqueId AND NULLIF(sr.strManufacturingProcess,'') IS NOT NULL
 AND p.intManufacturingProcessId IS NULL
 
 INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
@@ -142,7 +142,8 @@ SELECT
     , strMessage = 'The Customer ' + ISNULL(sr.strCustomer, '') + ' does not exist.'
 FROM tblApiSchemaRecipe sr
 LEFT JOIN vyuARCustomer c ON c.strName = sr.strCustomer
-WHERE sr.guiApiUniqueId = @guiApiUniqueId
+WHERE sr.guiApiUniqueId = @guiApiUniqueId 
+AND NULLIF(sr.strCustomer,'') IS NOT NULL
 AND c.intEntityId IS NULL
 AND NULLIF(sr.strCustomer, '') IS NOT NULL
 
@@ -163,7 +164,7 @@ OUTER APPLY (
 	WHERE strFarmDescription = sr.strFarm OR strFarm = sr.strFarm
 ) f
 WHERE sr.guiApiUniqueId = @guiApiUniqueId
-AND f.intFarmFieldId IS NULL
+AND f.intFarmFieldId IS NULL 
 AND NULLIF(sr.strFarm, '') IS NOT NULL
 AND NULLIF(sr.strCustomer, '') IS NULL
 
@@ -575,81 +576,85 @@ BEGIN
 
 		SET @intRecipeId = SCOPE_IDENTITY()
 
-		-- Create a default output items
-		INSERT INTO tblMFRecipeItem (
-			intRecipeId
-			, intItemId
-			, strDescription
-			, dblQuantity
-			, dblCalculatedQuantity
-			, intItemUOMId
-			, intRecipeItemTypeId
-			, strItemGroupName
-			, dblUpperTolerance
-			, dblLowerTolerance
-			, dblCalculatedUpperTolerance
-			, dblCalculatedLowerTolerance
-			, dblShrinkage
-			, ysnScaled
-			, intConsumptionMethodId
-			, intStorageLocationId
-			, dtmValidFrom
-			, dtmValidTo
-			, ysnYearValidationRequired
-			, ysnMinorIngredient
-			, ysnOutputItemMandatory
-			, dblScrap
-			, ysnConsumptionRequired
-			, dblCostAllocationPercentage
-			, intMarginById
-			, dblMargin
-			, ysnCostAppliedAtInvoice
-			, intCommentTypeId
-			, strDocumentNo
-			, intSequenceNo
-			, ysnPartialFillConsumption
-			, intCreatedUserId
-			, dtmCreated
-			, intLastModifiedUserId
-			, dtmLastModified
-			, intConcurrencyId)
-		SELECT
-			intRecipeId                       = @intRecipeId
-			, intItemId                         = @intItemId
-			, strDescription                    = ''
-			, dblQuantity                       = @dblQuantity
-			, dblCalculatedQuantity             = 0
-			, intItemUOMId                      = @intItemUOMId
-			, intRecipeItemTypeId               = 2
-			, strItemGroupName                  = ''
-			, dblUpperTolerance                 = 0
-			, dblLowerTolerance                 = 0
-			, dblCalculatedUpperTolerance       = @dblQuantity
-			, dblCalculatedLowerTolerance       = @dblQuantity
-			, dblShrinkage                      = 0
-			, ysnScaled                         = 0
-			, intConsumptionMethodId            = NULL
-			, intStorageLocationId              = NULL
-			, dtmValidFrom                      = NULL
-			, dtmValidTo                        = NULL
-			, ysnYearValidationRequired         = 0
-			, ysnMinorIngredient                = 0
-			, ysnOutputItemMandatory            = 1
-			, dblScrap                          = 0
-			, ysnConsumptionRequired            = 1
-			, dblCostAllocationPercentage       = 100
-			, intMarginById                     = NULL
-			, dblMargin                         = 0
-			, ysnCostAppliedAtInvoice           = 0
-			, intCommentTypeId                  = NULL
-			, strDocumentNo                     = NULL
-			, intSequenceNo                     = NULL
-			, ysnPartialFillConsumption         = 1
-			, intCreatedUserId                  = @intUserId
-			, dtmCreated                        = GETUTCDATE()
-			, intLastModifiedUserId             = @intUserId
-			, dtmLastModified                   = GETUTCDATE()
-			, intConcurrencyId                  = 1
+		IF (@intItemId IS NOT NULL)
+			BEGIN
+				-- Create a default output items
+				INSERT INTO tblMFRecipeItem (
+					intRecipeId
+					, intItemId
+					, strDescription
+					, dblQuantity
+					, dblCalculatedQuantity
+					, intItemUOMId
+					, intRecipeItemTypeId
+					, strItemGroupName
+					, dblUpperTolerance
+					, dblLowerTolerance
+					, dblCalculatedUpperTolerance
+					, dblCalculatedLowerTolerance
+					, dblShrinkage
+					, ysnScaled
+					, intConsumptionMethodId
+					, intStorageLocationId
+					, dtmValidFrom
+					, dtmValidTo
+					, ysnYearValidationRequired
+					, ysnMinorIngredient
+					, ysnOutputItemMandatory
+					, dblScrap
+					, ysnConsumptionRequired
+					, dblCostAllocationPercentage
+					, intMarginById
+					, dblMargin
+					, ysnCostAppliedAtInvoice
+					, intCommentTypeId
+					, strDocumentNo
+					, intSequenceNo
+					, ysnPartialFillConsumption
+					, intCreatedUserId
+					, dtmCreated
+					, intLastModifiedUserId
+					, dtmLastModified
+					, intConcurrencyId)
+				SELECT
+					intRecipeId                       = @intRecipeId
+					, intItemId                         = @intItemId
+					, strDescription                    = ''
+					, dblQuantity                       = @dblQuantity
+					, dblCalculatedQuantity             = 0
+					, intItemUOMId                      = @intItemUOMId
+					, intRecipeItemTypeId               = 2
+					, strItemGroupName                  = ''
+					, dblUpperTolerance                 = 0
+					, dblLowerTolerance                 = 0
+					, dblCalculatedUpperTolerance       = @dblQuantity
+					, dblCalculatedLowerTolerance       = @dblQuantity
+					, dblShrinkage                      = 0
+					, ysnScaled                         = 0
+					, intConsumptionMethodId            = NULL
+					, intStorageLocationId              = NULL
+					, dtmValidFrom                      = NULL
+					, dtmValidTo                        = NULL
+					, ysnYearValidationRequired         = 0
+					, ysnMinorIngredient                = 0
+					, ysnOutputItemMandatory            = 1
+					, dblScrap                          = 0
+					, ysnConsumptionRequired            = 1
+					, dblCostAllocationPercentage       = 100
+					, intMarginById                     = NULL
+					, dblMargin                         = 0
+					, ysnCostAppliedAtInvoice           = 0
+					, intCommentTypeId                  = NULL
+					, strDocumentNo                     = NULL
+					, intSequenceNo                     = NULL
+					, ysnPartialFillConsumption         = 1
+					, intCreatedUserId                  = @intUserId
+					, dtmCreated                        = GETUTCDATE()
+					, intLastModifiedUserId             = @intUserId
+					, dtmLastModified                   = GETUTCDATE()
+					, intConcurrencyId                  = 1
+			END
+		
 	END
 	ELSE
 	BEGIN
@@ -750,4 +755,6 @@ CROSS APPLY (
 	WHERE guiApiUniqueId = log.guiApiUniqueId
 ) r
 WHERE log.guiApiImportLogId = @guiLogId
+GO
+
 

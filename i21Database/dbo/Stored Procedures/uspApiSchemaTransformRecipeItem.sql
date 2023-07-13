@@ -728,4 +728,3 @@ CROSS APPLY (
 	WHERE guiApiUniqueId = log.guiApiUniqueId
 ) r
 WHERE log.guiApiImportLogId = @guiLogId
-
