@@ -66,6 +66,7 @@ BEGIN
                 , strLOBSegmentDescription = LOB.strCode
                 , A.strCurrency
                 , A.strAccountId
+                , strPostedBy = A.strUserName 
             FROM  
 			vyuGLDetail A 
             outer apply dbo.fnGLGetSegmentAccount(A.intAccountId, 3)LOC
@@ -159,6 +160,7 @@ BEGIN
                     , strLOBSegmentDescription
                     , strCurrency
                     , strAccountId
+                    , strPostedBy
                 )
                 SELECT 
                     0
@@ -208,6 +210,7 @@ BEGIN
                     , strLOBSegmentDescription
                     , strCurrency
                     , strAccountId
+                    , strPostedBy
                 FROM #AuditorTransactions 
                 WHERE @strTransactionId =strTransactionId 
                 ORDER BY CASE WHEN @strFilterDate = 'DatePosted' THEN   dtmDate ELSE dtmDateEntered  END
