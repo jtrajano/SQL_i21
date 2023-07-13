@@ -2673,7 +2673,7 @@ BEGIN TRY
 															THEN 0
 													ELSE 
 														CASE WHEN ISNULL(allocatedContract.dblAllocatedQty, 0) >= ISNULL(LG.dblInitialQty, 0)
-															THEN ISNULL(allocatedContract.dblAllocatedQty, 0) - (cd.dblDetailQuantity - cd.dblContractOriginalQty)
+																THEN ISNULL(allocatedContract.dblAllocatedQty, 0) - (cd.dblDetailQuantity - cd.dblContractOriginalQty)
 															WHEN ISNULL(allocatedContract.dblAllocatedQty, 0) >= (cd.dblDetailQuantity - cd.dblContractOriginalQty)
 																THEN ISNULL(LG.dblInitialQty, 0) - ISNULL(allocatedContract.dblAllocatedQty, 0)
 															ELSE ISNULL(LG.dblInitialQty, 0) - ((cd.dblDetailQuantity - cd.dblContractOriginalQty))
@@ -2707,7 +2707,7 @@ BEGIN TRY
 																THEN 
 																	CASE WHEN ISNULL(LG.dblInitialQty, 0) >= (partialPricedCT.dblCompletedQty + partialPricedCT.dblPricedOpenQty)
 																		THEN 
-																			CASE WHEN ISNULL(LG.dblInitialQty, 0) <> cd.dblDetailQuantity 
+																			CASE WHEN ISNULL(LG.dblInitialQty, 0) <> cd.dblDetailQuantity AND cd.dblDetailQuantity = ISNULL(LG.dblQuantity, 0)
 																				THEN ISNULL(LG.dblInitialQty, 0) - (partialPricedCT.dblCompletedQty + partialPricedCT.dblPricedOpenQty) 
 																				ELSE partialPricedCT.dblPricedOpenQty
 																				END
