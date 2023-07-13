@@ -48,4 +48,4 @@ LEFT JOIN tblSMCurrency N ON N.intCurrencyID = A.intCurrencyId
 LEFT JOIN vyuAPFiscalPeriod P ON MONTH(A.dtmDatePaid) = P.intMonth AND YEAR(A.dtmDatePaid) = P.intYear
 LEFT JOIN tblAPVoucherPaymentSchedule O ON O.intId = B.intPayScheduleId
 WHERE ISNULL(ISNULL(I.dtmBillDate, BA.dtmBillDate), J.dtmDate) IS NOT NULL
-OR ISNULL(ISNULL(I.dtmDueDate, BA.dtmDueDate), J.dtmDueDate) IS NOT NULL
+AND ISNULL(ISNULL(I.dtmDueDate, BA.dtmDueDate), J.dtmDueDate) IS NOT NULL
