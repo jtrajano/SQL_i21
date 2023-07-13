@@ -11088,6 +11088,7 @@
     <Build Include="dbo\Stored Procedures\uspCTGetOfferList.sql" />
     <Build Include="dbo\Functions\fnCTGetFreightRateMatrixFromCommodity.sql" />
     <Build Include="dbo\Functions\fnCTConvertPriceToTargetItemUOM.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateInvoiceBaseColumns.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
