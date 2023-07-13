@@ -136,6 +136,10 @@ FROM (
 		,dblRate = CASE WHEN ISNULL(ADP.ysnValidFX,0) = 1 AND ADP.intSeqCurrencyId <> DC.intDefaultCurrencyId THEN dbo.fnCTGetTransactionForexRate(CDP.intContractDetailId) ELSE NULL END
 		,strCurrencyExchangeRateType = CASE WHEN ISNULL(ADP.ysnValidFX,0) = 1 AND ADP.intSeqCurrencyId <> DC.intDefaultCurrencyId THEN CET.strCurrencyExchangeRateType ELSE NULL END
 
+		-- Added Functional Forex Rates From Purchase and Sales Contracts
+		,dblPFunctionalFxRate = dbo.fnLGGetForexRateFromContract(CDP.intContractDetailId)
+		,dblSFunctionalFxRate = dbo.fnLGGetForexRateFromContract(CDS.intContractDetailId)
+
 	FROM (SELECT intShipmentType = 1 UNION SELECT intShipmentType = 2) ShipType
 	CROSS JOIN tblLGAllocationDetail AD
 	JOIN tblLGAllocationHeader AH ON AH.intAllocationHeaderId = AD.intAllocationHeaderId
