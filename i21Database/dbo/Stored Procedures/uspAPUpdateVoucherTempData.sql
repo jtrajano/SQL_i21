@@ -260,9 +260,9 @@ BEGIN
 																	WHEN voucher.ysnFinalVoucher = 1 AND voucher.intTransactionType = 1 THEN voucher.dblTotal - voucher.dblProvisionalTotal
 							 										ELSE voucher.dblTotal 
 															 	END
-						,@updatedPaymentAmt = CASE WHEN @tempPayment != voucher.dblTempPayment --Payment have been edited
-						THEN @tempPayment
-						ELSE CASE WHEN voucher.ysnPrepayHasPayment = 0
+						,@updatedPaymentAmt = CASE WHEN (CASE when voucher.intTransactionType IN (1) THEN ABS(@tempPayment) ELSE @tempPayment END) != voucher.dblTempPayment --Payment have been edited
+                        THEN (CASE when voucher.intTransactionType IN (1) THEN ABS(@tempPayment) ELSE @tempPayment END)
+                        ELSE CASE WHEN voucher.ysnPrepayHasPayment = 0
 							 THEN ((@voucherTotal - ISNULL(appliedPrepays.dblPayment, 0)) - voucher.dblPaymentTemp) - @tempDiscount + @tempInterest
 							 ELSE @voucherAmountDue - @tempDiscount + @tempInterest END
 						END
