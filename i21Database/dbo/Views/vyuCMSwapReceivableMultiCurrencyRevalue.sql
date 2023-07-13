@@ -28,7 +28,8 @@ SELECT DISTINCT
     dblDebit                =   0, -- Calcuate By GL
     dblCredit               =   0,  -- Calcuate By GL
 	intCompanyLocationId	=	NULL,
-	intAccountId			=	SwapShort.intGLAccountIdFrom
+	intAccountId			=	SwapShort.intGLAccountIdFrom,
+	dtmSettlement			=	CASE WHEN ISNULL(SwapLong.ysnPosted, 0) = 1 THEN  SwapLong.dtmDate ELSE SwapShort.dtmDate END
 FROM tblCMBankSwap BankSwap
 JOIN tblCMBankTransfer SwapShort
 	ON SwapShort.intTransactionId = BankSwap.intSwapShortId
@@ -40,7 +41,7 @@ CROSS APPLY (
 	WHERE ysnRevalue_Swap = 1
 ) RevalueOptions
 CROSS APPLY (
-	SELECT TOP 1 P.intGLFiscalYearPeriodId
+	SELECT TOP 1 P.intGLFiscalYearPeriodId, dtmDate, ysnPosted
 	FROM tblCMBankTransfer 
 	CROSS APPLY dbo.fnGLGetFiscalPeriod(dtmDate) P
 	WHERE intTransactionId = BankSwap.intSwapLongId

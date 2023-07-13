@@ -309,6 +309,7 @@ SELECT
 	,intNewCurrencyExchangeRateTypeId = NULL
 	,strNewForexRateType = '' COLLATE Latin1_General_CI_AS
 FROM vyuCMSwapReceivableMultiCurrencyRevalue
+WHERE  dtmSettlement > @dtmDate
 UNION ALL
 SELECT 
 	strTransactionType COLLATE Latin1_General_CI_AS strTransactionType, strTransactionId COLLATE Latin1_General_CI_AS strTransactionId, 
@@ -324,11 +325,13 @@ SELECT
 	,intNewCurrencyExchangeRateTypeId = NULL
 	,strNewForexRateType = '' COLLATE Latin1_General_CI_AS
 FROM vyuCMSwapPayableMultiCurrencyRevalue
+WHERE  dtmSettlement > @dtmDate
 )
 INSERT INTO  @tblMulti
-SELECT A.*, strCurrency
+SELECT A.*, strCurrency 
 FROM cte A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
-WHERE dtmDate <= @dtmDate
+WHERE dtmDate <= @dtmDate 
+
 AND A.intCurrencyId <> @intDefaultCurrencyId
 -- WITH cte AS(
 -- SELECT 
