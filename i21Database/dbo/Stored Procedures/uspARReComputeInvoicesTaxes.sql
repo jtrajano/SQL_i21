@@ -74,8 +74,11 @@ SELECT DISTINCT
 	,[intCustomerLocationId]			= (CASE WHEN ISNULL(SMFT.[strFobPoint],'Destination') = 'Origin ' THEN ARI.[intBillToLocationId] ELSE ARI.[intShipToLocationId] END)
 	,[dblSubCurrencyRate]				= ISNULL(ARID.[dblSubCurrencyRate], 1)
 	,[intFreightTermId]					= ARI.[intFreightTermId]
-	,[dblPrice]							= (CASE WHEN ISNULL(ARID.[intLoadDetailId],0) = 0 THEN ARID.[dblPrice] ELSE ISNULL(ARID.[dblUnitPrice], @ZeroDecimal) END) / ISNULL(ARID.[dblSubCurrencyRate], 1)
-	,[dblQtyShipped]					= (CASE WHEN ISNULL(ARID.[intLoadDetailId],0) = 0 THEN ARID.[dblQtyShipped] ELSE ISNULL(ARID.[dblShipmentNetWt], @ZeroDecimal) END)
+	,[dblPrice]							= ARID.dblPrice / ISNULL(ARID.dblSubCurrencyRate, 1)
+	,[dblQtyShipped]					= CASE WHEN ISNULL(ARID.intLoadDetailId, 0) = 0 
+											THEN ARID.dblQtyShipped 
+											ELSE dbo.fnRoundBanker(dbo.fnCalculateQtyBetweenUOM(ARID.intItemWeightUOMId, ISNULL(ARID.intPriceUOMId, ARID.intItemWeightUOMId), ISNULL(ARID.dblShipmentNetWt, ARID.dblQtyShipped)), dbo.fnARGetDefaultDecimal())
+										  END
 	,[intCurrencyExchangeRateTypeId]	= ARID.[intCurrencyExchangeRateTypeId]
 	,[dblCurrencyExchangeRate]			= ISNULL(ARID.[dblCurrencyExchangeRate], 1)
 	,[intTaxGroupId]					= CASE WHEN ISNULL(ARID.[intTaxGroupId],0) = 0 THEN NULL ELSE ARID.[intTaxGroupId] END

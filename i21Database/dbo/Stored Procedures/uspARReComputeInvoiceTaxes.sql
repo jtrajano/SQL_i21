@@ -99,21 +99,18 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 			[intInvoiceDetailId]
 			
 		SELECT
-			 @ItemId						= tblARInvoiceDetail.[intItemId]
-			,@ItemPrice						= 
-												(CASE WHEN ISNULL(tblARInvoiceDetail.[intLoadDetailId],0) = 0 
-													THEN 
-														tblARInvoiceDetail.[dblPrice] - (tblARInvoiceDetail.[dblPrice] * (tblARInvoiceDetail.[dblDiscount] / 100.00))
-													ELSE 
-														ISNULL(tblARInvoiceDetail.[dblUnitPrice], @ZeroDecimal) 
-												END) / ISNULL(tblARInvoiceDetail.[dblSubCurrencyRate], 1)
-			,@QtyShipped					= (CASE WHEN ISNULL(tblARInvoiceDetail.[intLoadDetailId],0) = 0 THEN tblARInvoiceDetail.[dblQtyShipped] ELSE ISNULL(tblARInvoiceDetail.[dblShipmentNetWt], @ZeroDecimal) END)
-			,@TaxGroupId					= tblARInvoiceDetail.[intTaxGroupId]
-			,@SiteId						= tblARInvoiceDetail.[intSiteId]
-			,@SubCurrencyRate				= ISNULL(tblARInvoiceDetail.[dblSubCurrencyRate], 1)
-			,@CurrencyExchangeRateTypeId	= tblARInvoiceDetail.[intCurrencyExchangeRateTypeId]
-			,@CurrencyExchangeRate			= ISNULL(tblARInvoiceDetail.[dblCurrencyExchangeRate], 1)
-			,@ItemUOMId						= tblARInvoiceDetail.intItemUOMId 
+			 @ItemId						= intItemId
+			,@ItemPrice						= dblPrice - (dblPrice * (dblDiscount / 100.00)) / ISNULL(dblSubCurrencyRate, 1)
+			,@QtyShipped					= CASE 
+												WHEN ISNULL(intLoadDetailId, 0) = 0 THEN dblQtyShipped
+												ELSE dbo.fnRoundBanker(dbo.fnCalculateQtyBetweenUOM(intItemWeightUOMId, ISNULL(intPriceUOMId, intItemWeightUOMId), ISNULL(dblShipmentNetWt, dblQtyShipped)), dbo.fnARGetDefaultDecimal())
+											  END
+			,@TaxGroupId					= intTaxGroupId
+			,@SiteId						= intSiteId
+			,@SubCurrencyRate				= ISNULL(dblSubCurrencyRate, 1)
+			,@CurrencyExchangeRateTypeId	= intCurrencyExchangeRateTypeId
+			,@CurrencyExchangeRate			= ISNULL(dblCurrencyExchangeRate, 1)
+			,@ItemUOMId						= intItemUOMId 
 		FROM
 			tblARInvoiceDetail
 		WHERE

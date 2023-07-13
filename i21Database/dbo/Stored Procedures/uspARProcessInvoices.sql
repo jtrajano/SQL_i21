@@ -1347,7 +1347,7 @@ DECLARE	@successfulCount INT
 		,@batchIdUsed NVARCHAR(40)
 		,@recapId NVARCHAR(250)
 
-DECLARE @TempInvoiceIdTable AS TABLE ([intInvoiceId] INT)
+DECLARE @TempInvoiceIdTable Id
 
 --UnPosting Updated Invoices
 DECLARE @IdsForUnPostingUpdated VARCHAR(MAX)
@@ -1371,7 +1371,7 @@ BEGIN TRY
 		AND ISNULL(EFP.[ysnRecap],0) <> 1
 			
 	SELECT
-		@IdsForUnPostingUpdated = COALESCE(@IdsForUnPostingUpdated + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250))
+		@IdsForUnPostingUpdated = COALESCE(@IdsForUnPostingUpdated + ',' ,'') + CAST(intId AS NVARCHAR(250))
 	FROM
 		@TempInvoiceIdTable
 			
@@ -1423,7 +1423,7 @@ BEGIN TRY
 		AND ISNULL(EFP.[ysnRecap],0) = 1
 
 	SELECT
-		@IdsForUnPostingUpdated = COALESCE(@IdsForUnPostingUpdated + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250))
+		@IdsForUnPostingUpdated = COALESCE(@IdsForUnPostingUpdated + ',' ,'') + CAST(intId AS NVARCHAR(250))
 	FROM
 		@TempInvoiceIdTable	
 		
@@ -2534,7 +2534,7 @@ BEGIN TRY
 		AND ISNULL([ysnRecap],0) <> 1	
 		
 	SELECT 
-		@IdsForPosting = COALESCE(@IdsForPosting + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250))
+		@IdsForPosting = COALESCE(@IdsForPosting + ',' ,'') + CAST(intId AS NVARCHAR(250))
 	FROM
 		@TempInvoiceIdTable
 		
@@ -2582,7 +2582,7 @@ BEGIN TRY
 		AND ISNULL([ysnRecap],0) = 1	
 
 	SELECT
-		@IdsForPosting = COALESCE(@IdsForPosting + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250))
+		@IdsForPosting = COALESCE(@IdsForPosting + ',' ,'') + CAST(intId AS NVARCHAR(250))
 	FROM
 		@TempInvoiceIdTable
 		
@@ -2652,7 +2652,7 @@ BEGIN TRY
 		AND ISNULL([ysnRecap],0) <> 1	
 
 	SELECT
-		@IdsForPostingUpdated = COALESCE(@IdsForPostingUpdated + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250))
+		@IdsForPostingUpdated = COALESCE(@IdsForPostingUpdated + ',' ,'') + CAST(intId AS NVARCHAR(250))
 	FROM
 		@TempInvoiceIdTable
 	
@@ -2702,7 +2702,7 @@ BEGIN TRY
 		AND ISNULL([ysnRecap],0) = 1
 
 	SELECT
-		@IdsForPostingUpdated = COALESCE(@IdsForPostingUpdated + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250))
+		@IdsForPostingUpdated = COALESCE(@IdsForPostingUpdated + ',' ,'') + CAST(intId AS NVARCHAR(250))
 	FROM
 		@TempInvoiceIdTable
 	
@@ -2810,9 +2810,11 @@ WHERE
 	AND ISNULL(intInvoiceId, 0) <> 0
 
 SELECT
-	@CreateIds = COALESCE(@CreateIds + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250))
+	@CreateIds = COALESCE(@CreateIds + ',' ,'') + CAST(intId AS NVARCHAR(250))
 FROM
 	@TempInvoiceIdTable
+
+EXEC uspARUpdateInvoiceBaseColumns @TempInvoiceIdTable
 
 SET @CreatedIvoices = @CreateIds
 
@@ -2846,11 +2848,11 @@ WHERE
 	AND ISNULL(intInvoiceId, 0) <> 0
 
 SELECT
-	@UpdatedIds = COALESCE(@UpdatedIds + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250))
+	@UpdatedIds = COALESCE(@UpdatedIds + ',' ,'') + CAST(intId AS NVARCHAR(250))
 FROM
 	@TempInvoiceIdTable
 
-SET @UpdatedIvoices = @UpdatedIds
+EXEC uspARUpdateInvoiceBaseColumns @TempInvoiceIdTable
 
 IF ISNULL(@RaiseError,0) = 0
 BEGIN
