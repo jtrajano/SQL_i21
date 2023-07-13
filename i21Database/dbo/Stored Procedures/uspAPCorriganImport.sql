@@ -383,6 +383,7 @@ END
 		,intTransactionType
 		,intAPAccount
 		,intEntityVendorId
+		,strReferenceNo
 		,intLocationId
 		,intShipToId
 		,intShipFromId
@@ -409,6 +410,7 @@ END
 		intTransactionType 		=	intTransactionType,
 		intAPAccount			=	@apAccountId,
 		intEntityVendorId		=	intEntityVendorId,
+		strReferenceNo			=	CAST(GETDATE() AS NVARCHAR),
 		intLocationId			=	intShipToId,
 		intShipToId				=	intShipToId,
 		intShipFromId			=	intShipFromId,
@@ -553,6 +555,12 @@ END
 			INNER JOIN @ids B ON A.intBillId = B.intId
 
 			EXEC uspAPUpdateVoucherDetailTax  @billDetailIds
+
+			-- UPDATE A
+			-- SET
+			-- 	A.dblTotalController = A.dblTotal
+			-- FROM tblAPBill A
+			-- INNER JOIN @ids B ON A.intBillId = B.intId
 
 		END
 	--END
