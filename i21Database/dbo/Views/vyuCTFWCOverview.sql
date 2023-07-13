@@ -66,8 +66,6 @@ AS
 				CTD.strReference 
 			FROM	tblCTContractHeader	CH	
 			INNER JOIN tblCTContractDetail		CTD  WITH (NOLOCK) ON CTD.intContractHeaderId = CH.intContractHeaderId
-			LEFT JOIN tblLGLoadDetail			LGD  WITH (NOLOCK) ON CTD.intContractDetailId = LGD.intPContractDetailId
-			LEFT JOIN tblLGLoad					LGL  WITH (NOLOCK) ON LGL.intContractDetailId = CTD.intContractDetailId
 			LEFT JOIN tblCTContractStatus		CTS  WITH (NOLOCK) ON CTS.intContractStatusId = CTD.intContractStatusId
 			LEFT JOIN tblSMCompanyLocation		CL   WITH (NOLOCK) ON CL.intCompanyLocationId = CH.intCompanyLocationId
 			LEFT JOIN tblSMCompanyLocation		CLD  WITH (NOLOCK) ON CLD.intCompanyLocationId = CTD.intCompanyLocationId
@@ -76,8 +74,11 @@ AS
 			LEFT JOIN tblCTPricingType			CP	 WITH (NOLOCK) ON CTD.intPricingTypeId	  = CP.intPricingTypeId
 			LEFT JOIN tblEMEntity				EC	 WITH (NOLOCK) ON EC.intEntityId		  = CH.intCreatedById
 			LEFT JOIN tblSMTerm					CT	 WITH (NOLOCK) ON CT.intTermID			  = CH.intTermId
-			LEFT JOIN tblMFBatch				MFB  WITH (NOLOCK) ON CTD.intContractDetailId = MFB.intContractDetailId 
+			LEFT JOIN tblQMSample				QS   WITH (NOLOCK) ON QS.intContractDetailId = CTD.intContractDetailId and QS.intCompanyLocationId = CTD.intCompanyLocationId
+			LEFT JOIN tblMFBatch				MFB  WITH (NOLOCK) ON MFB.intSampleId = QS.intSampleId
 			LEFT JOIN tblQMGardenMark			GM   WITH (NOLOCK) ON GM.intGardenMarkId	  = MFB.intGardenMarkId
+			LEFT JOIN tblLGLoadDetail			LGD  WITH (NOLOCK) ON LGD.intBatchId = MFB.intBatchId
+			LEFT JOIN tblLGLoad					LGL  WITH (NOLOCK) ON LGL.intLoadId = LGD.intLoadId
 			LEFT JOIN tblSMFreightTerms			IT	 WITH (NOLOCK) ON IT.intFreightTermId	  =	CH.intFreightTermId
 			LEFT JOIN tblSMCity					SC	 WITH (NOLOCK) ON SC.intCityId			  =	CH.intINCOLocationTypeId
 			LEFT JOIN tblICItem					ICI  WITH (NOLOCK) ON ICI.intItemId			  =	CTD.intItemId
