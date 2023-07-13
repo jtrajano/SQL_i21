@@ -346,10 +346,10 @@ BEGIN
 			+ '<PRICE_MONTH>' + ISNULL(LEFT(CONVERT(NVARCHAR, CONVERT(DATETIME, '01 ' + FMon.strFutureMonth), 112), 6), '') + '</PRICE_MONTH>'
 			+ '<PRICE>' + ISNULL(CONVERT(NVARCHAR(50), CONVERT(NUMERIC(18, 2), CD.dblCashPrice)), '') + '</PRICE>'
 			+ '<PRICE_UOM>' + ISNULL(PUM.strUnitMeasure, '') + '</PRICE_UOM>'
-			+ '<PRICE_CURRENCY>' + ISNULL(C2.strDescription,'') + '</PRICE_CURRENCY>'
+			+ '<PRICE_CURRENCY>' + ISNULL(C2.strCurrency,'') + '</PRICE_CURRENCY>'
 			+ '<BASIS>' + ISNULL(CONVERT(NVARCHAR(50), CONVERT(NUMERIC(18, 2), CD.dblBasis)), '') + '</BASIS>'
 			+ '<BASIS_UOM>' + ISNULL(UM.strUnitMeasure, '') + '</BASIS_UOM>'
-			+ '<BASIS_CURRENCY>' + ISNULL(C.strDescription, '') + '</BASIS_CURRENCY>'
+			+ '<BASIS_CURRENCY>' + ISNULL(C.strCurrency, '') + '</BASIS_CURRENCY>'
 			+ '<FIXATION_DATE>' + RTRIM(LTRIM(ISNULL(CONVERT(CHAR, (
 					CASE WHEN CH.intPricingTypeId = 1 THEN CH.dtmContractDate
 						ELSE (SELECT TOP 1 PFD.dtmFixationDate FROM dbo.tblCTPriceFixationDetail PFD WHERE PFD.intPriceFixationId = PF.intPriceFixationId) END
@@ -359,10 +359,10 @@ BEGIN
 			+ '<PRICE_MONTH>' + ISNULL(LEFT(CONVERT(NVARCHAR, CONVERT(DATETIME, '01 ' + FMon.strFutureMonth), 112), 6), '') + '</PRICE_MONTH>'
 			+ '<PRICE></PRICE>'
 			+ '<PRICE_UOM>' + ISNULL(PUM.strUnitMeasure, '') + '</PRICE_UOM>'
-			+ '<PRICE_CURRENCY>' + ISNULL(C2.strDescription,'') + '</PRICE_CURRENCY>'
+			+ '<PRICE_CURRENCY>' + ISNULL(C2.strCurrency,'') + '</PRICE_CURRENCY>'
 			+ '<BASIS>' + ISNULL(CONVERT(NVARCHAR(50), CONVERT(NUMERIC(18, 2), CD.dblBasis)), '') + '</BASIS>'
 			+ '<BASIS_UOM>' + ISNULL(UM.strUnitMeasure, '') + '</BASIS_UOM>'
-			+ '<BASIS_CURRENCY>' + ISNULL(C.strDescription, '') + '</BASIS_CURRENCY>'
+			+ '<BASIS_CURRENCY>' + ISNULL(C.strCurrency, '') + '</BASIS_CURRENCY>'
 			+ '<FIXATION_DATE></FIXATION_DATE>' END
 
 			+ '<START_DATE>' + ISNULL(CONVERT(NVARCHAR, CF.dtmStartDate, 112), '') + '</START_DATE>'
