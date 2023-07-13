@@ -15,6 +15,7 @@ BEGIN
 	UPDATE LD
 	SET dblUnitPrice = TMD.dblPrice
 		,dblAmount = ROUND(dbo.fnMultiply(TMD.dblPrice, LD.dblQuantity), 2)
+		,intConcurrencyId = LD.intConcurrencyId + 1
 	FROM tblLGLoadDetail LD
 		INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 		INNER JOIN tblTMDispatch TMD ON TMD.intDispatchID = LD.intTMDispatchId
@@ -31,11 +32,12 @@ BEGIN
 	UPDATE DOD
 	SET dblPrice = TMD.dblPrice
 		,dblTotal = ROUND(dbo.fnMultiply(TMD.dblPrice, DOD.dblQuantity), 2)
+		,intConcurrencyId = DOD.intConcurrencyId + 1
 	FROM tblLGDispatchOrderDetail DOD
 		INNER JOIN tblLGDispatchOrder DO ON DO.intDispatchOrderId = DOD.intDispatchOrderId
 		INNER JOIN tblTMDispatch TMD ON TMD.intDispatchID = DOD.intTMDispatchId
 	WHERE DOD.intTMDispatchId = @intDispatchId
-		AND DOD.intOrderStatus IN (4, 6)
+		AND DOD.intOrderStatus NOT IN (4, 6)
 		AND DO.intDispatchStatus NOT IN (5, 6)
 END
 
