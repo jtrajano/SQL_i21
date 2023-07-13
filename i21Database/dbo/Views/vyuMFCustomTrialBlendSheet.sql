@@ -68,10 +68,10 @@ LEFT JOIN (
 		,strLotNumber = Lot.strLotNumber -- Batch
 		,dblTBSQuantity = (IL.dblQuantity / OIL.dblSumQuantity) * ISNULL(CP.dblTrialBlendSheetSize, 0) -- Weigh Up (Grams)
 		,strERPPONumber = Batch.strERPPONumber -- Purchase Order
-		,strTeaGardenChopInvoiceNumber = Batch.strTeaGardenChopInvoiceNumber -- Chop
+		,strTeaGardenChopInvoiceNumber = LEFT(Batch.strTeaGardenChopInvoiceNumber + ' ', 9) -- Chop
 		,strGardenMark = LEFT(GM.strGardenMark + ' ', 9) -- Mark
 		,strLeafGrade = LEFT(Batch.strLeafGrade + ' ', 5) -- Grade
-		,strTeaItemNo = LEFT(Item.strItemNo, 8) -- Tea Item
+		,strTeaItemNo = Item.strItemNo -- Tea Item
 		,dblTeaTaste = Batch.dblTeaTaste -- T
 		,dblTeaHue = Batch.dblTeaHue -- H
 		,dblTeaIntensity = Batch.dblTeaIntensity -- I
