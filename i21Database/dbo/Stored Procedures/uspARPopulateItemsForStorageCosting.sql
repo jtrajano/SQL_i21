@@ -102,7 +102,7 @@ WHERE ARID.[strTransactionType] IN ('Invoice', 'Credit Memo', 'Credit Note', 'Ca
   AND (ARID.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle') OR (ARID.[ysnBlended] = @OneBit))
   AND ARID.[strTransactionType] <> 'Debit Memo'
   AND ARID.[intStorageScheduleTypeId] IS NOT NULL
-  AND LGL.[intPurchaseSale] NOT IN (2, 3)
+  AND (ARID.[intLoadId] IS NULL OR (ARID.[intLoadId] IS NOT NULL AND LGL.[intPurchaseSale] NOT IN (2, 3)))
   AND ARID.strSessionId = @strSessionId
 
 RETURN 1
