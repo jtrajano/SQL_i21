@@ -91,7 +91,8 @@ BEGIN
 			,[strFinancingTransactionNumber]
 			,[strTaxPoint]
 			,[intTaxLocationId]
-			,[ysnOverrideTaxGroup])
+			,[ysnOverrideTaxGroup]
+			,[intLoadShipmentContainerId])
 		SELECT
 			[intEntityVendorId] = D1.intEntityId
 			,[intTransactionType] = 1
@@ -115,7 +116,9 @@ BEGIN
 			,[dblOrderQty] = LD.dblQuantity
 			,[dblOrderUnitQty] = ISNULL(ItemUOM.dblUnitQty,1)
 			,[intOrderUOMId] = LD.intItemUOMId
-			,[dblQuantityToBill] = LD.dblQuantity
+			,[dblQuantityToBill] = CASE WHEN (LDCL.intLoadDetailContainerLinkId IS NOT NULL) 
+						THEN ISNULL(LDCL.dblQuantity, LD.dblQuantity) 
+						ELSE LD.dblQuantity END
 			,[dblQtyToBillUnitQty] = ISNULL(ItemUOM.dblUnitQty,1)
 			,[intQtyToBillUOMId] = LD.intItemUOMId
 			,[dblCost] =	CASE WHEN CH.intPricingTypeId = 2 AND CT.intPricingTypeId = 1 -- Priced basis contract
@@ -124,7 +127,9 @@ BEGIN
 							END
 			,[dblCostUnitQty] = CAST(ISNULL(ItemCostUOM.dblUnitQty,1) AS DECIMAL(38,20))
 			,[intCostUOMId] = (CASE WHEN intPurchaseSale = 3 THEN ISNULL(AD.intSeqPriceUOMId, 0) ELSE ISNULL(AD.intSeqPriceUOMId, LD.intPriceUOMId) END) 
-			,[dblNetWeight] = ISNULL(LD.dblNet,0)
+			,[dblNetWeight] = CASE WHEN (LDCL.intLoadDetailContainerLinkId IS NOT NULL) 
+							THEN ISNULL(LDCL.dblLinkNetWt, LD.dblNet)
+							ELSE LD.dblNet END
 			,[dblWeightUnitQty] = ISNULL(ItemWeightUOM.dblUnitQty,1)
 			,[intWeightUOMId] = ItemWeightUOM.intItemUOMId
 			,[intCostCurrencyId] = (CASE WHEN intPurchaseSale = 3 THEN ISNULL(AD.intSeqCurrencyId, 0) ELSE ISNULL(AD.intSeqCurrencyId, LD.intPriceCurrencyId) END)
@@ -152,8 +157,8 @@ BEGIN
 			,[strBillOfLading] = L.strBLNumber
 			,[ysnReturn] = CAST(0 AS BIT)
 			,[ysnStage] = CAST(1 AS BIT)
-			,[intStorageLocationId] = ISNULL(LW.intStorageLocationId, CT.intStorageLocationId)
-			,[intSubLocationId] = ISNULL(LW.intSubLocationId, CT.intSubLocationId)
+			,[intStorageLocationId] = ISNULL(LWC.intStorageLocationId, CT.intStorageLocationId)
+			,[intSubLocationId] = ISNULL(LWC.intSubLocationId, CT.intSubLocationId)
 			,[dblOptionalityPremium] = ISNULL(LD.dblOptionalityPremium, 0)
 			,[dblQualityPremium] = ISNULL(LD.dblQualityPremium, 0)
 			,[intPurchaseTaxGroupId] = CASE WHEN ISNULL(LD.intTaxGroupId, '') = '' THEN @intTaxGroupId ELSE LD.intTaxGroupId END
@@ -163,6 +168,7 @@ BEGIN
 			,[strTaxPoint] = L.strTaxPoint
 			,[intTaxLocationId] = L.intTaxLocationId
 			,[ysnOverrideTaxGroup] = LD.ysnTaxGroupOverride
+			,[intLoadShipmentContainerId] = LC.intLoadContainerId
 		FROM tblLGLoad L
 		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		JOIN tblCTContractDetail CT ON CT.intContractDetailId = LD.intPContractDetailId
@@ -179,10 +185,6 @@ BEGIN
 		LEFT JOIN tblICItemUOM ItemWeightUOM ON ItemWeightUOM.intItemId = LD.intItemId and ItemWeightUOM.intUnitMeasureId = L.intWeightUnitMeasureId
 		LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = CT.intPriceItemUOMId
 		OUTER APPLY dbo.fnGetItemGLAccountAsTable(LD.intItemId, ItemLoc.intItemLocationId, 'AP Clearing') itemAccnt
-		OUTER APPLY (SELECT TOP 1 W.intSubLocationId, W.intStorageLocationId, strSubLocation = CLSL.strSubLocationName, strStorageLocation = SL.strName FROM tblLGLoadWarehouse W
-					LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = W.intStorageLocationId
-					LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = W.intSubLocationId
-					WHERE intLoadId = L.intLoadId) LW
 		LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = CT.intCurrencyId
 		OUTER APPLY (SELECT	TOP 1  
 					intForexRateTypeId = RD.intRateTypeId
@@ -197,6 +199,22 @@ BEGIN
 					ORDER BY RD.dtmValidFromDate DESC) FX
 		LEFT JOIN dbo.tblGLAccount apClearing ON apClearing.intAccountId = itemAccnt.intAccountId
 		LEFT JOIN tblCMBankAccount BA ON BA.intBankAccountId = L.intBankAccountId
+		LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId
+		LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId AND ISNULL(LC.ysnRejected, 0) = 0
+		OUTER APPLY (
+			SELECT 
+				W.intLoadId,
+				W.intLoadWarehouseId,
+				W.intSubLocationId,
+				W.intStorageLocationId,
+				strSubLocation = CLSL.strSubLocationName,
+				strStorageLocation = SL.strName
+			FROM tblLGLoadWarehouse W
+			INNER JOIN tblLGLoadWarehouseContainer LWC ON LWC.intLoadContainerId = LC.intLoadContainerId AND LWC.intLoadWarehouseId = W.intLoadWarehouseId
+			LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = W.intStorageLocationId
+			LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = W.intSubLocationId
+			WHERE W.intLoadId = L.intLoadId
+		) AS LWC
 		WHERE L.intLoadId = @intLoadId
 			AND CT.intPricingTypeId IN (1, 6)
 			AND LD.intLoadDetailId NOT IN (SELECT IsNull(BD.intLoadDetailId, 0) FROM tblAPBillDetail BD JOIN tblICItem Item ON Item.intItemId = BD.intItemId
@@ -262,6 +280,7 @@ BEGIN
 			,[strTaxPoint] = NULL
 			,[intTaxLocationId] = NULL
 			,[ysnOverrideTaxGroup] = NULL
+			,[intLoadShipmentContainerId] = NULL
 		FROM
 			tblLGLoadCost A
 			JOIN tblLGLoad L ON L.intLoadId = A.intLoadId
@@ -283,8 +302,7 @@ BEGIN
 					,intLoadItemUOMId = LD.intItemUOMId
 					,SUM(LD.dblQuantity) dblQuantity
 				FROM tblLGLoadDetail LD
-				JOIN tblCTContractDetail CT ON CT.intContractDetailId = CASE WHEN (CP.ysnEnableAccrualsForOutbound = 1 AND (L.intPurchaseSale = 2 OR L.intPurchaseSale = 3) AND A.ysnAccrue = 1 AND A.intVendorId IS NOT NULL AND LD.intSContractDetailId = A.intContractDetailId) 
-																		THEN LD.intSContractDetailId ELSE LD.intPContractDetailId END
+				JOIN tblCTContractDetail CT ON CT.intContractDetailId = A.intContractDetailId
 				JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CT.intContractHeaderId
 				LEFT JOIN tblSMCompanyLocation Loc ON Loc.intCompanyLocationId = CASE WHEN (L.intPurchaseSale = 2) THEN LD.intSCompanyLocationId ELSE LD.intPCompanyLocationId END
 				LEFT JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = A.intItemId AND ItemLoc.intLocationId = Loc.intCompanyLocationId

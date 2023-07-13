@@ -232,7 +232,8 @@ BEGIN TRY
 			,[intPurchaseTaxGroupId]
 			,[strTaxPoint]
 			,[intTaxLocationId]
-			,[ysnOverrideTaxGroup])
+			,[ysnOverrideTaxGroup]
+			,[intLoadShipmentContainerId])
 		SELECT
 			[intEntityVendorId] = D1.intEntityId
 			,[intTransactionType] = 1
@@ -306,6 +307,7 @@ BEGIN TRY
 			,[strTaxPoint] = L.strTaxPoint
 			,[intTaxLocationId] = L.intTaxLocationId
 			,[ysnOverrideTaxGroup] = LD.ysnTaxGroupOverride
+			,[intLoadShipmentContainerId] = LC.intLoadContainerId
 		FROM tblLGLoad L
 		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		JOIN tblCTContractDetail CT ON CT.intContractDetailId = LD.intPContractDetailId
@@ -347,7 +349,9 @@ BEGIN TRY
 			WHERE W.intLoadId = L.intLoadId
 		) AS LWC
 		WHERE L.intLoadId = @intLoadId
-			AND (LD.dblQuantity - ISNULL(B.dblQtyBilled, 0)) > 0
+			AND (CASE WHEN (LDCL.intLoadDetailContainerLinkId IS NOT NULL) 
+				THEN ISNULL(LDCL.dblQuantity, LD.dblQuantity) 
+				ELSE LD.dblQuantity END - ISNULL(B.dblQtyBilled, 0)) > 0
 
 		INSERT INTO @distinctVendor
 		SELECT DISTINCT intEntityVendorId
@@ -469,7 +473,8 @@ BEGIN TRY
 				,[intPurchaseTaxGroupId]
 				,[strTaxPoint]
 				,[intTaxLocationId]
-				,[ysnOverrideTaxGroup])
+				,[ysnOverrideTaxGroup]
+				,[intLoadShipmentContainerId])
 			SELECT
 				[intEntityVendorId]
 				,[intTransactionType] = CASE WHEN @intType = 1 THEN 1 WHEN @intType = 2 THEN 16 END
@@ -536,6 +541,7 @@ BEGIN TRY
 				,[strTaxPoint]
 				,[intTaxLocationId]
 				,[ysnOverrideTaxGroup]
+				,[intLoadShipmentContainerId]
 			FROM @voucherPayable
 			WHERE intEntityVendorId = @intVendorEntityId
 
