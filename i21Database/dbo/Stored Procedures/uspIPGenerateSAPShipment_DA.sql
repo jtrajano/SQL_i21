@@ -287,15 +287,15 @@ BEGIN
 				SELECT @strError = @strError + 'Destination Port cannot be blank. '
 			END
 
-			IF @dtmETAPOL IS NULL
-			BEGIN
-				SELECT @strError = @strError + 'ETA POL cannot be blank. '
-			END
+			--IF @dtmETAPOL IS NULL
+			--BEGIN
+			--	SELECT @strError = @strError + 'ETA POL cannot be blank. '
+			--END
 
-			IF @dtmETSPOL IS NULL
-			BEGIN
-				SELECT @strError = @strError + 'ETS POL cannot be blank. '
-			END
+			--IF @dtmETSPOL IS NULL
+			--BEGIN
+			--	SELECT @strError = @strError + 'ETS POL cannot be blank. '
+			--END
 
 			IF @dtmETAPOD IS NULL
 			BEGIN
