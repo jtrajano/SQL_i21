@@ -17,9 +17,9 @@ SELECT  intProjectModuleId			= ProjectModule.intProjectModuleId
 	   ,dblHoursOverShort			= ISNULL(ProjectTickets.dblQuotedHours,0) - ISNULL(ProjectTickets.dblActualHours,0)
 	   ,intCustomerId				= Project.intCustomerId
 	   ,strCustomerName				= Customer.strName
-	   ,strPercentComplete			= CASE WHEN ISNULL(ProjectTickets.dblQuotedHours, 0) = 0
-											THEN '0%'
-										ELSE CONVERT(NVARCHAR(10), CONVERT(INT,ROUND(ProjectTickets.dblBillablehours / ProjectTickets.dblQuotedHours, 2) * 100)) + '%'
+	   ,strPercentComplete			= CASE WHEN ProjectTicketsCount.intClosedTickets  IS NOT NULL
+											THEN CONVERT(NVARCHAR(10), CONVERT(DECIMAL(5,2),(ProjectTicketsCount.intClosedTickets  * 100/ ProjectTicketsCount.intTotalTickets))) + '%'
+											ELSE '0.00%'
 									END
 	   ,strPhase					= ProjectModule.strPhase
 	   ,strComment					= ProjectModule.strComment
@@ -104,6 +104,20 @@ ON CustomerSuperUser.intEntityId = ProjectModule.intCustomerSuperUserId
 				  ProjectTickets.dtmCompleted IS NOT NULL
 			ORDER BY ProjectTickets.dtmCompleted DESC
 		) ProjectTicketCompletedDate
+			OUTER APPLY(
+				SELECT Project.strProjectName,								
+				       intClosedTickets		= SUM(CASE WHEN ProjectTickets.strStatus = 'Closed' 
+													THEN 1
+													ELSE 0
+													END),
+					   intTotalTickets  =      count(ProjectTask.intTicketId)																	  
+				FROM tblHDProjectTask ProjectTask
+						INNER JOIN vyuHDProjectTickets ProjectTickets
+				ON ProjectTickets.intTicketId = ProjectTask.intTicketId
+				WHERE ProjectTask.intProjectId = Project.intProjectId AND
+					  ProjectTickets.strModule = SMModule.strModule	
+				GROUP BY ProjectTask.intProjectId			
+		) ProjectTicketsCount
 		OUTER APPLY(
 
 			SELECT	   TOP 1 intTicketStatusId = ProjectTickets.intTicketStatusId
