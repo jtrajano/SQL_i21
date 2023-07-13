@@ -1469,49 +1469,6 @@ BEGIN
 					,@userId
 					,NULL
 					,@ValueToPost
-
-			INSERT INTO @GLEntries (
-					[dtmDate] 
-					,[strBatchId]
-					,[intAccountId]
-					,[dblDebit]
-					,[dblCredit]
-					,[dblDebitUnit]
-					,[dblCreditUnit]
-					,[strDescription]
-					,[strCode]
-					,[strReference]
-					,[intCurrencyId]
-					,[dblExchangeRate]
-					,[dtmDateEntered]
-					,[dtmTransactionDate]
-					,[strJournalLineDescription]
-					,[intJournalLineNo]
-					,[ysnIsUnposted]
-					,[intUserId]
-					,[intEntityId]
-					,[strTransactionId]					
-					,[intTransactionId]
-					,[strTransactionType]
-					,[strTransactionForm] 
-					,[strModuleName]
-					,[intConcurrencyId]
-					,[dblDebitForeign]
-					,[dblDebitReport]
-					,[dblCreditForeign]
-					,[dblCreditReport]
-					,[dblReportingRate]
-					,[dblForeignRate]
-					,[intSourceEntityId]
-					,[intCommodityId]
-					,[strRateType]
-			)			
-			EXEC @intReturnValue = dbo.uspICCreateGLEntriesOnInTransitValueAdjustment								
-				@strBatchId = @batchId
-				,@strTransactionId = NULL
-				,@intEntityUserSecurityId = @userId
-				,@strGLDescription = NULL
-				,@AccountCategory_Cost_Adjustment = DEFAULT 
 		END TRY
 		BEGIN CATCH
 			SET @errorAdjustment = ERROR_MESSAGE()
