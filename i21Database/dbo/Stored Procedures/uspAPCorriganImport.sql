@@ -597,6 +597,12 @@ END
 
 			EXEC uspAPUpdateVoucherDetailTax  @billDetailIds
 
+			-- UPDATE A
+			-- SET
+			-- 	A.dblTotalController = A.dblTotal
+			-- FROM tblAPBill A
+			-- INNER JOIN @ids B ON A.intBillId = B.intId
+
 		END
 	--END
 
