@@ -96,6 +96,7 @@
 [ysnAllowPendingClaimsWoClaimableWt] BIT NULL,
 [ysnAutoCopyDocumentsToSales] BIT NULL DEFAULT ((0)),
 [ysnAllowPledgedLotsForPicking] BIT NULL,
+[ysnOverrideLOBSegment] BIT NULL,
 
 CONSTRAINT [PK_tblLGCompanyPreference] PRIMARY KEY ([intCompanyPreferenceId]), 
 CONSTRAINT [FK_tblLGCompanyPreference_tblICCommodity_intCommodityId] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]),

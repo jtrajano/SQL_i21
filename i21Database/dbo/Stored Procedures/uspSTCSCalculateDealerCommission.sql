@@ -79,7 +79,7 @@ BEGIN TRY
 		IF @ysnAutoBlend = 0
 		BEGIN
 			BEGIN TRY
-				SET @intSubLocationId = (SELECT intCompanyLocationSubLocationId FROM tblTMSite WHERE intLocationId = @intCompanyLocationId AND intProduct = @intItemId);
+				SET @intSubLocationId = (SELECT TOP 1 intCompanyLocationSubLocationId FROM tblTMSite WHERE intLocationId = @intCompanyLocationId AND intProduct = @intItemId);
 				EXEC [dbo].[uspICCalculateCost] @intItemId, @intCompanyLocationId, @dblQty, NULL, @Cost OUT, @intItemUOMId, NULL, NULL, @intSubLocationId, NULL
 			END TRY
 			BEGIN CATCH
@@ -124,7 +124,7 @@ BEGIN TRY
 					SET @MFGCost = NULL
 
 					BEGIN TRY
-						SET @intSubLocationId = (SELECT intCompanyLocationSubLocationId FROM tblTMSite WHERE intLocationId = @intCompanyLocationId AND intProduct = @intMFGItemId);
+						SET @intSubLocationId = (SELECT TOP 1 intCompanyLocationSubLocationId FROM tblTMSite WHERE intLocationId = @intCompanyLocationId AND intProduct = @intMFGItemId);
 						EXEC [dbo].[uspICCalculateCost] @intMFGItemId, @intCompanyLocationId, @dblQty, NULL, @MFGCost OUT, @intMFGItemUOMId, NULL, NULL, @intSubLocationId, NULL
 					END TRY
 					BEGIN CATCH

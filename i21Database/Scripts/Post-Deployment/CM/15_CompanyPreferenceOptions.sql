@@ -43,6 +43,10 @@ UPDATE tblCMCompanyPreferenceOption SET ysnOverrideLocationSegment_Swap = 0 WHER
 
 UPDATE tblCMCompanyPreferenceOption SET ysnOverrideLocationSegment_InTransit = 0 WHERE ysnOverrideLocationSegment_InTransit IS NULL
 
+UPDATE tblCMCompanyPreferenceOption SET ysnRemittanceAdvice_DisplayVendorAccountNumber = 1 WHERE ysnRemittanceAdvice_DisplayVendorAccountNumber IS NULL
+
+UPDATE tblCMCompanyPreferenceOption SET ysnRemittanceAdvice_AttachSettlement =0 WHERE ysnRemittanceAdvice_AttachSettlement IS NULL
+
 GO
 
 PRINT ('Finished updating company preference options default settings ')

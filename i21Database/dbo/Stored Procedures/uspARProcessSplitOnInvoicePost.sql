@@ -60,6 +60,7 @@ BEGIN TRY
 		 , strTransactionType	= I.strTransactionType
 	FROM tblARPostInvoiceHeader I 
 	INNER JOIN tblEMEntitySplitDetail SD ON I.intSplitId = SD.intSplitId
+	INNER JOIN tblARCustomer C ON SD.intEntityId = C.intEntityId
 	WHERE I.intSplitId IS NOT NULL
 	  AND I.intDistributionHeaderId IS NULL 
 	  AND I.strType <> 'Transport Delivery'

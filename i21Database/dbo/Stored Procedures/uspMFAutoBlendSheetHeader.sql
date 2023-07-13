@@ -107,5 +107,5 @@ LEFT JOIN tblMFMachine AS Machine ON BlendRequirement.intMachineId = Machine.int
 LEFT JOIN tblMFMachineIssuedUOMType AS MachineIssuedUOM ON Machine.intIssuedUOMTypeId = MachineIssuedUOM.intIssuedUOMTypeId
 LEFT JOIN tblMFRecipe AS Recipe ON BlendRequirement.intItemId = Recipe.intItemId AND BlendRequirement.intLocationId = Recipe.intLocationId AND Recipe.ysnActive = 1
 							   		/* Filter recipe with Validity if Company Configuration Recipe Header Validation is set to true. */
-							   AND (@ysnRecipeHeaderValidation = 1 AND GETDATE() BETWEEN Recipe.dtmValidFrom AND Recipe.dtmValidTo)
+							   AND (@ysnRecipeHeaderValidation = 1 AND CONVERT(DATE, GETDATE()) BETWEEN CONVERT(DATE, Recipe.dtmValidFrom) AND CONVERT(DATE, Recipe.dtmValidTo))
 WHERE BlendRequirement.intBlendRequirementId = @intBlendRequirementId

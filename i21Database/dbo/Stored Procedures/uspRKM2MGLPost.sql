@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspRKM2MGLPost
+﻿CREATE PROCEDURE [dbo].[uspRKM2MGLPost]
 	@intM2MHeaderId INT
 
 AS
@@ -22,19 +22,19 @@ BEGIN TRY
 		, @dtmPreviousGLReverseDate DATETIME
 		, @strPreviousBatchId NVARCHAR(100)
 		, @strCommodityCode NVARCHAR(100)
-		, @ysnPosted BIT
-		, @strRecordName NVARCHAR(100)
 		, @intCurrencyId INT
 		, @intFunctionalCurrencyId INT
 		, @ysnM2MAllowGLPostToNonFunctionalCurrency BIT
+		, @ysnPosted BIT
+		, @strRecordName NVARCHAR(100)
 
 	SELECT @intCommodityId = intCommodityId
 		, @dtmCurrenctGLPostDate = dtmPostDate
 		, @dtmGLReverseDate = dtmReverseDate 
 		, @intLocationId = intLocationId
+		, @intCurrencyId = intCurrencyId
 		, @ysnPosted = ysnPosted
 		, @strRecordName = strRecordName
-		, @intCurrencyId = intCurrencyId
 	FROM tblRKM2MHeader
 	WHERE intM2MHeaderId = @intM2MHeaderId
 
@@ -49,6 +49,7 @@ BEGIN TRY
 	
 	SELECT @ysnM2MAllowGLPostToNonFunctionalCurrency = ysnM2MAllowGLPostToNonFunctionalCurrency FROM tblRKCompanyPreference
 	SELECT @intFunctionalCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference
+
 
 	IF (ISNULL(@ysnPosted, 0) = 1)
 	BEGIN
@@ -87,11 +88,6 @@ BEGIN TRY
 	SELECT * INTO #tmpPostRecap
 	FROM tblRKM2MPostPreview 
 	WHERE intM2MHeaderId = @intM2MHeaderId
-	
-	IF (@dtmCurrenctGLPostDate IS NULL)
-	BEGIN
-		SELECT TOP 1 @dtmCurrenctGLPostDate = dtmDate FROM #tmpPostRecap
-	END
 
 	IF (@dtmCurrenctGLPostDate IS NULL)
 	BEGIN
@@ -118,7 +114,7 @@ BEGIN TRY
 			, @strTransactionId = strTransactionId
 			, @intTransactionId = intTransactionId
 			, @strTransactionType = strTransactionType
-			, @dblAmount = (dblDebit + dblCredit)
+			, @dblAmount = (dblCredit - dblDebit)
 			
 		FROM #tmpPostRecap
 
@@ -143,7 +139,7 @@ BEGIN TRY
 		END
 		ELSE IF (@strTransactionType = 'Mark To Market-Basis Offset' OR @strTransactionType = 'Mark To Market-Basis Intransit Offset')
 		BEGIN
-			IF (ISNULL(@dblAmount, 0) >= 0)
+			IF (ISNULL(@dblAmount, 0) <= 0)
 			BEGIN
 				SELECT TOP 1 @intAccountId = intAccountId
 					, @strAccountNo = strAccountNo
@@ -181,7 +177,7 @@ BEGIN TRY
 		END
 		ELSE IF (@strTransactionType = 'Mark To Market-Futures Derivative Offset' OR @strTransactionType = 'Mark To Market-Futures Offset' OR @strTransactionType = 'Mark To Market-Futures Intransit Offset')
 		BEGIN
-			IF (ISNULL(@dblAmount, 0) >= 0)
+			IF (ISNULL(@dblAmount, 0) <= 0)
 			BEGIN
 				SELECT TOP 1 @intAccountId = intAccountId
 					, @strAccountNo = strAccountNo
@@ -219,7 +215,7 @@ BEGIN TRY
 		END
 		ELSE IF (@strTransactionType = 'Mark To Market-Cash Offset' OR @strTransactionType = 'Mark To Market-Futures Intransit Offset')
 		BEGIN
-			IF (ISNULL(@dblAmount, 0) >= 0)
+			IF (ISNULL(@dblAmount, 0) <= 0)
 			BEGIN
 				SELECT TOP 1 @intAccountId = intAccountId
 					, @strAccountNo = strAccountNo
@@ -257,7 +253,7 @@ BEGIN TRY
 		END
 		ELSE IF (@strTransactionType = 'Mark To Market-Ratio Offset')
 		BEGIN
-			IF (ISNULL(@dblAmount, 0) >= 0)
+			IF (ISNULL(@dblAmount, 0) <= 0)
 			BEGIN
 				SELECT TOP 1 @intAccountId = intAccountId
 					, @strAccountNo = strAccountNo
@@ -276,7 +272,7 @@ BEGIN TRY
 		END
 		ELSE IF (@strTransactionType = 'Mark To Market-Cash Inventory Offset')
 		BEGIN
-			IF (ISNULL(@dblAmount, 0) >= 0)
+			IF (ISNULL(@dblAmount, 0) <= 0)
 			BEGIN
 				SELECT TOP 1 @intAccountId = intAccountId
 					, @strAccountNo = strAccountNo
@@ -463,7 +459,7 @@ BEGIN TRY
 		EXEC dbo.uspGLBookEntries @ReverseGLEntries,1 
 	
 		UPDATE tblRKM2MPostPreview SET strReversalBatchId = @strReversalBatchId WHERE intM2MHeaderId = @intM2MHeaderId
-
+		
 		SELECT * FROM @tblResult
 	COMMIT TRAN	
 END TRY

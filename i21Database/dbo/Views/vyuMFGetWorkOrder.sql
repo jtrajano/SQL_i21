@@ -134,6 +134,10 @@ OUTER APPLY (SELECT TOP 1 intOrderHeaderId
 OUTER APPLY (SELECT TOP 1 MFWorkOrderStatus.strName
 			 FROM tblMFWorkOrderStatus AS MFWorkOrderStatus
 			 WHERE MFWorkOrderStatus.intStatusId = W.intTrialBlendSheetStatusId) AS TrialBlendSheetStatus
+WHERE R.intVersionNo = ( 
+			SELECT MAX(intVersionNo) 
+			FROM tblMFRecipe R
+			WHERE R.intItemId = W.intItemId)
 GROUP BY C.intManufacturingCellId
 	   , C.strCellName
 	   , W.intWorkOrderId

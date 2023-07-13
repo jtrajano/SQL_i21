@@ -248,21 +248,23 @@ IF ISNULL(@ysnInvoice, 1) = 1 OR ISNULL(@ysnRebuild, 0) = 1
 		LEFT JOIN tblGLFiscalYearPeriod AccPeriod ON ARI.intPeriodId = AccPeriod.intGLFiscalYearPeriodId
 		LEFT JOIN tblICItemUOM ARIDUOM ON ARID.intItemUOMId = ARIDUOM.intItemUOMId
 		LEFT OUTER JOIN (
-			SELECT intTransactionId		= ICIT.intTransactionId
-				 , strTransactionId		= ICIT.strTransactionId
-				 , intItemId			= ICIT.intItemId
-				 , intItemUOMId			= ICIT.intItemUOMId
-				 , dblCost				= CASE WHEN SUM(ICIT.dblQty) <> 0 THEN SUM(ICIT.dblQty * ICIT.dblCost + ICIT.dblValue) / SUM(ICIT.dblQty) ELSE 0 END
-				 , dblUnitQty			= AVG(UOM.dblUnitQty)
+			SELECT intTransactionId			= ICIT.intTransactionId
+				 , strTransactionId			= ICIT.strTransactionId
+				 , intTransactionDetailId	= ICIT.intTransactionDetailId
+				 , intItemId				= ICIT.intItemId
+				 , intItemUOMId				= ICIT.intItemUOMId
+				 , dblCost					= CASE WHEN SUM(ICIT.dblQty) <> 0 THEN SUM(ICIT.dblQty * ICIT.dblCost + ICIT.dblValue) / SUM(ICIT.dblQty) ELSE 0 END
+				 , dblUnitQty				= AVG(UOM.dblUnitQty)
 			FROM tblICInventoryTransaction ICIT
 			INNER JOIN tblICItemUOM UOM ON ICIT.intItemUOMId = UOM.intItemUOMId
 			WHERE ICIT.ysnIsUnposted = 0
 			  AND ICIT.intItemUOMId IS NOT NULL
 			  AND ICIT.intTransactionTypeId <> 1
-			GROUP BY ICIT.intTransactionId, ICIT.strTransactionId, ICIT.intItemId, ICIT.intItemUOMId
-		) AS NONSO ON ARI.intInvoiceId		= NONSO.intTransactionId
-				  AND ARI.strInvoiceNumber	= NONSO.strTransactionId
-				  AND ARID.intItemId		= NONSO.intItemId
+			GROUP BY ICIT.intTransactionId, ICIT.strTransactionId, ICIT.intItemId, ICIT.intItemUOMId, ICIT.intTransactionDetailId
+		) AS NONSO ON ARI.intInvoiceId			= NONSO.intTransactionId
+				  AND ARI.strInvoiceNumber		= NONSO.strTransactionId
+				  AND ARID.intItemId			= NONSO.intItemId
+				  AND ARID.intInvoiceDetailId 	= NONSO.intTransactionDetailId
 		LEFT OUTER JOIN (
 			SELECT intInventoryShipmentItemId	= ICISI.intInventoryShipmentItemId
 				 , intLineNo					= ICISI.intLineNo
@@ -354,7 +356,7 @@ IF ISNULL(@ysnInvoice, 1) = 1 OR ISNULL(@ysnRebuild, 0) = 1
 													THEN CASE WHEN ISNULL(LOTTED.dblCost, 0) > 0 THEN ISNULL(LOTTED.dblCost, 0) / ARID.dblQtyShipped ELSE ISNULL(LOTTED.dblCost, 0) END 
 												ELSE CASE WHEN ISNULL(NONSO.dblCost, 0) > 0 THEN ISNULL(NONSO.dblCost, 0) / ARID.dblQtyShipped ELSE ISNULL(NONSO.dblCost, 0) END
 											END)
-			, dblPrice					= ARID.dblPrice
+			, dblPrice					= ARID.dblPrice * CASE WHEN ARID.intPriceUOMId IS NOT NULL AND ARID.intItemUOMId <> ARID.intPriceUOMId THEN ARIDUOM.dblUnitQty ELSE 1 END
 			, dblTax					= ARID.dblTotalTax
 			, dblLineTotal				= ARID.dblTotal
 			, dblTotal					= ARI.dblInvoiceTotal			
@@ -381,6 +383,7 @@ IF ISNULL(@ysnInvoice, 1) = 1 OR ISNULL(@ysnRebuild, 0) = 1
 		INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId
 		INNER JOIN #INVOICES II ON ARI.intInvoiceId = II.intInvoiceId
 		INNER JOIN tblICItem ICI ON ARID.intItemId = ICI.intItemId
+		LEFT JOIN tblICItemUOM ARIDUOM ON ARID.intItemUOMId = ARIDUOM.intItemUOMId
 		LEFT JOIN tblGLFiscalYearPeriod AccPeriod ON ARI.intPeriodId = AccPeriod.intGLFiscalYearPeriodId
 		LEFT OUTER JOIN (
 			SELECT intTransactionId

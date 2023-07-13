@@ -27,9 +27,6 @@ BEGIN
 		,@strExternalPOItemNumber NVARCHAR(100)
 		,@dblDeliveredQty NUMERIC(18, 6)
 		,@strUnitOfMeasure NVARCHAR(100)
-		,@strCommodityCode NVARCHAR(100)
-		,@dblGrossWt NUMERIC(18, 6)
-		,@strWeightUOM NVARCHAR(50)
 	DECLARE @strContractNumber NVARCHAR(50)
 		,@intContractSeq INT
 		,@strVendorAccountNum NVARCHAR(50)
@@ -44,6 +41,11 @@ BEGIN
 		,@dtmETAPOD DATETIME
 		,@strItemNo NVARCHAR(50)
 		,@strShortName NVARCHAR(50)
+		,@strTransportationMode NVARCHAR(50)
+		,@strShippingLine NVARCHAR(100)
+		,@strCarrier NVARCHAR(100)
+		,@strMVessel NVARCHAR(200)
+		,@strWarehouse NVARCHAR(50)
 
 	INSERT INTO @tblLGLoadStg (intLoadStgId)
 	SELECT intLoadStgId
@@ -159,9 +161,6 @@ BEGIN
 				,@strExternalPOItemNumber = NULL
 				,@dblDeliveredQty = NULL
 				,@strUnitOfMeasure = NULL
-				,@strCommodityCode = NULL
-				,@dblGrossWt = NULL
-				,@strWeightUOM = NULL
 
 			SELECT @strContractNumber = NULL
 				,@intContractSeq = NULL
@@ -177,15 +176,17 @@ BEGIN
 				,@dtmETAPOD = NULL
 				,@strItemNo = NULL
 				,@strShortName = NULL
+				,@strTransportationMode = NULL
+				,@strShippingLine = NULL
+				,@strCarrier = NULL
+				,@strMVessel = NULL
+				,@strWarehouse = NULL
 
 			SELECT @intLoadDetailId = intLoadDetailId
 				,@strExternalPONumber = strExternalPONumber
 				,@strExternalPOItemNumber = strExternalPOItemNumber
 				,@dblDeliveredQty = dblDeliveredQty
 				,@strUnitOfMeasure = strUnitOfMeasure
-				,@strCommodityCode = strCommodityCode
-				,@dblGrossWt = dblGrossWt
-				,@strWeightUOM = strWeightUOM
 			FROM dbo.tblLGLoadDetailStg WITH (NOLOCK)
 			WHERE intLGLoadDetailStgId = @intLGLoadDetailStgId
 
@@ -203,9 +204,20 @@ BEGIN
 				,@dtmETAPOD = L.dtmETAPOD
 				,@strItemNo = I.strItemNo
 				,@strShortName = I.strShortName
+				,@strTransportationMode = CASE L.intTransportationMode
+					WHEN 1 THEN 'Truck'
+					WHEN 2 THEN 'Ocean Vessel'
+					WHEN 3 THEN 'Rail'
+					WHEN 4 THEN 'Multimodal'
+					END
+				,@strShippingLine = SL.strName
+				,@strCarrier = L.strGenerateLoadHauler
+				,@strMVessel = L.strMVessel
 			FROM dbo.tblLGLoadDetail LD WITH (NOLOCK)
 			JOIN dbo.tblLGLoad L WITH (NOLOCK) ON L.intLoadId = LD.intLoadId
 				AND LD.intLoadDetailId = @intLoadDetailId
+			JOIN dbo.tblLGLoadDetailContainerLink LDCL WITH (NOLOCK) ON LDCL.intLoadDetailId = LD.intLoadDetailId
+			JOIN dbo.tblLGLoadContainer LC WITH (NOLOCK) ON LC.intLoadContainerId = LDCL.intLoadContainerId
 			JOIN dbo.tblCTContractDetail CD WITH (NOLOCK) ON CD.intContractDetailId = LD.intPContractDetailId
 			JOIN dbo.tblCTContractHeader CH WITH (NOLOCK) ON CH.intContractHeaderId = CD.intContractHeaderId
 			JOIN dbo.vyuAPVendor V WITH (NOLOCK) ON V.intEntityId = LD.intVendorEntityId
@@ -213,24 +225,38 @@ BEGIN
 			LEFT JOIN dbo.tblCTPosition P WITH (NOLOCK) ON P.intPositionId = L.intPositionId
 			LEFT JOIN dbo.tblSMCity LP WITH (NOLOCK) ON LP.intCityId = CD.intLoadingPortId
 			LEFT JOIN dbo.tblSMCity DP WITH (NOLOCK) ON DP.intCityId = CD.intDestinationPortId
+			LEFT JOIN dbo.tblLGContainerType CT WITH (NOLOCK) ON CT.intContainerTypeId = L.intContainerTypeId
+			LEFT JOIN dbo.tblEMEntity SL WITH (NOLOCK) ON SL.intEntityId = L.intShippingLineEntityId
 
-			SELECT @strDetailXML = '<LINE_ITEM>'
+			SELECT TOP 1 @strWarehouse = CLSL.strSubLocationName
+			FROM dbo.tblLGLoadWarehouse LW WITH (NOLOCK)
+			JOIN dbo.tblLGLoad L WITH (NOLOCK) ON L.intLoadId = LW.intLoadId
+				AND L.intLoadId = @intLoadId
+			JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = LW.intSubLocationId
 
-			SELECT @strDetailXML += '<SEQUENCE_NO>' + LTRIM(ISNULL(@intContractSeq, '')) + '</SEQUENCE_NO>'
-
-			SELECT @strDetailXML += '<PO_LINE_ITEM_NO>' + ISNULL(@strExternalPOItemNumber, '') + '</PO_LINE_ITEM_NO>'
-
-			SELECT @strDetailXML += '<ITEM_NO>' + dbo.fnEscapeXML(ISNULL(@strItemNo, '')) + '</ITEM_NO>'
-
-			SELECT @strDetailXML += '<SHORT_NAME>' + ISNULL(@strShortName, '') + '</SHORT_NAME>'
-
-			SELECT @strDetailXML += '<COMMODITY>' + ISNULL(@strCommodityCode, '') + '</COMMODITY>'
-
-			SELECT @strDetailXML += '<GROSS_WEIGHT>' + ISNULL(CONVERT(NVARCHAR(50), CONVERT(NUMERIC(18, 2), @dblGrossWt)), '') + '</GROSS_WEIGHT>'
-
-			SELECT @strDetailXML += '<WEIGHT_UOM>' + ISNULL(@strWeightUOM, '') + '</WEIGHT_UOM>'
-
-			SELECT @strDetailXML += '</LINE_ITEM>'
+			SELECT @strDetailXML = @strDetailXML
+				+ '<LINE_ITEM>'
+				+ '<PO_LINE_ITEM_NO>' + ISNULL(@strExternalPOItemNumber, '') + '</PO_LINE_ITEM_NO>'
+				+ '<ITEM_NO>' + dbo.fnEscapeXML(ISNULL(I.strItemNo, '')) + '</ITEM_NO>'
+				+ '<ITEM_DESCRIPTION>' + dbo.fnEscapeXML(ISNULL(I.strDescription, '')) + '</ITEM_DESCRIPTION>'
+				+ '<SHORT_NAME>' + ISNULL(I.strShortName, '') + '</SHORT_NAME>'
+				+ '<COMMODITY>' + ISNULL(C.strCommodityCode, '') + '</COMMODITY>'
+				+ '<GROSS_WEIGHT>' + ISNULL(CONVERT(NVARCHAR(50), CONVERT(NUMERIC(18, 2), LC.dblNetWt)), '') + '</GROSS_WEIGHT>'
+				+ '<WEIGHT_UOM>' + ISNULL(LCWU.strUnitMeasure, '') + '</WEIGHT_UOM>'
+				+ '<CONTAINER_TYPE>' + ISNULL(CT.strContainerType, '') + '</CONTAINER_TYPE>'
+				+ '<CONTAINER_NO>' + ISNULL(LC.strContainerNumber, '') + '</CONTAINER_NO>'
+				+ '<SEAL_NO>' + ISNULL(LC.strSealNumber, '') + '</SEAL_NO>'
+				+ '</LINE_ITEM>'
+			FROM dbo.tblLGLoadDetail LD WITH (NOLOCK)
+			JOIN dbo.tblLGLoad L WITH (NOLOCK) ON L.intLoadId = LD.intLoadId
+				AND LD.intLoadDetailId = @intLoadDetailId
+			JOIN dbo.tblLGLoadDetailContainerLink LDCL WITH (NOLOCK) ON LDCL.intLoadDetailId = LD.intLoadDetailId
+			JOIN dbo.tblLGLoadContainer LC WITH (NOLOCK) ON LC.intLoadContainerId = LDCL.intLoadContainerId
+			JOIN dbo.tblICItem I WITH (NOLOCK) ON I.intItemId = LD.intItemId
+			JOIN dbo.tblICCommodity C WITH (NOLOCK) ON C.intCommodityId = I.intCommodityId
+			JOIN dbo.tblLGContainerType CT WITH (NOLOCK) ON CT.intContainerTypeId = L.intContainerTypeId
+			JOIN dbo.tblICUnitMeasure LCWU WITH (NOLOCK) ON LCWU.intUnitMeasureId = LC.intWeightUnitMeasureId
+			ORDER BY LC.intLoadContainerId
 
 			SELECT @intLGLoadDetailStgId = MIN(intLGLoadDetailStgId)
 			FROM @tblLGLoadDetailStg
@@ -335,6 +361,18 @@ BEGIN
 			SELECT @strHeaderXML += '<ETS_POL>' + ISNULL(CONVERT(NVARCHAR, @dtmETSPOL, 112), '') + '</ETS_POL>'
 
 			SELECT @strHeaderXML += '<ETA_POD>' + ISNULL(CONVERT(NVARCHAR, @dtmETAPOD, 112), '') + '</ETA_POD>'
+
+			SELECT @strHeaderXML += '<TRANSPORT_MODE>' + ISNULL(@strTransportationMode, '') + '</TRANSPORT_MODE>'
+
+			SELECT @strHeaderXML += '<SHIPPING_LINE>' + dbo.fnEscapeXML(ISNULL(@strShippingLine, '')) + '</SHIPPING_LINE>'
+
+			SELECT @strHeaderXML += '<CARRIER>' + dbo.fnEscapeXML(ISNULL(@strCarrier, '')) + '</CARRIER>'
+
+			SELECT @strHeaderXML += '<MV_NAME>' + dbo.fnEscapeXML(ISNULL(@strMVessel, '')) + '</MV_NAME>'
+
+			SELECT @strHeaderXML += '<WAREHOUSE>' + ISNULL(@strWarehouse, '') + '</WAREHOUSE>'
+
+			SELECT @strHeaderXML += '<SEQUENCE_NO>' + LTRIM(ISNULL(@intContractSeq, '')) + '</SEQUENCE_NO>'
 
 			SELECT @strHeaderXML += '</HEADER>'
 		END
