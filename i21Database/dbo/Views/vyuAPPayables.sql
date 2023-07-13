@@ -12,10 +12,12 @@ SELECT
 	, A.strBillId 
 	, 0 AS dblAmountPaid 
 	, CAST(CASE WHEN A.intTransactionType IN (16) THEN (B.dblTotal * (B.dblProvisionalPercentage / 100)) * B.dblRate
+						WHEN A.ysnFinalVoucher = 1 THEN (B.dblTotal * ((100 - A.dblProvisionalPercentage) / 100)) * B.dblRate
 						WHEN A.intTransactionType NOT IN (1,14) THEN (B.dblTotal) *  B.dblRate * -1 
 				ELSE (B.dblTotal) * B.dblRate
 		END AS DECIMAL(18,2)) AS dblTotal
 	,	CASE WHEN A.intTransactionType IN (16) THEN A.dblProvisionalAmountDue
+				WHEN A.ysnFinalVoucher = 1 THEN A.dblAmountDue - A.dblProvisionalTotal
 				WHEN A.intTransactionType NOT IN (1,14) THEN A.dblAmountDue * -1 ELSE A.dblAmountDue
 		END * B.dblRate AS dblAmountDue 
 	, dblWithheld = 0
@@ -45,10 +47,12 @@ SELECT
 	, A.strBillId 
 	, 0 AS dblAmountPaid 
 	, CAST(CASE WHEN A.intTransactionType IN (16) THEN (B.dblTotal * (ISNULL(BL.dblProvisionalPercentage, 100) / 100)) * B.dblRate 
+				WHEN BL.ysnFinalVoucher = 1 THEN (BL.dblTotal * ((100 - BL.dblProvisionalPercentage) / 100)) * B.dblRate
 				WHEN A.intTransactionType NOT IN (1,14) THEN (B.dblTotal) *  B.dblRate * -1 
 				ELSE (B.dblTotal) * B.dblRate
 		END AS DECIMAL(18,2)) AS dblTotal
 	, CASE WHEN A.intTransactionType IN (16) THEN BL.dblProvisionalAmountDue
+	WHEN BL.ysnFinalVoucher = 1 THEN BL.dblAmountDue - BL.dblProvisionalTotal
 	WHEN A.intTransactionType NOT IN (1,14) THEN A.dblAmountDue * -1 ELSE A.dblAmountDue
 		END * B.dblRate AS dblAmountDue 
 	, dblWithheld = 0
@@ -95,10 +99,12 @@ SELECT
 	, A.strBillId 
 	, 0 AS dblAmountPaid 
 	, CAST(CASE WHEN A.intTransactionType IN (16) THEN  (ISNULL(B.dblTax, 0) * (A.dblProvisionalPercentage / 100)) * B.dblRate
+				WHEN A.ysnFinalVoucher = 1 THEN (B.dblTax * ((100 - A.dblProvisionalPercentage) / 100)) * B.dblRate
 				WHEN A.intTransactionType NOT IN (1,14) THEN ISNULL(B.dblTax, 0) *  B.dblRate * -1 
 				ELSE ISNULL(B.dblTax, 0) * B.dblRate
 		END AS DECIMAL(18,2)) AS dblTotal
 	, CASE WHEN A.intTransactionType IN (16) THEN A.dblProvisionalAmountDue
+		WHEN A.ysnFinalVoucher = 1 THEN A.dblAmountDue - A.dblProvisionalTotal
 		WHEN A.intTransactionType NOT IN (1,14) THEN A.dblAmountDue * -1 ELSE A.dblAmountDue
 		END * B.dblRate AS dblAmountDue 
 	, dblWithheld = 0
@@ -130,8 +136,10 @@ SELECT
 	, A.strBillId 
 	, 0 AS dblAmountPaid 
 	, CAST(CASE WHEN A.intTransactionType IN (16) AND A.dblProvisionalTotal > 0 THEN (A.dblProvisionalTotal + (A.dblTax * (A.dblProvisionalPercentage / 100)))
+							WHEN A.ysnFinalVoucher = 1 AND A.dblTotal > 0 THEN (A.dblTotal - A.dblProvisionalTotal) * (A.dblTax * (100 - A.dblProvisionalPercentage) / 100)
 							WHEN A.intTransactionType NOT IN (1,14) AND A.dblTotal > 0 THEN (A.dblTotal + A.dblTax) * -1 ELSE A.dblTotal + A.dblTax END AS DECIMAL(18,2)) AS dblTotal
 	, CASE WHEN A.intTransactionType IN (16) THEN A.dblProvisionalAmountDue
+	WHEN A.ysnFinalVoucher = 1 THEN A.dblAmountDue - A.dblProvisionalTotal
 	WHEN A.intTransactionType NOT IN (1,14) THEN A.dblAmountDue * -1 ELSE A.dblAmountDue END AS dblAmountDue 
 	, dblWithheld = 0
 	, dblDiscount = 0 
@@ -280,8 +288,10 @@ SELECT --OVERPAYMENT
 	, A.strBillId 
 	, 0 AS dblAmountPaid 
 	, CASE WHEN A.intTransactionType IN (16) AND A.dblProvisionalTotal > 0 THEN A.dblProvisionalTotal
+		WHEN A.ysnFinalVoucher = 1 AND A.dblTotal - A.dblProvisionalTotal > 0 THEN A.dblTotal - A.dblProvisionalTotal
 		WHEN A.intTransactionType NOT IN (1,14) AND A.dblTotal > 0 THEN A.dblTotal * -1 ELSE A.dblTotal END AS dblTotal
 	, CASE WHEN A.intTransactionType IN (16) AND A.dblProvisionalAmountDue > 0 THEN A.dblProvisionalAmountDue
+		WHEN A.ysnFinalVoucher = 1 AND A.dblAmountDue - A.dblProvisionalTotal > 0 THEN A.dblAmountDue - A.dblProvisionalTotal
 		WHEN A.intTransactionType NOT IN (1,14) AND A.dblAmountDue > 0 THEN A.dblAmountDue * -1 ELSE A.dblAmountDue END AS dblAmountDue 
 	, dblWithheld = 0
 	, dblDiscount = 0 

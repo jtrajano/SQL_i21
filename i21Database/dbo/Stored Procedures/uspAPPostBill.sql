@@ -1281,7 +1281,9 @@ BEGIN
 			DELETE GL 
 			FROM @GLEntriesTemp GL
 			INNER JOIN vyuGLAccountDetail AD ON AD.intAccountId = GL.intAccountId
+			INNER JOIN tblAPBill BL ON GL.strTransactionId = BL.strBillId
 			WHERE AD.intAccountCategoryId = 45
+			AND BL.ysnFinalVoucher != 1
 
 			INSERT INTO @GLEntries
 			SELECT * FROM @GLEntriesTemp

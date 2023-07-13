@@ -1485,7 +1485,8 @@ BEGIN
 		-- 										END
 		-- 										* (CASE WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END),
 		[dblDebit]						=	CAST((SUM(ISNULL(D.dblAdjustedTax, D.dblTax)) - SUM(D.dblTax)) * ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2))
-											* (CASE WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END),
+														* (CASE WHEN A.ysnFinalVoucher = 1 THEN (100 - A.dblProvisionalPercentage) / 100
+															WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END),
 		[dblCredit]						=	0,
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
@@ -1507,7 +1508,8 @@ BEGIN
 		[strTransactionType]			=	'Bill',
 		[strTransactionForm]			=	@SCREEN_NAME,
 		[strModuleName]					=	@MODULE_NAME,
-		[dblDebitForeign]				=	CAST(SUM(ISNULL(D.dblAdjustedTax, D.dblTax)) - SUM(D.dblTax) AS DECIMAL(18,2)),
+		[dblDebitForeign]				=	CAST(SUM(ISNULL(D.dblAdjustedTax, D.dblTax)) - SUM(D.dblTax) AS DECIMAL(18,2))
+															* (CASE WHEN A.ysnFinalVoucher = 1 THEN (100 - A.dblProvisionalPercentage) / 100 ELSE 1 END),
 		-- [dblDebitForeign]				=	CASE WHEN charges.intInventoryReceiptChargeId > 0 
 		-- 											THEN  (CASE 
 		-- 													--IF CHARGE IS THE ITEM FOR ysnPrice, REVERSE THE TAX SIGN
@@ -1579,6 +1581,8 @@ BEGIN
 	,A.intTransactionType
 	,A.strBillId
 	,A.intBillId
+	,A.ysnFinalVoucher
+	,A.dblProvisionalPercentage
 	,charges.intInventoryReceiptChargeId
 	,charges.ysnPrice
 	,receipts.intEntityVendorId
@@ -2207,12 +2211,12 @@ BEGIN
 						ELSE R2.dblTax
 					END) * (100 - A.dblProvisionalPercentage) / 100) AS DECIMAL(18,2))
 					
-					+ (CASE WHEN R.intInventoryReceiptChargeId > 0 
+					+ CAST((CASE WHEN R.intInventoryReceiptChargeId > 0 
 								THEN (CASE WHEN (A.intEntityVendorId = charges.intEntityVendorId)
 												AND charges.ysnPrice = 1
 											THEN (R2.dblAdjustedTax - R2.dblTax) * -1 ELSE (R2.dblAdjustedTax - R2.dblTax) END) 
 						ELSE (R2.dblAdjustedTax - R2.dblTax)
-					END)
+					END) * (100 - A.dblProvisionalPercentage) / 100 AS DECIMAL(18,2))
 				AS dblTotal,
 				 R.dblRate  AS dblRate,
 				 exRates.intCurrencyExchangeRateTypeId,
