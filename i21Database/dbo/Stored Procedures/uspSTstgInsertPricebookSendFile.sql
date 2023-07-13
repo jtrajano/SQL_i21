@@ -370,7 +370,7 @@ BEGIN
 	
 							[strICPOSCodeFormatFormat]			= PCF.strPosCodeFormat,
 							[strICPOSCode]						= dbo.fnSTRemoveCheckDigit(ISNULL(PCF.strUPCA, PCF.strLongUPCCode)), --IUOM.strLongUPCCode, -- IF PASSPORT DO NOT include check digit
-							[strICPOSCodeModifier]				= '0',
+							[strICPOSCodeModifier]				= CAST(ISNULL(IUOM.intModifier, '0') AS NVARCHAR(10)),
 
 							[strITTDataActiveFlgValue]			= CASE 
 																	WHEN item.strStatus = 'Active' 
