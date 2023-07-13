@@ -63,4 +63,4 @@ OUTER APPLY (
 ) COMP
 WHERE B.strContainerNumber != ''
   AND B.strContainerNumber IS NOT NULL
-  AND B.intLocationId = B.intBuyingCenterLocationId
+  AND B.intLocationId = B.intMixingUnitLocationId
