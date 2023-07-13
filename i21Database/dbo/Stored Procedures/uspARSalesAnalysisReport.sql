@@ -262,7 +262,7 @@ IF ISNULL(@ysnInvoice, 1) = 1 OR ISNULL(@ysnRebuild, 0) = 1
 				 , intTransactionDetailId	= ICIT.intTransactionDetailId
 				 , intItemId				= ICIT.intItemId
 				 , intItemUOMId				= ICIT.intItemUOMId
-				 , dblCost					= CASE WHEN SUM(ICIT.dblQty) <> 0 THEN SUM(ICIT.dblCost) / SUM(ICIT.dblQty) ELSE 0 END
+				 , dblCost					= CASE WHEN SUM(ICIT.dblQty) <> 0 THEN SUM(ICIT.dblQty * ICIT.dblCost + ICIT.dblValue) / SUM(ICIT.dblQty) ELSE 0 END
 				 , dblUnitQty				= AVG(UOM.dblUnitQty)
 			FROM tblICInventoryTransaction ICIT
 			INNER JOIN tblICItemUOM UOM ON ICIT.intItemUOMId = UOM.intItemUOMId
