@@ -120,8 +120,12 @@ BEGIN
 
     DECLARE @strReceiptType AS NVARCHAR(50)
 			,@self AS INT 
-			,@costAdjustmentType_DETAILED AS TINYINT = 1
-			,@costAdjustmentType_SUMMARIZED AS TINYINT = 2
+
+	DECLARE @costAdjustmentType_DETAILED AS TINYINT = 1
+		,@costAdjustmentType_SUMMARIZED AS TINYINT = 2
+		,@costAdjustmentType_RETROACTIVE_DETAILED AS TINYINT = 3
+		,@costAdjustmentType_RETROACTIVE_SUMMARIZED AS TINYINT = 4
+		,@costAdjustmentType_CURRENT_AVG AS TINYINT = 5
 
 	DECLARE @costAdjustmentType AS TINYINT 
 	SET @costAdjustmentType = dbo.fnICGetCostAdjustmentSetup(@intItemId, @intItemLocationId) 
@@ -590,7 +594,7 @@ BEGIN
 		END 
 
 		-- Check if there is a transaction where the cost change needs escalation. 
-		IF @costAdjustmentType = @costAdjustmentType_DETAILED
+		IF @costAdjustmentType IN (@costAdjustmentType_DETAILED, @costAdjustmentType_RETROACTIVE_DETAILED)
 		BEGIN 
 			SET @EscalateCostAdjustment = 0 
 			SET @EscalateCostAdjustment = (@t_dblQty * @CostBucketNewCost) - (@t_dblQty * @CostBucketOriginalCost)
@@ -671,7 +675,7 @@ BEGIN
 				,[intInventoryCostAdjustmentTypeId] = 
 						CASE	WHEN @t_dblQty > 0 THEN 
 									CASE	
-											WHEN @costAdjustmentType = @costAdjustmentType_SUMMARIZED THEN 
+											WHEN @costAdjustmentType IN (@costAdjustmentType_SUMMARIZED, @costAdjustmentType_RETROACTIVE_SUMMARIZED) THEN 
 												@COST_ADJ_TYPE_Adjust_Value
 											WHEN @t_intTransactionTypeId = @INV_TRANS_TYPE_Produce THEN 
 												@COST_ADJ_TYPE_Adjust_WIP
@@ -698,7 +702,7 @@ BEGIN
 									END 
 								WHEN @t_dblQty < 0 THEN 
 									CASE	
-											WHEN @costAdjustmentType = @costAdjustmentType_SUMMARIZED THEN 
+											WHEN @costAdjustmentType IN (@costAdjustmentType_SUMMARIZED, @costAdjustmentType_RETROACTIVE_SUMMARIZED) THEN 
 												@COST_ADJ_TYPE_Adjust_Sold									
 											WHEN @t_intTransactionTypeId = @INV_TRANS_TYPE_Consume THEN 
 												@COST_ADJ_TYPE_Adjust_WIP
@@ -846,7 +850,7 @@ END
 --			END 
 --	END 
 --END 
-IF @costAdjustmentType = @costAdjustmentType_SUMMARIZED
+IF @costAdjustmentType IN (@costAdjustmentType_SUMMARIZED, @costAdjustmentType_RETROACTIVE_SUMMARIZED) 
 BEGIN 
 
 	DECLARE loopCostAdjustmentLogSummarized CURSOR LOCAL FAST_FORWARD
@@ -935,7 +939,7 @@ BEGIN
 
 END 
 
-ELSE IF @costAdjustmentType = @costAdjustmentType_DETAILED
+ELSE IF @costAdjustmentType IN (@costAdjustmentType_DETAILED, @costAdjustmentType_RETROACTIVE_DETAILED)
 BEGIN 
 
 	DECLARE @strTransactionIdCostAdjLog AS NVARCHAR(50)
