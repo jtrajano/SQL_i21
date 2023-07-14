@@ -178,10 +178,45 @@ SELECT
 	,intProfitCenter					= CLOC.intProfitCenter
 	,intOpportunityId					= INV.intOpportunityId
 	,strOpportunityName					= OPUR.strName
-	,ysnTaxAdjusted							= CAST(CASE WHEN RELATEDINVOICE2.strType = 'Tax Adjustment' AND RELATEDINVOICE2.ysnPosted = 1 THEN 1 ELSE 0 END AS BIT)
-	,strPrintFormat							= INV.strPrintFormat
-	,dblPercentage							= INV.dblPercentage
-	,dblProvisionalTotal					= CASE WHEN INV.dblPercentage <> 100 THEN INV.dblProvisionalTotal ELSE INV.dblInvoiceTotal END
+	,ysnTaxAdjusted						= CAST(CASE WHEN RELATEDINVOICE2.strType = 'Tax Adjustment' AND RELATEDINVOICE2.ysnPosted = 1 THEN 1 ELSE 0 END AS BIT)
+	,strPrintFormat						= INV.strPrintFormat
+	,dblPercentage						= INV.dblPercentage
+	,dblProvisionalTotal				= CASE WHEN INV.dblPercentage <> 100 THEN INV.dblProvisionalTotal ELSE INV.dblInvoiceTotal END
+	
+	,guiApiUniqueId							= INV.guiApiUniqueId
+	,intDefaultPayToBankAccountId			= INV.intDefaultPayToBankAccountId
+	,strDefaultPayToBankAccountNo			= DBA.strBankAccountNo
+	,strDefaultPayToBankPaymentInstructions	= DBA.strPaymentInstructions
+	,intPayToCashBankAccountId				= INV.intPayToCashBankAccountId
+	,strPayToCashBankAccountNo				= PFCBA.strBankAccountNo
+	,strSourceOfPayTo						= INV.strSourceOfPayTo
+	,strPaymentInstructions					= INV.strPaymentInstructions
+	,strTransactionNo						= INV.strTransactionNo
+	,intBankId								= INV.intBankId
+	,strBankName							= B.strBankName
+	,intBankAccountId						= INV.intBankAccountId
+	,strBankAccountNo						= BA.strBankAccountNo
+	,intBorrowingFacilityId					= INV.intBorrowingFacilityId
+	,strBorrowingFacility					= BF.strBorrowingFacilityId
+	,intBorrowingFacilityLimitId			= INV.intBorrowingFacilityLimitId
+	,strBorrowingFacilityLimit				= BFL.strBorrowingFacilityLimit
+	,intBorrowingFacilityLimitDetailId		= INV.intBorrowingFacilityLimitDetailId
+	,strBorrowingFacilityLimitDetail		= BFLD.strLimitDescription
+	,strBankReferenceNo						= INV.strBankReferenceNo
+	,strBankTradeReference					= INV.strBankTradeReference
+	,dblLoanAmount 							= INV.dblLoanAmount
+	,dblSurcharge							= INV.dblSurcharge
+	,intBankValuationRuleId					= INV.intBankValuationRuleId
+	,strBankValuationRule					= BVR.strBankValuationRule
+	,strTradeFinanceComments				= INV.strTradeFinanceComments
+	,strGoodsStatus							= INV.strGoodsStatus
+	,intTaxLocationId						= INV.intTaxLocationId
+	,strTaxLocation							= TAXLOCATION.strLocationName
+	,strTaxPoint							= INV.strTaxPoint
+	,ysnOverrideTaxPoint					= CAST(CASE WHEN ISNULL(INV.strTaxPoint,'') = '' THEN 0 ELSE 1 END AS BIT)
+	,ysnOverrideTaxLocation					= CAST(CASE WHEN ISNULL(INV.intTaxLocationId,0) > 0 THEN 1 ELSE 0 END AS BIT)
+	,strSourcedFrom							= CASE WHEN ISNULL(INV.intDefaultPayToBankAccountId,0) <> 0 THEN INV.strSourcedFrom ELSE '' END
+	
 FROM tblARInvoice INV WITH (NOLOCK)
 INNER JOIN (
     SELECT 

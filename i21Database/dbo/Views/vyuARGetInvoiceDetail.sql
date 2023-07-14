@@ -196,6 +196,7 @@ SELECT intInvoiceDetailId					= INV.intInvoiceDetailId
 	 , intOriginalInvoiceDetailId			= INV.intOriginalInvoiceDetailId
 	 , intDispatchId                        = INV.intDispatchId
 	 , strOrderNumber                       = ISNULL(CORDER.strOrderNumber, '') COLLATE Latin1_General_CI_AS
+	 , strCustomerProduct					= XREF.strCustomerProduct
 	 , dblPercentage						= INV.dblPercentage
 	 , dblProvisionalTotal					= CASE WHEN INV.dblPercentage <> 100 THEN INV.dblProvisionalTotal ELSE INV.dblTotal END
 FROM tblARInvoice PINV WITH(NOLOCK)
@@ -372,4 +373,5 @@ LEFT JOIN (
 	WHERE intInvoiceDetailId IS NOT NULL
 	GROUP BY intInvoiceDetailId
 ) APAR ON INV.intInvoiceDetailId = APAR.intInvoiceDetailId
+LEFT JOIN tblICItemCustomerXref XREF ON XREF.intItemCustomerXrefId = INV.intItemCustomerXrefId
 GO
