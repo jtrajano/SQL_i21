@@ -25,7 +25,7 @@ BEGIN
 
 	INSERT INTO @dbTable (intSubsidiaryCompanyId, strDatabase, strCompany)  
 	SELECT intSubsidiaryCompanyId, strDatabase, strCompany FROM tblGLSubsidiaryCompany  
-	WHERE intDatabaseId <> DB_ID()  
+	WHERE strDatabase <> DB_NAME() 
 		
 	WHILE EXISTS(SELECT TOP 1 1 FROM @dbTable)  
 	BEGIN  
