@@ -98,10 +98,10 @@ LEFT JOIN (
             rctTax.dblTax AS dblTax
         FROM tblICInventoryReceiptItemTax rctTax
 		INNER JOIN tblICInventoryReceiptItem rctItem ON rctItem.intInventoryReceiptItemId = rctTax.intInventoryReceiptItemId
-        LEFT JOIN (tblAPBillDetail billDetail INNER JOIN tblAPBill bill ON bill.intBillId = billDetail.intBillId LEFT JOIN vyuAPVoucherIdWithDM vwdm2 ON bill.intBillId = vwdm2.intBillId)
-            ON billDetail.intInventoryReceiptItemId = rctItem.intInventoryReceiptItemId
-            AND billDetail.intInventoryReceiptChargeId IS NULL
-			AND vwdm2.intBillId IS NULL
+        -- LEFT JOIN (tblAPBillDetail billDetail INNER JOIN tblAPBill bill ON bill.intBillId = billDetail.intBillId LEFT JOIN vyuAPVoucherIdWithDM vwdm2 ON bill.intBillId = vwdm2.intBillId)
+        --     ON billDetail.intInventoryReceiptItemId = rctItem.intInventoryReceiptItemId
+        --     AND billDetail.intInventoryReceiptChargeId IS NULL
+		-- 	AND vwdm2.intBillId IS NULL
         -- LEFT JOIN tblAPBillDetailTax billDetailTax
         --         ON billDetail.intBillDetailId = billDetailTax.intBillDetailId
         --         AND billDetailTax.intTaxCodeId = rctTax.intTaxCodeId
@@ -109,17 +109,21 @@ LEFT JOIN (
         WHERE 
             rctTax.intInventoryReceiptItemId = rctItem.intInventoryReceiptItemId 
         AND (
-                EXISTS (
+                EXISTS ( 
                     SELECT 1 FROM tblAPBillDetailTax billDetailTax
                     INNER JOIN tblAPBillDetail bdtl ON billDetailTax.intBillDetailId = bdtl.intBillDetailId
 					LEFT JOIN vyuAPVoucherIdWithDM vwdm ON bdtl.intBillId = vwdm.intBillId
                     WHERE billDetailTax.intTaxCodeId = rctTax.intTaxCodeId
                     AND billDetailTax.intTaxClassId = rctTax.intTaxClassId
 					AND vwdm.intBillId IS NULL
-                ) OR
-                billDetail.intBillDetailId IS NULL
+                ) 
+                OR
+                --billDetail.intBillDetailId IS NULL
+                NOT EXISTS ( --DO NOT INCLUDE THE TAX OF RECEIPT IF IT DOES NOT HAVE 
+					SELECT 1 FROM tblAPBillDetail billDetail WHERE billDetail.intInventoryReceiptItemId = rctItem.intInventoryReceiptItemId
+				)
         )
-        -- AND 1 = CASE WHEN billDetail.intBillDetailId IS NULL THEN 1
+    -- AND 1 = CASE WHEN billDetail.intBillDetailId IS NULL THEN 1
         --         ELSE (
         --             CASE WHEN billDetailTax.intBillDetailTaxId IS NOT NULL THEN 1 ELSE 0 END
         --         )
