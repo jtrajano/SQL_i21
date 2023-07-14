@@ -89,12 +89,8 @@ BEGIN TRY
 		, dblSplitPercent		= SD.dblSplitPercent
 		, strTransactionType	= SD.strTransactionType
 	FROM #SPLITINVOICEDETAILS SD
-	INNER JOIN (
-		SELECT intInvoiceId		= SDD.intInvoiceId
-			 , intSplitEntityId	= MIN(SDD.intSplitEntityId)
-		FROM #SPLITINVOICEDETAILS SDD
-		GROUP BY SDD.intInvoiceId
-	) SDO ON SD.intInvoiceId = SDO.intInvoiceId AND SD.intSplitEntityId = SDO.intSplitEntityId
+	INNER JOIN tblARPostInvoiceHeader I ON SD.intSplitEntityId = I.intEntityCustomerId AND I.intInvoiceId = SD.intInvoiceId
+	WHERE I.strSessionId = @strSessionId
 
 	--REMOVE INVOICE TO UPDATE
 	DELETE SD
