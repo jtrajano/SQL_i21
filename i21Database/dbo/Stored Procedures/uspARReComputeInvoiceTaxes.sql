@@ -103,7 +103,7 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 			,@ItemPrice						= dblPrice - (dblPrice * (dblDiscount / 100.00)) / ISNULL(dblSubCurrencyRate, 1)
 			,@QtyShipped					= CASE 
 												WHEN ISNULL(intLoadDetailId, 0) = 0 THEN dblQtyShipped
-												ELSE dbo.fnRoundBanker(dbo.fnCalculateQtyBetweenUOM(intItemWeightUOMId, ISNULL(intPriceUOMId, intItemWeightUOMId), ISNULL(dblShipmentNetWt, dblQtyShipped)), dbo.fnARGetDefaultDecimal())
+												ELSE dbo.fnRoundBanker(dbo.fnCalculateQtyBetweenUOM(intItemWeightUOMId, ISNULL(intPriceUOMId, intItemWeightUOMId), ISNULL(dblShipmentNetWt, dblQtyShipped)), dbo.fnARGetDefaultPriceDecimal())
 											  END
 			,@TaxGroupId					= intTaxGroupId
 			,@SiteId						= intSiteId

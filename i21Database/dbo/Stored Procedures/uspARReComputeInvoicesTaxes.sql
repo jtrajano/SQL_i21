@@ -77,7 +77,7 @@ SELECT DISTINCT
 	,[dblPrice]							= ARID.dblPrice / ISNULL(ARID.dblSubCurrencyRate, 1)
 	,[dblQtyShipped]					= CASE WHEN ISNULL(ARID.intLoadDetailId, 0) = 0 
 											THEN ARID.dblQtyShipped 
-											ELSE dbo.fnRoundBanker(dbo.fnCalculateQtyBetweenUOM(ARID.intItemWeightUOMId, ISNULL(ARID.intPriceUOMId, ARID.intItemWeightUOMId), ISNULL(ARID.dblShipmentNetWt, ARID.dblQtyShipped)), dbo.fnARGetDefaultDecimal())
+											ELSE dbo.fnRoundBanker(dbo.fnCalculateQtyBetweenUOM(ARID.intItemWeightUOMId, ISNULL(ARID.intPriceUOMId, ARID.intItemWeightUOMId), ISNULL(ARID.dblShipmentNetWt, ARID.dblQtyShipped)), dbo.fnARGetDefaultPriceDecimal())
 										  END
 	,[intCurrencyExchangeRateTypeId]	= ARID.[intCurrencyExchangeRateTypeId]
 	,[dblCurrencyExchangeRate]			= ISNULL(ARID.[dblCurrencyExchangeRate], 1)
