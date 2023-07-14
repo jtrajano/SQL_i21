@@ -172,7 +172,7 @@ SELECT
 	,[dblForexRate] = p.dblForexRate
 	,[intStorageScheduleTypeId] = p.intStorageScheduleTypeId
     ,[dblUnitRetail] = CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 AND ISNULL(i.strLotTracking, 'No') = 'No' THEN dbo.fnCalculateCostBetweenUOM(p.intItemUOMId, iu.intItemUOMId, p.dblUnitRetail) ELSE p.dblUnitRetail END 
-	,[intCategoryId] = p.intCategoryId
+	,[intCategoryId] = ISNULL(p.intCategoryId, i.intCategoryId)
 	,[dblAdjustCostValue] = p.dblAdjustCostValue
 	,[dblAdjustRetailValue] = p.dblAdjustRetailValue
 	,[intCostingMethod] = p.intCostingMethod
