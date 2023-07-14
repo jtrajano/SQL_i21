@@ -8,6 +8,7 @@ begin
 	
 	DECLARE @strCompanyName			NVARCHAR(500),
 			@strAddress				NVARCHAR(500),
+			@strAddress2			NVARCHAR(500),
 			@strCounty				NVARCHAR(500),
 			@strCity				NVARCHAR(500),
 			@strState				NVARCHAR(500),
@@ -98,6 +99,8 @@ begin
 			@strZip			=	CASE WHEN LTRIM(RTRIM(strZip)) = '' THEN NULL ELSE LTRIM(RTRIM(strZip)) END,
 			@strCountry		=	CASE WHEN LTRIM(RTRIM(strCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(strCountry)) END
 	FROM	tblSMCompanySetup
+
+	SET @strAddress2 = @strCity + ', ' + @strState + ' ' + @strZip
 
 	-- Reset the start date time
 	SELECT @dtmStartDate = CAST(CAST(@dtmStartDate AS DATE) AS DATETIME)
@@ -377,6 +380,7 @@ begin
 			, ENTITY.strEntityNo
 			, ENTITY.strName
 			, ENTITY_LOCATION.strAddress
+			, (ENTITY_LOCATION.strCity + ', ' + ENTITY_LOCATION.strState + ' ' + ENTITY_LOCATION.strZipCode)  AS strAddress2
 			, ITEM.strItemNo
 
 			, BALANCES.dblBeginningBalance AS dblBeginningBalance
@@ -389,6 +393,7 @@ begin
 
 
 			, @strAddress AS strCompanyAddress
+			, @strAddress2 AS strCompanyAddress2
 		FROM @DATA_TABLE DATA_TABLE
 			LEFT JOIN @BALANCES BALANCES
 				ON DATA_TABLE.intEntityId = BALANCES.intEntityId
@@ -423,6 +428,7 @@ begin
 			, ENTITY.strEntityNo
 			, ENTITY.strName
 			, ENTITY_LOCATION.strAddress
+			, (ENTITY_LOCATION.strCity + ', ' + ENTITY_LOCATION.strState + ' ' + ENTITY_LOCATION.strZipCode)  AS strAddress2
 			, '' AS strItemNo
 
 			, BALANCES.dblBeginningBalance AS dblBeginningBalance
@@ -435,6 +441,7 @@ begin
 
 
 			, @strAddress AS strCompanyAddress
+			, @strAddress2 AS strCompanyAddress2
 		FROM @BALANCES BALANCES			
 			JOIN tblEMEntity ENTITY
 				ON BALANCES.intEntityId = ENTITY.intEntityId
