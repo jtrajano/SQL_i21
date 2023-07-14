@@ -76,7 +76,7 @@ INTO	tblICInventoryValuationSummary
 WITH	(HOLDLOCK) 
 AS		summaryLog 
 USING (
-	SELECT	DISTINCT
+	SELECT
 		intInventoryValuationKeyId = NULL 
 		,Item.intItemId
 		,Item.strItemNo
