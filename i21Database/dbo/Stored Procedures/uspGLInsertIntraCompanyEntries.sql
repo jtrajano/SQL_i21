@@ -9,11 +9,9 @@ BEGIN
     IF ISNULL(@ysnAllowIntraCompanyEntries, 0) = 0 RETURN
 
     DECLARE @cntSegment INT, @msg NVARCHAR(50), @errorMsg NVARCHAR(500),@ysnHasError BIT = 0
-    SELECT 1  FROM #tmpGLDetail A JOIN tblGLAccount B ON
+    SELECT @rowCount = count(*)  FROM #tmpGLDetail A JOIN tblGLAccount B ON
         A.intAccountId = B.intAccountId
         GROUP BY intCompanySegmentId
-
-	SET @rowCount = @@ROWCOUNT
 
     IF @rowCount > 2
     BEGIN
