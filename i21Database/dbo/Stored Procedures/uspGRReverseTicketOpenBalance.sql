@@ -254,6 +254,21 @@ BEGIN TRY
 	END
 	ELSE IF  @strType='Reduced By Invoice'
 	BEGIN
+		DECLARE @ysnExists BIT
+
+		IF EXISTS(
+			SELECT TOP 1 1 
+			FROM tblGRStorageHistory SH
+			INNER JOIN tblGRCustomerStorage CS
+				ON CS.intCustomerStorageId = SH.intCustomerStorageId
+			INNER JOIN tblARInvoiceDetail ID
+				ON ID.intInvoiceId = SH.intInvoiceId
+					AND ID.intItemId = CS.intItemId
+			WHERE SH.intInvoiceId = @IntSourceKey
+		)
+			SET @ysnExists = 0
+		ELSE
+			SET @ysnExists = 1
 
 		UPDATE CS
 		SET CS.dblOpenBalance = CS.dblOpenBalance + SH.dblTotalUnits
@@ -285,7 +300,7 @@ BEGIN TRY
 			,@intUserId
 			,0
 			,6 -- Transaction Type Id for Invoice
-			,'Invoice Deletion'
+			,CASE WHEN @ysnExists = 1 THEN 'Reversed By Invoice' ELSE 'Invoice Deletion' END
 			,dblUnits
 			,GETDATE()
 			,NULL

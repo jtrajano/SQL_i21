@@ -8,7 +8,7 @@ BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX)
 	DECLARE @SummaryLogs AS RKSummaryLog
 
-	IF (SELECT 1 FROM tblGRStorageHistory WHERE intStorageHistoryId = @intStorageHistoryId AND (intTransactionTypeId IN (1,3,4,5,8,9) OR (intTransactionTypeId = 6 AND strType IN ('Reduced By Invoice', 'Invoice Deletion'))) ) = 1
+	IF (SELECT 1 FROM tblGRStorageHistory WHERE intStorageHistoryId = @intStorageHistoryId AND (intTransactionTypeId IN (1,3,4,5,8,9) OR (intTransactionTypeId = 6 AND strType IN ('Reduced By Invoice', 'Invoice Deletion','Reversed By Invoice'))) ) = 1
 	--IF (SELECT 1 FROM tblGRStorageHistory WHERE intStorageHistoryId = @intStorageHistoryId AND (intTransactionTypeId IN (1,3,4,5,8,9)) ) = 1
 	BEGIN
 		INSERT INTO @SummaryLogs
