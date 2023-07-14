@@ -51,6 +51,7 @@ BEGIN TRY
 			@ysnUniqueEntityReference	BIT,
 			@ysnUsed					BIT = 0,
 			@dblTotalPriced				NUMERIC(18, 6) = 0,
+			@dblTotalPricedLots			NUMERIC(18,6) = 0,
 			@strContractBase 			NVARCHAR(50)
 
 	SELECT	@ysnUniqueEntityReference = ysnUniqueEntityReference FROM tblCTCompanyPreference
@@ -131,9 +132,10 @@ BEGIN TRY
 			
 	);  
 
-	SELECT @dblTotalPriced = ISNULL(SUM(ISNULL(dblQty, 0)), 0)
+	SELECT @dblTotalPriced = ISNULL(SUM(ISNULL(dblQty, 0)), 0), @dblTotalPricedLots = ISNULL(SUM(ISNULL(dblLoad, 0)), 0)
 	FROM (
 		SELECT dblQty = ISNULL(pfd.dblQuantity, 0) --dbo.fnCTConvertQtyToTargetCommodityUOM(@intCommodityId, tCum.intUnitMeasureId, fCum.intUnitMeasureId, ISNULL(pfd.dblQuantity, 0))
+		,dblLoad = isnull(pfd.dblNoOfLots,0)
 		FROM tblCTPriceFixation pf
 		JOIN tblCTPriceFixationDetail pfd ON pfd.intPriceFixationId = pf.intPriceFixationId
 		--JOIN tblICCommodityUnitMeasure fCum ON fCum.intCommodityUnitMeasureId = @intCommodityUOMId
@@ -463,12 +465,12 @@ BEGIN TRY
 		SELECT @strPriceStatus = strStatus FROM vyuCTPriceContractStatus where intContractHeaderId = @intContractHeaderId	
 		IF(@strPriceStatus = 'Fully Priced')
 			BEGIN 
-				IF(@dblQuantity < @dblTotalPriced)
+				IF(@dblQuantity < @dblTotalPriced and @dblNoOfLots < @dblTotalPricedLots)
 				BEGIN 
 					SET @ErrMsg = 'Quantity cannot be reduced below price fixed quantity of ' + CAST(ISNULL(@dblTotalPriced, 0) AS NVARCHAR) + '.'
 					RAISERROR(@ErrMsg, 16, 1)
 				END
-				IF(@dblQuantity > @dblTotalPriced)
+				IF(@dblQuantity > @dblTotalPriced and @dblNoOfLots > @dblTotalPricedLots)
 				BEGIN 
 					SET @ErrMsg = 'Quantity cannot be increase above price fixed quantity of ' + CAST(ISNULL(@dblTotalPriced, 0) AS NVARCHAR) + '.'
 					RAISERROR(@ErrMsg, 16, 1)
