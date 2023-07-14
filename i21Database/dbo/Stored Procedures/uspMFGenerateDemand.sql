@@ -2768,7 +2768,7 @@ BEGIN TRY
 			   END AS strAttributeName
 			 , (CASE WHEN DL.intMonthId IN (- 1, 0) AND A.intReportAttributeID IN (2, 4, 13, 14) THEN ISNULL(D.dblQty, 0)
 					 WHEN DL.intMonthId IN (- 1, 0) THEN D.dblQty
-					 WHEN A.intReportAttributeID IN (8) AND DL.intMonthId <= @intMonthsToView THEN ABS(ISNULL(D.dblQty, 0))
+					 WHEN A.intReportAttributeID IN (8) AND DL.intMonthId <= @intMonthsToView THEN -ABS(ISNULL(D.dblQty, 0))
 					 WHEN A.intReportAttributeID IN (8, 16) AND DL.intMonthId > @intMonthsToView THEN ABS(D.dblQty)
 					 ELSE ISNULL(D.dblQty, 0)
 				END) AS dblQty
