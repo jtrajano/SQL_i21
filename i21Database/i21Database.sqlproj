@@ -3857,6 +3857,7 @@
     <Build Include="dbo\Stored Procedures\uspTRGetQuotePrice.sql" />
     <Build Include="dbo\Tables\tblICInventoryLotCostAdjustmentLog.sql" />
     <Build Include="dbo\Functions\fnARGetDefaultDecimal.sql" />
+    <Build Include="dbo\Functions\fnARGetDefaultPriceDecimal.sql" />
     <Build Include="dbo\Stored Procedures\uspICUnpostAutoNegative.sql">
       <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
     </Build>

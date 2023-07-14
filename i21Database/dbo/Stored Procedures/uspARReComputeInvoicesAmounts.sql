@@ -227,7 +227,7 @@ SET
 									WHEN ISNULL(ARID.intLoadDetailId,0) <> 0 
 										THEN dbo.fnRoundBanker(
 												dbo.fnRoundBanker(
-													((ARID.dblPrice / ARID.dblSubCurrencyRate) * dbo.fnRoundBanker(dbo.fnCalculateQtyBetweenUOM(ARID.intItemWeightUOMId, ISNULL(ARID.intPriceUOMId, ARID.intItemWeightUOMId), ISNULL(ARID.dblShipmentNetWt, ARID.dblQtyShipped)), dbo.fnARGetDefaultDecimal()))
+													((ARID.dblPrice / ARID.dblSubCurrencyRate) * dbo.fnRoundBanker(dbo.fnCalculateQtyBetweenUOM(ARID.intItemWeightUOMId, ISNULL(ARID.intPriceUOMId, ARID.intItemWeightUOMId), ISNULL(ARID.dblShipmentNetWt, ARID.dblQtyShipped)), dbo.fnARGetDefaultPriceDecimal()))
 												, dbo.fnARGetDefaultDecimal()) 
 												- 
 												dbo.fnRoundBanker(
@@ -235,7 +235,7 @@ SET
 														(
 															(ARID.dblPrice / ARID.[dblSubCurrencyRate]) 
 															* 
-															dbo.fnRoundBanker(dbo.fnCalculateQtyBetweenUOM(ARID.intItemWeightUOMId, ISNULL(ARID.intPriceUOMId, ARID.intItemWeightUOMId), ISNULL(ARID.dblShipmentNetWt, ARID.dblQtyShipped)), dbo.fnARGetDefaultDecimal())
+															dbo.fnRoundBanker(dbo.fnCalculateQtyBetweenUOM(ARID.intItemWeightUOMId, ISNULL(ARID.intPriceUOMId, ARID.intItemWeightUOMId), ISNULL(ARID.dblShipmentNetWt, ARID.dblQtyShipped)), dbo.fnARGetDefaultPriceDecimal())
 														) 
 														* 
 														(ARID.dblDiscount / 100.00)

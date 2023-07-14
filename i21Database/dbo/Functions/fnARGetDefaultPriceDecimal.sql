@@ -1,0 +1,5 @@
+﻿CREATE FUNCTION dbo.fnARGetDefaultPriceDecimal() RETURNS INT
+AS
+BEGIN
+	RETURN 6
+END
