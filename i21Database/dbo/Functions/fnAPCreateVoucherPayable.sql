@@ -61,6 +61,7 @@ RETURNS @returntable TABLE
 	[intLoadShipmentId]				INT NULL,
 	[intLoadShipmentDetailId]		INT NULL,
 	[intLoadShipmentCostId]			INT NULL,
+	[intLoadShipmentContainerId]	INT NULL,
 	[intWeightClaimId]				INT NULL,
 	[intWeightClaimDetailId]		INT NULL,
 	[intPaycheckHeaderId]			INT NULL,
@@ -191,6 +192,7 @@ BEGIN
 		,[intLoadShipmentId]			= A.[intLoadShipmentId]				
 		,[intLoadShipmentDetailId]		= A.[intLoadShipmentDetailId]		
 		,[intLoadShipmentCostId]		= A.[intLoadShipmentCostId]			
+		,[intLoadShipmentContainerId]	= A.[intLoadShipmentContainerId]
 		,[intWeightClaimId]				= A.[intWeightClaimId]		
 		,[intWeightClaimDetailId]		= A.[intWeightClaimDetailId]		
 		,[intPaycheckHeaderId]			= A.[intPaycheckHeaderId]			

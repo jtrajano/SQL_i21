@@ -52,6 +52,8 @@ SELECT
 	,A.intInventoryShipmentChargeId
 	,A.intLoadShipmentId
 	,A.intLoadShipmentDetailId
+	,A.intLoadShipmentCostId
+	,A.intLoadShipmentContainerId
 	,A.intWeightClaimId
 	,A.intWeightClaimDetailId
 	,A.intItemId
@@ -114,6 +116,8 @@ LEFT JOIN
 		,B.intInventoryReceiptChargeId
 		,B.intInventoryReceiptItemId
 		,B.intLoadDetailId
+		,B.intLoadShipmentCostId
+		,B.intLoadShipmentContainerId
 		,B.intInventoryShipmentChargeId
 		,B.intItemId
 		,STUFF
@@ -133,6 +137,8 @@ LEFT JOIN
 					AND ISNULL(B.intInventoryReceiptChargeId,-1) = ISNULL(C.intInventoryReceiptChargeId,-1)
 					AND ISNULL(B.intInventoryReceiptItemId,-1) = ISNULL(C.intInventoryReceiptItemId,-1)
 					AND ISNULL(B.intLoadDetailId,-1) = ISNULL(C.intLoadDetailId,-1)
+					AND ISNULL(B.intLoadShipmentCostId,-1) = ISNULL(C.intLoadShipmentCostId,-1)
+					AND ISNULL(B.intLoadShipmentContainerId,-1) = ISNULL(C.intLoadShipmentContainerId,-1)
 					AND ISNULL(B.intInventoryShipmentChargeId,-1) = ISNULL(C.intInventoryShipmentChargeId,-1)
 					AND ISNULL(B.intItemId,-1) = ISNULL(C.intItemId,-1) 
 					GROUP BY 
@@ -144,6 +150,8 @@ LEFT JOIN
 						,C.intInventoryReceiptChargeId
 						,C.intInventoryReceiptItemId
 						,C.intLoadDetailId
+						,C.intLoadShipmentCostId
+						,C.intLoadShipmentContainerId
 						,C.intInventoryShipmentChargeId
 						,C.intItemId
 					FOR xml path('')
@@ -164,6 +172,8 @@ LEFT JOIN
 		,B.intInventoryReceiptChargeId
 		,B.intInventoryReceiptItemId
 		,B.intLoadDetailId
+		,B.intLoadShipmentCostId
+		,B.intLoadShipmentContainerId
 		,B.intInventoryShipmentChargeId
 		,B.intItemId
 ) A2
@@ -174,9 +184,10 @@ AND ISNULL(A.intScaleTicketId,-1) = ISNULL(A2.intScaleTicketId,-1)
 AND ISNULL(A.intInventoryReceiptChargeId,-1) = ISNULL(A2.intInventoryReceiptChargeId,-1)
 AND ISNULL(A.intInventoryReceiptItemId,-1) = ISNULL(A2.intInventoryReceiptItemId,-1)
 AND ISNULL(A.intLoadShipmentDetailId,-1) = ISNULL(A2.intLoadDetailId,-1)
+AND ISNULL(A.intLoadShipmentCostId,-1) = ISNULL(A2.intLoadShipmentCostId,-1)
+AND ISNULL(A.intLoadShipmentContainerId,-1) = ISNULL(A2.intLoadShipmentContainerId,-1)
 AND ISNULL(A.intInventoryShipmentChargeId,-1) = ISNULL(A2.intInventoryShipmentChargeId,-1)
 AND ISNULL(A.intItemId,-1) = ISNULL(A2.intItemId,-1)
-
 LEFT JOIN dbo.tblGLFiscalYearPeriod FP
 	ON A.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR A.dtmDate = FP.dtmStartDate OR A.dtmDate = FP.dtmEndDate
 LEFT JOIN vyuCTContractDetailView CDV ON CDV.intContractDetailId = A.intContractDetailId AND CDV.intContractSeq = A.intContractSeqId

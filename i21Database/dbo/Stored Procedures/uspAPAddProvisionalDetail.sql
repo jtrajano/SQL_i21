@@ -102,6 +102,7 @@ SELECT TOP 100 PERCENT
 	,intLoadDetailId					=	A.intLoadShipmentDetailId
 	,intLoadId							=	A.intLoadShipmentId
 	,intLoadShipmentCostId				=	A.intLoadShipmentCostId
+	,intLoadShipmentContainerId			=	A.intLoadShipmentContainerId
 	,intWeightClaimId					=	A.intWeightClaimId
 	,intWeightClaimDetailId				=	A.intWeightClaimDetailId
 	,intScaleTicketId					=	A.intScaleTicketId
@@ -403,7 +404,8 @@ INSERT
 	,intSettleStorageId				
 	,intLocationId						
 	,intLoadDetailId
-	,intLoadShipmentCostId					
+	,intLoadShipmentCostId		
+	,intLoadShipmentContainerId			
 	,intLoadId	
 	,intWeightClaimId
 	,intWeightClaimDetailId
@@ -503,7 +505,8 @@ VALUES
 	,intSettleStorageId				
 	,intLocationId						
 	,intLoadDetailId	
-	,intLoadShipmentCostId				
+	,intLoadShipmentCostId		
+	,intLoadShipmentContainerId		
 	,intLoadId				
 	,intWeightClaimId
 	,intWeightClaimDetailId
