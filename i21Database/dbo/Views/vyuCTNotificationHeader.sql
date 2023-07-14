@@ -21,7 +21,8 @@ AS
 				CD.strCurrency,			CD.strFutureMonth,		CD.strStorageLocation,	CD.strSubLocation,
 				CD.strItemDescription,	CD.intContractDetailId,	CD.strProductType,		PW.intAllStatusId,
 				BC.strBasisComponent COLLATE Latin1_General_CI_AS AS strBasisComponent,
-				CD.intContractStatusId,	CD.strContractItemName,	CD.strContractItemNo
+				CD.intContractStatusId,	CD.strContractItemName,	CD.strContractItemNo,
+				st.strSampleTypeName
 				
 		FROM	tblCTContractHeader			CH
 		JOIN	tblICCommodity				CO	ON	CO.intCommodityId				=	CH.intCommodityId
@@ -76,4 +77,5 @@ AS
 				 ) t
 				GROUP BY intContractHeaderId
 		)									PW	ON	PW.intContractHeaderId			=	CD.intContractHeaderId
+		left join tblQMSampleType st on st.intSampleTypeId = CH.intSampleTypeId
 	

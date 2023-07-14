@@ -41,6 +41,16 @@ BEGIN TRY
 													CH.strPosition,					CH.strContractBasis,				CH.strCountry,			
 					CH.strCustomerContract,			strSalesperson,					CD.intContractStatusId,				CD.strContractItemName,		
 					CD.strContractItemNo,
+					strCounterParty = null,
+					strSIRef = null,
+					dtmSIDate = null,
+					ysnShipped = null,
+					dtmETSPol = null,
+					strBookedShippingLine = null,
+					strBookNumber = null,
+					strETSDateStatus = null,
+					strSampleType = null,
+					strApprovalStatus = null,
 					CAST(ROW_NUMBER() OVER(ORDER BY CD.intContractHeaderId DESC) AS INT) AS intUniqueId,
 					DENSE_RANK() OVER (ORDER BY CD.intContractDetailId DESC) intRankNo					
 				
@@ -64,6 +74,16 @@ BEGIN TRY
 					NULL strBasisComponent,			PO.strPosition,					strContractBasis = CB.strFreightTerm,				CR.strCountry,			
 					CH.strCustomerContract,			SP.strName strSalesperson,		CD.intContractStatusId,				'''' AS strContractItemName,		
 					'''' AS strContractItemNo,
+					strCounterParty = null,
+					strSIRef = null,
+					dtmSIDate = null,
+					ysnShipped = null,
+					dtmETSPol = null,
+					strBookedShippingLine = null,
+					strBookNumber = null,
+					strETSDateStatus = null,
+					strSampleType = null,
+					strApprovalStatus = null,
 					CAST(ROW_NUMBER() OVER(ORDER BY CH.intContractHeaderId DESC) AS INT) AS intUniqueId,
 					DENSE_RANK() OVER (ORDER BY CH.intContractHeaderId DESC) intRankNo	
 
@@ -99,6 +119,16 @@ BEGIN TRY
 					CH.strBasisComponent,			CH.strPosition,				CH.strContractBasis,			CH.strCountry,			
 					CH.strCustomerContract,			strSalesperson,				CH.intContractStatusId,			CH.strContractItemName,		
 					CH.strContractItemNo,
+					strCounterParty = null,
+					strSIRef = null,
+					dtmSIDate = null,
+					ysnShipped = null,
+					dtmETSPol = null,
+					strBookedShippingLine = null,
+					strBookNumber = null,
+					strETSDateStatus = null,
+					strSampleType = null,
+					strApprovalStatus = null,
 					CAST(ROW_NUMBER() OVER(ORDER BY CH.intContractHeaderId DESC) AS INT) AS intUniqueId,
 					DENSE_RANK() OVER (ORDER BY CH.intContractHeaderId DESC) intRankNo
 
@@ -120,6 +150,16 @@ BEGIN TRY
 					CH.strBasisComponent,			CH.strPosition,				CH.strContractBasis,			CH.strCountry,			
 					CH.strCustomerContract,			strSalesperson,				CH.intContractStatusId,			CH.strContractItemName,		
 					CH.strContractItemNo,
+					strCounterParty = null,
+					strSIRef = null,
+					dtmSIDate = null,
+					ysnShipped = null,
+					dtmETSPol = null,
+					strBookedShippingLine = null,
+					strBookNumber = null,
+					strETSDateStatus = null,
+					strSampleType = null,
+					strApprovalStatus = null,
 					CAST(ROW_NUMBER() OVER(ORDER BY CH.intContractHeaderId DESC) AS INT) AS intUniqueId,
 					DENSE_RANK() OVER (ORDER BY CH.intContractHeaderId DESC) intRankNo	
 
@@ -142,6 +182,16 @@ BEGIN TRY
 					CH.strBasisComponent,			CH.strPosition,				CH.strContractBasis,			CH.strCountry,			
 					CH.strCustomerContract,			strSalesperson,				CH.intContractStatusId,			CH.strContractItemName,		
 					CH.strContractItemNo,
+					strCounterParty = CH.strEntityName,
+					strSIRef = l.strSIRef,
+					dtmSIDate = l.dtmSIDate,
+					ysnShipped = l.ysnShipped,
+					dtmETSPol = l.dtmETSPol,
+					strBookedShippingLine = l.strBookedShippingLine,
+					strBookNumber = l.strBookNumber,
+					strETSDateStatus = case when l.dtmETSPol is null then null when l.dtmETSPol <= CH.dtmEndDate then ''OK'' else ''Late'' end,
+					strSampleType = CH.strSampleTypeName,
+					strApprovalStatus = txn.strApprovalStatus,
 					CAST(ROW_NUMBER() OVER(ORDER BY CH.intContractHeaderId DESC) AS INT) AS intUniqueId,
 					DENSE_RANK() OVER (ORDER BY CH.intContractHeaderId DESC) intRankNo	
 
@@ -150,6 +200,26 @@ BEGIN TRY
 			cross join tblCTAction ac
 			cross join tblCTEvent ev
 			join tblCTEventRecipient er on er.intEventId = ev.intEventId
+			left join (
+				select
+					intContractDetailId = isnull(dsi.intPContractDetailId,dsi.intSContractDetailId)
+					,strSIRef = si.strLoadNumber
+					,dtmSIDate = si.dtmScheduledDate
+					,dtmETSPol = si.dtmETSPOL
+					,strBookedShippingLine = sl.strName
+					,strBookNumber = si.strBookingReference
+					,ysnShipped = case when ls.intShipmentStatus in (6,11) then convert(bit,1) else convert(bit,0) end
+				from
+					tblLGLoad si
+					join tblLGLoadDetail dsi on dsi.intLoadId = si.intLoadId
+					left join tblLGLoad s on s.intLoadShippingInstructionId = si.intLoadId
+					left join tblEMEntity sl on sl.intEntityId = si.intShippingLineEntityId
+					left join tblLGLoad ls on ls.intLoadShippingInstructionId = si.intLoadId
+				where
+					si.intShipmentType = 2
+					and isnull(dsi.intPContractDetailId,dsi.intSContractDetailId) is not null
+			) l on l.intContractDetailId = CH.intContractDetailId
+			left join tblSMTransaction txn on txn.intRecordId = CH.intContractHeaderId and txn.intScreenId = 15
 			where
 				CH.intContractStatusId in (1,4)
 				and ac.strActionName = ''Late Shipment''
@@ -174,6 +244,16 @@ BEGIN TRY
 					CH.strBasisComponent,			CH.strPosition,				CH.strContractBasis,			CH.strCountry,			
 					CH.strCustomerContract,			strSalesperson,				CH.intContractStatusId,			CH.strContractItemName,		
 					CH.strContractItemNo,
+					strCounterParty = null,
+					strSIRef = null,
+					dtmSIDate = null,
+					ysnShipped = null,
+					dtmETSPol = null,
+					strBookedShippingLine = null,
+					strBookNumber = null,
+					strETSDateStatus = null,
+					strSampleType = null,
+					strApprovalStatus = null,
 					CAST(ROW_NUMBER() OVER(ORDER BY CH.intContractHeaderId DESC) AS INT) AS intUniqueId,
 					DENSE_RANK() OVER (ORDER BY CH.intContractHeaderId DESC) intRankNo		
 
@@ -204,7 +284,7 @@ BEGIN TRY
 					CH.strItemDescription,			CH.dblQtyInStockUOM,		CH.intContractDetailId,			CH.strProductType,
 					CH.strBasisComponent,			CH.strPosition,				CH.strContractBasis,			CH.strCountry,			
 					CH.strCustomerContract,			strSalesperson,				CH.intContractStatusId,			CH.strContractItemName,		
-					CH.strContractItemNo		
+					CH.strContractItemNo
 
 			FROM	vyuCTNotificationHeader CH
 			JOIN	tblQMSample as SM
@@ -230,7 +310,7 @@ BEGIN TRY
 								CH.strItemDescription,			CH.dblQtyInStockUOM,		CH.intContractDetailId,			CH.strProductType,
 								CH.strBasisComponent,			CH.strPosition,				CH.strContractBasis,			CH.strCountry,			
 								CH.strCustomerContract,			strSalesperson,				CH.intContractStatusId,			CH.strContractItemName,		
-								CH.strContractItemNo	
+								CH.strContractItemNo
 
 						FROM	vyuCTNotificationHeader CH
 						JOIN (
