@@ -91,11 +91,11 @@ SELECT DISTINCT strCommodityCode
 								END
 							END
 	, strProductType = ProductType.strDescription
-	, im.intProductTypeId
+	, intProductTypeId = ProductType.intCommodityAttributeId
 	, strProductLine = ProductLine.strDescription
-	, im.intProductLineId
+	, intProductLineId = ProductLine.intCommodityProductLineId
 	, strGrade  = Grade.strDescription
-	, im.intGradeId
+	, intGradeId = Grade.intCommodityAttributeId
 	--, strCertification = Certification.strCertificationName
 	, strCertification = CC.strContractCertifications
 	, im.intCertificationId
@@ -213,15 +213,25 @@ OUTER APPLY (
 	AND invShipment.intLineNo = cd.intContractDetailId
 	AND shipment.ysnPosted = 1
 ) invShipWarehouse
-LEFT JOIN tblICCommodityAttribute ProductType ON ProductType.intCommodityAttributeId = im.intProductTypeId
+LEFT JOIN tblICCommodityAttribute ProductType 
+	ON ProductType.intCommodityAttributeId = im.intProductTypeId
+	AND ProductType.strType = 'ProductType' 
+	AND ProductType.intCommodityId = im.intCommodityId 
 LEFT JOIN tblICCommodityProductLine ProductLine ON ProductLine.intCommodityProductLineId = im.intProductLineId
-LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityAttributeId = im.intGradeId
+LEFT JOIN tblICCommodityAttribute Grade	
+	ON Grade.intCommodityAttributeId = im.intGradeId
+	AND Grade.strType = 'Grade' 
+	AND Grade.intCommodityId = im.intCommodityId 
 --LEFT JOIN tblICCertification Certification ON Certification.intCertificationId = im.intCertificationId
 LEFT JOIN tblCTMTMPoint MTMPoint ON MTMPoint.intMTMPointId = cd.intMTMPointId
 LEFT JOIN tblICCommodityAttribute CLASS
 	ON CLASS.intCommodityAttributeId = im.intClassVarietyId
+	AND CLASS.strType = 'Class'
+	AND CLASS.intCommodityId = im.intCommodityId 
 LEFT JOIN tblICCommodityAttribute REGION
 	ON REGION.intCommodityAttributeId = im.intRegionId
+	AND REGION.strType = 'Region'
+	AND REGION.intCommodityId = im.intCommodityId 
 OUTER APPLY (
 		SELECT strContractCertifications = (LTRIM(STUFF((
 			SELECT ', ' + ICC.strCertificationName
@@ -318,11 +328,11 @@ UNION SELECT DISTINCT strCommodityCode
 								END
 							END
 	, strProductType = ProductType.strDescription
-	, im.intProductTypeId
+	, intProductTypeId = ProductType.intCommodityAttributeId
 	, strProductLine = ProductLine.strDescription
-	, im.intProductLineId
-	, strGrade  = Grade.strDescription
-	, im.intGradeId
+	, intProductLineId = ProductLine.intCommodityProductLineId
+	, strGrade = Grade.strDescription
+	, intGradeId = Grade.intCommodityAttributeId
 	--, strCertification = Certification.strCertificationName
 	, strCertification = CC.strContractCertifications
 	, im.intCertificationId
@@ -430,15 +440,26 @@ OUTER APPLY (
 	AND invShipment.intLineNo = cd.intContractDetailId
 	AND shipment.ysnPosted = 1
 ) invShipWarehouse
-LEFT JOIN tblICCommodityAttribute ProductType ON ProductType.intCommodityAttributeId = im.intProductTypeId
-LEFT JOIN tblICCommodityProductLine ProductLine ON ProductLine.intCommodityProductLineId = im.intProductLineId
-LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityAttributeId = im.intGradeId
+LEFT JOIN tblICCommodityAttribute ProductType 
+	ON ProductType.intCommodityAttributeId = im.intProductTypeId
+	AND ProductType.strType = 'ProductType' 
+	AND ProductType.intCommodityId = im.intCommodityId 
+LEFT JOIN tblICCommodityProductLine ProductLine 
+	ON ProductLine.intCommodityProductLineId = im.intProductLineId
+LEFT JOIN tblICCommodityAttribute Grade 
+	ON Grade.intCommodityAttributeId = im.intGradeId
+	AND Grade.strType = 'Grade' 
+	AND Grade.intCommodityId = im.intCommodityId 
 --LEFT JOIN tblICCertification Certification ON Certification.intCertificationId = im.intCertificationId
 LEFT JOIN tblCTMTMPoint MTMPoint ON MTMPoint.intMTMPointId = cd.intMTMPointId
 LEFT JOIN tblICCommodityAttribute CLASS
 	ON CLASS.intCommodityAttributeId = im.intClassVarietyId
+	AND  CLASS.strType = 'Class'
+	AND CLASS.intCommodityId = im.intCommodityId 
 LEFT JOIN tblICCommodityAttribute REGION
 	ON REGION.intCommodityAttributeId = im.intRegionId
+	AND REGION.strType = 'Region'
+	AND REGION.intCommodityId = im.intCommodityId 
 OUTER APPLY (
 	SELECT strContractCertifications = (LTRIM(STUFF((
 		SELECT ', ' + ICC.strCertificationName
@@ -453,66 +474,66 @@ OUTER APPLY (
 WHERE cd.intPricingTypeId IN (5,6) AND cd.intContractStatusId <> 3
 
 UNION SELECT DISTINCT iis.strCommodityCode
-	, iis.strItemNo
+	, strItemNo = iis.strItemNo
 	, strDestination = NULL
-	, strFutMarketName
-	, strFutureMonth
+	, strFutMarketName = NULL
+	, strFutureMonth = NULL
 	, strPeriodTo = NULL
-	, iis.strLocationName
-	, strMarketZoneCode
-	, strCurrency = (CASE WHEN ISNULL(strFMCurrency,'') = '' THEN iis.strCurrency ELSE strFMCurrency END)
-	, strPricingType
+	, strLocationName = iis.strLocationName
+	, strMarketZoneCode = NULL
+	, strCurrency = iis.strCurrency
+	, strPricingType = NULL
 	, strContractInventory = 'Inventory' COLLATE Latin1_General_CI_AS
-	, strContractType
+	, strContractType = NULL
 	, dblCashOrFuture = 0
 	, dblBasisOrDiscount = 0
 	, dblRatio = 0
-	, strUnitMeasure = (CASE WHEN ISNULL(strFMUOM,'') = '' THEN (CASE WHEN ISNULL(ct.strUOM, '') = '' THEN strStockUOM ELSE ct.strUOM END) ELSE strFMUOM END)
-	, iis.intCommodityId
-	, iis.intItemId
+	, strUnitMeasure = strStockUOM
+	, intCommodityId = iis.intCommodityId
+	, intItemId = iis.intItemId
 	, intOriginId = iis.intOriginId
-	, ct.intFutureMarketId
-	, ct.intFutureMonthId
-	, iis.intLocationId
-	, ct.intMarketZoneId
-	, intCurrencyId = (CASE WHEN ISNULL(intFMCurrencyId,'') = '' THEN iis.intCurrencyId ELSE intFMCurrencyId END)
-	, ct.intPricingTypeId
-	, ct.intContractTypeId
-	, intUnitMeasureId = (CASE WHEN ISNULL(strFMUOM,'') = '' THEN (CASE WHEN ISNULL(intUOMId, '') = '' THEN intStockUOMId ELSE intUOMId END) ELSE intFMUOMId END)
+	, intFutureMarketId = NULL
+	, intFutureMonthId = NULL
+	, intLocationId = iis.intLocationId
+	, intMarketZoneId = NULL
+	, intCurrencyId = iis.intCurrencyId
+	, intPricingTypeId = NULL
+	, intContractTypeId = NULL
+	, intUnitMeasureId = intStockUOMId
 	, intConcurrencyId = 0
-	, iis.strMarketValuation
+	, strMarketValuation = iis.strMarketValuation
 	, ysnLicensed = ISNULL(iis.ysnLicensed, 0)
 	, intBoardMonthId = NULL
 	, strBoardMonth = NULL
-	, strOriginPort
-	, intOriginPortId
-	, strDestinationPort 
-	, intDestinationPortId
-	, strCropYear 
-	, intCropYearId
-	, strStorageLocation 
-	, intStorageLocationId
-	, strStorageUnit 
-	, intStorageUnitId
-	, strProductType 
-	, intProductTypeId 
-	, strProductLine 
-	, intProductLineId
-	, strGrade 
-	, intGradeId
-	, strCertification
-	, intCertificationId
-	, strMTMPoint
-	, intMTMPointId
-	, strClass
-	, strRegion
+	, strOriginPort = NULL
+	, intOriginPortId = NULL
+	, strDestinationPort = NULL
+	, intDestinationPortId = NULL
+	, strCropYear = NULL
+	, intCropYearId = NULL
+	, strStorageLocation = NULL 
+	, intStorageLocationId = NULL
+	, strStorageUnit = NULL 
+	, intStorageUnitId = NULL
+	, strProductType = iis.strProductType
+	, intProductTypeId = iis.intProductTypeId
+	, strProductLine = iis.strProductLine
+	, intProductLineId = iis.intProductLineId
+	, strGrade = iis.strGrade
+	, intGradeId = iis.intGradeId
+	, strCertification = NULL
+	, intCertificationId = NULL
+	, strMTMPoint = NULL
+	, intMTMPointId = NULL
+	, strClass = iis.strClass
+	, strRegion = iis.strRegion
 FROM (
 	SELECT it.intItemId
 		, it.strItemNo
 		, it.strLocationName
 		, it.intLocationId
-		, it.strCurrency
-		, it.intCurrencyId
+		, strCurrency = currency.strCurrency
+		, intCurrencyId = currency.intCurrencyId
 		, it.strMarketValuation
 		, it.intOriginId
 		, cl.ysnLicensed
@@ -520,6 +541,12 @@ FROM (
 		, c.strCommodityCode
 		, intStockUOMId = UOM.intUnitMeasureId
 		, strStockUOM = UOM.strUnitMeasure
+		, strProductType = ProductType.strDescription
+		, intProductTypeId = ProductType.intCommodityAttributeId
+		, strProductLine = ProductLine.strDescription
+		, intProductLineId = ProductLine.intCommodityProductLineId
+		, strGrade = Grade.strDescription
+		, intGradeId = Grade.intCommodityAttributeId
 		, strClass = CLASS.strDescription
 		, strRegion = REGION.strDescription
 	FROM vyuRKGetInventoryTransaction it
@@ -528,67 +555,63 @@ FROM (
 	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemId = i.intItemId AND ItemUOM.ysnStockUnit = 1
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 	LEFT JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = it.intLocationId
+	LEFT JOIN (
+		SELECT TOP 1 
+			  strCurrency = c.strCurrency
+			, intCurrencyId = SMC.intDefaultCurrencyId -- FUNCTIONAL
+		FROM tblSMCompanyPreference SMC
+		LEFT JOIN tblSMCurrency c
+			ON c.intCurrencyID = SMC.intDefaultCurrencyId
+	) currency
+		ON 1 = 1
+	LEFT JOIN tblICCommodityAttribute ProductType 
+		ON ProductType.intCommodityAttributeId = i.intProductTypeId
+		AND ProductType.strType = 'ProductType' 
+		AND ProductType.intCommodityId = i.intCommodityId 
+	LEFT JOIN tblICCommodityProductLine ProductLine 
+		ON ProductLine.intCommodityProductLineId = i.intProductLineId
+	LEFT JOIN tblICCommodityAttribute Grade 
+		ON Grade.intCommodityAttributeId = i.intGradeId
+		AND Grade.strType = 'Grade' 
+		AND Grade.intCommodityId = i.intCommodityId 
 	LEFT JOIN tblICCommodityAttribute CLASS
 		ON CLASS.intCommodityAttributeId = i.intClassVarietyId
+		AND  CLASS.strType = 'Class'
+		AND CLASS.intCommodityId = i.intCommodityId 
 	LEFT JOIN tblICCommodityAttribute REGION
 		ON REGION.intCommodityAttributeId = i.intRegionId
+		AND REGION.strType = 'Region'
+		AND REGION.intCommodityId = i.intCommodityId 
+	LEFT JOIN (
+		SELECT TOP 1 
+			  intRiskViewId
+			--, ysnM2MAllowLotControlledItems
+		FROM tblRKCompanyPreference
+	) rkcp
+		ON 1 = 1
 	WHERE dblQuantity > 0
-		AND it.strLotTracking = (CASE WHEN (SELECT TOP 1 intRiskViewId FROM tblRKCompanyPreference) = 2 THEN it.strLotTracking ELSE 'No' END)) iis
-OUTER APPLY (
-	SELECT DISTINCT TOP 1 cd.intItemId
-		, cd.intCompanyLocationId
-		, fm.intFutureMarketId
-		, fmon.intFutureMonthId
-		, cd.intItemUOMId
-		, ch.intCommodityId
+		AND it.strLotTracking = CASE WHEN ISNULL(rkcp.intRiskViewId, 0) = 2 
+										--OR ISNULL(rkcp.ysnM2MAllowLotControlledItems, 0) = 1 
+									THEN it.strLotTracking ELSE 'No' END
+	GROUP BY it.intItemId
+		, it.strItemNo
+		, it.strLocationName
+		, it.intLocationId
+		, currency.strCurrency
+		, currency.intCurrencyId
+		, it.strMarketValuation
+		, it.intOriginId
+		, cl.ysnLicensed
+		, c.intCommodityId
 		, c.strCommodityCode
-		, intMarketZoneId = NULL
-		, intContractTypeId = NULL
-		, strContractType = NULL 
-		, pt.intPricingTypeId
-		, pt.strPricingType
-		, cd.intCurrencyId
-		, fm.strFutMarketName
-		, strFutureMonth
-		, strMarketZoneCode
-		, strFMCurrency = muc.strCurrency
-		, intFMCurrencyId = muc.intCurrencyID
-		, intFMUOMId = mum.intUnitMeasureId
-		, strFMUOM = mum.strUnitMeasure
-		, intUOMId = um.intUnitMeasureId
-		, strUOM = um.strUnitMeasure
-		, strOriginPort = NULL
-		, intOriginPortId = NULL
-		, strDestinationPort = NULL
-		, intDestinationPortId = NULL
-		, strCropYear = NULL
-		, intCropYearId = NULL
-		, strStorageLocation = NULL
-		, intStorageLocationId = NULL
-		, strStorageUnit = NULL
-		, intStorageUnitId = NULL
-		, strProductType = NULL
-		, intProductTypeId = NULL
-		, strProductLine = NULL
-		, intProductLineId = NULL
-		, strGrade  = NULL
-		, intGradeId = NULL
-		, strCertification = NULL
-		, intCertificationId = NULL
-		, strMTMPoint = NULL
-		, intMTMPointId = NULL
-	FROM tblCTContractDetail cd
-	JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
-	JOIN tblCTContractType ct ON ct.intContractTypeId = ch.intContractTypeId
-	JOIN tblCTPricingType pt ON pt.intPricingTypeId = cd.intPricingTypeId
-	JOIN tblICCommodity c ON c.intCommodityId = ch.intCommodityId
-	JOIN tblRKCommodityMarketMapping mm ON mm.intCommodityId = c.intCommodityId
-	LEFT JOIN tblRKFutureMarket fm ON fm.intFutureMarketId = mm.intFutureMarketId
-	LEFT JOIN tblRKFuturesMonth fmon ON fmon.intFutureMonthId = cd.intFutureMonthId
-	LEFT JOIN tblICUnitMeasure mum ON mum.intUnitMeasureId = fm.intUnitMeasureId
-	LEFT JOIN tblICItemUOM u ON cd.intItemUOMId = u.intItemUOMId
-	LEFT JOIN tblSMCurrency muc ON muc.intCurrencyID = fm.intCurrencyId
-	LEFT JOIN tblICUnitMeasure um ON um.intUnitMeasureId = u.intUnitMeasureId
-	LEFT JOIN tblARMarketZone mz ON	mz.intMarketZoneId = cd.intMarketZoneId
-	WHERE cd.intItemId = iis.intItemId
-) ct
+		, UOM.intUnitMeasureId
+		, UOM.strUnitMeasure
+		, ProductType.strDescription
+		, ProductType.intCommodityAttributeId
+		, ProductLine.strDescription
+		, ProductLine.intCommodityProductLineId
+		, Grade.strDescription
+		, Grade.intCommodityAttributeId
+		, CLASS.strDescription
+		, REGION.strDescription
+) iis
