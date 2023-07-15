@@ -1,7 +1,7 @@
 ﻿PRINT 'Demand Forecast Fix'
 GO
 
-IF (SELECT ysnDemandForecastDataFix FROM tblMFCompanyPreference) = 0
+IF (SELECT ISNULL(ysnDemandForecastDataFix, 0) FROM tblMFCompanyPreference) = 0
 	BEGIN
 		DECLARE @negativeValue AS TABLE 
 		(
