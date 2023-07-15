@@ -96,7 +96,6 @@ SELECT DISTINCT strCommodityCode
 	, intProductLineId = ProductLine.intCommodityProductLineId
 	, strGrade  = Grade.strDescription
 	, intGradeId = Grade.intCommodityAttributeId
-	--, strCertification = Certification.strCertificationName
 	, strCertification = CC.strContractCertifications
 	, im.intCertificationId
 	, MTMPoint.strMTMPoint
@@ -222,7 +221,6 @@ LEFT JOIN tblICCommodityAttribute Grade
 	ON Grade.intCommodityAttributeId = im.intGradeId
 	AND Grade.strType = 'Grade' 
 	AND Grade.intCommodityId = im.intCommodityId 
---LEFT JOIN tblICCertification Certification ON Certification.intCertificationId = im.intCertificationId
 LEFT JOIN tblCTMTMPoint MTMPoint ON MTMPoint.intMTMPointId = cd.intMTMPointId
 LEFT JOIN tblICCommodityAttribute CLASS
 	ON CLASS.intCommodityAttributeId = im.intClassVarietyId
@@ -333,7 +331,6 @@ UNION SELECT DISTINCT strCommodityCode
 	, intProductLineId = ProductLine.intCommodityProductLineId
 	, strGrade = Grade.strDescription
 	, intGradeId = Grade.intCommodityAttributeId
-	--, strCertification = Certification.strCertificationName
 	, strCertification = CC.strContractCertifications
 	, im.intCertificationId
 	, MTMPoint.strMTMPoint
@@ -450,7 +447,6 @@ LEFT JOIN tblICCommodityAttribute Grade
 	ON Grade.intCommodityAttributeId = im.intGradeId
 	AND Grade.strType = 'Grade' 
 	AND Grade.intCommodityId = im.intCommodityId 
---LEFT JOIN tblICCertification Certification ON Certification.intCertificationId = im.intCertificationId
 LEFT JOIN tblCTMTMPoint MTMPoint ON MTMPoint.intMTMPointId = cd.intMTMPointId
 LEFT JOIN tblICCommodityAttribute CLASS
 	ON CLASS.intCommodityAttributeId = im.intClassVarietyId
@@ -585,13 +581,13 @@ FROM (
 	LEFT JOIN (
 		SELECT TOP 1 
 			  intRiskViewId
-			--, ysnM2MAllowLotControlledItems
+			, ysnM2MAllowLotControlledItems
 		FROM tblRKCompanyPreference
 	) rkcp
 		ON 1 = 1
 	WHERE dblQuantity > 0
 		AND it.strLotTracking = CASE WHEN ISNULL(rkcp.intRiskViewId, 0) = 2 
-										--OR ISNULL(rkcp.ysnM2MAllowLotControlledItems, 0) = 1 
+										OR ISNULL(rkcp.ysnM2MAllowLotControlledItems, 0) = 1 
 									THEN it.strLotTracking ELSE 'No' END
 	GROUP BY it.intItemId
 		, it.strItemNo
