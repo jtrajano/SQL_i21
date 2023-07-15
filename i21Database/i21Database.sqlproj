@@ -12278,6 +12278,7 @@
     <None Include="Scripts\Post-Deployment\MBIL\InsertDefaultMobileCompanyPref.sql" />
     <Build Include="dbo\Stored Procedures\uspQMUpdateLoadShipmentDetail.sql" />
     <Build Include="dbo\Functions\fnCTGetSampleDetailAllocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspARProcessTradeFinanceLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
