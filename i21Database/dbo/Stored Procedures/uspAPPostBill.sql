@@ -1006,7 +1006,21 @@ SELECT
 	,[intOtherChargeItemId] = NULL
 	,[intItemLocationId] = IL.intItemLocationId
 	,[dtmDate] = B.dtmDate
-	,[dblValue] = LD.dblAmount * -1
+	,[dblValue] = (
+		CASE 
+			WHEN BD.intComputeTotalOption = 0 AND BD.intWeightUOMId IS NOT NULL AND BD.intWeightClaimDetailId IS NULL
+				THEN BD.dblNetWeight * BD.dblWeightUnitQty
+			ELSE BD.dblQtyReceived * BD.dblUnitQty 
+		END
+		*
+		CAST(
+			CASE 
+				WHEN BD.ysnSubCurrency <> 0
+					THEN BD.dblOldCost / ISNULL(B.intSubCurrencyCents, 1)
+				ELSE BD.dblOldCost
+			END
+		AS FLOAT) / ISNULL(BD.dblCostUnitQty, 1)
+	) * -1
 	,[intTransactionId] = B.intBillId
 	,[intTransactionDetailId] = BD.intBillDetailId
 	,[strTransactionId] = B.strBillId
