@@ -28,6 +28,7 @@
 	[intLocationId] INT             NULL,
 	[intLoadDetailId]    INT             NULL,
 	[intLoadShipmentCostId]    INT             NULL,
+	[intLoadShipmentContainerId] INT NULL,
 	[intLoadId]    INT             NULL,
 	[intWeightClaimId]    INT             NULL,
 	[intWeightClaimDetailId]    INT             NULL,
