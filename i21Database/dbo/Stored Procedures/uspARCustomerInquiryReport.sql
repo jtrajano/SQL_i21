@@ -4,15 +4,14 @@ CREATE PROCEDURE [dbo].[uspARCustomerInquiryReport]
 	, @dtmDate				DATE = NULL
 	, @page					INT = NULL	
 	, @limit				INT = NULL
-	, @start				INT = NULL	
+	, @start				INT = NULL
+	, @strCustomerIds		NVARCHAR(MAX) = MAX
 AS
 
-IF(OBJECT_ID('tempdb..#CUSTOMERINQUIRY') IS NOT NULL)
-BEGIN
-    DROP TABLE #CUSTOMERINQUIRY
-END
+IF(OBJECT_ID('tempdb..#CUSTOMERINQUIRY') IS NOT NULL) DROP TABLE #CUSTOMERINQUIRY
+IF(OBJECT_ID('tempdb..#SELECTEDCUSTOMERS') IS NOT NULL) DROP TABLE #SELECTEDCUSTOMERS
 
-CREATE TABLE #CUSTOMERINQUIRY (
+CREATE TABLE #SELECTEDCUSTOMERS (
 	  intEntityCustomerId			INT	NOT NULL
 	, intEntityId					INT NULL
 	, intTermsId					INT NULL
@@ -69,8 +68,9 @@ CREATE TABLE #CUSTOMERINQUIRY (
 	, dtmHighestDueARDate			DATETIME NULL
 )
 
-DECLARE @strCustomerIds				NVARCHAR(100) = NULL,
-	    @strCustomerAgingBy			NVARCHAR(250) = NULL
+CREATE TABLE #CUSTOMERINQUIRY (intEntityCustomerId INT	NOT NULL)
+
+DECLARE @strCustomerAgingBy			NVARCHAR(250) = NULL
 
 SELECT TOP 1 @strCustomerAgingBy = strCustomerAgingBy
 FROM tblARCompanyPreference WITH (NOLOCK)
@@ -83,6 +83,24 @@ IF @intEntityCustomerId IS NOT NULL
 		SET @strCustomerIds = CAST(@intEntityCustomerId AS NVARCHAR(100))
 
 		EXEC dbo.uspARUpdateCustomerHighestAR @intEntityCustomerId
+
+		INSERT INTO #SELECTEDCUSTOMERS
+		SELECT intEntityId
+		FROM tblARCustomer
+		WHERE intEntityId = @intEntityCustomerId
+	END
+ELSE IF @strCustomerIds IS NOT NULL AND @strCustomerIds <> ''
+	BEGIN
+		INSERT INTO #SELECTEDCUSTOMERS
+		SELECT C.intEntityId
+		FROM tblARCustomer C
+		INNER JOIN dbo.fnGetRowsFromDelimitedValues(@strCustomerIds) DV ON C.intEntityId = DV.intID
+	END
+ELSE
+	BEGIN
+		INSERT INTO #SELECTEDCUSTOMERS
+		SELECT C.intEntityId
+		FROM tblARCustomer C
 	END
 
 IF @intEntityUserId IS NULL
@@ -201,6 +219,7 @@ SELECT intEntityCustomerId          = CUSTOMER.intEntityId
      , dblHighestDueAR				= ISNULL(CUSTOMER.dblHighestDueAR, 0)
      , dtmHighestDueARDate			= CUSTOMER.dtmHighestDueARDate	 
 FROM vyuARCustomerSearch CUSTOMER
+INNER JOIN #SELECTEDCUSTOMERS CC ON CUSTOMER.intEntityId = CC.intEntityCustomerId
 LEFT JOIN tblARCustomerAgingStagingTable AGING ON CUSTOMER.intEntityCustomerId = AGING.intEntityCustomerId AND AGING.intEntityUserId = @intEntityUserId AND AGING.strAgingType = 'Summary'
 LEFT JOIN tblARStatementOfAccount SOA ON SOA.strEntityNo = CUSTOMER.strCustomerNumber
 LEFT JOIN (
@@ -278,7 +297,6 @@ LEFT JOIN (
 	  AND YEAR(dtmPostDate) = DATEPART(YEAR, @dtmDate)
 	  GROUP BY intEntityCustomerId
 ) YTDSERVICECHARGE ON CUSTOMER.intEntityCustomerId = YTDSERVICECHARGE.intEntityCustomerId 
-WHERE @intEntityCustomerId IS NULL OR CUSTOMER.intEntityCustomerId = @intEntityCustomerId
 
 UPDATE CI
 SET dblLastPayment		= ISNULL(PAYMENT.dblAmountPaid, 0)
