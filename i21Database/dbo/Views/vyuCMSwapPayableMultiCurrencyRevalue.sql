@@ -28,7 +28,8 @@ SELECT DISTINCT
     dblDebit                =   0, -- Calcuate By GL
     dblCredit               =   0,  -- Calcuate By GL
 	intCompanyLocationId	=	NULL,
-	intAccountId			=	SwapShort.intGLAccountIdTo
+	intAccountId			=	SwapShort.intGLAccountIdTo,
+	dtmSettlement			=	CASE WHEN ISNULL(SwapLong.ysnPosted, 0) = 1 THEN  SwapLong.dtmDate ELSE '2030-01-01' END
 FROM tblCMBankSwap BankSwap
 JOIN tblCMBankTransfer SwapShort
 	ON SwapShort.intTransactionId = BankSwap.intSwapShortId
