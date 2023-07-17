@@ -7,6 +7,7 @@ SELECT intEntityId				= SP.intEntityCustomerId
 	 , strCostToUse				= SP.strCostToUse
 	 , strVendorId				= V.strVendorId
 	 , strItemNo				= I.strItemNo
+	 , strItemDescription		= I.strDescription
 	 , strVendorLocationName	= VL.strLocationName
 	 , strCategoryCode			= CAT.strCategoryCode
 	 , strCustomerGroup			= SP.strCustomerGroup
@@ -32,3 +33,4 @@ LEFT JOIN tblICItem IR ON IR.intItemId = SP.intRackItemId
 LEFT JOIN tblEMEntityLocation VL ON VL.intEntityId = V.intEntityId AND VL.intEntityLocationId = SP.intEntityLocationId
 LEFT JOIN tblEMEntityLocation VLR ON VLR.intEntityId = VR.intEntityId AND VLR.intEntityLocationId = SP.intRackLocationId
 LEFT JOIN tblICCategory CAT ON CAT.intCategoryId = SP.intCategoryId
+WHERE I.intItemId IS NOT NULL
