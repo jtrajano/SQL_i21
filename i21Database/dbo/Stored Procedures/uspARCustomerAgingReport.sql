@@ -58,6 +58,14 @@ DECLARE @temp_xml_table TABLE (
 	,[datatype]		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 )
 
+--added
+DECLARE @DECOMPANY			Id
+DECLARE @COMPANY TABLE 
+	(
+		 intEntityCustomerId	INT	NOT NULL PRIMARY KEY
+		,intId					INT	NOT NULL
+	)
+
 -- Prepare the XML 
 EXEC sp_xml_preparedocument @xmlDocumentId OUTPUT, @xmlParam
 
@@ -322,6 +330,19 @@ IF @dtmDateFrom IS NOT NULL
 ELSE 			  
 	SET @dtmDateFrom = CAST(-53690 AS DATETIME)
 
+--added
+IF ISNULL(@strCompanyNameIds, '') <> ''
+	BEGIN
+		INSERT INTO @DECOMPANY
+		SELECT DISTINCT intID
+		FROM dbo.fnGetRowsFromDelimitedValues(@strCompanyNameIds)	
+		
+		INSERT INTO @COMPANY
+		SELECT GL.intAccountId, GL.intAccountId
+		FROM dbo.vyuARDistinctGLCompanyAccountIds GL WITH (NOLOCK) 
+		INNER JOIN @DECOMPANY COMPANY ON GL.intAccountId = COMPANY.intId
+	END
+
 IF NOT EXISTS(SELECT * FROM tblSRReportLog WHERE strReportLogId = @strReportLogId)
 BEGIN
 	EXEC dbo.uspARLogPerformanceRuntime @strScreenName			= 'Customer Aging Summary Report'
@@ -350,6 +371,12 @@ BEGIN
 
 	EXEC dbo.uspARGLAccountReport @dtmAsOfDate = @dtmDateTo
 								, @intEntityUserId = @intEntityUserId
+
+	--added
+	IF EXISTS (SELECT TOP 1 1 FROM @COMPANY)
+    BEGIN
+        DELETE FROM tblARGLSummaryStagingTable WHERE intAccountId NOT IN (SELECT intId FROM @COMPANY)
+    END
 							
 	--ROLL CREDITS
 	IF(OBJECT_ID('tempdb..#CUSTOMERSWITHCREDITS') IS NOT NULL)
