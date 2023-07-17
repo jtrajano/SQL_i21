@@ -1,4 +1,4 @@
-﻿ALTER PROCEDURE [dbo].[uspCMPostBankTransaction]
+﻿CREATE PROCEDURE [dbo].[uspCMPostBankTransaction]
 	@ysnPost				BIT		= 0
 	,@ysnRecap				BIT		= 0
 	,@strTransactionId		NVARCHAR(40) = NULL 
