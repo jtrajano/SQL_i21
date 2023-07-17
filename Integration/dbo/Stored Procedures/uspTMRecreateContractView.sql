@@ -169,6 +169,7 @@ BEGIN
 				,strCustomerName = C.strName COLLATE Latin1_General_CI_AS
 				,strItemUnitDescription = G.strUnitMeasure COLLATE Latin1_General_CI_AS
 				,ysnMaxPrice = CAST(ISNULL(ysnMaxPrice,0) AS BIT)
+				,intContractStatusId = B.intContractStatusId
  			FROM tblCTContractHeader A
 			INNER JOIN vyuCTContractHeaderNotMapped H
 				ON A.intContractHeaderId = H.intContractHeaderId
