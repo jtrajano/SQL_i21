@@ -572,6 +572,7 @@ IF @ysnPost = 1
   EXEC uspCMBTOverrideGLAccount @intGLAccountIdFrom, @intBankTransferTypeId 
     IF @@ERROR <> 0 GOTO Post_Rollback    
 
+IF @ysnPost = 1
   EXEC uspGLInsertIntraCompanyEntries
     IF @@ERROR <> 0 GOTO Post_Rollback    
 
@@ -902,7 +903,7 @@ IF @ysnPost = 1
   EXEC uspCMBTOverrideGLAccount @intGLAccountIdFrom, @intBankTransferTypeId 
     IF @@ERROR <> 0 GOTO Post_Rollback    
 
-
+IF @ysnPost = 1 
   EXEC uspGLInsertIntraCompanyEntries
     IF @@ERROR <> 0 GOTO Post_Rollback    
   
