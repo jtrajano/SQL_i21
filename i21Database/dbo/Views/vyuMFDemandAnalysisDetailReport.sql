@@ -28,6 +28,8 @@ SELECT strAttributeName			AS [Plan Detail]
 	 , PivotData.strMonth10
 	 , PivotData.strMonth11
 	 , PivotData.strMonth12
+	 , strInvPlngReportName		AS [Plan Name]
+	 , dtmDemandDate			AS [Date]
 FROM 
 (
 	SELECT CASE WHEN DemandAttribute.intReportAttributeID = 1	THEN 'Months & Item'
@@ -46,12 +48,19 @@ FROM
 		 , DemandAttribute.intDisplayOrder
 		 , DemandAnalysis.intItemId
 		 , DemandAttribute.intReportAttributeID
+		 , ReportMaster.strInvPlngReportName
+		 , ReportMaster.dtmDemandDate
 	FROM tblCTInvPlngReportAttributeValue AS DemandAnalysis
 	JOIN tblICItem AS Item ON DemandAnalysis.intItemId = Item.intItemId
 	JOIN tblCTReportAttribute AS DemandAttribute ON DemandAnalysis.intReportAttributeID = DemandAttribute.intReportAttributeID
 	OUTER APPLY (SELECT TOP 1 strLocationName
 				 FROM tblSMCompanyLocation AS SMCompanyLocation
 				 WHERE SMCompanyLocation.intCompanyLocationId = DemandAnalysis.intLocationId) AS CompanyLocation
+	OUTER APPLY (SELECT TOP 1 CTReportMaster.strInvPlngReportName
+							, CONVERT(DATE, CTReportMaster.dtmDate) AS dtmDemandDate
+				 FROM tblCTInvPlngReportMaster AS CTReportMaster
+				 JOIN tblMFDemandHeader AS DemandHeader ON CTReportMaster.intDemandHeaderId = DemandHeader.intDemandHeaderId
+				 WHERE CTReportMaster.intInvPlngReportMasterID = DemandAnalysis.intInvPlngReportMasterID) AS ReportMaster
 ) AS SourceData
 PIVOT
 (
