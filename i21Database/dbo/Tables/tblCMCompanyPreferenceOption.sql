@@ -35,8 +35,6 @@ CREATE TABLE [dbo].[tblCMCompanyPreferenceOption](
 	ysnRemittanceAdvice_DisplayVendorAccountNumber BIT NULL,
 	ysnRemittanceAdvice_AttachSettlement BIT NULL,
 	intConcurrencyId int NULL,
-	ysnRemittanceAdvice_DisplayVendorAccountNumber BIT NULL,
- 	ysnRemittanceAdvice_AttachSettlement BIT NULL,
  	CONSTRAINT [PK_tblCMCompanyPreferenceOption] PRIMARY KEY CLUSTERED 
 (
 	[intCompanyPreferenceOptionId] ASC
