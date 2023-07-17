@@ -70,31 +70,15 @@ BEGIN
 	WHERE l.strPeriod = @strPeriod
 END 
 
-CREATE TABLE #valuation (
-	  intItemId INT
-	, strItemNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
-	, strItemDescription NVARCHAR(500) COLLATE Latin1_General_CI_AS
-	, intItemLocationId INT
-	, strLocationName NVARCHAR(200) COLLATE Latin1_General_CI_AS
-	, dblRunningQuantity NUMERIC(38, 6)
-	, dblRunningValue NUMERIC(38, 6)
-	, dblRunningLastCost NUMERIC(38, 6)
-	, dblRunningStandardCost NUMERIC(38, 6)
-	, dblRunningAverageCost NUMERIC(38, 6)
-	, strStockUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS
-	, strCategoryCode NVARCHAR(50) COLLATE Latin1_General_CI_AS
-	, strCommodityCode NVARCHAR(50) COLLATE Latin1_General_CI_AS
-	, strInTransitLocationName NVARCHAR(50) COLLATE Latin1_General_CI_AS
-	, intLocationId INT
-	, intInTransitLocationId INT
-	, ysnInTransit BIT
-	, strPeriod NVARCHAR(50) COLLATE Latin1_General_CI_AS
-	, strKey NVARCHAR(100) COLLATE Latin1_General_CI_AS
-)
-
-INSERT #valuation
-SELECT	
-		 Item.intItemId
+;
+MERGE	
+INTO	tblICInventoryValuationSummary
+WITH	(HOLDLOCK) 
+AS		summaryLog 
+USING (
+	SELECT
+		intInventoryValuationKeyId = NULL 
+		,Item.intItemId
 		,Item.strItemNo
 		,strItemDescription = Item.strDescription 
 		,ItemLocation.intItemLocationId
@@ -218,78 +202,81 @@ SELECT
 		ItemLocation.intItemLocationId IS NOT NULL
 		AND f.intGLFiscalYearPeriodId >= fypStartingPoint.intGLFiscalYearPeriodId
 		AND FLOOR(CAST(f.dtmStartDate AS FLOAT)) <= FLOOR(CAST(GETDATE() AS FLOAT))
+) query
+	ON 
+	summaryLog.intItemId = query.intItemId 
+	AND summaryLog.strPeriod = query.strPeriod 
+	AND summaryLog.strKey = query.strKey
+	AND (
+		summaryLog.intInTransitLocationId = query.intInTransitLocationId
+		OR (summaryLog.intInTransitLocationId is null and query.intInTransitLocationId is null) 
+	)	
 
-INSERT INTO tblICInventoryValuationSummary (
-	  intItemId
-	, strItemNo
-	, strItemDescription
-	, intItemLocationId
-	, strLocationName
-	, dblRunningQuantity
-	, dblRunningValue
-	, dblRunningLastCost
-	, dblRunningStandardCost
-	, dblRunningAverageCost
-	, strStockUOM
-	, strCategoryCode
-	, strCommodityCode
-	, strInTransitLocationName
-	, intLocationId
-	, intInTransitLocationId
-	, ysnInTransit
-	, strPeriod
-	, strKey
-)
-SELECT
-	  v.intItemId
-	, v.strItemNo
-	, v.strItemDescription
-	, v.intItemLocationId
-	, v.strLocationName
-	, v.dblRunningQuantity
-	, v.dblRunningValue
-	, v.dblRunningLastCost
-	, v.dblRunningStandardCost
-	, v.dblRunningAverageCost
-	, v.strStockUOM
-	, v.strCategoryCode
-	, v.strCommodityCode
-	, v.strInTransitLocationName
-	, v.intLocationId
-	, v.intInTransitLocationId
-	, v.ysnInTransit
-	, v.strPeriod
-	, v.strKey
-FROM #valuation v
-WHERE NOT EXISTS (
-	SELECT TOP 1 1
-	FROM tblICInventoryValuationSummary s
-	WHERE s.intItemId = v.intItemId 
-		AND s.strPeriod = v.strPeriod 
-		AND ISNULL(s.intInTransitLocationId, 0) = ISNULL(v.intInTransitLocationId, 0)
-)
+WHEN MATCHED THEN 
+	UPDATE 
+	SET summaryLog.strItemNo = query.strItemNo
+		,summaryLog.strItemDescription = query.strItemDescription
+		,summaryLog.strLocationName = query.strLocationName
+		,summaryLog.dblRunningQuantity = query.dblRunningQuantity
+		,summaryLog.dblRunningValue = query.dblRunningValue
+		,summaryLog.dblRunningLastCost = query.dblRunningLastCost
+		,summaryLog.dblRunningStandardCost = query.dblRunningStandardCost
+		,summaryLog.dblRunningAverageCost = query.dblRunningAverageCost
+		,summaryLog.strStockUOM = query.strStockUOM
+		,summaryLog.strCategoryCode = query.strCategoryCode
+		,summaryLog.strCommodityCode = query.strCommodityCode 
+		,summaryLog.strInTransitLocationName = query.strInTransitLocationName 
+		,summaryLog.intLocationId = query.intLocationId
+		,summaryLog.intInTransitLocationId = query.intInTransitLocationId
+		,summaryLog.ysnInTransit = query.ysnInTransit
+		,summaryLog.strKey = query.strKey 
 
-UPDATE s
-SET   s.strItemNo = v.strItemNo
-	, s.strItemDescription = v.strItemDescription
-	, s.strLocationName = v.strLocationName
-	, s.dblRunningQuantity = v.dblRunningQuantity
-	, s.dblRunningValue = v.dblRunningValue
-	, s.dblRunningLastCost = v.dblRunningLastCost
-	, s.dblRunningStandardCost = v.dblRunningStandardCost
-	, s.dblRunningAverageCost = v.dblRunningAverageCost
-	, s.strStockUOM = v.strStockUOM
-	, s.strCategoryCode = v.strCategoryCode
-	, s.strCommodityCode = v.strCommodityCode 
-	, s.strInTransitLocationName = v.strInTransitLocationName 
-	, s.intLocationId = v.intLocationId
-	, s.intInTransitLocationId = v.intInTransitLocationId
-	, s.ysnInTransit = v.ysnInTransit
-	, s.strKey = v.strKey 
-FROM tblICInventoryValuationSummary s
-JOIN #valuation v ON v.intItemId = s.intItemId 
-	AND v.strPeriod = s.strPeriod 
-	AND ISNULL(v.intInTransitLocationId, 0) = ISNULL(s.intInTransitLocationId, 0)
+WHEN NOT MATCHED THEN 
+	INSERT (
+		intInventoryValuationKeyId 
+		,intItemId
+		,strItemNo
+		,strItemDescription 
+		,intItemLocationId
+		,strLocationName 
+		,dblRunningQuantity
+		,dblRunningValue
+		,dblRunningLastCost
+		,dblRunningStandardCost
+		,dblRunningAverageCost
+		,strStockUOM
+		,strCategoryCode
+		,strCommodityCode
+		,strInTransitLocationName
+		,intLocationId
+		,intInTransitLocationId
+		,ysnInTransit
+		,strPeriod
+		,strKey
+	)
+	VALUES (
+		query.intInventoryValuationKeyId 
+		,query.intItemId
+		,query.strItemNo
+		,query.strItemDescription 
+		,query.intItemLocationId
+		,query.strLocationName 
+		,query.dblRunningQuantity
+		,query.dblRunningValue
+		,query.dblRunningLastCost
+		,query.dblRunningStandardCost
+		,query.dblRunningAverageCost
+		,query.strStockUOM
+		,query.strCategoryCode
+		,query.strCommodityCode
+		,query.strInTransitLocationName
+		,query.intLocationId
+		,query.intInTransitLocationId
+		,query.ysnInTransit
+		,query.strPeriod
+		,query.strKey		
+	)
+;
 	
 UPDATE l
 SET l.ysnRebuilding = 0
