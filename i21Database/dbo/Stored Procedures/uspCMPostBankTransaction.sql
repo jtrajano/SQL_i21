@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspCMPostBankTransaction]
+﻿ALTER PROCEDURE [dbo].[uspCMPostBankTransaction]
 	@ysnPost				BIT		= 0
 	,@ysnRecap				BIT		= 0
 	,@strTransactionId		NVARCHAR(40) = NULL 
@@ -193,7 +193,7 @@ BEGIN
 	GOTO Post_Rollback
 END 
 
-IF @ysnPost = 1 
+IF @ysnPost = 1 AND @ysnRecap = 0
 BEGIN
 	IF EXISTS(SELECT 1 FROM tblGLDetail where strTransactionId=@strTransactionId AND ISNULL(ysnIsUnposted,0) = 0)
 	BEGIN
