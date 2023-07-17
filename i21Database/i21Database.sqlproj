@@ -1779,6 +1779,7 @@
     <Build Include="dbo\Views\vyuGLCOAiPayables.sql" />
     <Build Include="dbo\Stored Procedures\uspGLCorrigaCOAiPayables.sql" />
     <None Include="Scripts\Post-Deployment\MF\15_DemandForecastFix.sql" />
+    <Build Include="dbo\Views\vyuRKGetSequenceMonth.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
