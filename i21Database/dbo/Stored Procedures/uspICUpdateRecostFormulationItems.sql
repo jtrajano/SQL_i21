@@ -72,7 +72,7 @@ SET		pl.dblUnitPrice =
 						,ISNULL(r.intRounding, 6)
 					) 
 				)
-			WHEN pl.strPricingMethod = 'Markup Standard Cost' THEN 
+			WHEN pl.strPricingMethod = 'Markup Standard Cost Percentage ' THEN 
 				ROUND(
 					((p.dblStandardCost * pl.dblAmountRate) / 100) + p.dblStandardCost
 					, ISNULL(r.intRounding, 6)

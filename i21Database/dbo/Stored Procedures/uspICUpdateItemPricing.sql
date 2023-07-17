@@ -26,7 +26,7 @@ BEGIN
 				AND pl.intItemLocationId = p.intItemLocationId
 	WHERE	p.intItemId = @intItemId
 			AND p.intItemLocationId = @intItemLocationId
-			AND pl.strPricingMethod = 'Markup Standard Cost' 
+			AND pl.strPricingMethod = 'Markup Standard Cost Percentage' 
 			AND (p.ysnIsPendingUpdate = 1 OR ISNULL(@forceUpdate, 0) = 1)
 		
 	UPDATE	pl
@@ -38,7 +38,7 @@ BEGIN
 				AND pl.intItemLocationId = p.intItemLocationId
 	WHERE	p.intItemId = @intItemId
 			AND p.intItemLocationId = @intItemLocationId
-			AND pl.strPricingMethod = 'Markup Last Cost'
+			AND pl.strPricingMethod = 'Markup Last Cost Percentage'
 			AND (p.ysnIsPendingUpdate = 1 OR ISNULL(@forceUpdate, 0) = 1)
 
 	UPDATE	pl
@@ -50,7 +50,7 @@ BEGIN
 				AND pl.intItemLocationId = p.intItemLocationId
 	WHERE	p.intItemId = @intItemId
 			AND p.intItemLocationId = @intItemLocationId
-			AND pl.strPricingMethod = 'Markup Avg Cost'
+			AND pl.strPricingMethod = 'Markup Avg Cost Percentage'
 			AND (p.ysnIsPendingUpdate = 1 OR ISNULL(@forceUpdate, 0) = 1)
 
 	UPDATE	pl
@@ -87,6 +87,37 @@ BEGIN
 			AND pl.strPricingMethod = 'Percent of Margin'
 			AND (p.ysnIsPendingUpdate = 1 OR ISNULL(@forceUpdate, 0) = 1)
 			AND pl.dblAmountRate < 100
+
+	UPDATE	pl
+	SET		pl.dblUnitPrice = ROUND((p.dblStandardCost + pl.dblAmountRate), 6) 
+	FROM	tblICItemPricingLevel pl INNER JOIN tblICItemPricing p
+				ON pl.intItemId = p.intItemId
+				AND pl.intItemLocationId = p.intItemLocationId
+	WHERE	p.intItemId = @intItemId
+			AND p.intItemLocationId = @intItemLocationId
+			AND pl.strPricingMethod = 'Markup Standard Cost Amount'
+			AND (p.ysnIsPendingUpdate = 1 OR ISNULL(@forceUpdate, 0) = 1)
+
+	UPDATE	pl
+	SET		pl.dblUnitPrice = ROUND((p.dblLastCost + pl.dblAmountRate), 6) 
+	FROM	tblICItemPricingLevel pl INNER JOIN tblICItemPricing p
+				ON pl.intItemId = p.intItemId
+				AND pl.intItemLocationId = p.intItemLocationId
+	WHERE	p.intItemId = @intItemId
+			AND p.intItemLocationId = @intItemLocationId
+			AND pl.strPricingMethod = 'Markup Last Cost Amount'
+			AND (p.ysnIsPendingUpdate = 1 OR ISNULL(@forceUpdate, 0) = 1)
+
+	UPDATE	pl
+	SET		pl.dblUnitPrice = ROUND((p.dblAverageCost + pl.dblAmountRate), 6) 
+	FROM	tblICItemPricingLevel pl INNER JOIN tblICItemPricing p
+				ON pl.intItemId = p.intItemId
+				AND pl.intItemLocationId = p.intItemLocationId
+	WHERE	p.intItemId = @intItemId
+			AND p.intItemLocationId = @intItemLocationId
+			AND pl.strPricingMethod = 'Markup Avg Cost Amount'
+			AND (p.ysnIsPendingUpdate = 1 OR ISNULL(@forceUpdate, 0) = 1)
+			
 END 
 
 ----------------------------------------------------------
