@@ -10,6 +10,7 @@ intStoreDepartmentId
 ,strSubCategoryCode
 ,sd.strRegisterCode
 ,sd.intConcurrencyId
+,sd.ysnFuelCategory
 FROM tblSTStoreDepartments sd
 LEFT JOIN vyuSTDepartmentTotalsPreloadCS plcs
 ON sd.intStoreId = plcs.intStoreId AND (sd.intCategoryId = plcs.intCategoryId OR sd.intSubcategoriesId = plcs.intSubcategoriesId)
