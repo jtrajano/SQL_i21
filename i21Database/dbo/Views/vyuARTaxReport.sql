@@ -101,6 +101,7 @@ SELECT
 	,strLocationName			= LOC.strLocationName
 	,strShipToLocationAddress 	= SHIPTO.strLocationName
 	,strItemNo					= DETAIL.strItemNo
+	,strItemDescription			= DETAIL.strItemDescription
 	,strCategoryCode			= DETAIL.strCategoryCode
 	,strItemCategory			= DETAIL.strCategoryCode
 	,intTaxClassId				= DETAIL.intTaxClassId
@@ -171,6 +172,7 @@ INNER JOIN (
 		,strSalesTaxAccount		= SALESTAXACCOUNT.strAccountId
 		,strPurchaseTaxAccount	= PURCHASEACCOUNT.strAccountId
 		,strItemNo				= ITEM.strItemNo
+		,strItemDescription		= ITEM.strDescription
 		,strCategoryCode		= CATEGORY.strCategoryCode
 		,intTaxClassId			= IDT.intTaxClassId
 		,intSalesTaxAccountId	= IDT.intSalesTaxAccountId
@@ -219,6 +221,7 @@ INNER JOIN (
 			,intCategoryId
 			,intTonnageTaxUOMId	= CASE WHEN ISNULL(ysnTonnageTax, 0) = 1 THEN intTonnageTaxUOMId ELSE NULL END
 			,strItemNo
+			,strDescription
 			,intCommodityId
 		FROM dbo.tblICItem WITH (NOLOCK)
 	) ITEM ON ID.intItemId = ITEM.intItemId
@@ -338,6 +341,7 @@ INNER JOIN (
 	     , strSalesTaxAccount		= GLS.strAccountId
 	     , strPurchaseTaxAccount	= GLP.strAccountId
 	     , strItemNo				= NULL
+	     , strItemDescription		= NULL
 	     , strCategoryCode			= NULL
 	     , intTaxClassId			= TC.intTaxClassId
 	     , intSalesTaxAccountId		= TC.intSalesTaxAccountId

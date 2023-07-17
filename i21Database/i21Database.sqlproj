@@ -4925,6 +4925,7 @@
     <Build Include="dbo\Tables\tblMFItemContaminationDetail.sql" />
     <Build Include="dbo\Functions\fnEMGetCustomerTransportQuoteCategory.sql" />
     <Build Include="dbo\Functions\fnEMGetCustomerTransportQuoteItem.sql" />
+    <Build Include="dbo\Functions\fnEMGetCustomerTransportQuoteItemDescription.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetWeightLoss.sql" />
     <Build Include="dbo\Stored Procedures\uspMFTransferProcessMovement.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetLotByStorageLocation.sql" />

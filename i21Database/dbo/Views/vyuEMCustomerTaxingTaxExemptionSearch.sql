@@ -6,6 +6,7 @@
 		tax_exemption.intEntityCustomerId,
 		cus_location.strLocationName,
 		item.strItemNo,
+		item.strDescription strItemDescription,
 		category.strCategoryCode,
 		tax_code.strTaxCode,
 		tax_class.strTaxClass,
