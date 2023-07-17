@@ -204,9 +204,13 @@ BEGIN TRY
 			,SUM(LD.dblQuantity) dblQuantity
 		FROM tblLGLoadDetail LD
 		JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 
-			WHEN ((ISNULL(LD.intPContractDetailId, 0) = 0) AND LD.intSContractDetailId = LC.intContractDetailId)
-				THEN LD.intSContractDetailId
-			ELSE LD.intPContractDetailId
+			WHEN ISNULL(L.intPurchaseSale, 0) = 1
+				THEN LD.intPContractDetailId
+				ELSE LD.intSContractDetailId
+			END AND LC.intContractDetailId = CASE
+			WHEN ISNULL(L.intPurchaseSale, 0) = 1
+				THEN LD.intPContractDetailId
+				ELSE LD.intSContractDetailId
 			END
 		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 		JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = LD.intItemId
@@ -337,7 +341,7 @@ BEGIN TRY
 				,[ysnStage]
 				,[intSubLocationId]
 				,[intStorageLocationId])
-			SELECT
+			SELECT DISTINCT
 				[intEntityVendorId] = VDD.intVendorEntityId
 				,[intTransactionType] = 1
 				,[intLocationId] = CD.intCompanyLocationId
