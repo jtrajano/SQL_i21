@@ -76,7 +76,7 @@ INTO	tblICInventoryValuationSummary
 WITH	(HOLDLOCK) 
 AS		summaryLog 
 USING (
-	SELECT	DISTINCT
+	SELECT	
 		intInventoryValuationKeyId = NULL 
 		,Item.intItemId
 		,Item.strItemNo
@@ -206,7 +206,7 @@ USING (
 	ON 
 	summaryLog.intItemId = query.intItemId 
 	AND summaryLog.strPeriod = query.strPeriod 
-	AND summaryLog.strKey = query.strKey
+	AND summaryLog.intItemLocationId = query.intItemLocationId 
 	AND (
 		summaryLog.intInTransitLocationId = query.intInTransitLocationId
 		OR (summaryLog.intInTransitLocationId is null and query.intInTransitLocationId is null) 
