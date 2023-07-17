@@ -740,7 +740,7 @@ BEGIN TRY
 							AND ((ER.intFromCurrencyId = CD.intInvoiceCurrencyId AND ER.intToCurrencyId = @DefaultCurrencyId) 
 								OR (ER.intFromCurrencyId = @DefaultCurrencyId AND ER.intToCurrencyId = CD.intInvoiceCurrencyId))
 						ORDER BY RD.dtmValidFromDate DESC) FX
-			OUTER APPLY (SELECT	TOP 1 intBillId FROM tblAPBillDetail WHERE intLoadDetailId = LD.intLoadDetailId) VCHR
+			OUTER APPLY (SELECT	TOP 1 intBillId, dblCost, dblOldCost FROM tblAPBillDetail WHERE intLoadDetailId = LD.intLoadDetailId) VCHR
 			WHERE L.intLoadId = @intLoadId
 				AND ISNULL(LC.ysnRejected, 0) <> 1
 				AND NOT EXISTS (SELECT 1 FROM tblICInventoryReceiptItem IRI 
@@ -887,7 +887,7 @@ BEGIN TRY
 							AND ((ER.intFromCurrencyId = CD.intInvoiceCurrencyId AND ER.intToCurrencyId = @DefaultCurrencyId) 
 								OR (ER.intFromCurrencyId = @DefaultCurrencyId AND ER.intToCurrencyId = CD.intInvoiceCurrencyId))
 						ORDER BY RD.dtmValidFromDate DESC) FX
-			OUTER APPLY (SELECT	TOP 1 intBillId FROM tblAPBillDetail WHERE intLoadDetailId = LD.intLoadDetailId) VCHR
+			OUTER APPLY (SELECT	TOP 1 intBillId, dblCost, dblOldCost FROM tblAPBillDetail WHERE intLoadDetailId = LD.intLoadDetailId) VCHR
 			WHERE L.intLoadId = @intLoadId
 				AND LD.dblQuantity-ISNULL(LD.dblDeliveredQuantity,0) > 0
 		END
