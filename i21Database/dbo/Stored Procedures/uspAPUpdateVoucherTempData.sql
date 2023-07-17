@@ -198,13 +198,13 @@ BEGIN
 				END
 			END
 
-			UPDATE voucher
-				SET	@updatedPaymentAmt = CASE WHEN @tempPayment != voucher.dblTempPayment --Payment have been edited
-						THEN @tempPayment
-						ELSE CASE WHEN voucher.ysnPrepayHasPayment = 0
-							 THEN ((voucher.dblTotal - ISNULL(appliedPrepays.dblPayment, 0)) - voucher.dblPaymentTemp) - @tempDiscount + @tempInterest
-							 ELSE voucher.dblAmountDue - @tempDiscount + @tempInterest END
-						END
+            UPDATE voucher
+                SET @updatedPaymentAmt = CASE WHEN (CASE when voucher.intTransactionType IN (1) THEN ABS(@tempPayment) ELSE @tempPayment END) != voucher.dblTempPayment --Payment have been edited
+                        THEN (CASE when voucher.intTransactionType IN (1) THEN ABS(@tempPayment) ELSE @tempPayment END)
+                        ELSE CASE WHEN voucher.ysnPrepayHasPayment = 0
+                             THEN ((voucher.dblTotal - ISNULL(appliedPrepays.dblPayment, 0)) - voucher.dblPaymentTemp) - @tempDiscount + @tempInterest
+                             ELSE voucher.dblAmountDue - @tempDiscount + @tempInterest END
+                        END
 					--,@amountDue = voucher.dblAmountDue
 					,@amountDue = CASE WHEN voucher.dblPaymentTemp <> 0 AND voucher.ysnPrepayHasPayment = 0 THEN ((voucher.dblTotal - ISNULL(appliedPrepays.dblPayment, 0)) - voucher.dblPaymentTemp) ELSE voucher.dblAmountDue END
 					,@updatedWithheld = CASE WHEN vendor.ysnWithholding = 1 THEN
