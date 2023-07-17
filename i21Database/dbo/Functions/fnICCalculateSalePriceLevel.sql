@@ -39,7 +39,7 @@ BEGIN
 		SET @dblSalesPrice = @dblStandardCost + @dblAmount
 		SET @dblRetailPrice = @dblSalesPrice * @dblQuantity
 	END
-	ELSE IF @strPricingMethod COLLATE Latin1_General_CI_AS = 'Markup Standard Cost'
+	ELSE IF @strPricingMethod COLLATE Latin1_General_CI_AS = 'Markup Standard Cost Percentage'
 	BEGIN
 		DECLARE @dblMarkup NUMERIC(16, 9)
 		SET @dblMarkup = @dblStandardCost * (@dblAmount / 100.00)
@@ -51,17 +51,29 @@ BEGIN
 		SET @dblSalesPrice = @dblStandardCost / (1 - (@dblAmount / 100.00))
 		SET @dblRetailPrice = @dblSalesPrice * @dblQuantity
 	END
-	ELSE IF @strPricingMethod COLLATE Latin1_General_CI_AS = 'Markup Last Cost'
+	ELSE IF @strPricingMethod COLLATE Latin1_General_CI_AS = 'Markup Last Cost Percentage'
 	BEGIN
 		SET @dblMarkup = (@dblLastCost * (@dblAmount / 100.00))
 		SET @dblSalesPrice = (@dblLastCost + @dblMarkup)
 		SET @dblRetailPrice = @dblSalesPrice * @dblQuantity
 	END
-	ELSE IF @strPricingMethod COLLATE Latin1_General_CI_AS = 'Markup Avg Cost'
+	ELSE IF @strPricingMethod COLLATE Latin1_General_CI_AS = 'Markup Avg Cost Percentage'
 	BEGIN
 		SET @dblMarkup = (@dblAvgCost * (@dblAmount / 100.00))
 		SET @dblSalesPrice = (@dblAvgCost + @dblMarkup)
 		SET @dblRetailPrice = @dblAvgCost * @dblQuantity
+	END
+	ELSE IF @strPricingMethod COLLATE Latin1_General_CI_AS = 'Markup Standard Cost Amount'
+	BEGIN
+		SET @dblRetailPrice = (@dblStandardCost + @dblAmount)
+	END
+	ELSE IF @strPricingMethod COLLATE Latin1_General_CI_AS = 'Markup Last Cost Amount'
+	BEGIN
+		SET @dblRetailPrice = (@dblLastCost + @dblAmount)
+	END
+	ELSE IF @strPricingMethod COLLATE Latin1_General_CI_AS = 'Markup Avg Cost Amount'
+	BEGIN
+		SET @dblRetailPrice = (@dblAvgCost + @dblAmount)
 	END
 	ELSE
 		SET @dblRetailPrice = @dblOriginalRetailPrice

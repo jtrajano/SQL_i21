@@ -693,7 +693,7 @@ BEGIN
 				AND pl.intItemLocationId = p.intItemLocationId
 			INNER JOIN #tmpUpdateItemPricingForCStore_ItemPricingAuditLog l
 				ON l.intItemPricingId = p.intItemPricingId
-	WHERE	pl.strPricingMethod = 'Markup Standard Cost'
+	WHERE	pl.strPricingMethod = 'Markup Standard Cost Percentage'
 
 	UPDATE	pl
 	SET		pl.dblUnitPrice = ROUND(
@@ -715,7 +715,7 @@ BEGIN
 				AND pl.intItemLocationId = p.intItemLocationId
 			INNER JOIN #tmpUpdateItemPricingForCStore_ItemPricingAuditLog l
 				ON l.intItemPricingId = p.intItemPricingId
-	WHERE	pl.strPricingMethod = 'Markup Last Cost'
+	WHERE	pl.strPricingMethod = 'Markup Last Cost Percentage'
 
 	UPDATE	pl
 	SET		pl.dblUnitPrice = ROUND(
@@ -726,7 +726,40 @@ BEGIN
 				AND pl.intItemLocationId = p.intItemLocationId
 			INNER JOIN #tmpUpdateItemPricingForCStore_ItemPricingAuditLog l
 				ON l.intItemPricingId = p.intItemPricingId
-	WHERE	pl.strPricingMethod = 'Markup Avg Cost'
+	WHERE	pl.strPricingMethod = 'Markup Avg Cost Percentage'
+
+	UPDATE	pl
+	SET		pl.dblUnitPrice = ROUND
+				((p.dblStandardCost + pl.dblAmountPercent), 6) 
+
+	FROM	tblICItemPricingLevel pl INNER JOIN tblICItemPricing p
+				ON pl.intItemId = p.intItemId
+				AND pl.intItemLocationId = p.intItemLocationId
+			INNER JOIN #tmpUpdateItemPricingForCStore_ItemPricingAuditLog l
+				ON l.intItemPricingId = p.intItemPricingId
+	WHERE	pl.strPricingMethod = 'Markup Standard Cost Amount'
+
+	UPDATE	pl
+	SET		pl.dblUnitPrice = ROUND
+				((p.dblLastCost + pl.dblAmountPercent), 6) 
+
+	FROM	tblICItemPricingLevel pl INNER JOIN tblICItemPricing p
+				ON pl.intItemId = p.intItemId
+				AND pl.intItemLocationId = p.intItemLocationId
+			INNER JOIN #tmpUpdateItemPricingForCStore_ItemPricingAuditLog l
+				ON l.intItemPricingId = p.intItemPricingId
+	WHERE	pl.strPricingMethod = 'Markup Last Cost Amount'
+
+	UPDATE	pl
+	SET		pl.dblUnitPrice = ROUND
+				((p.dblAverageCost + pl.dblAmountPercent), 6) 
+
+	FROM	tblICItemPricingLevel pl INNER JOIN tblICItemPricing p
+				ON pl.intItemId = p.intItemId
+				AND pl.intItemLocationId = p.intItemLocationId
+			INNER JOIN #tmpUpdateItemPricingForCStore_ItemPricingAuditLog l
+				ON l.intItemPricingId = p.intItemPricingId
+	WHERE	pl.strPricingMethod = 'Markup Avg Cost Amount'
 END 
 
 ----------------------------------------------------------------------------

@@ -270,13 +270,17 @@ WHERE
 FilteredItemPricingLevel.strPricingMethod NOT IN (
 	'None', 
 	'Fixed Dollar Amount', 
-	'Markup Standard Cost', 
+	'Markup Standard Cost Percentage', 
 	'Percent of Margin',
 	'Discount Retail Price',
 	'MSRP Discount',
 	'Percent of Margin (MSRP)',
-	'Markup Last Cost',
-	'Markup Avg Cost'
+	'Markup Last Cost Percentage',
+	'Markup Avg Cost Percentage',
+	'Markup Standard Cost Amount',
+	'Markup Last Cost Amount',
+	'Markup Avg Cost Amount'
+
 )
 UNION
 SELECT -- Invalid Currency
