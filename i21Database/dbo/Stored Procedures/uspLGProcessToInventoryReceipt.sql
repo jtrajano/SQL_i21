@@ -739,7 +739,10 @@ BEGIN TRY
 								ELSE 
 									ISNULL(LDCL.dblLinkNetWt, 0)
 								END
-				,[dblCost] = ISNULL(AD.dblSeqPrice, ISNULL(LD.dblUnitPrice,0))
+				,[dblCost] = CASE WHEN (VCHR.dblOldCost IS NOT NULL)
+								THEN VCHR.dblCost
+								ELSE ISNULL(AD.dblSeqPrice, ISNULL(LD.dblUnitPrice,0))
+								END
 				,[intCostUOMId] = dbo.fnGetMatchingItemUOMId(LD.intItemId, ISNULL(AD.intSeqPriceUOMId,LD.intPriceUOMId))
 				,intCurrencyId = CASE WHEN AD.ysnValidFX = 1 THEN CD.intInvoiceCurrencyId ELSE ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) END
 				,[intSubCurrencyCents] = CASE WHEN (AD.ysnValidFX = 1) THEN SC.intCent ELSE COALESCE(LSC.intCent, SC.intCent, 1) END
@@ -804,7 +807,7 @@ BEGIN TRY
 							AND ((ER.intFromCurrencyId = CD.intInvoiceCurrencyId AND ER.intToCurrencyId = @DefaultCurrencyId) 
 								OR (ER.intFromCurrencyId = @DefaultCurrencyId AND ER.intToCurrencyId = CD.intInvoiceCurrencyId))
 						ORDER BY RD.dtmValidFromDate DESC) FX
-			OUTER APPLY (SELECT	TOP 1 intBillId FROM tblAPBillDetail WHERE intLoadDetailId = LD.intLoadDetailId) VCHR
+			OUTER APPLY (SELECT	TOP 1 intBillId, dblCost, dblOldCost FROM tblAPBillDetail WHERE intLoadDetailId = LD.intLoadDetailId) VCHR
 			WHERE L.intLoadId = @intLoadId
 				AND ISNULL(LC.ysnRejected, 0) <> 1
 				AND NOT EXISTS (SELECT 1 FROM tblICInventoryReceiptItem IRI 
@@ -877,7 +880,10 @@ BEGIN TRY
 				,[dblGross] = LD.dblGross - ISNULL(LD.dblDeliveredGross,0)
 				,[dblTare] = LD.dblTare - ISNULL(LD.dblDeliveredTare,0)
 				,[dblNet] = LD.dblNet -ISNULL(LD.dblDeliveredNet,0)
-				,[dblCost] = ISNULL(AD.dblSeqPrice, ISNULL(LD.dblUnitPrice,0))
+				,[dblCost] = CASE WHEN (VCHR.dblOldCost IS NOT NULL)
+								THEN VCHR.dblCost
+								ELSE ISNULL(AD.dblSeqPrice, ISNULL(LD.dblUnitPrice,0))
+								END
 				,[intCostUOMId] = dbo.fnGetMatchingItemUOMId(LD.intItemId, ISNULL(AD.intSeqPriceUOMId,LD.intPriceUOMId))
 				,intCurrencyId = CASE WHEN AD.ysnValidFX = 1 THEN CD.intInvoiceCurrencyId ELSE ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) END
 				,[intSubCurrencyCents] = CASE WHEN (AD.ysnValidFX = 1) THEN SC.intCent ELSE COALESCE(LSC.intCent, SC.intCent, 1) END
@@ -937,7 +943,7 @@ BEGIN TRY
 							AND ((ER.intFromCurrencyId = CD.intInvoiceCurrencyId AND ER.intToCurrencyId = @DefaultCurrencyId) 
 								OR (ER.intFromCurrencyId = @DefaultCurrencyId AND ER.intToCurrencyId = CD.intInvoiceCurrencyId))
 						ORDER BY RD.dtmValidFromDate DESC) FX
-			OUTER APPLY (SELECT	TOP 1 intBillId FROM tblAPBillDetail WHERE intLoadDetailId = LD.intLoadDetailId) VCHR
+			OUTER APPLY (SELECT	TOP 1 intBillId, dblCost, dblOldCost FROM tblAPBillDetail WHERE intLoadDetailId = LD.intLoadDetailId) VCHR
 			WHERE L.intLoadId = @intLoadId
 				AND LD.dblQuantity-ISNULL(LD.dblDeliveredQuantity,0) > 0
 		END
