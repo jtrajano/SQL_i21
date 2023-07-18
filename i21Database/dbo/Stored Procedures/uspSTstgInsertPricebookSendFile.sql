@@ -509,7 +509,7 @@ SELECT '@tblTempPassportITT', * FROM @tblTempPassportITT
 																			[strICPOSCodeModifier]
 																		FROM @tblTempPassportITT
 																	) ItemCode
-																	WHERE ItemCode.strICPOSCode = ITTDetail.strICPOSCode
+																	WHERE ItemCode.strICPOSCode = ITTDetail.strICPOSCode AND ItemCode.strICPOSCodeModifier = ITTDetail.strICPOSCodeModifier
 																	FOR XML PATH('ItemCode'), TYPE
 																),
 																(
@@ -534,16 +534,18 @@ SELECT '@tblTempPassportITT', * FROM @tblTempPassportITT
 																			(
 																				SELECT DISTINCT
 																					[strICPOSCode],
+																					[strICPOSCodeModifier],
 																					[dblTransactionQtyLimit]
 																				FROM @tblTempPassportITT
 																			) ItemTransactionLimit
-																			WHERE ItemTransactionLimit.strICPOSCode = ITTDetail.strICPOSCode
+																			WHERE ItemTransactionLimit.strICPOSCode = ITTDetail.strICPOSCode AND ItemTransactionLimit.strICPOSCodeModifier = ITTDetail.strICPOSCodeModifier
 																			FOR XML PATH('SalesRestriction'), TYPE
 																		)
 																	FROM 
 																	(
 																		SELECT DISTINCT
 																			[strICPOSCode],
+																			[strICPOSCodeModifier],
 																			[strITTDataActiveFlgValue],
 																			[dblITTDataInventoryValuePrice],
 																			[strITTDataMerchandiseCode],
@@ -560,14 +562,15 @@ SELECT '@tblTempPassportITT', * FROM @tblTempPassportITT
 																			[dblTransactionQtyLimit]
 																		FROM @tblTempPassportITT
 																	) ITTData
-																	WHERE ITTData.strICPOSCode = ITTDetail.strICPOSCode
+																	WHERE ITTData.strICPOSCode = ITTDetail.strICPOSCode AND ITTData.strICPOSCodeModifier = ITTDetail.strICPOSCodeModifier
 																	FOR XML PATH('ITTData'), TYPE
 																)
 															FROM 
 															(
 																SELECT DISTINCT
 																	[strITTDetailRecordActionType],
-																	[strICPOSCode]
+																	[strICPOSCode],
+																	[strICPOSCodeModifier]
 																FROM @tblTempPassportITT
 															) ITTDetail
 															ORDER BY ITTDetail.strICPOSCode ASC
