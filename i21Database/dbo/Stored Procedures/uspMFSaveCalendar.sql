@@ -1,73 +1,80 @@
-﻿CREATE PROCEDURE [dbo].uspMFSaveCalendar (
-	@strXML NVARCHAR(MAX)
-	,@intCalendarId INT OUTPUT
-	,@intConcurrencyId INT OUTPUT
-	)
+﻿CREATE PROCEDURE [dbo].[uspMFSaveCalendar] 
+(
+	@strXML				NVARCHAR(MAX)
+  , @intCalendarId		INT OUTPUT
+  , @intConcurrencyId	INT OUTPUT
+)
 AS
 BEGIN TRY
 	DECLARE @strCalendarName NVARCHAR(50)
-		,@intManufacturingCellId INT
-		,@dtmFromDate DATETIME
-		,@dtmToDate DATETIME
-		,@dtmCalendarDate DATETIME
-		,@intShiftId INT
-		,@dtmShiftStartTime DATETIME
-		,@dtmShiftEndTime DATETIME
-		,@ysnStandardCalendar BIT
-		,@intNoOfMachine INT
-		,@intUserId INT
-		,@intRecordId INT
-		,@dtmCurrentDate DATETIME
-		,@idoc INT
-		,@intLocationId INT
-		,@ErrMsg NVARCHAR(MAX)
-		,@intCalendarDetailId INT
-		,@ysnHoliday BIT
-		,@intShiftBreakTypeDuration INT
-		,@intMachineId INT
-		,@strCalendarDate NVARCHAR(50)
-		,@strShiftName NVARCHAR(50)
-		,@strName NVARCHAR(50)
-		,@strShiftId NVARCHAR(50)
+		  , @intManufacturingCellId INT
+		  , @dtmFromDate DATETIME
+		  , @dtmToDate DATETIME
+		  , @dtmCalendarDate DATETIME
+		  , @intShiftId INT
+		  , @dtmShiftStartTime DATETIME
+		  , @dtmShiftEndTime DATETIME
+		  , @ysnStandardCalendar BIT
+		  , @intNoOfMachine INT
+		  , @intUserId INT
+		  , @intRecordId INT
+		  , @dtmCurrentDate DATETIME
+		  , @idoc INT
+		  , @intLocationId INT
+		  , @ErrMsg NVARCHAR(MAX)
+		  , @intCalendarDetailId INT
+		  , @ysnHoliday BIT
+		  , @intShiftBreakTypeDuration INT
+		  , @intMachineId INT
+		  , @strCalendarDate NVARCHAR(50)
+		  , @strShiftName NVARCHAR(50)
+		  , @strName NVARCHAR(50)
+		  , @strShiftId NVARCHAR(50)
+		  , @ysnShowHoliday BIT
 
 	SELECT @dtmCurrentDate = GETDATE()
 
-	DECLARE @tblScheduleCalendar TABLE (
-		intRecordId INT identity(1, 1)
-		,dtmCalendarDate DATETIME
-		,intShiftId INT
-		,dtmShiftStartTime DATETIME
-		,dtmShiftEndTime DATETIME
-		,intNoOfMachine INT
-		,ysnHoliday BIT
-		,intConcurrencyId INT
-		)
+	DECLARE @tblScheduleCalendar TABLE 
+	(
+		intRecordId			INT IDENTITY(1, 1)
+	  , dtmCalendarDate		DATETIME
+	  , intShiftId			INT
+	  , dtmShiftStartTime	DATETIME
+	  , dtmShiftEndTime		DATETIME
+	  , intNoOfMachine		INT
+	  , ysnHoliday			BIT
+	  , intConcurrencyId	INT
+	  , ysnShowHoliday		BIT
+	)
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
-		,@strXML
+							  , @strXML
 
-	SELECT @intCalendarId = intCalendarId
-		,@strCalendarName = strCalendarName
-		,@intManufacturingCellId = intManufacturingCellId
-		,@dtmFromDate = dtmFromDate
-		,@dtmToDate = dtmToDate
-		,@ysnStandardCalendar = ysnStandardCalendar
-		,@intUserId = intUserId
-		,@intLocationId = intLocationId
-		,@intConcurrencyId = intConcurrencyId
-		,@strShiftId = strShiftIds
-	FROM OPENXML(@idoc, 'root', 2) WITH (
-			intCalendarId INT
-			,strCalendarName NVARCHAR(50)
-			,intManufacturingCellId INT
-			,dtmFromDate DATETIME
-			,dtmToDate DATETIME
-			,ysnStandardCalendar BIT
-			,intUserId INT
-			,intLocationId INT
-			,intConcurrencyId INT
-			,strShiftIds NVARCHAR(50)
-			)
+	SELECT @intCalendarId			= intCalendarId
+		 , @strCalendarName			= strCalendarName
+		 , @intManufacturingCellId	= intManufacturingCellId
+		 , @dtmFromDate				= dtmFromDate
+		 , @dtmToDate				= dtmToDate
+		 , @ysnStandardCalendar		= ysnStandardCalendar
+		 , @intUserId				= intUserId
+		 , @intLocationId			= intLocationId
+		 , @intConcurrencyId		= intConcurrencyId
+		 , @strShiftId				= strShiftIds
+		 , @ysnShowHoliday			= ysnShowHoliday
+	FROM OPENXML(@idoc, 'root', 2) WITH 
+	(
+		intCalendarId			INT
+	  , strCalendarName			NVARCHAR(50)
+	  , intManufacturingCellId	INT
+	  , dtmFromDate				DATETIME
+	  , dtmToDate				DATETIME
+	  , ysnStandardCalendar		BIT
+	  , intUserId				INT
+	  , intLocationId			INT
+	  , intConcurrencyId		INT
+	  , strShiftIds				NVARCHAR(50)
+	  , ysnShowHoliday			BIT
+	)
 
 	IF EXISTS (
 			SELECT *
@@ -112,53 +119,53 @@ BEGIN TRY
 	END
 
 	IF @intCalendarId IS NULL
-	BEGIN
-		INSERT INTO dbo.tblMFScheduleCalendar (
-			strName
-			,intManufacturingCellId
-			,dtmFromDate
-			,dtmToDate
-			,ysnStandard
-			,intLocationId
-			,dtmCreated
-			,intCreatedUserId
-			,dtmLastModified
-			,intLastModifiedUserId
-			,intConcurrencyId
+		BEGIN
+			INSERT INTO dbo.tblMFScheduleCalendar 
+			(
+				strName
+			  , intManufacturingCellId
+			  , dtmFromDate
+			  , dtmToDate
+			  , ysnStandard
+			  , intLocationId
+			  , dtmCreated
+			  , intCreatedUserId
+			  , dtmLastModified
+			  , intLastModifiedUserId
+			  , intConcurrencyId
+			  , ysnShowHoliday
 			)
-		SELECT @strCalendarName
-			,@intManufacturingCellId
-			,@dtmFromDate
-			,@dtmToDate
-			,@ysnStandardCalendar
-			,@intLocationId
-			,@dtmCurrentDate
-			,@intUserId
-			,@dtmCurrentDate
-			,@intUserId
-			,1
+			SELECT @strCalendarName
+				 , @intManufacturingCellId
+				 , @dtmFromDate
+				 , @dtmToDate
+				 , @ysnStandardCalendar
+				 , @intLocationId
+				 , @dtmCurrentDate
+				 , @intUserId
+				 , @dtmCurrentDate
+				 , @intUserId
+				 , 1
+				 , @ysnShowHoliday
 
-		SELECT @intCalendarId = SCOPE_IDENTITY()
-	END
+			SELECT @intCalendarId = SCOPE_IDENTITY()
+		END
 	ELSE
-	BEGIN
-		UPDATE dbo.tblMFScheduleCalendar
-		SET strName = @strCalendarName
-			,dtmToDate = CASE 
-				WHEN @dtmToDate IS NOT NULL
-					THEN @dtmToDate
-				ELSE dtmToDate
-				END
-			,ysnStandard = CASE 
-				WHEN @ysnStandardCalendar IS NOT NULL
-					THEN @ysnStandardCalendar
-				ELSE ysnStandard
-				END
-			,dtmLastModified = @dtmCurrentDate
-			,intLastModifiedUserId = @intUserId
-			,intConcurrencyId = intConcurrencyId + 1
-		WHERE intCalendarId = @intCalendarId
-	END
+		BEGIN
+			UPDATE dbo.tblMFScheduleCalendar
+			SET strName					= @strCalendarName
+			  , dtmToDate				= CASE WHEN @dtmToDate IS NOT NULL THEN @dtmToDate
+											   ELSE dtmToDate
+										  END
+			  , ysnStandard				= CASE WHEN @ysnStandardCalendar IS NOT NULL THEN @ysnStandardCalendar
+											   ELSE ysnStandard
+										  END
+			  , dtmLastModified			= @dtmCurrentDate
+			  , intLastModifiedUserId	= @intUserId
+			  , intConcurrencyId		= intConcurrencyId + 1
+			  , ysnShowHoliday			= @ysnShowHoliday
+			WHERE intCalendarId = @intCalendarId
+		END
 
 	SELECT @intConcurrencyId = intConcurrencyId
 	FROM dbo.tblMFScheduleCalendar
