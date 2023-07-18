@@ -97,6 +97,13 @@ BEGIN
 		WHERE strBatchId =@strLotNumber AND intMixingUnitLocationId  =@intLocationId
 	END
 
+	IF @intBatchId IS NULL
+	BEGIN
+		SELECT @intBatchId =intBatchId 
+		FROM tblMFBatch 
+		WHERE strBatchId =@strLotNumber 
+	END
+
 	IF @intSplitFromLotId IS NULL
 		AND @ysnLifeTimeByEndOfMonth = 1
 	BEGIN
