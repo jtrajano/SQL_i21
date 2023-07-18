@@ -41,7 +41,7 @@ CROSS APPLY (
 	WHERE ysnRevalue_Swap = 1
 ) RevalueOptions
 CROSS APPLY (
-	SELECT TOP 1 P.intGLFiscalYearPeriodId
+	SELECT TOP 1 P.intGLFiscalYearPeriodId, ysnPosted, dtmDate
 	FROM tblCMBankTransfer 
 	CROSS APPLY dbo.fnGLGetFiscalPeriod(dtmDate) P
 	WHERE intTransactionId = BankSwap.intSwapLongId
