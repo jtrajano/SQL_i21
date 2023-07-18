@@ -94,7 +94,7 @@ SELECT
 																		END 
 																END
 																,ARID.[dblSplitPercent])
-															,CASE WHEN LOT.[intItemUOMId] = ARID.[intItemUOMId] THEN 1 ELSE ARID.[dblUnitQty] END
+															,CASE WHEN LOT.[intItemUOMId] = ARID.[intItemUOMId] OR ICIUOM_STOCK.[intItemUOMId] <> ARID.[intItemUOMId] THEN 1 ELSE ARID.[dblUnitQty] END
 														),@ZeroDecimal)
 	,[dblSalesPrice]			= ARID.[dblPrice] 
 	,[intCurrencyId]			= ARID.[intCurrencyId]
