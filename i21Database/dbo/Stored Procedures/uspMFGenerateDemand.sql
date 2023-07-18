@@ -1021,6 +1021,12 @@ BEGIN TRY
 								  , intMonthId
 								  , intLocationId
 					FROM tblMFGetRecipeInputItem
+
+					/* MFG-5283 - Forecast should always be subtracted on Ending Inventory. */
+					UPDATE #tblMFDemand
+					SET dblQty = -dblQty
+					WHERE intAttributeId = 8 AND dblQty > 0;
+					
 				END
 			ELSE
 				BEGIN
@@ -1062,7 +1068,10 @@ BEGIN TRY
 			)
 			SELECT intItemId
 				 , strName
-				 , strValue
+				 /* MFG-5283 - Forecast should always be subtracted on Ending Inventory. */
+				 , CASE WHEN strValue > 0 THEN -strValue
+						ELSE strValue
+				   END
 				 , 8
 				 , intLocationId
 			FROM #TempForecastedConsumption FC
