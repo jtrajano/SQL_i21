@@ -246,7 +246,7 @@ ELSE IF @strBasis = @BASIS_REVENUE
 				AND CPIC.intCommissionPlanId = @intCommissionPlanId
 				AND NOT EXISTS (
 				SELECT 1
-				FROM tblARCommissionRecapDetail
+				FROM tblARCommissionDetail
 				WHERE intSourceId = I.intInvoiceId
 					AND strSourceType = 'tblARInvoice'
 			)
