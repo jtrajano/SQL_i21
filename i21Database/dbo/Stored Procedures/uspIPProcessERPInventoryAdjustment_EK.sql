@@ -655,7 +655,7 @@ BEGIN TRY
 
 					IF @dblWeightPerQty > 0
 					BEGIN
-						SELECT @dblLotQuantity = dbo.[fnDivide](@dblQuantity, @dblWeightPerQty)
+						SELECT @dblLotQuantity = ROUND(dbo.[fnDivide](@dblQuantity, @dblWeightPerQty),0)
 					END
 					ELSE
 					BEGIN
@@ -804,7 +804,7 @@ BEGIN TRY
 
 					IF @dblWeightPerQty > 0
 					BEGIN
-						SELECT @dblLotQuantity = dbo.[fnDivide](@dblQuantity, @dblWeightPerQty)
+						SELECT @dblLotQuantity = ROUND(dbo.[fnDivide](@dblQuantity, @dblWeightPerQty),0)
 					END
 					ELSE
 					BEGIN
@@ -1063,15 +1063,15 @@ BEGIN TRY
 					WHERE RI.intInventoryTransferId = @intInventoryTransferId
 						AND RI.intInventoryTransferDetailId = @intInventoryTransferDetailId
 
-					SELECT @intBatchId=LI.intBatchId,@strRemarks=L.strNotes 
-					FROM tblICLot L
-					JOIN tblMFLotInventory LI on LI.intLotId=L.intLotId
-					WHERE L.strLotNumber =@strLotNo 
-					AND LI.intBatchId IS NOT NULL
+					--SELECT @intBatchId=LI.intBatchId,@strRemarks=L.strNotes 
+					--FROM tblICLot L
+					--JOIN tblMFLotInventory LI on LI.intLotId=L.intLotId
+					--WHERE L.strLotNumber =@strLotNo 
+					--AND LI.intBatchId IS NOT NULL
 
-					UPDATE tblMFLotInventory 
-					SET intBatchId=@intBatchId
-					WHERE intLotId=@intLotId
+					--UPDATE tblMFLotInventory 
+					--SET intBatchId=@intBatchId
+					--WHERE intLotId=@intLotId
 				END
 
 				IF EXISTS (
