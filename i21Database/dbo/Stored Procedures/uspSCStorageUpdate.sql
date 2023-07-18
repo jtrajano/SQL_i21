@@ -329,6 +329,7 @@ BEGIN TRY
 		,[intUserId]
 		,[dblGrossQuantity]
 		,[intShipFromLocationId]
+		,[intShipFromEntityId]
 	)
 	SELECT 
 		[strTransactionNumber]					= CASE WHEN ISNULL(SC.intDeliverySheetId,0) > 0 THEN SC.strDeliverySheetNumber ELSE SC.strTicketNumber END
@@ -355,6 +356,7 @@ BEGIN TRY
 		,[intUserId]							= @intUserId
 		,[dblGrossQuantity]						= (@dblNetUnits / SC.dblNetUnits) * SC.dblGrossUnits
 		,[intShipFromLocationId]				= SC.intFarmFieldId
+		,[intShipFromEntityId]					= SC.intEntityId
 	FROM vyuSCTicketScreenView SC
 	INNER JOIN tblSCScaleSetup SCSetup ON SCSetup.intScaleSetupId = SC.intScaleSetupId
 	LEFT JOIN tblICItem ICFees ON ICFees.intItemId = SCSetup.intDefaultFeeItemId
