@@ -259,6 +259,7 @@ BEGIN TRY
 		SET @intEntityId = NULL
 		SET @intCompanyLocationId = NULL
 		SET @strTransactionType = NULL
+		SET @intNewContractHeaderId = NULL
 
 		SELECT @strConditionXML = NULL
 			,@strCertificationXML = NULL
@@ -4187,6 +4188,8 @@ BEGIN TRY
 				x:
 
 				----------------------------CALL Stored procedure for APPROVAL -----------------------------------------------------------
+				SELECT @intTransactionRefId = NULL
+
 				SELECT @intCreatedById = intCreatedById
 				--,@intCompanyRefId = intCompanyId
 				FROM tblCTContractHeader
