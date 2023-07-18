@@ -119,7 +119,9 @@ BEGIN TRY
 				   ,[dblGrossQuantity]
 				   ,[dblBasis]
 				   ,[dblSettlementPrice]
-				   ,[intShipFromLocationId])
+				   ,[intShipFromLocationId]
+				   ,[intShipFromEntityId]
+				   )
 		SELECT 	[intConcurrencyId]					= 1
 				,[intEntityId]						= CS.intEntityId
 				,[intCommodityId]					= CS.intCommodityId
@@ -158,6 +160,7 @@ BEGIN TRY
 				,[dblBasis]							= CS.dblBasis
 				,[dblSettlementPrice]				= CS.dblSettlementPrice
 				,[intShipFromLocationId]			= CS.intShipFromLocationId
+				,[intShipFromEntityId]				= CS.intShipFromEntityId
 		FROM	@CustomerStorageStagingTable CS
 
 		SELECT @intCustomerStorageId = SCOPE_IDENTITY()
