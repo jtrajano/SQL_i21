@@ -8,7 +8,9 @@ AS
  Created By: Jonathan Valenzuela
  Date: 06/22/2023
  ***************************************************************/
-SELECT strAttributeName			AS [Plan Detail]
+SELECT strInvPlngReportName		AS [Plan Name]
+	 , dtmDemandDate			AS [Date]
+	 , strAttributeName			AS [Plan Detail]
 	 , strItemNo				AS [Item No]
 	 , CASE WHEN intReportAttributeID = 1 THEN PivotData.OpeningInv
 		    ELSE ''
@@ -28,8 +30,6 @@ SELECT strAttributeName			AS [Plan Detail]
 	 , PivotData.strMonth10
 	 , PivotData.strMonth11
 	 , PivotData.strMonth12
-	 , strInvPlngReportName		AS [Plan Name]
-	 , dtmDemandDate			AS [Date]
 FROM 
 (
 	SELECT CASE WHEN DemandAttribute.intReportAttributeID = 1	THEN 'Months & Item'
@@ -82,7 +82,8 @@ PIVOT
 	, strMonth12
 	)
 ) AS PivotData
-ORDER BY intInvPlngReportMasterID ASC
-		, intItemId ASC
-		, intDisplayOrder ASC 
+ORDER BY dtmDemandDate DESC
+	   , intInvPlngReportMasterID ASC
+	   , intItemId ASC
+	   , intDisplayOrder ASC 
 OFFSET 0 ROWS
