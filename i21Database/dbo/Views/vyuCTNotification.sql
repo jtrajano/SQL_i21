@@ -182,7 +182,7 @@ AS
 
 		UNION ALL
 
-		SELECT	CH.intContractHeaderId,			CH.intContractSeq,			CH.dtmStartDate,				CH.dtmEndDate,
+		SELECT	distinct CH.intContractHeaderId,			CH.intContractSeq,			CH.dtmStartDate,				CH.dtmEndDate,
 				CH.dblQuantity,					CH.dblFutures,				CH.dblBasis,					CH.dblCashPrice,
 				CH.dblScheduleQty,				CH.dblNoOfLots,				CH.strItemNo,					CH.strPricingType,
 				CH.strFutMarketName,			CH.strItemUOM,				CH.strLocationName,				CH.strPriceUOM,
