@@ -23,6 +23,7 @@
 	[strLicenseEdition]					VARCHAR(40) COLLATE Latin1_General_CI_AS NULL DEFAULT 'Standard',
 	[intPowerBIRefreshes]				INT NULL,
     [intConcurrencyId]					INT CONSTRAINT [DF_tblARCustomerLicenseInformation_intConcurrencyId] DEFAULT ((0)) NOT NULL,
+	[intMaxAttachmentStorage]			INT NOT NULL DEFAULT(100),
 
     CONSTRAINT [PK_tblARCustomerLicenseInformation] PRIMARY KEY CLUSTERED ([intCustomerLicenseInformationId] ASC),
 	CONSTRAINT [FK_tblARCustomerLicenseInformation_tblARCustomer] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityId]) ON DELETE CASCADE,
