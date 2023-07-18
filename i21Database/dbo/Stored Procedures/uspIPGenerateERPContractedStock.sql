@@ -58,7 +58,7 @@ BEGIN TRY
 		JOIN dbo.tblICItemUOM IUOM ON IUOM.intItemId = CD.intItemId
 					AND IUOM.ysnStockUnit = 1
 		OUTER APPLY (
-			SELECT Sum(B.dblTotalQuantity*B.dblWeightPerUnit ) dblQuantity
+			SELECT Sum(B.dblPackagesBought) dblQuantity
 			FROM tblMFBatch B
 			WHERE B.intContractDetailId = CD.intContractDetailId
 			) B2
@@ -156,12 +156,12 @@ BEGIN TRY
 	+ '<Plant>' + IsNULL(ltrim(MU.strVendorRefNoPrefix),'')  + '</Plant>' 
 	+ '<ItemCode>' + IsNULL(I.strItemNo,'') + '</ItemCode>' 
 	+ '<StockDate>' + IsNULL(CONVERT(VARCHAR(33), CD.dtmUpdatedAvailabilityDate, 126),'') + '</StockDate>' 
-	+ '<Quantity>' + IsNULL([dbo].[fnRemoveTrailingZeroes](CS1.dblBalanceQty),'') + '</Quantity>' 
+	+ '<Quantity>' + IsNULL([dbo].[fnRemoveTrailingZeroes](dbo.fnMFConvertQuantityToTargetItemUOM(CD.intItemUOMId,IUOM.intItemUOMId , CS1.dblBalanceQty)),'') + '</Quantity>' 
 	+ '<MixingUnit>' + IsNULL(ltrim(MU.strLocationName) , '') + '</MixingUnit>' 
-	+ '<Taste>' + IsNULL([dbo].[fnRemoveTrailingZeroes](B.dblTeaTaste),'') + '</Taste>' 
-	+ '<Hue>' + IsNULL([dbo].[fnRemoveTrailingZeroes](B.dblTeaHue),'') + '</Hue>' 
-	+ '<Intensity>' + IsNULL([dbo].[fnRemoveTrailingZeroes](B.dblTeaIntensity),'') + '</Intensity>' 
-	+ '<MouthFeel>' + IsNULL([dbo].[fnRemoveTrailingZeroes](B.dblTeaMouthFeel),'') + '</MouthFeel>'
+	+ '<Taste>' + IsNULL([dbo].[fnRemoveTrailingZeroes](IsNULL(B.dblTeaTaste,PinpointValue.[Taste])),'') + '</Taste>' 
+	+ '<Hue>' + IsNULL([dbo].[fnRemoveTrailingZeroes](IsNULL(B.dblTeaHue,PinpointValue.[Hue])),'') + '</Hue>' 
+	+ '<Intensity>' + IsNULL([dbo].[fnRemoveTrailingZeroes](IsNULL(B.dblTeaIntensity,PinpointValue.[Intensity])),'') + '</Intensity>' 
+	+ '<MouthFeel>' + IsNULL([dbo].[fnRemoveTrailingZeroes](IsNULL(B.dblTeaMouthFeel,PinpointValue.[Mouth feel])),'') + '</MouthFeel>'
 	+ '<ContainerNo></ContainerNo>' 
 	+ '<FromLocationCode>' + IsNULL(C1.strCity, '') + '</FromLocationCode>' 
 	+ '<PONumber>' +  IsNULL(Case When B.strBatchId is not null Then B.strBatchId Else CH.strContractNumber + '/' + ltrim(CD.intContractSeq) End,'') + '</PONumber>' 
@@ -173,11 +173,11 @@ BEGIN TRY
 	+ '<Channel>' + IsNULL(MZ.strMarketZoneCode, '') + '</Channel>' 
 	+ '<StorageLocation>' + IsNULL(LTRIM(SUBSTRING(ISNULL(MUSL.strSubLocationName, ''), CHARINDEX('/', MUSL.strSubLocationName) + 1, LEN(MUSL.strSubLocationName))) , '') + '</StorageLocation>' 
 	+ '<Size>' + IsNULL(B.strLeafSize, '') + '</Size>' 
-	+ '<Volume>' + IsNULL([dbo].[fnRemoveTrailingZeroes](B.dblTeaVolume), '') + '</Volume>' 
-	+ '<Appearance>' + IsNULL([dbo].[fnRemoveTrailingZeroes](B.dblTeaAppearance), '') + '</Appearance>' 
+	+ '<Volume>' + IsNULL([dbo].[fnRemoveTrailingZeroes](IsNULL(B.dblTeaVolume,I.dblBlendWeight)), '') + '</Volume>' 
+	+ '<Appearance>' + IsNULL([dbo].[fnRemoveTrailingZeroes](IsNULL(B.dblTeaAppearance,PinpointValue.[Appearance])), '') + '</Appearance>' 
 	+ '<ExpiryDate>' + IsNULL(CONVERT(VARCHAR(33), DateAdd(mm, I.intLifeTime, B.dtmProductionBatch), 126),'') + '</ExpiryDate>' 
 	+ '<NoOfBags>' + IsNULL([dbo].[fnRemoveTrailingZeroes](CS1.dblBalanceQty) ,'') + '</NoOfBags>' 
-	+ '<UnitWeight>' + IsNULL([dbo].[fnRemoveTrailingZeroes](dbo.fnMFConvertQuantityToTargetItemUOM(CD.intItemUOMId,IUOM.intItemUOMId , CS1.dblBalanceQty)),'') + '</UnitWeight>' 
+	+ '<UnitWeight>' + IsNULL([dbo].[fnRemoveTrailingZeroes](dbo.fnMFConvertQuantityToTargetItemUOM(CD.intItemUOMId,IUOM.intItemUOMId , CS1.dblBalanceQty)/CS1.dblBalanceQty),'') + '</UnitWeight>' 
 	+ '<NoOfBagsPerPallet>' + IsNULL(ltrim(I.intUnitPerLayer * I.intLayerPerPallet), '') + '</NoOfBagsPerPallet>' 
 	+ '<ReceiptDate></ReceiptDate>' 
 	+ '<BuyingOrderNo>' + IsNULL(B.strBuyingOrderNumber, '') + '</BuyingOrderNo>' 
@@ -230,14 +230,38 @@ BEGIN TRY
 	LEFT JOIN tblICItem OI on OI.intItemId=B.intOriginalItemId
 	LEFT JOIN tblQMTINClearance T on T.intBatchId =B.intBatchId 
 	Left JOIN tblARMarketZone MZ on MZ.intMarketZoneId =CD.intMarketZoneId
-	
+	OUTER APPLY (
+	SELECT [Taste]
+		,[Hue]
+		,[Intensity]
+		,[Mouth feel]
+		,[Appearance]
+	FROM (
+		SELECT PPV.dblPinpointValue
+			,PRT.strPropertyName
+		FROM tblQMProduct AS PRD
+		JOIN tblQMProductProperty AS PP ON PP.intProductId = PRD.intProductId
+		JOIN tblQMProperty AS PRT ON PRT.intPropertyId = PP.intPropertyId
+		JOIN tblQMProductPropertyValidityPeriod AS PPV ON PPV.intProductPropertyId = PP.intProductPropertyId
+		WHERE PRD.intProductValueId = I.intItemId
+			AND PRD.intProductTypeId = 2
+		) p
+	PIVOT(Min(dblPinpointValue) FOR p.strPropertyName IN (
+				[Taste]
+				,[Hue]
+				,[Intensity]
+				,[Mouth feel]
+				,[Appearance]
+				)) AS pvt
+	) AS PinpointValue
+
 SELECT @strDetailXML2 = IsNULL(@strDetailXML2,'') 
 	+ '<Header><StockCode></StockCode>' 
 	+ '<BatchNumber>' + IsNULL(B.strBatchId,'') + '</BatchNumber>' 
 	+ '<Plant>' + IsNULL(ltrim(MU.strVendorRefNoPrefix),'')  + '</Plant>' 
 	+ '<ItemCode>' + IsNULL(I.strItemNo,'') + '</ItemCode>' 
 	+ '<StockDate>' + IsNULL(IsNULL(CONVERT(VARCHAR(33), CD.dtmUpdatedAvailabilityDate, 126),CONVERT(VARCHAR(33), B.dtmStock , 126)),'') + '</StockDate>' 
-	+ '<Quantity>' + IsNULL([dbo].[fnRemoveTrailingZeroes](B.dblPackagesBought),'') + '</Quantity>' 
+	+ '<Quantity>' + IsNULL([dbo].[fnRemoveTrailingZeroes]([dbo].[fnGRConvertQuantityToTargetItemUOM](B.intTealingoItemId,B.intWeightUOMId,IUOM.intUnitMeasureId, B.dblTotalQuantity)),'') + '</Quantity>' 
 	+ '<MixingUnit>' + IsNULL(ltrim(MU.strLocationName) , '') + '</MixingUnit>' 
 	+ '<Taste>' + IsNULL([dbo].[fnRemoveTrailingZeroes](B.dblTeaTaste),'') + '</Taste>' 
 	+ '<Hue>' + IsNULL([dbo].[fnRemoveTrailingZeroes](B.dblTeaHue),'') + '</Hue>' 
@@ -254,11 +278,11 @@ SELECT @strDetailXML2 = IsNULL(@strDetailXML2,'')
 	+ '<Channel>' + IsNULL(MZ.strMarketZoneCode, '') + '</Channel>' 
 	+ '<StorageLocation>'+IsNULL(LTRIM(SUBSTRING(ISNULL(MUSL.strSubLocationName, ''), CHARINDEX('/', MUSL.strSubLocationName) + 1, LEN(MUSL.strSubLocationName))) , '') +'</StorageLocation>' 
 	+ '<Size>' + IsNULL(B.strLeafSize, '') + '</Size>' 
-	+ '<Volume>' + IsNULL([dbo].[fnRemoveTrailingZeroes](B.dblTeaVolume), '') + '</Volume>' 
+	+ '<Volume>' + IsNULL([dbo].[fnRemoveTrailingZeroes](IsNULL(B.dblTeaVolume,I.dblBlendWeight)), '') + '</Volume>' 
 	+ '<Appearance>' + IsNULL([dbo].[fnRemoveTrailingZeroes](B.dblTeaAppearance), '') + '</Appearance>' 
 	+ '<ExpiryDate>' + IsNULL(CONVERT(VARCHAR(33), DateAdd(mm, I.intLifeTime, B.dtmProductionBatch), 126),'') + '</ExpiryDate>' 
 	+ '<NoOfBags>' + IsNULL([dbo].[fnRemoveTrailingZeroes](B.dblPackagesBought) ,'') + '</NoOfBags>' 
-	+ '<UnitWeight>' + IsNULL([dbo].[fnRemoveTrailingZeroes]([dbo].[fnGRConvertQuantityToTargetItemUOM](B.intTealingoItemId,B.intWeightUOMId,IUOM.intUnitMeasureId, B.dblTotalQuantity)),'') + '</UnitWeight>' 
+	+ '<UnitWeight>' + IsNULL([dbo].[fnRemoveTrailingZeroes](B.dblWeightPerUnit),'') + '</UnitWeight>' 
 	+ '<NoOfBagsPerPallet>' + IsNULL(ltrim(I.intUnitPerLayer * I.intLayerPerPallet), '') + '</NoOfBagsPerPallet>' 
 	+ '<ReceiptDate></ReceiptDate>' 
 	+ '<BuyingOrderNo>' + IsNULL(B.strBuyingOrderNumber, '') + '</BuyingOrderNo>' 
@@ -278,7 +302,7 @@ SELECT @strDetailXML2 = IsNULL(@strDetailXML2,'')
 	+ '<SaleNumber>' + IsNULL(ltrim(B.intSales), '') + '</SaleNumber>' 
 	+ '<BrokerCode>' + IsNULL(BK.strName, '') + '</BrokerCode>' 
 	+ '<AuctionCenter>' + IsNULL(SM.strLocationName , '') + '</AuctionCenter>' 
-	+ '<BoughtPrice>' + IsNULL(IsNULL([dbo].[fnRemoveTrailingZeroes]([dbo].[fnCTCalculateAmountBetweenCurrency](CD.intCurrencyId, @intToCurrencyId, CD.dblCashPrice, 0)),[dbo].[fnRemoveTrailingZeroes]([dbo].[fnCTCalculateAmountBetweenCurrency](B.intCurrencyId, @intToCurrencyId, B.dblBoughtPrice, 0))),'') + '</BoughtPrice>' 
+	+ '<BoughtPrice>' + IsNULL([dbo].[fnRemoveTrailingZeroes]([dbo].[fnCTCalculateAmountBetweenCurrency](CD.intCurrencyId, @intToCurrencyId, CD.dblCashPrice, 0)), '') + '</BoughtPrice>' 
 	+ '<LandedPrice>' + IsNULL([dbo].[fnRemoveTrailingZeroes](B.dblLandedPrice), '') + '</LandedPrice>' 
 	+ '<TinNo>' + IsNULL(T.strTINNumber , '') + '</TinNo>' 
 	+ '<TBO>' + IsNULL(SM.strLocationNumber, '') + '</TBO>' 
