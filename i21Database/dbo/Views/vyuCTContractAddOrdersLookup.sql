@@ -33,10 +33,10 @@ SELECT	  CD.intContractDetailId
 		, Item.strLotTracking
 		, Item.intCommodityId
 		, CAST(ISNULL(CU.intMainCurrencyId,0) AS BIT) AS ysnSubCurrency
-		, SL.intCompanyLocationSubLocationId 
-		, SL.strSubLocationName
-		, STL.intStorageLocationId
-		, STL.strName AS strStorageLocationName
+		, intCompanyLocationSubLocationId = ISNULL(SLA.intCompanyLocationSubLocationId,SL.intCompanyLocationSubLocationId)
+		, strSubLocationName = ISNULL(SLA.strSubLocationName,SL.strSubLocationName)
+		, intStorageLocationId = ISNULL(STLA.intStorageLocationId,STL.intStorageLocationId)
+		, ISNULL(STLA.strName,STL.strName) AS strStorageLocationName
 		, dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intNetWeightUOMId,ISNULL(CD.dblBalance,0) - ISNULL(CD.dblScheduleQty,0))	AS	dblAvailableNetWeight
 		, CD.intRateTypeId
 		, RT.strCurrencyExchangeRateType
@@ -70,6 +70,8 @@ FROM	tblCTContractDetail CD
 	LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = IL.intLocationId
 	LEFT JOIN tblSMCompanyLocationSubLocation SL ON SL.intCompanyLocationSubLocationId = IL.intSubLocationId
 	LEFT JOIN tblICStorageLocation STL ON STL.intStorageLocationId = IL.intStorageLocationId
+	LEFT JOIN tblSMCompanyLocationSubLocation SLA ON SLA.intCompanyLocationSubLocationId = CD.intSubLocationId
+	LEFT JOIN tblICStorageLocation STLA ON STLA.intStorageLocationId = CD.intStorageLocationId
 	LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CD.intCurrencyId
 	LEFT JOIN tblSMCurrencyExchangeRateType	RT ON RT.intCurrencyExchangeRateTypeId = CD.intRateTypeId
 	CROSS APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD

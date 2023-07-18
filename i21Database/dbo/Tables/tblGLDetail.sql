@@ -3,7 +3,6 @@
     [intSubsidiaryCompanyId] [int] NULL,
     [intMultiCompanyId] [int]   NULL,
     [dtmDate]                   DATETIME         NOT NULL,
-    --[dtmDateNoTime]             AS CAST(dtmDate AS DATE) PERSISTED,
     [strBatchId]                NVARCHAR (40)    COLLATE Latin1_General_CI_AS NULL,
     [intAccountId]              INT              NOT NULL,
     [dblDebit] [numeric](18, 6) NULL CONSTRAINT [DF_tblGLDetail_dblDebit]  DEFAULT ((0)),
@@ -57,14 +56,15 @@
     [intLedgerId] INT NULL,
     [intSubledgerId] INT NULL,
     [intCompanyLocationId] INT NULL,
+    [strSourceAccount] NVARCHAR(100)  COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [PK_tblGL] PRIMARY KEY CLUSTERED ([intGLDetailId] ASC),
-   -- CONSTRAINT [FK_tblGL_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+    --CONSTRAINT [FK_tblGL_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
     CONSTRAINT [FK_tblGLDetail_tblSMMultiCompany] FOREIGN KEY([intMultiCompanyId]) REFERENCES [dbo].[tblSMMultiCompany] ([intMultiCompanyId])
 );
 GO
 CREATE NONCLUSTERED INDEX [IX_tblGLDetail_Valuation]
 	ON [dbo].[tblGLDetail]([strTransactionId], [strBatchId])
-	INCLUDE (dtmDate, strTransactionType, ysnIsUnposted, strCode);
+	INCLUDE (dtmDate, strTransactionType);
 GO
 
 CREATE NONCLUSTERED INDEX [_dta_index_tblEMEntityCredential_9_1290448367__K2_3] ON [dbo].[tblEMEntityCredential]
@@ -214,8 +214,3 @@ CREATE NONCLUSTERED INDEX idxGL_tblGLDetail_FiscalPeriod ON [dbo].[tblGLDetail]
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 GO
 
-CREATE NONCLUSTERED INDEX [dpa_tblGLDetail_1] ON [tblGLDetail] ([intAccountId],[ysnIsUnposted],[dtmDate]) INCLUDE ([intFiscalPeriodId])
-GO
-
-CREATE NONCLUSTERED INDEX [dpa_tblGLDetail_2] ON [tblGLDetail] ([ysnIsUnposted],[dtmDate]) INCLUDE ([intAccountId],[intFiscalPeriodId])
-GO

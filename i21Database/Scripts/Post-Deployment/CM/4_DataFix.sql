@@ -267,5 +267,5 @@ GO
 update tblCMBankFileFormatDetail set strFieldName = 'Tag 20 (Record Number)' where strFieldName = 'Tag 20 (EFT Number)'
 update tblCMBankFileFormatDetail set strFieldName = 'Tag 21 (Record Number)' where strFieldName = 'Tag 21 (EFT Number)'
 
-PRINT('/*******************  END Cash Management Data Fixess *******************/')
+PRINT('/*******************  END Cash Management Data Fixes *******************/')
 GO

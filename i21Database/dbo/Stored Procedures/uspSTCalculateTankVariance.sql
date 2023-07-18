@@ -124,7 +124,7 @@ AS BEGIN
 		UPDATE	tblSTCheckoutTankVarianceCalculation
 		SET		dblStartFuelVolume = @dblPreviousCheckoutTankMonitorFuelVolume,
 				dblDeliveries = @dblDeliveries,
-				dblCalculatedVariance = ABS((@dblPreviousCheckoutTankMonitorFuelVolume + @dblDeliveries - dblSales) - dblEndFuelVolume),
+				dblCalculatedVariance = ABS((@dblPreviousCheckoutTankMonitorFuelVolume + @dblDeliveries - dblSales) - @dblEndFuelVolume),
 				dblEndFuelVolume = @dblEndFuelVolume
 		WHERE	intCheckoutId = @intCheckoutId AND intDeviceId = @intDeviceId
 

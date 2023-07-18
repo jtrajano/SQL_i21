@@ -231,7 +231,7 @@ BEGIN TRY
 
 	IF @intLotStatusId IS NULL
 	BEGIN
-		SELECT @intLotStatusId = strAttributeValue
+		SELECT @intLotStatusId = ISNULL(NULLIF(strAttributeValue, ''), 1)
 		FROM tblMFManufacturingProcessAttribute pa
 		WHERE pa.intManufacturingProcessId = @intManufacturingProcessId
 			AND pa.intLocationId = @intLocationId

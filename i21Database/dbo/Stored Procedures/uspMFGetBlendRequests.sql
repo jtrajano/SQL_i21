@@ -47,6 +47,9 @@ IF @intWorkOrderId = 0
 		 , (a.dblQuantity - ISNULL(a.dblIssuedQty, 0)) - ((a.dblQuantity - ISNULL(a.dblIssuedQty, 0)) / ri.dblLowerTolerance) AS dblCalculatedLowerTolerance 
 		 , Machine.strName AS strMachine
 		 , a.dblEstNoOfBlendSheet
+		 , NULL AS dblAffordabilityCost
+		 , NULL AS intMachineId
+		 , NULL AS strCellName
 	FROM tblMFBlendRequirement a 
 	JOIN tblICItem b ON a.intItemId = b.intItemId 
 	JOIN tblICItemUOM c ON b.intItemId = c.intItemId AND a.intUOMId=c.intUnitMeasureId 
@@ -92,6 +95,9 @@ IF @intWorkOrderId > 0
 		 , Machine.strName AS strMachine
 		 , a.dblEstNoOfBlendSheet
 		 , a.dblBlenderSize
+		 , NULL AS dblAffordabilityCost
+		 , NULL AS intMachineId
+		 , NULL AS strCellName
 	FROM tblMFBlendRequirement a 
 	JOIN tblICItem b ON a.intItemId = b.intItemId 
 	JOIN tblICItemUOM c ON b.intItemId = c.intItemId AND a.intUOMId = c.intUnitMeasureId 
@@ -165,6 +171,9 @@ IF @intWorkOrderId < 0
 		 , Machine.strName AS strMachine
 		 , a.dblEstNoOfBlendSheet
 		 , a.dblBlenderSize
+		 , NULL AS dblAffordabilityCost
+		 , NULL AS intMachineId
+		 , NULL AS strCellName
 	FROM tblMFBlendRequirement a 
 	JOIN tblICItem b ON a.intItemId = b.intItemId 
 	JOIN tblICItemUOM c ON b.intItemId = c.intItemId AND a.intUOMId=c.intUnitMeasureId 

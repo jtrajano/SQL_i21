@@ -462,6 +462,7 @@ BEGIN
 				,dblQty  
 				,dblUOMQty  
 				,dblCost  
+				,dblForexCost 
 				,dblSalesPrice  
 				,intCurrencyId  
 				,dblExchangeRate  
@@ -520,6 +521,7 @@ BEGIN
 												END
 
 				,dblCost					= ISNULL(originalShipment.dblCost, 0)
+				,dblForexCost				= ISNULL(originalShipment.dblForexCost, 0)
 
 				,dblSalesPrice              = 
 												CASE	
@@ -730,6 +732,7 @@ BEGIN
 					,[dblQty] 
 					,[dblUOMQty] 
 					,[dblCost] 
+					,[dblForexCost]
 					,[dblValue] 
 					,[dblSalesPrice] 
 					,[intCurrencyId] 
@@ -760,6 +763,7 @@ BEGIN
 					,-[dblQty] 
 					,[dblUOMQty] 
 					,[dblCost] 
+					,[dblForexCost]
 					,[dblValue] 
 					,[dblSalesPrice] 
 					,[intCurrencyId] 
@@ -798,6 +802,7 @@ BEGIN
 						,[dblQty] 
 						,[dblUOMQty] 
 						,[dblCost] 
+						,[dblForexCost]
 						,[dblValue] 
 						,[dblSalesPrice] 
 						,[intCurrencyId] 
@@ -828,6 +833,7 @@ BEGIN
 					,-t.[dblQty] 
 					,t.[dblUOMQty] 
 					,t.[dblCost] 
+					,t.[dblForexCost]
 					,t.[dblValue] 
 					,t.[dblSalesPrice] 
 					,t.[intCurrencyId] 
@@ -923,6 +929,7 @@ BEGIN
 				,dblQty  
 				,dblUOMQty  
 				,dblCost  
+				,dblForexCost 
 				,dblSalesPrice  
 				,intCurrencyId  
 				,dblExchangeRate  
@@ -970,6 +977,7 @@ BEGIN
 												END
 
 				,dblCost					= 0.00 
+				,dblForexRate				= 0.00
 				,dblSalesPrice              = 
 											dbo.fnCalculateCostBetweenUOM (
 												ISNULL(DetailItem.intPriceUOMId, ItemUOM.intItemUOMId) 
@@ -1401,27 +1409,27 @@ BEGIN
 	SET dblDebitForeign = ISNULL(dblDebitForeign, 0)
 		,dblCreditForeign = ISNULL(dblCreditForeign, 0) 
 
-	-- If shipment is in foreign currency, then make sure the Foreign Debits and Credits are filled-in. 
-	UPDATE	glEntries
-	SET
-			dblDebitForeign = CASE WHEN dblDebit <> 0 AND dblDebitForeign = 0 AND si.dblForexRate <> 0 THEN ISNULL(dblDebit / si.dblForexRate, 0) ELSE ISNULL(dblDebitForeign, 0) END
-			,dblCreditForeign = CASE WHEN dblCredit <> 0 AND dblCreditForeign = 0 AND si.dblForexRate <> 0 THEN ISNULL(dblCredit / si.dblForexRate, 0) ELSE ISNULL(dblCreditForeign, 0) END 
-			,intCurrencyId = s.intCurrencyId
-			,dblExchangeRate = si.dblForexRate
-			,dblForeignRate = si.dblForexRate
-			,strRateType = currencyRateType.strCurrencyExchangeRateType
-	FROM	tblICInventoryShipment s INNER JOIN tblICInventoryShipmentItem si
-				ON s.intInventoryShipmentId = si.intInventoryShipmentId
-			INNER JOIN tblICInventoryTransaction t
-				ON t.strTransactionId = s.strShipmentNumber
-				AND t.intTransactionDetailId = si.intInventoryShipmentItemId
-			INNER JOIN @GLEntries glEntries
-				ON glEntries.intJournalLineNo = t.intInventoryTransactionId 			
-				AND glEntries.strTransactionId = s.strShipmentNumber 
-			LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
-				ON currencyRateType.intCurrencyExchangeRateTypeId = si.intForexRateTypeId
-	WHERE	s.strShipmentNumber = @strTransactionId
-			AND s.intCurrencyId <> @intFunctionalCurrencyId
+	---- If shipment is in foreign currency, then make sure the Foreign Debits and Credits are filled-in. 
+	--UPDATE	glEntries
+	--SET
+	--		dblDebitForeign = CASE WHEN dblDebit <> 0 AND dblDebitForeign = 0 AND si.dblForexRate <> 0 THEN ISNULL(dblDebit / si.dblForexRate, 0) ELSE ISNULL(dblDebitForeign, 0) END
+	--		,dblCreditForeign = CASE WHEN dblCredit <> 0 AND dblCreditForeign = 0 AND si.dblForexRate <> 0 THEN ISNULL(dblCredit / si.dblForexRate, 0) ELSE ISNULL(dblCreditForeign, 0) END 
+	--		,intCurrencyId = s.intCurrencyId
+	--		,dblExchangeRate = si.dblForexRate
+	--		,dblForeignRate = si.dblForexRate
+	--		,strRateType = currencyRateType.strCurrencyExchangeRateType
+	--FROM	tblICInventoryShipment s INNER JOIN tblICInventoryShipmentItem si
+	--			ON s.intInventoryShipmentId = si.intInventoryShipmentId
+	--		INNER JOIN tblICInventoryTransaction t
+	--			ON t.strTransactionId = s.strShipmentNumber
+	--			AND t.intTransactionDetailId = si.intInventoryShipmentItemId
+	--		INNER JOIN @GLEntries glEntries
+	--			ON glEntries.intJournalLineNo = t.intInventoryTransactionId 			
+	--			AND glEntries.strTransactionId = s.strShipmentNumber 
+	--		LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
+	--			ON currencyRateType.intCurrencyExchangeRateTypeId = si.intForexRateTypeId
+	--WHERE	s.strShipmentNumber = @strTransactionId
+	--		AND s.intCurrencyId <> @intFunctionalCurrencyId
 END 
 
 --------------------------------------------------------------------------------------------  

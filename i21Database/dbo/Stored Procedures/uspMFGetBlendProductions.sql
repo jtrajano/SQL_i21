@@ -1,7 +1,11 @@
-﻿CREATE PROCEDURE [dbo].[uspMFGetBlendProductions] @intManufacturingCellId INT
-	,@ysnProduced BIT = 0
-	,@intLocationId INT = 0
+﻿CREATE PROCEDURE [dbo].[uspMFGetBlendProductions] 
+(
+	@intManufacturingCellId INT
+  , @ysnProduced			BIT = 0
+  , @intLocationId			INT = 0
+) 
 AS
+
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
@@ -9,64 +13,87 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 IF ISNULL(@ysnProduced, 0) = 0
-	SELECT w.intWorkOrderId
-		,w.strWorkOrderNo
-		,i.strItemNo
-		,i.strDescription
-		,ISNULL(w.dblQuantity, 0.0) AS dblQuantity
-		,ISNULL(w.dblPlannedQuantity, 0.0) AS dblPlannedQuantity
-		,w.intItemUOMId
-		,um.strUnitMeasure AS strUOM
-		,w.intStatusId
-		,w.intManufacturingCellId
-		,w.intMachineId
-		,w.dtmCreated
-		,w.intCreatedUserId
-		,w.dtmLastModified
-		,w.intLastModifiedUserId
-		,w.dtmExpectedDate
-		,w.dblBinSize
-		,w.intBlendRequirementId
-		,w.ysnKittingEnabled
-		,w.strComment
-		,w.intLocationId
-		,w.intStorageLocationId
-		,br.strDemandNo
-		,ISNULL(ws.strBackColorName, '') AS strBackColorName
-		,us.strUserName
-		,w.intExecutionOrder
-		,ws.strName AS strStatus
-		,sl.strName AS strStorageLocation
-		,mc.strCellName
-		,i.strLotTracking
-		,i.intItemId
-		,w.strERPOrderNo
-		,i.dblRiskScore
-		,w.intManufacturingProcessId
-		,i.intCategoryId
-		,w.intTransactionFrom
-		,w.dtmActualProductionStartDate
-		,w.dtmActualProductionEndDate
-		,w.dblActualQuantity
-	FROM tblMFWorkOrder w
-	JOIN tblICItem i ON w.intItemId = i.intItemId
-	JOIN tblICItemUOM iu ON w.intItemUOMId = iu.intItemUOMId
-	JOIN tblICUnitMeasure um ON iu.intUnitMeasureId = um.intUnitMeasureId
-	JOIN tblMFBlendRequirement br ON w.intBlendRequirementId = br.intBlendRequirementId
-	JOIN tblMFWorkOrderStatus ws ON w.intStatusId = ws.intStatusId
-	JOIN tblMFManufacturingCell mc ON w.intManufacturingCellId = mc.intManufacturingCellId
-	LEFT JOIN tblSMUserSecurity us ON w.intCreatedUserId = us.[intEntityId]
-	LEFT JOIN tblICStorageLocation sl ON w.intStorageLocationId = sl.intStorageLocationId
-	WHERE w.intManufacturingCellId = @intManufacturingCellId
-		AND w.intStatusId IN (
-			9
-			,10
-			,11
-			,12
-			)
-		AND ISNULL(w.intTransactionFrom, 0) <> 5 --Exclude Blends Produced/Reversed from Simple Blend Production(4), AutoBlend(5) 
-	ORDER BY w.dtmExpectedDate
-		,w.intExecutionOrder
+	BEGIN
+		SELECT w.intWorkOrderId
+			 , w.strWorkOrderNo
+			 , i.strItemNo
+			 , i.strDescription
+			 , ISNULL(w.dblQuantity, 0.0) AS dblQuantity
+			 , ISNULL(w.dblPlannedQuantity, 0.0) AS dblPlannedQuantity
+			 , w.intItemUOMId
+			 , um.strUnitMeasure AS strUOM
+			 , w.intStatusId
+			 , w.intManufacturingCellId
+			 , w.intMachineId
+			 , w.dtmCreated
+			 , w.intCreatedUserId
+			 , w.dtmLastModified
+			 , w.intLastModifiedUserId
+			 , w.dtmExpectedDate
+			 , w.dblBinSize
+			 , w.intBlendRequirementId
+			 , w.ysnKittingEnabled
+			 , w.strComment
+			 , w.intLocationId
+			 , w.intStorageLocationId
+			 , br.strDemandNo
+			 , ISNULL(ws.strBackColorName, '') AS strBackColorName
+			 , us.strUserName
+			 , w.intExecutionOrder
+			 , ws.strName AS strStatus
+			 , sl.strName AS strStorageLocation
+			 , mc.strCellName
+			 , i.strLotTracking
+			 , i.intItemId
+			 , w.strERPOrderNo
+			 , i.dblRiskScore
+			 , w.intManufacturingProcessId
+			 , i.intCategoryId
+			 , w.intTransactionFrom
+			 , w.dtmActualProductionStartDate
+			 , w.dtmActualProductionEndDate
+			 , w.dblActualQuantity
+			 , 0.00 AS dblComputedValue
+			 , 0.00 AS dblConfirmedQty
+			 , 0.00 AS dblIssuedQuantity 
+			 , 0.00 AS dblNoOfUnits
+			 , 0.00 AS dblStandardCost
+			 , 0.00 AS dblWeightPerUnit
+			 , NULL AS dtmPlannedDate
+			 , NULL AS dtmProductionDate
+			 , 0 AS intItemIssuedUOMId
+			 , 0 AS intLotId
+			 , 0 AS intNoOfUnitsItemUOMId
+			 , 0 AS intNoOfUnitsUnitMeasureId 
+			 , 0 AS intPickListId
+			 , 0 AS intShiftId
+			 , '' AS strLocationName
+			 , '' AS strLotAlias
+			 , '' AS strLotNumber
+			 , '' AS strNoOfUnitsUnitMeasure
+			 , '' AS strPickListNo
+			 , '' AS strReferenceNo
+			 , '' AS strShiftName
+			 , '' AS strVesselNo
+		FROM tblMFWorkOrder w
+		JOIN tblICItem i ON w.intItemId = i.intItemId
+		JOIN tblICItemUOM iu ON w.intItemUOMId = iu.intItemUOMId
+		JOIN tblICUnitMeasure um ON iu.intUnitMeasureId = um.intUnitMeasureId
+		JOIN tblMFBlendRequirement br ON w.intBlendRequirementId = br.intBlendRequirementId
+		JOIN tblMFWorkOrderStatus ws ON w.intStatusId = ws.intStatusId
+		JOIN tblMFManufacturingCell mc ON w.intManufacturingCellId = mc.intManufacturingCellId
+		LEFT JOIN tblSMUserSecurity us ON w.intCreatedUserId = us.[intEntityId]
+		LEFT JOIN tblICStorageLocation sl ON w.intStorageLocationId = sl.intStorageLocationId
+		WHERE w.intManufacturingCellId = @intManufacturingCellId
+		  AND w.intStatusId IN (9
+							  , 10
+							  , 11
+							  , 12)
+		  AND ISNULL(w.intTransactionFrom, 0) <> 5 --Exclude Blends Produced/Reversed from Simple Blend Production(4), AutoBlend(5) 
+		ORDER BY w.dtmExpectedDate
+			   , w.intExecutionOrder
+
+	END
 
 --Closed Blend Sheets
 IF ISNULL(@ysnProduced, 0) = 1
@@ -109,6 +136,28 @@ BEGIN
 			,w.dtmActualProductionStartDate
 			,w.dtmActualProductionEndDate
 			,w.dblActualQuantity
+			,0.00 AS dblComputedValue
+			,0.00 AS dblConfirmedQty
+			,0.00 AS dblIssuedQuantity
+		    ,0.00 AS dblNoOfUnits
+			,0.00 AS dblStandardCost
+			,0.00 AS dblWeightPerUnit
+			,NULL AS dtmPlannedDate
+			,NULL AS dtmProductionDate
+			,0 AS intItemIssuedUOMId
+			,0 AS intLotId
+			,0 AS intNoOfUnitsItemUOMId
+			,0 AS intNoOfUnitsUnitMeasureId 
+			,0 AS intPickListId 
+			,0 AS intShiftId
+			,'' AS strLocationName
+			,'' AS strLotAlias
+			,'' AS strLotNumber
+			,'' AS strNoOfUnitsUnitMeasure
+			,'' AS strPickListNo
+			,'' AS strReferenceNo
+			,'' AS strShiftName
+			,'' AS strVesselNo
 		FROM tblMFWorkOrder w
 		JOIN tblICItem i ON w.intItemId = i.intItemId
 		JOIN tblICItemUOM iu ON w.intItemUOMId = iu.intItemUOMId
@@ -158,7 +207,29 @@ BEGIN
 			,w.intTransactionFrom
 			,w.dtmActualProductionStartDate
 			,w.dtmActualProductionEndDate
-			,w.dblActualQuantity
+			,w.dblActualQuantity dblIssuedQuantity
+			,0.00 AS dblComputedValue
+			,0.00 AS dblConfirmedQty
+			,0.00 AS dblIssuedQuantity 
+			,0.00 AS dblNoOfUnits
+			,0.00 AS dblStandardCost
+			,0.00 AS dblWeightPerUnit
+			,NULL AS dtmPlannedDate
+			,NULL AS dtmProductionDate
+			,0 AS intItemIssuedUOMId
+			,0 AS intLotId
+			,0 AS intNoOfUnitsItemUOMId 
+			,0 AS intNoOfUnitsUnitMeasureId 
+			,0 AS intPickListId 
+			,0 AS intShiftId
+			,'' AS strLocationName
+			,'' AS strLotAlias
+			,'' AS strLotNumber
+			,'' AS strNoOfUnitsUnitMeasure
+			,'' AS strPickListNo
+			,'' AS strReferenceNo
+			,'' AS strShiftName
+			,'' AS strVesselNo
 		FROM tblMFWorkOrder w
 		JOIN tblICItem i ON w.intItemId = i.intItemId
 		JOIN tblICItemUOM iu ON w.intItemUOMId = iu.intItemUOMId

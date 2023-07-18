@@ -2,7 +2,8 @@
 
 CREATE PROCEDURE [dbo].[uspLGGetInboundShipmentContainerReportForInStore1]
 	@xmlParam NVARCHAR(MAX) = NULL,
-	@xmlParam2 INT = NULL
+	@xmlParam2 INT = NULL,
+	@xmlParam3 INT = NULL
 AS
 BEGIN
 	DECLARE @ysnLoadNumber BIT
@@ -37,7 +38,7 @@ BEGIN
 
 		,strMarks = CASE WHEN (LV.intPurchaseSale = 2) THEN ICL.strMarkings ELSE LC.strMarks END 
 		,LDV.strItemUOM
-		,dblContainerContractQty = CASE WHEN (LV.intPurchaseSale = 2) THEN LDL.dblLotQuantity ELSE LC.dblQuantity END
+		,dblContainerContractQty = CASE WHEN (LV.intPurchaseSale = 2) THEN LDL.dblLotQuantity ELSE LDCL.dblQuantity END
 		,dblContainerGrossWt = CASE WHEN (LV.intPurchaseSale = 2) THEN LDL.dblGross ELSE LC.dblGrossWt END
 		,LDV.strWeightItemUOM
 		,dblContainerTareWt = CASE WHEN (LV.intPurchaseSale = 2) THEN LDL.dblTare ELSE LC.dblTareWt END
@@ -69,4 +70,5 @@ BEGIN
 					(SELECT intContainerId FROM tblLGPickLotDetail PLD 
 					LEFT JOIN tblLGPickLotHeader PLH ON PLD.intPickLotHeaderId = PLH.intPickLotHeaderId
 					WHERE PLH.intType = 2)))
+		AND ISNULL(@xmlParam3, 0) = LW.intLoadWarehouseId
 END

@@ -15,7 +15,7 @@ I.strItemNo
 ,vyupriceHierarchyStockUnit.dblSalePrice AS dblRetailItemPerUnit
 ,vyupriceHierarchyStockUnit.dblSalePrice AS dblStockUnitPrice
 ,I.intCategoryId,
-vyupriceHierarchy.dblLastCost
+dblLastCost = ISNULL(vyupriceHierarchy.dblLastCost, 0)
 FROM tblICItem I 
 INNER JOIN tblICItemLocation IL 
 	ON I.intItemId = IL.intItemId

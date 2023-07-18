@@ -3,7 +3,7 @@
 	@post				BIT,
 	@recap				BIT,
 	@userId				INT,
-	@batchId			NVARCHAR(20) = NULL,
+	@batchId			NVARCHAR(50) = NULL,
 	@success			BIT = 0 OUTPUT,
 	@invalidCount		INT = 0 OUTPUT,
 	@successfulCount	INT = 0 OUTPUT,
@@ -65,7 +65,7 @@ WHERE NOT EXISTS (
 	WHERE B.intTransactionId = A.intId
 )
 
-SELECT @totalRecords = COUNT(*) FROM @validVoucherPrepay
+SELECT @totalRecords = COUNT(*) FROM @voucherPrepayIdData
 
 IF @totalRecords = 0 
 BEGIN

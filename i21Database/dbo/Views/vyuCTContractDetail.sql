@@ -202,9 +202,6 @@
 		,dblOptionalityPremium = cd.dblOptionalityPremium
 		,dblBudgetPrice = cd.dblBudgetPrice
 		,dblTotalBudget = cd.dblTotalBudget
-		,intLocalCurrencyId = cd.intLocalCurrencyId
-		,intLocalUOMId = cd.intLocalUOMId
-		,dblLocalCashPrice = cd.dblLocalCashPrice
 		,intAverageUOMId = cd.intAverageUOMId
 		,dblAverageQuantity = cd.dblAverageQuantity
 		,strLCNumber = cd.strLCNumber

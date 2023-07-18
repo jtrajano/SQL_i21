@@ -53,7 +53,7 @@ DECLARE @tempBasis TABLE(intRowNumber INT
 	, intProductLineId INT
 	, strGrade NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, intGradeId INT
-	, strCertification NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, strCertification NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 	, intCertificationId INT
 	, strMTMPoint NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, intMTMPointId INT

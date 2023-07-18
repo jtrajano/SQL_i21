@@ -159,7 +159,7 @@ SELECT
 	,dblProvisionalPayment				= CASE WHEN ysnFromProvisional = 1 AND dblProvisionalAmount > 0 THEN RELATEDINVOICE.dblPayment ELSE 0 END 
 	,dblProvisionalBasePayment			= CASE WHEN ysnFromProvisional = 1 AND dblBaseProvisionalAmount > 0 THEN RELATEDINVOICE.dblBasePayment ELSE 0 END 
 	,ysnHasCreditApprover				= CAST(CASE WHEN CUSTOMERCREDITAPPROVER.intApproverCount > 0 OR USERCREDITAPPROVER.intApproverCount > 0 THEN 1 ELSE 0 END AS BIT)
-	,dblCreditStopDays					= ISNULL(CUSTOMERAGING.dblCreditStopDays, 0)
+	,dblCreditStopDays					= CAST(0 AS NUMERIC(18, 6)) --ISNULL(CUSTOMERAGING.dblCreditStopDays, 0)
 	,intCreditStopDays					= CUS.intCreditStopDays
 	,ysnInvoiceReturned					= ISNULL(RELATEDINVOICE.ysnReturned,0)
 	,ysnInterCompany					= ISNULL(INV.ysnInterCompany,0)
@@ -178,10 +178,45 @@ SELECT
 	,intProfitCenter					= CLOC.intProfitCenter
 	,intOpportunityId					= INV.intOpportunityId
 	,strOpportunityName					= OPUR.strName
-	,ysnTaxAdjusted							= CAST(CASE WHEN RELATEDINVOICE2.strType = 'Tax Adjustment' AND RELATEDINVOICE2.ysnPosted = 1 THEN 1 ELSE 0 END AS BIT)
-	,strPrintFormat							= INV.strPrintFormat
-	,dblPercentage							= INV.dblPercentage
-	,dblProvisionalTotal					= CASE WHEN INV.dblPercentage <> 100 THEN INV.dblProvisionalTotal ELSE INV.dblInvoiceTotal END
+	,ysnTaxAdjusted						= CAST(CASE WHEN RELATEDINVOICE2.strType = 'Tax Adjustment' AND RELATEDINVOICE2.ysnPosted = 1 THEN 1 ELSE 0 END AS BIT)
+	,strPrintFormat						= INV.strPrintFormat
+	,dblPercentage						= INV.dblPercentage
+	,dblProvisionalTotal				= CASE WHEN INV.dblPercentage <> 100 THEN INV.dblProvisionalTotal ELSE INV.dblInvoiceTotal END
+	
+	,guiApiUniqueId							= INV.guiApiUniqueId
+	,intDefaultPayToBankAccountId			= INV.intDefaultPayToBankAccountId
+	,strDefaultPayToBankAccountNo			= DBA.strBankAccountNo
+	,strDefaultPayToBankPaymentInstructions	= DBA.strPaymentInstructions
+	,intPayToCashBankAccountId				= INV.intPayToCashBankAccountId
+	,strPayToCashBankAccountNo				= PFCBA.strBankAccountNo
+	,strSourceOfPayTo						= INV.strSourceOfPayTo
+	,strPaymentInstructions					= INV.strPaymentInstructions
+	,strTransactionNo						= INV.strTransactionNo
+	,intBankId								= INV.intBankId
+	,strBankName							= B.strBankName
+	,intBankAccountId						= INV.intBankAccountId
+	,strBankAccountNo						= BA.strBankAccountNo
+	,intBorrowingFacilityId					= INV.intBorrowingFacilityId
+	,strBorrowingFacility					= BF.strBorrowingFacilityId
+	,intBorrowingFacilityLimitId			= INV.intBorrowingFacilityLimitId
+	,strBorrowingFacilityLimit				= BFL.strBorrowingFacilityLimit
+	,intBorrowingFacilityLimitDetailId		= INV.intBorrowingFacilityLimitDetailId
+	,strBorrowingFacilityLimitDetail		= BFLD.strLimitDescription
+	,strBankReferenceNo						= INV.strBankReferenceNo
+	,strBankTradeReference					= INV.strBankTradeReference
+	,dblLoanAmount 							= INV.dblLoanAmount
+	,dblSurcharge							= INV.dblSurcharge
+	,intBankValuationRuleId					= INV.intBankValuationRuleId
+	,strBankValuationRule					= BVR.strBankValuationRule
+	,strTradeFinanceComments				= INV.strTradeFinanceComments
+	,strGoodsStatus							= INV.strGoodsStatus
+	,intTaxLocationId						= INV.intTaxLocationId
+	,strTaxLocation							= TAXLOCATION.strLocationName
+	,strTaxPoint							= INV.strTaxPoint
+	,ysnOverrideTaxPoint					= CAST(CASE WHEN ISNULL(INV.strTaxPoint,'') = '' THEN 0 ELSE 1 END AS BIT)
+	,ysnOverrideTaxLocation					= CAST(CASE WHEN ISNULL(INV.intTaxLocationId,0) > 0 THEN 1 ELSE 0 END AS BIT)
+	,strSourcedFrom							= CASE WHEN ISNULL(INV.intDefaultPayToBankAccountId,0) <> 0 THEN INV.strSourcedFrom ELSE '' END
+	
 FROM tblARInvoice INV WITH (NOLOCK)
 INNER JOIN (
     SELECT 
@@ -289,11 +324,11 @@ OUTER APPLY(
 	AND SC.strScreenName = 'Invoice'
 	WHERE SRA.intEntityUserSecurityId = INV.intEntityId
 ) USERCREDITAPPROVER
-OUTER APPLY(
-	SELECT TOP 1 dblCreditStopDays
-	FROM dbo.vyuARCustomerInquiry
-	WHERE intEntityCustomerId = INV.intEntityCustomerId
-) CUSTOMERAGING
+-- OUTER APPLY(
+-- 	SELECT TOP 1 dblCreditStopDays
+-- 	FROM dbo.vyuARCustomerInquiry
+-- 	WHERE intEntityCustomerId = INV.intEntityCustomerId
+-- ) CUSTOMERAGING
 OUTER APPLY(
 	SELECT TOP 1 strCompanyName
 	FROM dbo.tblSMInterCompany

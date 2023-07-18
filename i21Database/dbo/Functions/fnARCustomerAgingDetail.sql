@@ -51,7 +51,7 @@ RETURNS @returntable TABLE (
 	,[strSourceTransaction]		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 	,[strType]					NVARCHAR(25) COLLATE Latin1_General_CI_AS NULL
 	,[strTransactionType]		NVARCHAR(25) COLLATE Latin1_General_CI_AS NULL
-	,[strCompanyName]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	,[strCompanyName]			NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL
 	,[strCompanyAddress]        NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL
 	,[strAgingType]				NVARCHAR(25) COLLATE Latin1_General_CI_AS NULL
 	,[intCurrencyId]			INT NULL
@@ -376,6 +376,7 @@ BEGIN
 	LEFT JOIN (
 		SELECT intTransactionId, dtmDate, strTransactionType
 		FROM dbo.tblARNSFStagingTableDetail
+		WHERE ysnProcessed = 1
 		GROUP BY intTransactionId, dtmDate, strTransactionType
 	) NSF ON P.intPaymentId = NSF.intTransactionId AND NSF.strTransactionType = 'Payment'
 	WHERE P.ysnPosted = 1
@@ -577,8 +578,8 @@ BEGIN
 	)
 	SELECT intOriginalInvoiceId	= I.intOriginalInvoiceId
 		 , strDocumentNumber	= ID.strDocumentNumber
-		 , dblRefundTotal		= SUM(ID.dblTotal)
-		 , dblBaseRefundTotal	= SUM(ID.dblBaseTotal)
+		 , dblRefundTotal		= SUM(I.dblPayment)
+		 , dblBaseRefundTotal	= SUM(I.dblBasePayment)
 	FROM tblARInvoiceDetail ID
 	INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
 	INNER JOIN @ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId

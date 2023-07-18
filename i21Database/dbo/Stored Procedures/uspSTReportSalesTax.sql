@@ -23,8 +23,7 @@ BEGIN
 		, dblQuantity NUMERIC(18, 6)
 		, dblNetSales NUMERIC(18, 6)
 		, dblTax NUMERIC(18, 6)
-		, dblAmount NUMERIC(18, 6)
-		, dblTotal NUMERIC(18, 6))
+		, dblAmount NUMERIC(18, 6))
 
 	DECLARE @tmpStoreGroup AS TABLE (intStoreId INT, strStoreGroupName NVARCHAR(100))
 	DECLARE @tmpStores AS TABLE (Item NVARCHAR(100))
@@ -39,7 +38,8 @@ BEGIN
 		, dblPrice NUMERIC(18, 6)
 		, dblQuantity NUMERIC(18, 6)
 		, dblTax NUMERIC(18, 6)
-		, dblAmount NUMERIC(18, 6))
+		, dblAmount NUMERIC(18, 6)
+		, intInvoiceDetailId INT)
 		
 	DECLARE @MainStoreGroup AS TABLE (strStoreGroupName NVARCHAR(100)
 		, dtmCheckoutDate DATETIME
@@ -52,7 +52,8 @@ BEGIN
 		, dblPrice NUMERIC(18, 6)
 		, dblQuantity NUMERIC(18, 6)
 		, dblTax NUMERIC(18, 6)
-		, dblAmount NUMERIC(18, 6))
+		, dblAmount NUMERIC(18, 6)
+		, intInvoiceDetailId INT)
 		
 	DECLARE @MerchandiseDetails AS TABLE (intStoreId INT
 		, intStoreNo NVARCHAR(100)
@@ -62,7 +63,19 @@ BEGIN
 		, dblTotalSalesAmountRaw NUMERIC(18, 6)
 		, intItemsSold INT
 		, ysnUseTaxFlag2 BIT
-		, dblTotal NUMERIC(18, 6))
+		, dblTotal NUMERIC(18, 6)
+		, dblTotalTax NUMERIC(18, 6)
+		, dblNetSales NUMERIC(18, 6))
+
+	DECLARE @CategorySalesTotalDetails AS TABLE (intStoreId INT, 
+		intStoreNo INT,
+		dblTotalSalesAmountRaw DECIMAL(18, 2),
+		intItemsSold INT,
+		dblTaxableTotalTax DECIMAL(18, 2),
+		dblTaxableNetSales DECIMAL(18, 2),
+		dblNonTaxableTotalTax DECIMAL(18, 2),
+		dblNonTaxableNetSales DECIMAL(18, 2)
+	)
 		
 	INSERT INTO @tmpStores
 	SELECT DISTINCT Item FROM dbo.fnSplitString(@strStoreIds, ',')
@@ -88,6 +101,7 @@ BEGIN
 			, T1.dblQuantity
 			, T5.dblTax
 			, T1.dblAmount
+			, T5.intInvoiceDetailId
 		FROM tblSTCheckoutHeader T0
 		INNER JOIN tblSTCheckoutPumpTotals T1 ON T0.intCheckoutId = T1.intCheckoutId
 		INNER JOIN tblICItemUOM T2 ON T1.intPumpCardCouponId = T2.intItemUOMId
@@ -106,6 +120,7 @@ BEGIN
 			, T1.dblQuantity
 			, T5.dblTax
 			, T1.dblAmount
+			, T5.intInvoiceDetailId
 
 		INSERT INTO @MainStoreGroup
 		SELECT T6.strStoreGroupName
@@ -120,6 +135,7 @@ BEGIN
 			, T1.dblQuantity
 			, T5.dblTax
 			, T1.dblAmount
+			, T5.intInvoiceDetailId
 		FROM tblSTCheckoutHeader T0
 		INNER JOIN tblSTCheckoutPumpTotals T1 ON T0.intCheckoutId = T1.intCheckoutId
 		INNER JOIN tblICItemUOM T2 ON T1.intPumpCardCouponId = T2.intItemUOMId
@@ -127,7 +143,7 @@ BEGIN
 		INNER JOIN tblSTStore T4 ON T0.intStoreId = T4.intStoreId
 		INNER JOIN vyuARInvoiceTaxDetail T5 ON T0.intInvoiceId = T5.intInvoiceId AND T3.intItemId = T5.intItemId
 		LEFT JOIN @tmpStoreGroup T6 ON T0.intStoreId = T6.intStoreId
-		WHERE ISNULL(T0.intInvoiceId,0) <> 0 AND T5.ysnTaxExempt = 0
+		WHERE ISNULL(T0.intInvoiceId, 0) <> 0 AND T5.ysnTaxExempt = 0
 		GROUP BY T6.strStoreGroupName
 			, CAST(FLOOR(CAST(T0.dtmCheckoutDate AS FLOAT)) AS DATETIME)
 			, T4.intStoreNo
@@ -140,6 +156,7 @@ BEGIN
 			, T1.dblQuantity
 			, T5.dblTax
 			, T1.dblAmount
+			, T5.intInvoiceDetailId
 	END
 
 	
@@ -152,55 +169,62 @@ BEGIN
 			IF @intGroupById = 0
 			BEGIN
 				INSERT INTO @tmpDetails
-				SELECT dtmCheckoutDate = CASE WHEN @ysnSummary = 1 THEN NULL ELSE dtmCheckoutDate END
-					, intStoreNo = 0
-					, intStoreId = 0
-					, strStoreName = ''
-					, intItemId
-					, strItemNo
-					, strDescription
-					, dblPrice = AVG(MT.dblPrice)
-					, dblQuantity = AVG (MT.dblQuantity)
-					, dblNetSales = (AVG(MT.dblPrice) * AVG(MT.dblQuantity)) - SUM(MT.dblTax)
-					, dblTax = SUM (MT.dblTax)
-					, dblAmount = AVG(MT.dblPrice) * AVG (MT.dblQuantity)
-					, dblTotal = SUM(MT.dblAmount)
-				FROM @MainStore MT
-				WHERE CAST(FLOOR(CAST(MT.dtmCheckoutDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(@dtmFrom AS FLOAT)) AS DATETIME)
-					AND CAST(FLOOR(CAST(MT.dtmCheckoutDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@dtmTo AS FLOAT)) AS DATETIME)
-					AND MT.intStoreId IN (SELECT Item FROM @tmpStores)
-				GROUP BY CASE WHEN @ysnSummary = 1 THEN NULL ELSE dtmCheckoutDate END
-					, intItemId
-					, strItemNo
-					, strDescription
+				SELECT dtmCheckoutDate, intStoreNo, intStoreId, strStoreName, intItemId, strItemNo, strDescription,
+				   AVG(dblPrice), SUM(dblQuantity) AS dblQuantity, SUM(dblNetSales) AS dblNetSales, SUM(dblTax) AS dblTax,
+				   SUM(dblAmount) AS dblAmount
+				FROM 
+				(
+				  SELECT dtmCheckoutDate = CASE WHEN @ysnSummary = 1 THEN NULL ELSE dtmCheckoutDate END
+						, intStoreNo = 0
+						, intStoreId = 0
+						, strStoreName = ''
+						, intItemId
+						, strItemNo
+						, strDescription
+						, MT.dblPrice 
+						, AVG (MT.dblQuantity) AS dblQuantity
+						, (AVG(MT.dblPrice) * AVG(MT.dblQuantity)) - SUM(MT.dblTax) AS dblNetSales
+						, SUM(MT.dblTax) AS dblTax 
+						, AVG(MT.dblPrice) * AVG (MT.dblQuantity) AS dblAmount
+						, MT.intInvoiceDetailId
+					FROM @MainStore MT
+					WHERE CAST(FLOOR(CAST(MT.dtmCheckoutDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(@dtmFrom AS FLOAT)) AS DATETIME)
+						AND CAST(FLOOR(CAST(MT.dtmCheckoutDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@dtmTo AS FLOAT)) AS DATETIME)
+						AND MT.intStoreId IN (SELECT Item FROM @tmpStores)
+					GROUP BY CASE WHEN @ysnSummary = 1 THEN NULL ELSE dtmCheckoutDate END, MT.strStoreName, intItemId
+						, strItemNo, strDescription, MT.dblPrice, MT.intInvoiceDetailId
+				) tbl
+				GROUP BY dtmCheckoutDate, intStoreNo, intStoreId, strStoreName, intItemId, strItemNo, strDescription
 			END
 			ELSE
 			BEGIN
 				INSERT INTO @tmpDetails
-				SELECT dtmCheckoutDate = CASE WHEN @ysnSummary = 1 THEN NULL ELSE dtmCheckoutDate END
-					, intStoreNo
-					, intStoreId
-					, strStoreName
-					, intItemId
-					, strItemNo
-					, strDescription
-					, dblPrice = AVG(MT.dblPrice)
-					, dblQuantity = AVG (MT.dblQuantity)
-					, dblNetSales = (AVG(MT.dblPrice) * AVG(MT.dblQuantity)) - SUM(MT.dblTax)
-					, dblTax = SUM (MT.dblTax)
-					, dblAmount = AVG(MT.dblPrice) * AVG (MT.dblQuantity)
-					, dblTotal = SUM(MT.dblAmount)
-				FROM @MainStore MT
-				WHERE CAST(FLOOR(CAST(MT.dtmCheckoutDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(@dtmFrom AS FLOAT)) AS DATETIME)
-					AND CAST(FLOOR(CAST(MT.dtmCheckoutDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@dtmTo AS FLOAT)) AS DATETIME)
-					AND MT.intStoreId IN (SELECT Item FROM @tmpStores)
-				GROUP BY CASE WHEN @ysnSummary = 1 THEN NULL ELSE dtmCheckoutDate END
-					, intStoreNo
-					, intStoreId
-					, strStoreName
-					, intItemId
-					, strItemNo
-					, strDescription
+				SELECT dtmCheckoutDate, intStoreNo, intStoreId, strStoreName, intItemId, strItemNo, strDescription,
+				   AVG(dblPrice), SUM(dblQuantity) AS dblQuantity, SUM(dblNetSales) AS dblNetSales, SUM(dblTax) AS dblTax,
+				   SUM(dblAmount) AS dblAmount
+				FROM 
+				(
+				  SELECT dtmCheckoutDate = CASE WHEN @ysnSummary = 1 THEN NULL ELSE dtmCheckoutDate END
+						, intStoreNo
+						, intStoreId
+						, strStoreName
+						, intItemId
+						, strItemNo
+						, strDescription
+						, MT.dblPrice 
+						, AVG (MT.dblQuantity) AS dblQuantity
+						, (AVG(MT.dblPrice) * AVG(MT.dblQuantity)) - SUM(MT.dblTax) AS dblNetSales
+						, SUM(MT.dblTax) AS dblTax 
+						, AVG(MT.dblPrice) * AVG (MT.dblQuantity) AS dblAmount
+						, MT.intInvoiceDetailId
+					FROM @MainStore MT
+					WHERE CAST(FLOOR(CAST(MT.dtmCheckoutDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(@dtmFrom AS FLOAT)) AS DATETIME)
+						AND CAST(FLOOR(CAST(MT.dtmCheckoutDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@dtmTo AS FLOAT)) AS DATETIME)
+						AND MT.intStoreId IN (SELECT Item FROM @tmpStores)
+					GROUP BY CASE WHEN @ysnSummary = 1 THEN NULL ELSE dtmCheckoutDate END, intStoreNo, intStoreId, MT.strStoreName, intItemId
+						, strItemNo, strDescription, MT.dblPrice, MT.intInvoiceDetailId
+				) tbl
+				GROUP BY dtmCheckoutDate, intStoreNo, intStoreId, strStoreName, intItemId, strItemNo, strDescription
 			END
 		END
 		ELSE
@@ -208,56 +232,62 @@ BEGIN
 			IF @intGroupById = 0
 			BEGIN
 				INSERT INTO @tmpDetails
-				SELECT dtmCheckoutDate = CASE WHEN @ysnSummary = 1 THEN NULL ELSE dtmCheckoutDate END
-					, intStoreNo = 0
-					, intStoreId = 0
-					, strStoreName = ''
-					, intItemId
-					, strItemNo
-					, strDescription
-					, dblPrice = AVG(MT.dblPrice)
-					, dblQuantity = SUM (MT.dblQuantity)
-					, dblNetSales = (AVG(MT.dblPrice) * SUM(MT.dblQuantity)) - SUM(MT.dblTax)
-					, dblTax = SUM (MT.dblTax)
-					, dblAmount = AVG(MT.dblPrice) * SUM (MT.dblQuantity)
-					, dblTotal = SUM(MT.dblAmount)
-				FROM @MainStoreGroup MT
-				WHERE CAST(FLOOR(CAST(MT.dtmCheckoutDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(@dtmFrom AS FLOAT)) AS DATETIME)
-					AND CAST(FLOOR(CAST(MT.dtmCheckoutDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@dtmTo AS FLOAT)) AS DATETIME)
-					AND MT.intStoreId IN (SELECT Item FROM @tmpStores)
-				GROUP BY CASE WHEN @ysnSummary = 1 THEN NULL ELSE dtmCheckoutDate END
-					, intItemId
-					, strItemNo
-					, strDescription
+				SELECT dtmCheckoutDate, intStoreNo, intStoreId, strStoreName, intItemId, strItemNo, strDescription,
+				   AVG(dblPrice), SUM(dblQuantity) AS dblQuantity, SUM(dblNetSales) AS dblNetSales, SUM(dblTax) AS dblTax,
+				   SUM(dblAmount) AS dblAmount
+				FROM 
+				(
+				  SELECT dtmCheckoutDate = CASE WHEN @ysnSummary = 1 THEN NULL ELSE dtmCheckoutDate END
+						, intStoreNo = 0
+						, intStoreId = 0
+						, strStoreName = ''
+						, intItemId
+						, strItemNo
+						, strDescription
+						, MT.dblPrice 
+						, AVG (MT.dblQuantity) AS dblQuantity
+						, (AVG(MT.dblPrice) * AVG(MT.dblQuantity)) - SUM(MT.dblTax) AS dblNetSales
+						, SUM(MT.dblTax) AS dblTax 
+						, AVG(MT.dblPrice) * AVG (MT.dblQuantity) AS dblAmount
+						, MT.intInvoiceDetailId
+					FROM @MainStore MT
+					WHERE CAST(FLOOR(CAST(MT.dtmCheckoutDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(@dtmFrom AS FLOAT)) AS DATETIME)
+						AND CAST(FLOOR(CAST(MT.dtmCheckoutDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@dtmTo AS FLOAT)) AS DATETIME)
+						AND MT.intStoreId IN (SELECT Item FROM @tmpStores)
+					GROUP BY CASE WHEN @ysnSummary = 1 THEN NULL ELSE dtmCheckoutDate END, MT.strStoreName, intItemId
+						, strItemNo, strDescription, MT.dblPrice, MT.intInvoiceDetailId
+				) tbl
+				GROUP BY dtmCheckoutDate, intStoreNo, intStoreId, strStoreName, intItemId, strItemNo, strDescription
 			END
 			ELSE
 			BEGIN
 				INSERT INTO @tmpDetails
-				SELECT dtmCheckoutDate = CASE WHEN @ysnSummary = 1 THEN NULL ELSE dtmCheckoutDate END
-					, intStoreNo = strStoreGroupName + ' - ' + CAST(intStoreNo AS NVARCHAR(10))
-					, intStoreId
-					, strStoreName
-					, intItemId
-					, strItemNo
-					, strDescription
-					, dblPrice = AVG(MT.dblPrice)
-					, dblQuantity = SUM (MT.dblQuantity)
-					, dblNetSales = (AVG(MT.dblPrice) * SUM(MT.dblQuantity)) - SUM(MT.dblTax)
-					, dblTax = SUM (MT.dblTax)
-					, dblAmount = AVG(MT.dblPrice) * SUM (MT.dblQuantity)
-					, dblTotal = SUM(MT.dblAmount)
-				FROM @MainStoreGroup MT
-				WHERE CAST(FLOOR(CAST(MT.dtmCheckoutDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(@dtmFrom AS FLOAT)) AS DATETIME)
-				AND CAST(FLOOR(CAST(MT.dtmCheckoutDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@dtmTo AS FLOAT)) AS DATETIME)
-				AND MT.intStoreId IN (SELECT Item FROM @tmpStores)
-				GROUP BY CASE WHEN @ysnSummary = 1 THEN NULL ELSE dtmCheckoutDate END
-					, strStoreGroupName
-					, intStoreNo
-					, intStoreId
-					, strStoreName
-					, intItemId
-					, strItemNo
-					, strDescription
+				SELECT dtmCheckoutDate, intStoreNo, intStoreId, strStoreName, intItemId, strItemNo, strDescription,
+				   AVG(dblPrice), SUM(dblQuantity) AS dblQuantity, SUM(dblNetSales) AS dblNetSales, SUM(dblTax) as dblTax,
+				   SUM(dblAmount) as dblAmount
+				FROM 
+				(
+				  SELECT dtmCheckoutDate = CASE WHEN @ysnSummary = 1 THEN NULL ELSE dtmCheckoutDate END
+						, intStoreNo
+						, intStoreId
+						, strStoreName
+						, intItemId
+						, strItemNo
+						, strDescription
+						, MT.dblPrice 
+						, AVG (MT.dblQuantity) AS dblQuantity
+						, (AVG(MT.dblPrice) * AVG(MT.dblQuantity)) - SUM(MT.dblTax) AS dblNetSales
+						, SUM(MT.dblTax) AS dblTax 
+						, AVG(MT.dblPrice) * AVG (MT.dblQuantity) AS dblAmount
+						, MT.intInvoiceDetailId
+					FROM @MainStore MT
+					WHERE CAST(FLOOR(CAST(MT.dtmCheckoutDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(@dtmFrom AS FLOAT)) AS DATETIME)
+						AND CAST(FLOOR(CAST(MT.dtmCheckoutDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@dtmTo AS FLOAT)) AS DATETIME)
+						AND MT.intStoreId IN (SELECT Item FROM @tmpStores)
+					GROUP BY CASE WHEN @ysnSummary = 1 THEN NULL ELSE dtmCheckoutDate END, intStoreNo, intStoreId, MT.strStoreName, intItemId
+						, strItemNo, strDescription, MT.dblPrice, MT.intInvoiceDetailId
+				) tbl
+				GROUP BY dtmCheckoutDate, intStoreNo, intStoreId, strStoreName, intItemId, strItemNo, strDescription
 			END
 		END
 
@@ -292,7 +322,7 @@ BEGIN
 				, dblTax
 				, dblAmount
 			FROM @tmpDetails
-			WHERE dblTotal <> 0
+			WHERE dblAmount <> 0
 		END
 	END
 	/********** Tax Fuel Sales End ***********/
@@ -312,11 +342,12 @@ BEGIN
 					, (AVG(MT.dblPrice) * AVG(MT.dblQuantity)) - SUM(MT.dblTax) AS dblNetSales
 					, SUM (MT.dblTax) AS dblTax
 					, AVG(MT.dblPrice) * AVG (MT.dblQuantity) AS dblAmount
+					, MT.intInvoiceDetailId
 				FROM @MainStore MT
 				WHERE CAST(FLOOR(CAST(MT.dtmCheckoutDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(@dtmFrom AS FLOAT)) AS DATETIME)
 					AND CAST(FLOOR(CAST(MT.dtmCheckoutDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@dtmTo AS FLOAT)) AS DATETIME)
 					AND MT.intStoreId IN (SELECT Item FROM @tmpStores)
-				GROUP BY MT.intItemId, MT.intStoreId
+				GROUP BY MT.intItemId, MT.intStoreId, MT.intInvoiceDetailId
 			) tmp
 		END
 		ELSE
@@ -350,60 +381,106 @@ BEGIN
 			IF @intGroupById = 0
 			BEGIN
 				INSERT INTO @MerchandiseDetails
-				SELECT 0 AS intStoreId
-					, 0 AS intStoreNo
-					, '' AS strStoreName
-					, T5.intCategoryId
-					, T5.strDescription
-					, ISNULL( AVG(T1.dblTotalSalesAmountRaw), 0) AS dblTotalSalesAmountRaw
-					, AVG(T1.intItemsSold) AS intItemsSold
-					, T4.ysnUseTaxFlag2
-					, ISNULL(AVG(T1.dblTotalSalesAmountRaw), 0) AS dblTotal
-				FROM tblSTCheckoutHeader T0
-				INNER JOIN tblSTCheckoutDepartmetTotals T1 ON T0.intCheckoutId = T1.intCheckoutId
-				INNER JOIN tblSTStore T2 ON T0.intStoreId = T2.intStoreId
-				INNER JOIN tblICItem T3 ON T1.intItemId = T3.intItemId
-				INNER JOIN tblICCategoryLocation T4 ON T3.intCategoryId = T4.intCategoryId
-				INNER JOIN tblICCategory T5 ON T4.intCategoryId = T5.intCategoryId
-				WHERE ISNULL (T0.intInvoiceId,0) <> 0
-					AND CAST(FLOOR(CAST(T0.dtmCheckoutDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(@dtmFrom AS FLOAT)) AS DATETIME)
-					AND CAST(FLOOR(CAST(T0.dtmCheckoutDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@dtmTo AS FLOAT)) AS DATETIME)
-					AND T0.intStoreId IN (SELECT Item FROM @tmpStores)
-				GROUP BY T5.intCategoryId
-					, T5.strDescription
-					, T4.ysnUseTaxFlag2
-				ORDER BY T4.ysnUseTaxFlag2
+				SELECT  intStoreId
+					, intStoreNo
+					, strDescription
+					, intCategoryId
+					, strDescription
+					, SUM(dblTotalSalesAmountRaw) AS dblTotalSalesAmountRaw
+					, SUM(intItemsSold) AS intItemsSold
+					, ysnUseTaxFlag2
+					, dblTotal
+					, SUM(dblTotalTax) AS dblTotalTax
+					, (SUM(dblTotalSalesAmountRaw) - SUM(dblTotalTax)) AS dblNetSales
+				FROM (
+					SELECT 0 AS intStoreId
+						, 0 AS intStoreNo
+						, '' AS strStoreName
+						, T5.intCategoryId
+						, T5.strDescription
+						, ISNULL( AVG(T1.dblTotalSalesAmountComputed), 0) AS dblTotalSalesAmountRaw
+						, AVG(T1.intItemsSold) AS intItemsSold
+						, T4.ysnUseTaxFlag2
+						, ISNULL(AVG(T1.dblTotalSalesAmountComputed), 0) AS dblTotal
+						, MAX(T6.dblTotalTax) AS dblTotalTax
+					FROM tblSTCheckoutHeader T0
+					INNER JOIN tblSTCheckoutDepartmetTotals T1 ON T0.intCheckoutId = T1.intCheckoutId
+					INNER JOIN tblSTStore T2 ON T0.intStoreId = T2.intStoreId
+					INNER JOIN tblICItem T3 ON T1.intItemId = T3.intItemId
+					INNER JOIN tblICCategoryLocation T4 ON T3.intCategoryId = T4.intCategoryId
+					INNER JOIN tblICCategory T5 ON T4.intCategoryId = T5.intCategoryId
+					INNER JOIN tblSTCheckoutSalesTaxTotals T6 ON T0.intCheckoutId = T6.intCheckoutId
+					WHERE ISNULL (T0.intInvoiceId,0) <> 0
+						AND CAST(FLOOR(CAST(T0.dtmCheckoutDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(@dtmFrom AS FLOAT)) AS DATETIME)
+						AND CAST(FLOOR(CAST(T0.dtmCheckoutDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@dtmTo AS FLOAT)) AS DATETIME)
+						AND T0.intStoreId IN (SELECT Item FROM @tmpStores)
+					GROUP BY T5.intCategoryId
+						, T5.strDescription
+						, T4.ysnUseTaxFlag2
+						, T0.dtmCheckoutDate
+				) tbl
+				GROUP BY intStoreId
+					, intStoreNo
+					, strDescription
+					, intCategoryId
+					, strDescription
+					, ysnUseTaxFlag2
+					, dblTotal
+				ORDER BY ysnUseTaxFlag2
 			END
 			ELSE
 			BEGIN
 				INSERT INTO @MerchandiseDetails
-				SELECT T0.intStoreId
-					, T2.intStoreNo
-					, T2.strDescription AS strStoreName
-					, T5.intCategoryId
-					, T5.strDescription
-					, ISNULL (AVG(T1.dblTotalSalesAmountRaw), 0) AS dblTotalSalesAmountRaw
-					, AVG(T1.intItemsSold) AS intItemsSold
-					, T4.ysnUseTaxFlag2
-					, ISNULL(AVG(T1.dblTotalSalesAmountRaw), 0) AS dblTotal
-				FROM tblSTCheckoutHeader T0
-				INNER JOIN tblSTCheckoutDepartmetTotals T1 ON T0.intCheckoutId = T1.intCheckoutId
-				INNER JOIN tblSTStore T2 ON T0.intStoreId = T2.intStoreId
-				INNER JOIN tblICItem T3 ON T1.intItemId = T3.intItemId
-				INNER JOIN tblICCategoryLocation T4 ON T3.intCategoryId = T4.intCategoryId
-				INNER JOIN tblICCategory T5 ON T4.intCategoryId = T5.intCategoryId
-				WHERE ISNULL (T0.intInvoiceId,0) <> 0
-					AND CAST(FLOOR(CAST(T0.dtmCheckoutDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(@dtmFrom AS FLOAT)) AS DATETIME)
-					AND CAST(FLOOR(CAST(T0.dtmCheckoutDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@dtmTo AS FLOAT)) AS DATETIME)
-					AND T0.intStoreId IN (SELECT Item FROM @tmpStores)
-				GROUP BY T0.intStoreId
-					, T2.intStoreNo
-					, T2.strDescription
-					, T5.intCategoryId
-					, T5.strDescription
-					, T4.ysnUseTaxFlag2
-				ORDER BY T4.ysnUseTaxFlag2
-					, T0.intStoreId
+				SELECT  intStoreId
+					, intStoreNo
+					, strDescription
+					, intCategoryId
+					, strDescription
+					, SUM(dblTotalSalesAmountRaw) AS dblTotalSalesAmountRaw
+					, SUM(intItemsSold) AS intItemsSold
+					, ysnUseTaxFlag2
+					, dblTotal
+					, SUM(dblTotalTax) AS dblTotalTax
+					, (SUM(dblTotalSalesAmountRaw) - SUM(dblTotalTax)) AS dblNetSales
+				FROM (
+					SELECT T0.intStoreId
+						, T2.intStoreNo
+						, T2.strDescription AS strStoreName
+						, T5.intCategoryId
+						, T5.strDescription
+						, ISNULL (AVG(T1.dblTotalSalesAmountComputed), 0) AS dblTotalSalesAmountRaw
+						, AVG(T1.intItemsSold) AS intItemsSold
+						, T4.ysnUseTaxFlag2
+						, ISNULL(AVG(T1.dblTotalSalesAmountComputed), 0) AS dblTotal
+						, MAX(T6.dblTotalTax) AS dblTotalTax
+					FROM tblSTCheckoutHeader T0
+					INNER JOIN tblSTCheckoutDepartmetTotals T1 ON T0.intCheckoutId = T1.intCheckoutId
+					INNER JOIN tblSTStore T2 ON T0.intStoreId = T2.intStoreId
+					INNER JOIN tblICItem T3 ON T1.intItemId = T3.intItemId
+					INNER JOIN tblICCategoryLocation T4 ON T3.intCategoryId = T4.intCategoryId
+					INNER JOIN tblICCategory T5 ON T4.intCategoryId = T5.intCategoryId
+					INNER JOIN tblSTCheckoutSalesTaxTotals T6 ON T0.intCheckoutId = T6.intCheckoutId
+					WHERE ISNULL (T0.intInvoiceId,0) <> 0
+						AND CAST(FLOOR(CAST(T0.dtmCheckoutDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(@dtmFrom AS FLOAT)) AS DATETIME)
+						AND CAST(FLOOR(CAST(T0.dtmCheckoutDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@dtmTo AS FLOAT)) AS DATETIME)
+						AND T0.intStoreId IN (SELECT Item FROM @tmpStores)
+					GROUP BY T0.intStoreId
+						, T2.intStoreNo
+						, T2.strDescription
+						, T5.intCategoryId
+						, T5.strDescription
+						, T4.ysnUseTaxFlag2
+						, T0.dtmCheckoutDate
+				) tbl
+				GROUP BY intStoreId
+					, intStoreNo
+					, strDescription
+					, intCategoryId
+					, strDescription
+					, ysnUseTaxFlag2
+					, dblTotal
+				ORDER BY ysnUseTaxFlag2
+						, intCategoryId
 			END
 		END
 		ELSE
@@ -411,65 +488,143 @@ BEGIN
 			IF @intGroupById = 0
 			BEGIN
 				INSERT INTO @MerchandiseDetails
-				SELECT 0 AS intStoreId
-					, 0 AS intStoreNo
-					, '' AS strStoreName
-					, T5.intCategoryId
-					, T5.strDescription
-					, ISNULL(AVG(T1.dblTotalSalesAmountRaw), 0) AS dblTotalSalesAmountRaw
-					, AVG(T1.intItemsSold) AS intItemsSold
-					, T4.ysnUseTaxFlag2
-					, ISNULL(AVG(T1.dblTotalSalesAmountRaw), 0) AS dblTotal
-				FROM tblSTCheckoutHeader T0
-				INNER JOIN tblSTCheckoutDepartmetTotals T1 ON T0.intCheckoutId = T1.intCheckoutId
-				INNER JOIN tblSTStore T2 ON T0.intStoreId = T2.intStoreId
-				INNER JOIN tblICItem T3 ON T1.intItemId = T3.intItemId
-				INNER JOIN tblICCategoryLocation T4 ON T3.intCategoryId = T4.intCategoryId
-				INNER JOIN tblICCategory T5 ON T4.intCategoryId = T5.intCategoryId
-				LEFT JOIN @tmpStoreGroup T6 ON T0.intStoreId = T6.intStoreId
-				WHERE ISNULL (T0.intInvoiceId,0) <> 0
-					AND CAST(FLOOR(CAST(T0.dtmCheckoutDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(@dtmFrom AS FLOAT)) AS DATETIME)
-					AND CAST(FLOOR(CAST(T0.dtmCheckoutDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@dtmTo AS FLOAT)) AS DATETIME)
-					AND T0.intStoreId IN (SELECT Item FROM @tmpStores)
-				GROUP BY T5.intCategoryId
-					, T5.strDescription
-					, T4.ysnUseTaxFlag2
-				ORDER BY T4.ysnUseTaxFlag2  
+				SELECT  intStoreId
+					, intStoreNo
+					, strDescription
+					, intCategoryId
+					, strDescription
+					, SUM(dblTotalSalesAmountRaw) AS dblTotalSalesAmountRaw
+					, SUM(intItemsSold) AS intItemsSold
+					, ysnUseTaxFlag2
+					, dblTotal
+					, SUM(dblTotalTax) AS dblTotalTax
+					, (SUM(dblTotalSalesAmountRaw) - SUM(dblTotalTax)) AS dblNetSales
+				FROM (
+					SELECT 0 AS intStoreId
+						, 0 AS intStoreNo
+						, '' AS strStoreName
+						, T5.intCategoryId
+						, T5.strDescription
+						, ISNULL(AVG(T1.dblTotalSalesAmountComputed), 0) AS dblTotalSalesAmountRaw
+						, AVG(T1.intItemsSold) AS intItemsSold
+						, T4.ysnUseTaxFlag2
+						, ISNULL(AVG(T1.dblTotalSalesAmountComputed), 0) AS dblTotal
+						, MAX(T7.dblTotalTax) AS dblTotalTax
+					FROM tblSTCheckoutHeader T0
+					INNER JOIN tblSTCheckoutDepartmetTotals T1 ON T0.intCheckoutId = T1.intCheckoutId
+					INNER JOIN tblSTStore T2 ON T0.intStoreId = T2.intStoreId
+					INNER JOIN tblICItem T3 ON T1.intItemId = T3.intItemId
+					INNER JOIN tblICCategoryLocation T4 ON T3.intCategoryId = T4.intCategoryId
+					INNER JOIN tblICCategory T5 ON T4.intCategoryId = T5.intCategoryId
+					LEFT JOIN @tmpStoreGroup T6 ON T0.intStoreId = T6.intStoreId
+					INNER JOIN tblSTCheckoutSalesTaxTotals T7 ON T0.intCheckoutId = T7.intCheckoutId
+					WHERE ISNULL (T0.intInvoiceId,0) <> 0
+						AND CAST(FLOOR(CAST(T0.dtmCheckoutDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(@dtmFrom AS FLOAT)) AS DATETIME)
+						AND CAST(FLOOR(CAST(T0.dtmCheckoutDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@dtmTo AS FLOAT)) AS DATETIME)
+						AND T0.intStoreId IN (SELECT Item FROM @tmpStores)
+					GROUP BY T5.intCategoryId
+						, T5.strDescription
+						, T4.ysnUseTaxFlag2
+						, T0.dtmCheckoutDate
+					) tbl
+				GROUP BY intStoreId
+					, intStoreNo
+					, strDescription
+					, intCategoryId
+					, strDescription
+					, ysnUseTaxFlag2
+					, dblTotal
+				ORDER BY ysnUseTaxFlag2
 			END
 			ELSE
 			BEGIN
 				INSERT INTO @MerchandiseDetails
-				SELECT T0.intStoreId
-					, T6.strStoreGroupName + ' - ' + CAST(T2.intStoreNo AS nvarchar(10)) AS intStoreNo
-					, T2.strDescription AS strStoreName
-					, T5.intCategoryId
-					, T5.strDescription
-					, ISNULL(AVG(T1.dblTotalSalesAmountRaw), 0) AS dblTotalSalesAmountRaw
-					, AVG(T1.intItemsSold) AS intItemsSold
-					, T4.ysnUseTaxFlag2
-					, ISNULL(AVG(T1.dblTotalSalesAmountRaw), 0) AS dblTotal
-				FROM tblSTCheckoutHeader T0
-				INNER JOIN tblSTCheckoutDepartmetTotals T1 ON T0.intCheckoutId = T1.intCheckoutId
-				INNER JOIN tblSTStore T2 ON T0.intStoreId = T2.intStoreId
-				INNER JOIN tblICItem T3 ON T1.intItemId = T3.intItemId
-				INNER JOIN tblICCategoryLocation T4 ON T3.intCategoryId = T4.intCategoryId
-				INNER JOIN tblICCategory T5 ON T4.intCategoryId = T5.intCategoryId
-				LEFT JOIN @tmpStoreGroup T6 ON T0.intStoreId = T6.intStoreId
-				WHERE ISNULL (T0.intInvoiceId,0) <> 0
-					AND CAST(FLOOR(CAST(T0.dtmCheckoutDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(@dtmFrom AS FLOAT)) AS DATETIME)
-					AND CAST(FLOOR(CAST(T0.dtmCheckoutDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@dtmTo AS FLOAT)) AS DATETIME)
-					AND T0.intStoreId IN (SELECT Item FROM @tmpStores)
-				GROUP BY T0.intStoreId
-					, T6.strStoreGroupName
-					, T2.intStoreNo
-					, T2.strDescription
-					, T5.intCategoryId
-					, T5.strDescription
-					, T4.ysnUseTaxFlag2
-				ORDER BY T4.ysnUseTaxFlag2
-					, T0.intStoreId
+				SELECT  intStoreId
+					, intStoreNo
+					, strDescription
+					, intCategoryId
+					, strDescription
+					, SUM(dblTotalSalesAmountRaw) AS dblTotalSalesAmountRaw
+					, SUM(intItemsSold) AS intItemsSold
+					, ysnUseTaxFlag2
+					, dblTotal
+					, SUM(dblTotalTax) AS dblTotalTax
+					, (SUM(dblTotalSalesAmountRaw) - SUM(dblTotalTax)) AS dblNetSales
+				FROM (
+					SELECT T0.intStoreId
+						, T6.strStoreGroupName + ' - ' + CAST(T2.intStoreNo AS nvarchar(10)) AS intStoreNo
+						, T2.strDescription AS strStoreName
+						, T5.intCategoryId
+						, T5.strDescription
+						, ISNULL(AVG(T1.dblTotalSalesAmountComputed), 0) AS dblTotalSalesAmountRaw
+						, AVG(T1.intItemsSold) AS intItemsSold
+						, T4.ysnUseTaxFlag2
+						, ISNULL(AVG(T1.dblTotalSalesAmountComputed), 0) AS dblTotal
+						, MAX(T7.dblTotalTax) AS dblTotalTax
+					FROM tblSTCheckoutHeader T0
+					INNER JOIN tblSTCheckoutDepartmetTotals T1 ON T0.intCheckoutId = T1.intCheckoutId
+					INNER JOIN tblSTStore T2 ON T0.intStoreId = T2.intStoreId
+					INNER JOIN tblICItem T3 ON T1.intItemId = T3.intItemId
+					INNER JOIN tblICCategoryLocation T4 ON T3.intCategoryId = T4.intCategoryId
+					INNER JOIN tblICCategory T5 ON T4.intCategoryId = T5.intCategoryId
+					LEFT JOIN @tmpStoreGroup T6 ON T0.intStoreId = T6.intStoreId
+					INNER JOIN tblSTCheckoutSalesTaxTotals T7 ON T0.intCheckoutId = T7.intCheckoutId
+					WHERE ISNULL (T0.intInvoiceId,0) <> 0
+						AND CAST(FLOOR(CAST(T0.dtmCheckoutDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(@dtmFrom AS FLOAT)) AS DATETIME)
+						AND CAST(FLOOR(CAST(T0.dtmCheckoutDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@dtmTo AS FLOAT)) AS DATETIME)
+						AND T0.intStoreId IN (SELECT Item FROM @tmpStores)
+					GROUP BY T0.intStoreId
+						, T6.strStoreGroupName
+						, T2.intStoreNo
+						, T2.strDescription
+						, T5.intCategoryId
+						, T5.strDescription
+						, T4.ysnUseTaxFlag2
+						, T0.dtmCheckoutDate
+					) tbl
+					GROUP BY intStoreId
+						, intStoreNo
+						, strDescription
+						, intCategoryId
+						, strDescription
+						, ysnUseTaxFlag2
+						, dblTotal
+					ORDER BY ysnUseTaxFlag2
+						, intCategoryId
 			END
 		END
+
+		INSERT INTO @CategorySalesTotalDetails
+		SELECT intStoreId, intStoreNo, 
+			ISNULL(SUM(dblTotalSalesAmountRaw), 0) AS dblTotalSalesAmountRaw,
+			ISNULL(SUM(intItemsSold), 0) AS intItemsSold,
+			ISNULL(SUM(dblTotalTax), 0) AS dblTaxableTotalTax,
+			ISNULL(SUM(dblNetSales), 0) AS dblTaxableNetSales,
+			0 AS dbNonlTaxableTotalTax,
+			0 AS dblNonTaxableNetSales
+		FROM @MerchandiseDetails
+		WHERE ysnUseTaxFlag2 <> 0
+		GROUP BY intStoreId, intStoreNo
+		UNION
+		SELECT intStoreId, intStoreNo, 
+			ISNULL(SUM(dblTotalSalesAmountRaw), 0) AS dblTotalSalesAmountRaw,
+			ISNULL(SUM(intItemsSold), 0) AS intItemsSold,
+			0 AS dblTaxableTotalTax,
+			0 AS dblTaxableNetSales,
+			ISNULL(SUM(dblTotalTax), 0) AS dblNonTaxableTotalTax,
+			ISNULL(SUM(dblNetSales), 0) AS dblNonTaxableNetSales
+		FROM @MerchandiseDetails
+		WHERE ysnUseTaxFlag2 = 0
+		GROUP BY intStoreId, intStoreNo
+
+
+		SELECT intStoreId, intStoreNo, SUM(dblTotalSalesAmountRaw) AS dblTotalSalesAmountRaw
+			, SUM(intItemsSold) AS intItemsSold
+			, (SUM(dblTaxableTotalTax)) AS dblTotalTax
+			, (SUM(dblTotalSalesAmountRaw) - SUM(dblTaxableTotalTax)) AS dblTotalNetSales
+		FROM @CategorySalesTotalDetails
+		GROUP BY intStoreId, intStoreNo
+
 		IF @strReportName = 'Merchandise Sales'
 		BEGIN
 			IF @ysnIncludeZeroValues = 1
@@ -477,11 +632,13 @@ BEGIN
 				SELECT intStoreId
 					, intStoreNo
 					, strStoreName
-					, intCategoryId
+					, intCategoryId 
 					, strDescription
 					, dblTotalSalesAmountRaw
 					, intItemsSold
 					, ysnUseTaxFlag2
+					, dblTotalTax
+					, dblNetSales
 				FROM @MerchandiseDetails
 			END
 			ELSE
@@ -494,18 +651,12 @@ BEGIN
 					, dblTotalSalesAmountRaw
 					, intItemsSold
 					, ysnUseTaxFlag2
+					, dblTotalTax
+					, dblNetSales
 				FROM @MerchandiseDetails
 				WHERE dblTotal <> 0
 			END
 		END
-		ELSE
-		BEGIN
-			SELECT
-				SUM(dblTotalSalesAmountRaw) AS dblTotalSalesAmountRaw
-				, SUM(intItemsSold) AS intItemsSold
-			FROM @MerchandiseDetails
-		END
-
 	END
 	/********** Merchandise Sales End ***********/
 	
@@ -770,7 +921,7 @@ BEGIN
 							AND T5.ysnTaxExempt = 0
 							AND CAST(FLOOR(CAST(T0.dtmCheckoutDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(@dtmFrom AS FLOAT)) AS DATETIME)
 							AND CAST(FLOOR(CAST(T0.dtmCheckoutDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@dtmTo AS FLOAT)) AS DATETIME)
-							AND T0.intStoreId = 6
+							AND T0.intStoreId IN (SELECT Item FROM @tmpStores)
 						) as tbl
 					) tbl
 					GROUP BY intStoreId, intStoreNo, strStoreName, strDescription
@@ -802,7 +953,7 @@ BEGIN
 							AND T5.ysnTaxExempt = 0
 							AND CAST(FLOOR(CAST(T0.dtmCheckoutDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(@dtmFrom AS FLOAT)) AS DATETIME)
 							AND CAST(FLOOR(CAST(T0.dtmCheckoutDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@dtmTo AS FLOAT)) AS DATETIME)
-							AND T0.intStoreId = 6
+							AND T0.intStoreId IN (SELECT Item FROM @tmpStores)
 						) as tbl
 					) tbl
 					GROUP BY intStoreId, intStoreNo, strStoreName, strDescription

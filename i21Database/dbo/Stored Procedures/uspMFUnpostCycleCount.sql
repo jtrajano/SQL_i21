@@ -297,6 +297,8 @@ BEGIN TRY
 			,dblForeignRate
 			,intSourceEntityId
 			,intCommodityId
+			,intCurrencyExchangeRateTypeId
+			,strRateType
 			)
 		EXEC dbo.uspICCreateGLEntriesOnCostAdjustment @strBatchId = @strBatchIdForUnpost
 			,@intEntityUserSecurityId = @intUserId

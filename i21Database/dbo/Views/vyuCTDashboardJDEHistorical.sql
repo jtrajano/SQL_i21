@@ -142,6 +142,7 @@ SELECT 	 SQ.intContractDetailId
 		,CD.intSubBookId as intDetailSubBookId
 		,LV.strForwardingAgentEntity
 		,LL.strName AS strLogisticsLeadName
+		,dtmLastWeighing = WC.dtmLastWeighingDate
 	FROM 		vyuCTContractSequence			 	SQ	WITH (NOLOCK)		
 	JOIN 		tblCTContractDetail				 	CD	WITH (NOLOCK) ON	CD.intContractDetailId				=	SQ.intContractDetailId AND SQ.intContractStatusId NOT IN (1,2,4)
 	JOIN 		tblCTContractHeader				 	CH	WITH (NOLOCK) ON	CH.intContractHeaderId				=	SQ.intContractHeaderId
@@ -183,3 +184,5 @@ SELECT 	 SQ.intContractDetailId
 	LEFT JOIN	vyuCTLoadView						LV	WITH (NOLOCK) ON	LV.intContractDetailId				=	CD.intContractDetailId
 	LEFT JOIN	vyuCTQualityApprovedRejected		QA	WITH (NOLOCK) ON	QA.intContractDetailId				=	CD.intContractDetailId
 	LEFT JOIN 	tblEMEntity LL on LL.intEntityId = CD.intLogisticsLeadId
+	LEFT JOIN	tblLGWeightClaim WC ON WC.intLoadId = LV.intLoadId
+	LEFT JOIN	tblLGWeightClaimDetail WD ON WD.intWeightClaimId = WC.intWeightClaimId

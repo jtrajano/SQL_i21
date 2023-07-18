@@ -42,11 +42,12 @@ SELECT wo.strWorkOrderNo
 	,TC.strTINNumber [strTIN]
 	,woil.dblIssuedQuantity [dblBags]
 	,CAST((woil.dblQuantity / dblTotalWeight.dblTotalWeight) * 100 AS NUMERIC(38,1)) [dblPercentage]
-	,DATEDIFF(DAY, lot.dtmDateCreated, GETDATE()) [intAge]
+	,intAge = DATEDIFF(D, ISNULL(lot.dtmManufacturedDate, lot.dtmDateCreated), GETDATE()) -- Age
 	,wo.intTrialBlendSheetStatusId
 	,woil.strFW
 	,b.dblLandedPrice
 	,b.dblSellingPrice
+	,1 AS intConcurrencyId
 FROM tblMFWorkOrder wo
 INNER JOIN tblMFWorkOrderInputLot woil ON wo.intWorkOrderId = woil.intWorkOrderId
 INNER JOIN tblICLot lot ON lot.intLotId = woil.intLotId
@@ -64,3 +65,4 @@ OUTER APPLY (
 OUTER APPLY (SELECT TOP 1 SUM(dblQuantity) AS dblSumQuantity
 			 FROM tblMFWorkOrderInputLot
 			 WHERE intWorkOrderId = woil.intWorkOrderId) AS WorkOrderInputLotQty
+GO

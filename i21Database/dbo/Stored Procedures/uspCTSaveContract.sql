@@ -63,13 +63,13 @@ BEGIN TRY
 			@ysnRoll				    BIT = 0,
 			@intCostTermId				INT,
 			@ysnCancelledLoad			bit = 0,
-			@intContainerTypeId			INT	;
+			@intContainerTypeId			INT,
+			@ysnEnableOutrightPricing	bit	;
 		
 		DECLARE @xmlDocumentId INT
 		DECLARE @ModifiedSequence TABLE(
 			intContractDetailId INT
-		) 
-
+		);
 
 		IF (isnull(@strXML,'') <> '')
 		BEGIN
@@ -226,7 +226,7 @@ BEGIN TRY
 		, strCertifications
 	FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId
 
-	SELECT @ysnEnableLetterOfCredit = ysnEnableLetterOfCredit, @ysnFeedOnApproval	=	ysnFeedOnApproval, @ysnAutoEvaluateMonth = ysnAutoEvaluateMonth, @ysnBasisComponent = (CASE WHEN @intContractTypeId = 1 THEN ysnBasisComponentPurchase ELSE ysnBasisComponentSales END) FROM tblCTCompanyPreference
+	SELECT @ysnEnableLetterOfCredit = ysnEnableLetterOfCredit, @ysnFeedOnApproval	=	ysnFeedOnApproval, @ysnAutoEvaluateMonth = ysnAutoEvaluateMonth, @ysnBasisComponent = (CASE WHEN @intContractTypeId = 1 THEN ysnBasisComponentPurchase ELSE ysnBasisComponentSales END), @ysnEnableOutrightPricing = ysnEnableOutrightPricing FROM tblCTCompanyPreference
 
 	SELECT	@intContractScreenId=	intScreenId FROM tblSMScreen WHERE strNamespace = 'ContractManagement.view.Contract'
 
@@ -260,11 +260,14 @@ BEGIN TRY
 	WHERE intProducerId IS NULL
 		AND @intProducerId IS NOT NULL
 	
-	UPDATE CD
-	SET dblTotalCost = ROUND(dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity) * CD.dblCashPrice / CASE WHEN CY.ysnSubCurrency = 1 THEN 100 ELSE 1 END,6)
-	FROM @CDTableUpdate CD
-	JOIN tblSMCurrency CY ON CY.intCurrencyID = CD.intCurrencyId
-	WHERE CD.intPricingTypeId IN (1, 6)
+	if not(@intHeaderPricingTypeId = 1 and @ysnEnableOutrightPricing = 1 and @intPricingTypeId = 1)
+	begin
+		UPDATE CD
+		SET dblTotalCost = ROUND(dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity) * CD.dblCashPrice / CASE WHEN CY.ysnSubCurrency = 1 THEN 100 ELSE 1 END,6)
+		FROM @CDTableUpdate CD
+		JOIN tblSMCurrency CY ON CY.intCurrencyID = CD.intCurrencyId
+		WHERE CD.intPricingTypeId IN (1, 6)
+	end
 
 	SELECT	@ErrMsg = COALESCE(@ErrMsg, '') + '#' + LTRIM(CC.strItemNo)  + '@' + LTRIM(CD.intContractSeq) + '^' + CD.strItemUOM + '.' +CHAR(13) + CHAR(10) 
 	FROM	vyuCTContractCostView	CC
@@ -697,7 +700,7 @@ BEGIN TRY
 			begin
 				declare @dblCostsDifferential numeric(18,6);
 				select @dblCostsDifferential = sum(dblRate) from tblCTContractCost where intContractDetailId = @intContractDetailId and ysnBasis = 1;
-				if (isnull(@dblCostsDifferential,0) <> isnull(@dblBasis,0))
+				if (round(isnull(@dblCostsDifferential,0),2) <> round(isnull(@dblBasis,0),2))
 				begin
 					select @ErrMsg = 'The sum of Amount('+convert(nvarchar(20),isnull(@dblCostsDifferential,0.00))+') does not match with the sequence Basis('+convert(nvarchar(20),isnull(@dblBasis,0.00))+').';
 					RAISERROR (@ErrMsg,18,1,'WITH NOWAIT')  

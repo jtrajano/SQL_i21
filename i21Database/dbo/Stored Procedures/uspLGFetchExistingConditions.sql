@@ -8,7 +8,7 @@
 	@intVendorEntityId INT
 AS
 BEGIN
-	SELECT
+	SELECT DISTINCT
 		LC.intLoadConditionId,
 		LC.intConditionId,
 		CTC.strConditionName,
@@ -31,14 +31,14 @@ BEGIN
 			WHEN L.intPurchaseSale = 1 THEN LD.intPContractDetailId
 			WHEN L.intPurchaseSale = 2 THEN LD.intSContractDetailId
 		END
-	INNER JOIN tblCTContractCertification CC ON CC.intContractDetailId = CD.intContractDetailId
+	LEFT JOIN tblCTContractCertification CC ON CC.intContractDetailId = CD.intContractDetailId
 	LEFT JOIN tblCTCondition CTC ON CTC.intConditionId = LC.intConditionId
 	WHERE
 		ICI.intOriginId = @intOriginId AND
 		L.strOriginPort = @strOriginPort AND
 		L.strDestinationPort = @strDestinationPort AND
-		CC.intCertificationId = @intCertificationId AND
 		LD.intVendorEntityId = @intVendorEntityId AND
+		COALESCE(CC.intCertificationId, 1) = CASE WHEN @intCertificationId = 0 THEN COALESCE(CC.intCertificationId, 1) ELSE @intCertificationId END AND
 		COALESCE(L.intShippingLineEntityId, 1) = CASE WHEN @intShippingLineEntityId = 0 THEN COALESCE(L.intShippingLineEntityId, 1) ELSE @intShippingLineEntityId END AND
 		COALESCE(LD.intPSubLocationId, 1) = CASE WHEN @intPSubLocationId = 0 THEN COALESCE(LD.intPSubLocationId, 1) ELSE @intPSubLocationId END AND
 		LC.intConditionId IS NOT NULL

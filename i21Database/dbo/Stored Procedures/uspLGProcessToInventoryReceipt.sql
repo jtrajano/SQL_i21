@@ -207,6 +207,7 @@ BEGIN TRY
 			,[strCostMethod]
 			,[dblRate]
 			,[dblAmount]
+			,[dblQuantity]
 			,[intCostUOMId]
 			,[intContractHeaderId]
 			,[intContractDetailId]
@@ -233,6 +234,7 @@ BEGIN TRY
 							ELSE (CV.[dblShipmentUnitPrice] / LOD.dblQuantityTotal) * LD.dblQuantity
 							END
 			,[dblAmount] = (CV.[dblTotal] / LOD.dblQuantityTotal) * LD.dblQuantity
+			,[dblQuantity] = NULL
 			,[intCostUOMId] = CV.intPriceItemUOMId
 			,[intContractHeaderId] = CD.intContractHeaderId
 			,[intContractDetailId] = LD.intPContractDetailId
@@ -257,17 +259,21 @@ BEGIN TRY
 		JOIN tblSMCurrency CUR ON CUR.intCurrencyID = CV.intCurrencyId
 		LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
 		LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = LD.intVendorEntityId AND EL.ysnDefaultLocation = 1
+		LEFT JOIN tblAPBillDetail VP ON VP.intLoadId = L.intLoadId AND VP.intItemId = CV.intItemId
+		LEFT JOIN tblAPBill AB ON AB.intBillId = VP.intBillId
 		OUTER APPLY (SELECT dblQuantityTotal = SUM(LOD.dblQuantity) FROM tblLGLoadDetail LOD WHERE LOD.intLoadId = L.intLoadId) LOD
-		WHERE CV.intLoadId = @intLoadId
+		OUTER APPLY (SELECT TOP 1 B.intBillId, B.ysnPosted FROM tblAPBill B JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId WHERE BD.intLoadShipmentCostId = CV.intLoadCostId) VCHR
+		WHERE CV.intLoadId = @intLoadId AND ISNULL(AB.intTransactionType, 0) <> 3
 
 		UNION ALL
 
 		SELECT 
 			[intOtherChargeEntityVendorId] = CLSL.intVendorId
 			,[intChargeId] = LWS.intItemId
-			,[strCostMethod] = 'Per Unit'
+			,[strCostMethod] = CASE WHEN ISNULL(WRMD.intCalculateQty, 8) = 8 THEN 'Custom Unit' ELSE 'Per Unit' END -- If Calculate Qty is = 'Manual Entry', pass cost method 'Custom Unit' to the IR charges
 			,[dblRate] = LWS.dblUnitRate
 			,[dblAmount] = LWS.dblActualAmount
+			,[dblQuantity] = CASE WHEN ISNULL(WRMD.intCalculateQty, 8) = 8 THEN LWS.dblQuantity ELSE NULL END
 			,[intCostUOMId] = LWS.intItemUOMId
 			,[intContractHeaderId] = CT.intContractHeaderId
 			,[intContractDetailId] = CT.intContractDetailId
@@ -291,6 +297,7 @@ BEGIN TRY
 		JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = LW.intSubLocationId
 		JOIN tblICItem I ON I.intItemId = LWS.intItemId
 		JOIN tblSMCurrency CUR ON CUR.intCurrencyID = L.intCurrencyId
+		LEFT JOIN tblLGWarehouseRateMatrixDetail WRMD ON WRMD.intWarehouseRateMatrixDetailId = LWS.intWarehouseRateMatrixDetailId
 		OUTER APPLY (SELECT TOP 1 CD.intContractHeaderId, CD.intContractDetailId, 
 						LD.intVendorEntityId, LD.intPCompanyLocationId, EL.intEntityLocationId
 					FROM tblLGLoadDetail LD 
@@ -325,6 +332,7 @@ BEGIN TRY
 			,[intCurrencyId]
 			,[intSourceType]
 			,[strBillOfLadding]
+			,[intSeasonCropYear]
 			)
 		SELECT DISTINCT [intLotId] = NULL
 			,[strLotNumber] = NULL
@@ -350,6 +358,7 @@ BEGIN TRY
 			,[intCurrencyId] = ISNULL(SC.intMainCurrencyId, L.intCurrencyId)
 			,[intSourceType] = 0
 			,[strBillOfLadding] = L.strBLNumber
+			,[intSeasonCropYear] = LD.intCropYearId
 		FROM tblLGLoad L  
 			JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 			JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId AND IL.intLocationId = LD.intPCompanyLocationId 
@@ -893,20 +902,7 @@ BEGIN TRY
 											THEN FX.intForexRateTypeId
 											ELSE LD.intForexRateTypeId END
 										END
-				,[dblForexRate] = CASE --if contract FX tab is setup
-										WHEN AD.ysnValidFX = 1 THEN 
-										CASE WHEN (ISNULL(LSC.intMainCurrencyId, ISNULL(LSC.intCurrencyID, '')) = @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId) 
-												THEN dbo.fnDivide(1, CD.dblRate) --functional price to foreign FX, use inverted contract FX rate
-											WHEN (ISNULL(LSC.intMainCurrencyId, ISNULL(LSC.intCurrencyID, '')) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId = @DefaultCurrencyId)
-												THEN 1 --foreign price to functional FX, use 1
-											WHEN (ISNULL(LSC.intMainCurrencyId, ISNULL(LSC.intCurrencyID, '')) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId)
-												THEN ISNULL(FX.dblFXRate, 1) --foreign price to foreign FX, use master FX rate
-											ELSE ISNULL(LD.dblForexRate,1) END
-										ELSE  --if contract FX tab is not setup
-										CASE WHEN (@DefaultCurrencyId <> ISNULL(SC.intMainCurrencyId, ISNULL(SC.intCurrencyID,''))) 
-											THEN ISNULL(FX.dblFXRate, 1)
-											ELSE ISNULL(LD.dblForexRate,1) END
-										END
+				,[dblForexRate] = ISNULL(LD.dblPFunctionalFxRate, dbo.fnLGGetForexRateFromContract(CD.intContractDetailId))
 				,[intContainerId] = ISNULL(LC.intLoadContainerId, -1)
 				,[intFreightTermId] = L.intFreightTermId
 				,[intBookId] = L.intBookId
@@ -1041,20 +1037,7 @@ BEGIN TRY
 											THEN FX.intForexRateTypeId
 											ELSE LD.intForexRateTypeId END
 										END
-				,[dblForexRate] = CASE --if contract FX tab is setup
-										WHEN AD.ysnValidFX = 1 THEN 
-										CASE WHEN (ISNULL(LSC.intMainCurrencyId, ISNULL(LSC.intCurrencyID, '')) = @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId) 
-												THEN dbo.fnDivide(1, CD.dblRate) --functional price to foreign FX, use inverted contract FX rate
-											WHEN (ISNULL(LSC.intMainCurrencyId, ISNULL(LSC.intCurrencyID, '')) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId = @DefaultCurrencyId)
-												THEN 1 --foreign price to functional FX, use 1
-											WHEN (ISNULL(LSC.intMainCurrencyId, ISNULL(LSC.intCurrencyID, '')) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId)
-												THEN ISNULL(FX.dblFXRate, 1) --foreign price to foreign FX, use master FX rate
-											ELSE ISNULL(LD.dblForexRate,1) END
-										ELSE  --if contract FX tab is not setup
-										CASE WHEN (@DefaultCurrencyId <> ISNULL(SC.intMainCurrencyId, ISNULL(SC.intCurrencyID,''))) 
-											THEN ISNULL(FX.dblFXRate, 1)
-											ELSE ISNULL(LD.dblForexRate,1) END
-										END
+				,[dblForexRate] = ISNULL(LD.dblPFunctionalFxRate, dbo.fnLGGetForexRateFromContract(CD.intContractDetailId))
 				,[intContainerId] = -1
 				,[intFreightTermId] = L.intFreightTermId
 				,[intBookId] = L.intBookId
@@ -1110,6 +1093,7 @@ BEGIN TRY
 			,[strCostMethod]
 			,[dblRate]
 			,[dblAmount]
+			,[dblQuantity]
 			,[intCostUOMId]
 			,[intContractHeaderId]
 			,[intContractDetailId]
@@ -1136,6 +1120,7 @@ BEGIN TRY
 							ELSE (CV.[dblShipmentUnitPrice] / LOD.dblQuantityTotal) * LD.dblQuantity
 							END
 			,[dblAmount] = (CV.[dblTotal] / LOD.dblQuantityTotal) * LD.dblQuantity
+			,[dblQuantity] = NULL
 			,[intCostUOMId] = CV.intPriceItemUOMId
 			,[intContractHeaderId] = CD.intContractHeaderId
 			,[intContractDetailId] = LD.intPContractDetailId
@@ -1163,24 +1148,28 @@ BEGIN TRY
 		LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = AD.intSeqCurrencyId
 		LEFT JOIN tblSMCurrency LSC ON LSC.intCurrencyID = LD.intPriceCurrencyId
 		LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = LD.intVendorEntityId AND EL.ysnDefaultLocation = 1
+		LEFT JOIN tblAPBillDetail VP ON VP.intLoadId = L.intLoadId AND VP.intItemId = CV.intItemId
+		LEFT JOIN tblAPBill AB ON AB.intBillId = VP.intBillId
 		OUTER APPLY (SELECT dblQuantityTotal = SUM(LOD.dblQuantity) FROM tblLGLoadDetail LOD WHERE LOD.intLoadId = L.intLoadId) LOD
-		WHERE CV.intLoadId = @intLoadId
+		OUTER APPLY (SELECT TOP 1 B.intBillId, B.ysnPosted FROM tblAPBill B JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId WHERE BD.intLoadShipmentCostId = CV.intLoadCostId) VCHR
+		WHERE CV.intLoadId = @intLoadId AND ISNULL(AB.intTransactionType, 0) <> 3
 
 		UNION ALL
 
 		SELECT 
 			[intOtherChargeEntityVendorId] = CLSL.intVendorId
 			,[intChargeId] = LWS.intItemId
-			,[strCostMethod] = 'Per Unit'
+			,[strCostMethod] = CASE WHEN ISNULL(WRMD.intCalculateQty, 8) = 8 THEN 'Custom Unit' ELSE 'Per Unit' END -- If Calculate Qty is = 'Manual Entry', pass cost method 'Custom Unit' to the IR charges
 			,[dblRate] = LWS.dblUnitRate
 			,[dblAmount] = LWS.dblActualAmount
+			,[dblQuantity] = CASE WHEN ISNULL(WRMD.intCalculateQty, 8) = 8 THEN LWS.dblQuantity ELSE NULL END
 			,[intCostUOMId] = LWS.intItemUOMId
 			,[intContractHeaderId] = CT.intContractHeaderId
 			,[intContractDetailId] = CT.intContractDetailId
 			,[ysnAccrue] = 1
 			,[strReceiptType] = 'Purchase Contract'
 			,[intShipViaId] = NULL
-			,[intCurrencyId] = L.intCurrencyId
+			,[intCurrencyId] = CT.intCurrencyId
 			,[intEntityVendorId] = CT.intVendorEntityId
 			,[intLocationId] = CT.intPCompanyLocationId
 			,[ysnPrice] = 0
@@ -1197,12 +1186,17 @@ BEGIN TRY
 		JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = LW.intSubLocationId
 		JOIN tblICItem I ON I.intItemId = LWS.intItemId
 		JOIN tblSMCurrency CUR ON CUR.intCurrencyID = L.intCurrencyId
+		LEFT JOIN tblLGWarehouseRateMatrixDetail WRMD ON WRMD.intWarehouseRateMatrixDetailId = LWS.intWarehouseRateMatrixDetailId 
 		OUTER APPLY (SELECT TOP 1 CD.intContractHeaderId, CD.intContractDetailId, 
 						LD.intVendorEntityId, LD.intPCompanyLocationId, EL.intEntityLocationId
+						,[intCurrencyId] = CASE WHEN (AD.ysnValidFX = 1) THEN AD.intSeqCurrencyId ELSE COALESCE(LSC.intMainCurrencyId, LSC.intCurrencyID, SC.intMainCurrencyId, SC.intCurrencyID) END
 					FROM tblLGLoadDetail LD 
 					JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
 					JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 					JOIN tblEMEntityLocation EL ON EL.intEntityId = CH.intEntityId AND EL.ysnDefaultLocation = 1
+					LEFT JOIN vyuLGAdditionalColumnForContractDetailView AD ON AD.intContractDetailId = CD.intContractDetailId
+					LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = AD.intSeqCurrencyId
+					LEFT JOIN tblSMCurrency LSC ON LSC.intCurrencyID = LD.intPriceCurrencyId
 					WHERE intLoadId = @intLoadId) CT
 		WHERE L.intLoadId = @intLoadId
 		
@@ -1235,6 +1229,7 @@ BEGIN TRY
 			,[intProducerId]
 			,[strCertificateId]
 			,[strTrackingNumber]
+			,[intSeasonCropYear]
 			)
 		SELECT DISTINCT [intLotId] = NULL
 			,[strLotNumber] = NULL
@@ -1280,6 +1275,7 @@ BEGIN TRY
 									THEN CC.strTrackingNumber
 									ELSE NULL
 								END
+			,[intSeasonCropYear] = LD.intCropYearId
 		FROM tblLGLoad L 
 		JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 		JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId AND IL.intLocationId = LD.intPCompanyLocationId 

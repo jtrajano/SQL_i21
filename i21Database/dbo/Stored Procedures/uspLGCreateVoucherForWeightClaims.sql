@@ -20,6 +20,7 @@ BEGIN TRY
 	DECLARE @dblNetWeight NUMERIC(18,6)
 	DECLARE @intBillId INT
 	DECLARE @intVoucherType INT
+	DECLARE @ysnWeightClaimsImpactGL INT
 
 	DECLARE @voucherDetailData TABLE 
 		(intWeightClaimRecordId INT Identity(1, 1)
@@ -85,6 +86,9 @@ BEGIN TRY
 		RAISERROR('Please configure ''AP Account'' for the company location.',16,1)
 	END
 
+	SELECT TOP 1 @ysnWeightClaimsImpactGL = ISNULL(ysnWeightClaimsImpactGL, 0) 
+	FROM tblLGCompanyPreference 
+
 	INSERT INTO @voucherDetailData (
 		   intWeightClaimId
 		  ,strReferenceNumber
@@ -121,7 +125,7 @@ BEGIN TRY
 		,intPartyEntityId = WCD.intPartyEntityId
 		,dblNetShippedWeight = WCD.dblFromNet
 		,dblWeightLoss = ABS(WCD.dblWeightLoss)
-		,dblNetWeight = CASE WHEN (strCondition = 'Missing') THEN WCD.dblFromNet ELSE WCD.dblToNet END
+		,dblNetWeight = ABS(WCD.dblClaimableWt) --CASE WHEN (strCondition = 'Missing') THEN WCD.dblFromNet ELSE WCD.dblToNet END
 		,dblFranchiseWeight = CASE WHEN WCD.dblWeightLoss > 0 THEN 0 ELSE WCD.dblFranchiseWt END
 		,dblQtyReceived = (ABS(WCD.dblWeightLoss) - CASE WHEN WCD.dblWeightLoss > 0 THEN 0 ELSE WCD.dblFranchiseWt END)
 		,dblCost = WCD.dblUnitPrice
@@ -356,7 +360,7 @@ BEGIN TRY
 			,[intSubCurrencyCents] = VDD.intSubCurrencyCents
 			,[intAccountId] = dbo.fnGetItemGLAccount(I.intItemId, IL.intItemLocationId, 'AP Clearing')
 			,[ysnReturn] = CAST(CASE WHEN (@intVoucherType = 11) THEN 1 ELSE 0 END AS BIT)
-			,[ysnStage] = CAST(0 AS BIT)
+			,[ysnStage] = @ysnWeightClaimsImpactGL
 			,[intSubLocationId] = VDD.intSubLocationId
 			,[intStorageLocationId] = VDD.intStorageLocationId
 		FROM @voucherDetailData VDD
@@ -409,7 +413,7 @@ BEGIN TRY
 		EXEC uspAPUpdateVoucherTotal @voucherIds
 
 		IF (ISNULL(@intWeightClaimDetailId,0) <> 0)
-			SET @strBillId = ISNULL(@strBillId,'') + CONVERT(NVARCHAR,ISNULL(@intBillId,0))
+			SET @strBillId = ISNULL(@strBillId,'') + ',' + CONVERT(NVARCHAR,ISNULL(@intBillId,0))
 
 		DELETE FROM @voucherPayableToProcess
 		DELETE FROM @voucherIds

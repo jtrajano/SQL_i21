@@ -42,5 +42,6 @@ SELECT SUM(dblWeight)															AS dblTotalWeight
 	 , ISNULL(SUM(dblWeight * dblA) / NULLIF(SUM(dblWeight), 0), 0)				AS dblWAvgA
 	 , ISNULL(SUM(dblWeight * dblV) / NULLIF(SUM(dblWeight), 0), 0)				AS dblWAvgV
 	 , intWorkOrderId
+	 , 1 AS intConcurrencyId
 FROM CTE
 GROUP BY intWorkOrderId

@@ -9,7 +9,7 @@ SELECT		a.intStoreId,
 			(CASE WHEN FORMAT(dbo.fnSTGetCurrentBusinessDay(a.intStoreId), 'd','us') = FORMAT(GETDATE(), 'd','us') THEN 'Current'
 				ELSE FORMAT(dbo.fnSTGetCurrentBusinessDay(a.intStoreId), 'd','us') END) as dtmCurrentBusinessDay,
 			a.ysnConsignmentStore,
-			reg.strStoreAppFileVersion as strStoreAppVersion,
+			a.strStoreAppFileVersion as strStoreAppVersion,
 			ISNULL((
 				SELECT (CASE WHEN ch.ysnPosted = 1 THEN 'Posted' ELSE ch.strCheckoutStatus END) 
 				FROM tblSTCheckoutHeader ch
@@ -37,4 +37,3 @@ LEFT JOIN	(	SELECT		intStoreId,
 													FROM		tblSTSiteStatus
 													GROUP BY	intStoreId)) c
 ON			a.intStoreId = c.intStoreId
-INNER JOIN	vyuSTRegister reg ON a.intStoreId = reg.intStoreId

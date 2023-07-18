@@ -82,21 +82,35 @@ BEGIN TRY
   
 
    
- SELECT  CT.intContractDetailId,   
-   SA.strSampleNumber,  
-   SA.strContainerNumber,  
-   ST.strSampleTypeName,  
-   CT.strSampleStatus,  
-   SA.dtmTestingEndDate,  
-   CT.dblRepresentingQty   
- FROM tblQMSample   SA  
- JOIN tblQMSampleType  ST  ON ST.intSampleTypeId = SA.intSampleTypeId   
- JOIN tblQMSampleStatus SS  ON SS.intSampleStatusId = SA.intSampleStatusId  
- JOIN @contractDetail  CT ON CT.intContractDetailId = SA.intContractDetailId  
- WHERE SA.intTypeId = 1  
- ORDER BY SA.intSampleId DESC  
+ --SELECT  CT.intContractDetailId,   
+ --  SA.strSampleNumber,  
+ --  SA.strContainerNumber,  
+ --  ST.strSampleTypeName,  
+ --  CT.strSampleStatus,  
+ --  SA.dtmTestingEndDate,  
+ --  CT.dblRepresentingQty   
+ --FROM tblQMSample   SA  
+ --JOIN tblQMSampleType  ST  ON ST.intSampleTypeId = SA.intSampleTypeId   
+ --JOIN tblQMSampleStatus SS  ON SS.intSampleStatusId = SA.intSampleStatusId  
+ --JOIN @contractDetail  CT ON CT.intContractDetailId = SA.intContractDetailId  
+ --WHERE SA.intTypeId = 1  
+ --ORDER BY SA.intSampleId DESC  
   
-  
+   
+SELECT MB.intContractDetailId
+	,  '' strSampleNumber
+	,  QS.strContainerNumber
+	,  MB.strSampleTypeName
+	,  CT.strSampleStatus   
+    ,  QS.dtmTestingEndDate   
+	,  Sum(MB.dblPackagesBought) dblPackagesBought
+FROM vyuMFBatch MB
+INNER JOIN tblQMSample QS ON QS.strSampleNumber = MB.strSampleNumber
+JOIN tblQMSampleStatus SS  ON SS.intSampleStatusId = QS.intSampleStatusId  
+JOIN @contractDetail  CT ON CT.intContractDetailId = QS.intContractDetailId   
+  WHERE QS.intTypeId = 1    
+  GROUP BY MB.intContractDetailId, QS.strContainerNumber, MB.strSampleTypeName, CT.strSampleStatus  , QS.dtmTestingEndDate    
+
   
 END TRY  
 BEGIN CATCH  

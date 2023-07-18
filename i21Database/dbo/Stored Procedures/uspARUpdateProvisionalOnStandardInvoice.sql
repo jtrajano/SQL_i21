@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspARUpdateProvisionalOnStandardInvoice]  
+﻿CREATE PROCEDURE [dbo].[uspARUpdateProvisionalOnStandardInvoice]
 	 @InvoiceId		INT   
 	,@ForDelete		BIT = 0
 	,@UserId		INT = NULL     
@@ -52,8 +52,7 @@ WHERE [intInvoiceId] IN (SELECT [intInvoiceId] FROM @InvoiceIds)
   )
 	
 UPDATE ARI	
-SET ARI.[dblProvisionalAmount]		= PRO.[dblInvoiceTotal]
-  , ARI.[dblBaseProvisionalAmount]	= PRO.[dblBaseInvoiceTotal]
+SET ARI.[dblProvisionalAmount]		= PRO.dblProvisionalTotal
   , ARI.[ysnExcludeFromPayment]		= ISNULL(@ysnExcludeFromPayment, 0)
   , ARI.[ysnProvisionalWithGL]     	= PRO.[ysnProvisionalWithGL]
   , ARI.[strComments]				= CASE WHEN (PRO.[dblInvoiceTotal] > ARI.[dblInvoiceTotal] AND ISNULL(@ysnExcludeFromPayment, 0) = 1) 

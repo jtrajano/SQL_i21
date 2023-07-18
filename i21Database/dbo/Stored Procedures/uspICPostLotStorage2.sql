@@ -13,6 +13,7 @@ CREATE PROCEDURE [dbo].[uspICPostLotStorage]
 	,@dblQty AS NUMERIC(38,20)
 	,@dblUOMQty AS NUMERIC(38,20)
 	,@dblCost AS NUMERIC(38,20)
+	,@dblForexCost AS NUMERIC(38,20)	
 	,@dblSalesPrice AS NUMERIC(18,6)
 	,@intCurrencyId AS INT
 	--,@dblExchangeRate AS NUMERIC(38,20)
@@ -60,6 +61,7 @@ DECLARE @CostUsed AS NUMERIC(38,20);
 DECLARE @FullQty AS NUMERIC(38,20);
 DECLARE @QtyOffset AS NUMERIC(38,20);
 DECLARE @TotalQtyOffset AS NUMERIC(38,20);
+DECLARE @ForexCostUsed AS NUMERIC(38,20);
 
 DECLARE @InventoryTransactionIdentityId AS INT
 
@@ -118,6 +120,7 @@ BEGIN
 
 				-- Get the unit cost. 
 				SET @dblCost = dbo.fnCalculateUnitCost(@dblCost, @dblUOMQty)
+				SET @dblForexCost = dbo.fnCalculateUnitCost(@dblForexCost, @dblUOMQty)
 
 				-- Adjust the Unit Qty 
 				SELECT @dblUOMQty = dblUnitQty
@@ -126,6 +129,7 @@ BEGIN
 
 				-- Adjust the cost to the new UOM
 				SET @dblCost = @dblCost * @dblUOMQty
+				SET @dblForexCost = @dblForexCost * @dblUOMQty
 			END 
 		END 
 
@@ -150,6 +154,11 @@ BEGIN
 				,@CostUsed OUTPUT 
 				,@QtyOffset OUTPUT 
 				,@UpdatedInventoryLotId OUTPUT 
+				,@intCurrencyId 
+				,@intForexRateTypeId 
+				,@dblForexRate 
+				,@dblForexCost 
+				,@ForexCostUsed OUTPUT 
 
 			IF @intReturnValue < 0 RETURN @intReturnValue;
 
@@ -157,6 +166,7 @@ BEGIN
 			-- Get the cost used. It is usually the cost from the cost bucket or the last cost. 
 			DECLARE @dblReduceStockQty AS NUMERIC(38,20) = ISNULL(-@QtyOffset, @dblReduceQty - ISNULL(@RemainingQty, 0))
 			DECLARE @dblCostToUse AS NUMERIC(38,20) = ISNULL(@CostUsed, @dblCost)
+			DECLARE @dblForexCostToUse AS NUMERIC(38,20) = ISNULL(@ForexCostUsed, @dblForexCost)
 
 			EXEC @intReturnValue = [dbo].[uspICPostInventoryTransactionStorage]
 					@intItemId = @intItemId
@@ -168,6 +178,7 @@ BEGIN
 					,@dblQty = @dblReduceStockQty
 					,@dblUOMQty = @dblUOMQty
 					,@dblCost = @dblCostToUse
+					,@dblForexCost = @dblForexCostToUse
 					,@dblValue = NULL
 					,@dblSalesPrice = @dblSalesPrice
 					,@intCurrencyId = @intCurrencyId
@@ -283,6 +294,7 @@ BEGIN
 
 				-- Get the unit cost. 
 				SET @dblCost = dbo.fnCalculateUnitCost(@dblCost, @dblUOMQty)
+				SET @dblForexCost = dbo.fnCalculateUnitCost(@dblForexCost, @dblUOMQty)
 
 				-- Adjust the Unit Qty 
 				SELECT @dblUOMQty = dblUnitQty
@@ -291,6 +303,7 @@ BEGIN
 
 				-- Adjust the cost to the new UOM
 				SET @dblCost = @dblCost * @dblUOMQty
+				SET @dblForexCost = @dblForexCost * @dblUOMQty
 			END 
 		END 
 						
@@ -308,6 +321,7 @@ BEGIN
 				,@dblQty = @FullQty
 				,@dblUOMQty = @dblUOMQty
 				,@dblCost = @dblCost
+				,@dblForexCost = @dblForexCost
 				,@dblValue = NULL
 				,@dblSalesPrice = @dblSalesPrice
 				,@intCurrencyId = @intCurrencyId
@@ -362,6 +376,11 @@ BEGIN
 				,@UpdatedInventoryLotId OUTPUT 
 				,@strRelatedTransactionId OUTPUT
 				,@intRelatedTransactionId OUTPUT 
+				,@intCurrencyId 
+				,@intForexRateTypeId 
+				,@dblForexRate 
+				,@dblForexCost 
+				,@ForexCostUsed OUTPUT
 
 			IF @intReturnValue < 0 RETURN @intReturnValue;
 
@@ -404,6 +423,7 @@ BEGIN
 							,@dtmDate = @dtmDate
 							,@dblQty = 0
 							,@dblCost = 0
+							,@dblForexCost = 0
 							,@dblUOMQty = 0
 							,@dblValue = @dblAutoVarianceOnUsedOrSoldStock
 							,@dblSalesPrice = @dblSalesPrice
@@ -491,6 +511,7 @@ BEGIN
 							, Lot.dblWeightPerQty
 						)
 					,Lot.dblLastCost = dbo.fnCalculateUnitCost(@dblCost, @dblUOMQty) 
+					,Lot.dblLastForexCost = dbo.fnCalculateUnitCost(@dblForexCost, @dblUOMQty) 
 			FROM	dbo.tblICLot Lot
 			WHERE	Lot.intItemLocationId = @intItemLocationId
 					AND Lot.intLotId = @intLotId

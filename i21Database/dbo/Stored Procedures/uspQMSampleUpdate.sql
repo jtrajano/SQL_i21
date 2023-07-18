@@ -53,10 +53,13 @@ BEGIN TRY
   ,@ysnMultipleContractSeq BIT  
  DECLARE @intOrgSampleTypeId INT  
   ,@intOrgItemId INT  
+  ,@intOrginalSampleItemId INT  
   ,@intOrgCountryID INT  
   ,@intOrgCompanyLocationSubLocationId INT  
   ,@intRelatedSampleId INT  
   ,@intCurrentRelatedSampleId INT  
+
+ DECLARE @intDefaultItemId INT
 
  DECLARE @intCountryID INT
   
@@ -123,6 +126,10 @@ DECLARE @ysnSuccess BIT
     ,1  
     )  
  END  
+
+ SELECT @intOrginalSampleItemId = intItemId
+ FROM tblQMSample
+ WHERE intSampleId = @intSampleId
   
  -- Quantity Check  
  IF ISNULL(@intSampleUOMId, 0) > 0  
@@ -1149,6 +1156,27 @@ DECLARE @ysnSuccess BIT
 IF EXISTS (SELECT 1 FROM tblQMCompanyPreference WHERE ysnCreateBatchOnSampleSave = 1)
 -- AND EXISTS (SELECT 1 FROM tblQMSample WHERE intSampleId = @intSampleId AND ((ISNULL(dblB1QtyBought, 0) <> 0 AND ISNULL(dblB1Price, 0) <> 0) OR ISNULL(intContractDetailId, 0) <> 0))
 BEGIN
+
+-- if it is AUC then trigger BUYER1 validation
+  IF EXISTS (
+          SELECT 1 
+          FROM tblQMSample S
+          INNER JOIN tblARMarketZone MZ ON MZ.intMarketZoneId = S.intMarketZoneId
+          WHERE ISNULL(intContractDetailId, 0) = 0 AND MZ.strMarketZoneCode = 'AUC'
+          AND S.intSampleId = @intSampleId
+  )
+  BEGIN  
+      IF EXISTS (SELECT 1 FROM tblQMSample S WHERE S.intSampleId = @intSampleId AND S.dblB1QtyBought > S.dblRepresentingQty)
+      BEGIN  
+          RAISERROR ('Buyer 1 Qty cannot be greater than Quantity. ', 16, 1)  
+      END  
+  
+      IF EXISTS (SELECT 1 FROM tblQMSample S WHERE S.intSampleId = @intSampleId AND S.intB1QtyUOMId <> S.intRepresentingUOMId)
+      BEGIN  
+          RAISERROR ('Buyer 1 Qty UOM should be the same as Quantity UOM. ', 16, 1)  
+      END 
+  END
+
   IF EXISTS(
     SELECT 1
     FROM tblQMSample S
@@ -1336,11 +1364,11 @@ BEGIN
       ,strAWBSampleReference = S.strAWBSampleReference
       ,dblBasePrice = CASE WHEN CD.intContractDetailId IS NULL THEN S.dblB1Price ELSE CD.dblCashPrice END
       ,ysnBoughtAsReserved = S.ysnBoughtAsReserve
-      ,dblBoughtPrice = CASE WHEN CD.intContractDetailId IS NULL THEN S.dblB1Price ELSE CD.dblCashPrice END
+      ,dblBoughtPrice = ISNULL(CASE WHEN CD.intContractDetailId IS NULL THEN S.dblB1Price ELSE CD.dblCashPrice END, BT.dblBoughtPrice)
       ,dblBulkDensity = BT.dblBulkDensity
       ,strBuyingOrderNumber = CASE WHEN CD.intContractDetailId IS NULL THEN S.strBuyingOrderNo ELSE CH.strExternalContractNumber END
       ,intSubBookId = S.intSubBookId
-      ,strContainerNumber = S.strContainerNumber
+      ,strContainerNumber = BT.strContainerNumber
       ,intCurrencyId = S.intCurrencyId
       ,dtmProductionBatch = S.dtmManufacturingDate
       ,dtmTeaAvailableFrom = BT.dtmTeaAvailableFrom
@@ -1408,11 +1436,15 @@ BEGIN
           THEN NULL
         ELSE CAST(TASTE.strPropertyValue AS NUMERIC(18, 6))
         END
-      ,dblTeaVolume = BT.dblTeaVolume
+      ,dblTeaVolume = CASE 
+        WHEN ISNULL(Volume.strPropertyValue, '') = ''
+          THEN ISNULL(I.dblBlendWeight, BT.dblTeaVolume)
+        ELSE CAST(Volume.strPropertyValue AS NUMERIC(18, 6))
+        END
       ,intTealingoItemId = S.intItemId
       ,dtmWarehouseArrival = BT.dtmWarehouseArrival
       ,intYearManufacture = Datepart(YYYY,S.dtmManufacturingDate)
-      ,strPackageSize = PT.strUnitMeasure
+      ,strPackageSize = ISNULL(PT.strUnitMeasure,BT.strPackageSize)
       ,intPackageUOMId = CASE WHEN CD.intContractDetailId IS NULL THEN S.intNetWtPerPackagesUOMId ELSE S.intRepresentingUOMId END
       ,dblTareWeight = S.dblTareWeight
       ,strTaster = BT.strTaster
@@ -1587,6 +1619,35 @@ BEGIN
         ,@strBatchId OUTPUT
         ,0
 
+      /* Update Load detail for non-auction sample */
+      IF EXISTS(
+        SELECT 1 FROM tblQMSample S
+        INNER JOIN tblARMarketZone MZ ON MZ.intMarketZoneId = S.intMarketZoneId
+        WHERE intSampleId = @intSampleId AND ISNULL(intContractDetailId, 0) <> 0 AND MZ.strMarketZoneCode <> 'AUC'
+      )
+      BEGIN
+        IF EXISTS (
+          SELECT 1
+          FROM tblQMSample S
+          INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = S.intContractDetailId
+          WHERE S.intItemId <> CD.intItemId
+          AND S.intSampleId = @intSampleId
+        )
+          RAISERROR('Item No. should match the item in the contract sequence.', 16, 1)
+        
+        DECLARE @intBatchToUpdateId INT
+
+				SELECT @intBatchToUpdateId = intBatchId
+				FROM tblMFBatch B
+				INNER JOIN tblQMSample S ON S.strBatchNo = B.strBatchId AND S.intLocationId = B.intLocationId
+				WHERE S.intSampleId = @intSampleId
+        AND B.intLocationId = B.intBuyingCenterLocationId
+
+        EXEC uspQMUpdateLoadShipmentDetail
+          @intBatchToUpdateId
+          ,@intLastModifiedUserId
+      END
+
       UPDATE tblQMSample
       SET strBatchNo = @strBatchId
       WHERE intSampleId = @intSampleId
@@ -1632,6 +1693,30 @@ BEGIN
 								,@intUserId = @intLastModifiedUserId
 								,@intOriginalItemId = @intOriginalItemId
 								,@intItemId = @intItemId
+
+        SELECT TOP 1 @intDefaultItemId = intDefaultItemId FROM tblQMCatalogueImportDefaults
+
+        IF @intItemId <> @intOrginalSampleItemId AND @intItemId <> @intDefaultItemId AND @intOrginalSampleItemId <> @intDefaultItemId
+          AND EXISTS(SELECT 1 FROM tblICLot WHERE strLotNumber=@strBatchId and intItemId <> @intItemId)
+        BEGIN
+          DECLARE
+            @dtmCurrentDate DATETIME
+            ,@strNewLotNumber	nvarchar(50)
+
+          SELECT @dtmCurrentDate = Convert(CHAR, GETDATE(), 101)
+          SELECT @intLotId=NULL
+          SELECT @intLotId=intLotId FROM tblICLot WHERE strLotNumber=@strBatchId
+          EXEC dbo.uspMFLotItemChange @intLotId =@intLotId
+                  ,@intNewItemId = @intItemId
+                  ,@intUserId = @intLastModifiedUserId
+                  ,@strNewLotNumber  = @strNewLotNumber OUTPUT
+                  ,@dtmDate =@dtmCurrentDate
+                  ,@strReasonCode  = NULL
+                  ,@strNotes  = NULL
+                  ,@ysnBulkChange  = 0
+                  ,@ysnProducedItemChange  = 0
+                  ,@dblPhysicalCount  = NULL
+        END
 			END			
     END
   END

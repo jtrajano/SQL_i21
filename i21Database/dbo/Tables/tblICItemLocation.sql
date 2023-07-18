@@ -78,6 +78,7 @@ Type the overview for the table here.
 		[strStorageUnitNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 		[intCostAdjustmentType] TINYINT NULL, 
 		[ysnActive] BIT NULL DEFAULT ((1)),
+		[intAvailableQtyFormulaId] TINYINT NULL, 
 		[intSort] INT NULL,
 		[intConcurrencyId] INT NULL DEFAULT ((0)),
 		[dtmDateCreated] DATETIME NULL,

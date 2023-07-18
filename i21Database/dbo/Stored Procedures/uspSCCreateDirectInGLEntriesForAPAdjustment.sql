@@ -137,7 +137,7 @@ BEGIN
 		SELECT	
 			dtmDate						= A.dtmTicketDateTime
 			,strBatchId					= @strBatchId
-			,intAccountId				= @intInventoryInTransitAccountId
+			,intAccountId				= isnull(@intInventoryInTransitAccountId,@intInventoryInTransitDirectAccountId)
 			,dblDebit					= CASE WHEN B.dblAmount < 0 THEN 0 ELSE ABS(B.dblAmount) END
 			,dblCredit					= CASE WHEN B.dblAmount < 0 THEN ABS(B.dblAmount) ELSE 0 END
 			,dblDebitUnit				= CASE WHEN B.dblAmount < 0 THEN 0 ELSE ABS(B.dblUnit) END
@@ -173,7 +173,7 @@ BEGIN
 			SELECT TOP 1
 				strDescription
 			FROM tblGLAccount
-			WHERE intAccountId = @intInventoryInTransitAccountId
+			WHERE intAccountId = isnull(@intInventoryInTransitAccountId,@intInventoryInTransitDirectAccountId)
 		) GLAccount
 		WHERE A.intTicketId = @TICKET_ID 
 			AND B.dblAmount != 0

@@ -164,7 +164,7 @@ SELECT
     ,[strPaymentMethod]                 = CASE WHEN LEN(RTRIM(LTRIM(ISNULL(ARP.[strPaymentMethod],'')))) > 0 THEN RTRIM(LTRIM(ARP.[strPaymentMethod])) ELSE RTRIM(LTRIM(ISNULL(SMPM.[strPaymentMethod],''))) END
     ,[strNotes]                         = ARP.[strNotes]
 	,[intExchangeRateTypeId]			= ARP.[intCurrencyExchangeRateTypeId]
-	,[dblExchangeRate]					= ARP.[dblExchangeRate]
+	,[dblExchangeRate]					= ISNULL(ARP.[dblExchangeRate], 1)
     ,[dtmDatePaid]                      = ARP.[dtmDatePaid]
     ,[dtmPostDate]                      = @PostDate
     ,[intWriteOffAccountId]             = ISNULL(ARP.[intWriteOffAccountId], @WriteOffAccount)
@@ -190,9 +190,9 @@ SELECT
     ,[ysnApplytoBudget]                 = ARP.[ysnApplytoBudget]
 
     ,[dblAmountPaid]                    = ARP.[dblAmountPaid]
-    ,[dblBaseAmountPaid]                = ROUND(ARP.[dblAmountPaid] * ARP.[dblExchangeRate], [dbo].[fnARGetDefaultDecimal]())
+    ,[dblBaseAmountPaid]                = ROUND(ARP.[dblAmountPaid] * ARP.[dblExchangeRate], dbo.fnARGetDefaultDecimal())
     ,[dblUnappliedAmount]               = ARP.[dblUnappliedAmount]
-    ,[dblBaseUnappliedAmount]           = ROUND(ARP.[dblUnappliedAmount] * ARP.[dblExchangeRate], [dbo].[fnARGetDefaultDecimal]())
+    ,[dblBaseUnappliedAmount]           = ROUND(ARP.[dblUnappliedAmount] * ARP.[dblExchangeRate], dbo.fnARGetDefaultDecimal())
     ,[dblPayment]                       = @ZeroDecimal
     ,[dblBasePayment]                   = @ZeroDecimal
     ,[dblDiscount]                      = @ZeroDecimal
@@ -225,7 +225,7 @@ SELECT
     ,[dblTransactionAmountDue]          = @ZeroDecimal
     ,[dblBaseTransactionAmountDue]      = @ZeroDecimal
     ,[intCurrencyExchangeRateTypeId]    = ARP.intCurrencyExchangeRateTypeId
-    ,[dblCurrencyExchangeRate]          = @ZeroDecimal
+    ,[dblCurrencyExchangeRate]          = @OneDecimal
     ,[strRateType]                      = ISNULL(SMCER.[strCurrencyExchangeRateType], '')
     ,[ysnUserDefinedPaymentMethod]      = ISNULL(SMPM.[ysnUserDefined], 0)
     ,[intPaymentMethodAccountId]        = ISNULL(SMPM.[intAccountId], 0)
@@ -386,7 +386,7 @@ SELECT
     ,[strPaymentMethod]                 = CASE WHEN LEN(RTRIM(LTRIM(ISNULL(ARP.[strPaymentMethod],'')))) > 0 THEN RTRIM(LTRIM(ARP.[strPaymentMethod])) ELSE RTRIM(LTRIM(ISNULL(SMPM.[strPaymentMethod],''))) END
     ,[strNotes]                         = ARP.[strNotes]
 	,[intExchangeRateTypeId]			= ARP.[intCurrencyExchangeRateTypeId]
-	,[dblExchangeRate]					= ARP.[dblExchangeRate]
+	,[dblExchangeRate]					= ISNULL(ARP.[dblExchangeRate], 1)
     ,[dtmDatePaid]                      = ARP.[dtmDatePaid]
     ,[dtmPostDate]                      = @PostDate
     ,[intWriteOffAccountId]             = ISNULL(ARP.[intWriteOffAccountId], @WriteOffAccount)
@@ -444,7 +444,7 @@ SELECT
     ,[dblTransactionAmountDue]          = @ZeroDecimal
     ,[dblBaseTransactionAmountDue]      = @ZeroDecimal
     ,[intCurrencyExchangeRateTypeId]    = ARP.intCurrencyExchangeRateTypeId
-    ,[dblCurrencyExchangeRate]          = @ZeroDecimal
+    ,[dblCurrencyExchangeRate]          = @OneDecimal
     ,[strRateType]                      = ISNULL(SMCER.[strCurrencyExchangeRateType], '')
     
 FROM
@@ -587,7 +587,7 @@ SELECT
     ,[strPaymentMethod]                 = CASE WHEN LEN(RTRIM(LTRIM(ISNULL(ARP.[strPaymentMethod],'')))) > 0 THEN RTRIM(LTRIM(ARP.[strPaymentMethod])) ELSE RTRIM(LTRIM(ISNULL(SMPM.[strPaymentMethod],''))) END
     ,[strNotes]                         = ARP.[strNotes]
 	,[intExchangeRateTypeId]			= ARP.[intCurrencyExchangeRateTypeId]
-	,[dblExchangeRate]					= ARP.[dblExchangeRate]
+	,[dblExchangeRate]					= ISNULL(ARP.[dblExchangeRate], 1)
     ,[dtmDatePaid]                      = ARP.[dtmDatePaid]
     ,[dtmPostDate]                      = @PostDate
     ,[intWriteOffAccountId]             = ISNULL(P.[intWriteOffAccountId], ISNULL(ARP.[intWriteOffAccountId], @WriteOffAccount))
@@ -648,7 +648,7 @@ SELECT
     ,[dblTransactionAmountDue]          = @ZeroDecimal
     ,[dblBaseTransactionAmountDue]      = @ZeroDecimal
     ,[intCurrencyExchangeRateTypeId]    = ARP.intCurrencyExchangeRateTypeId
-    ,[dblCurrencyExchangeRate]          = @ZeroDecimal
+    ,[dblCurrencyExchangeRate]          = @OneDecimal
     ,[strRateType]                      = ISNULL(SMCER.[strCurrencyExchangeRateType], '')
     
 FROM
@@ -795,7 +795,7 @@ SELECT
     ,[strPaymentMethod]                 = ARP.[strPaymentMethod]
     ,[strNotes]                         = ARP.[strNotes]
 	,[intExchangeRateTypeId]			= ARP.[intCurrencyExchangeRateTypeId]
-	,[dblExchangeRate]					= ARP.[dblExchangeRate]
+	,[dblExchangeRate]					= ISNULL(ARP.[dblExchangeRate], 1)
     ,[dtmDatePaid]                      = CAST(ARP.[dtmDatePaid] AS DATE)
     ,[dtmPostDate]                      = ARP.[dtmPostDate]
     ,[intWriteOffAccountId]             = ARP.[intWriteOffAccountId]
@@ -868,7 +868,7 @@ SELECT
     ,[dblTransactionPayment]			= ARI.[dblPayment]
     ,[dblBaseTransactionPayment]		= ROUND(ARI.[dblPayment] * ARI.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
  	,[intCurrencyExchangeRateTypeId]    = ARPD.[intCurrencyExchangeRateTypeId]
-    ,[dblCurrencyExchangeRate]          = ARPD.[dblCurrencyExchangeRate]
+    ,[dblCurrencyExchangeRate]          = ISNULL(ARPD.[dblCurrencyExchangeRate], 1)
     ,[strRateType]                      = ISNULL(SMCER.[strCurrencyExchangeRateType], '')
 FROM
     tblARPaymentDetail ARPD
@@ -1067,7 +1067,7 @@ SELECT
     ,[dblTransactionPayment]			= @ZeroDecimal
     ,[dblBaseTransactionPayment]		= @ZeroDecimal
  	,[intCurrencyExchangeRateTypeId]    = ARPD.[intCurrencyExchangeRateTypeId]
-    ,[dblCurrencyExchangeRate]          = ARPD.[dblCurrencyExchangeRate]
+    ,[dblCurrencyExchangeRate]          = ISNULL(ARPD.[dblCurrencyExchangeRate], 1)
     ,[strRateType]                      = ISNULL(SMCER.[strCurrencyExchangeRateType], '') 
 FROM tblARPaymentDetail ARPD
 INNER JOIN #ARPostPaymentHeader ARP ON ARPD.[intPaymentId] = ARP.[intTransactionId]

@@ -1,4 +1,4 @@
-﻿-- This function returns the total allocated other charge per 
+﻿-- This function returns the item cost based on the other charge-item allocation. 
 CREATE FUNCTION [dbo].[fnGetOtherChargesFromInventoryReceipt] ( 
 	@intInventoryReceiptItemId AS INT
 	,@intStockUOMId AS INT = NULL 
@@ -11,20 +11,48 @@ BEGIN
 			,@intFunctionalCurrencyId AS INT 
 			,@intItemUOMId AS INT 
 			,@intItemId AS INT 
+			,@intReceiptCurrencyId AS INT 
+			,@dblForexRate AS NUMERIC(38, 20) 
 
 	-- Get the functional currency. 
 	BEGIN 
 		SET @intFunctionalCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
 	END 
 
+	-- Get the receipt currency. 
+	BEGIN 
+		SELECT TOP 1 
+			@intReceiptCurrencyId = r.intCurrencyId
+			,@dblForexRate = ISNULL(NULLIF(ri.dblForexRate, 0), 1) 
+		FROM 
+			tblICInventoryReceiptItem ri INNER JOIN tblICInventoryReceipt r 
+				ON ri.intInventoryReceiptId = r.intInventoryReceiptId 
+		WHERE ri.intInventoryReceiptItemId = @intInventoryReceiptItemId
+	END 
+
+
 	SELECT	@totalOtherCharges = SUM(
 				ROUND(
 					CASE 
-						WHEN ISNULL(Charge.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(Charge.dblForexRate, 0) <> 0 THEN 
-							-- Other charge is using a foreign currency. Convert the other charge to functional currency. 
-							dbo.fnMultiply(
-								CASE WHEN ItemOtherCharges.ysnPrice = 1 THEN -ItemOtherCharges.dblAmount ELSE ItemOtherCharges.dblAmount END 
-								, ISNULL(Charge.dblForexRate, 0)
+						-- Other Charge shares the same currency with the detail item. 
+						WHEN ISNULL(Charge.intCurrencyId, @intFunctionalCurrencyId) = @intReceiptCurrencyId THEN 
+							-- No conversion required. Other charges shares the same currency with the item.
+							CASE WHEN ItemOtherCharges.ysnPrice = 1 THEN -ItemOtherCharges.dblAmount ELSE ItemOtherCharges.dblAmount END 
+
+						-- Other charge is a different currency compared to the currency at the receipt item. 
+						-- 1. Convert the other charge to functional currency. 
+						-- 2. Then convert the amount in functional currency to the item currency. 
+						WHEN 
+							--ISNULL(Charge.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId 
+							ISNULL(Charge.intCurrencyId, @intFunctionalCurrencyId) <> @intReceiptCurrencyId
+							--AND ISNULL(Charge.dblForexRate, 0) <> 0 							
+						THEN
+							dbo.fnDivide (							
+								dbo.fnMultiply(
+									CASE WHEN ItemOtherCharges.ysnPrice = 1 THEN -ItemOtherCharges.dblAmount ELSE ItemOtherCharges.dblAmount END 
+									, ISNULL(NULLIF(Charge.dblForexRate, 0), 1)
+								) 
+								, @dblForexRate
 							) 
 						ELSE 
 							-- No conversion. Other charge is already in functional currency. 
@@ -39,6 +67,7 @@ BEGIN
 				ON Charge.intInventoryReceiptChargeId = ItemOtherCharges.intInventoryReceiptChargeId
 	WHERE	ReceiptItems.intInventoryReceiptItemId = @intInventoryReceiptItemId
 			AND ItemOtherCharges.ysnInventoryCost = 1
+
 
 	SELECT	@units = 
 					CASE	WHEN ri.intWeightUOMId IS NOT NULL THEN ISNULL(AggregrateItemLots.dblTotalNet, ri.dblNet)

@@ -1,62 +1,67 @@
-﻿CREATE PROCEDURE uspMFPostWorkOrder (@strXML NVARCHAR(MAX))
+﻿CREATE PROCEDURE uspMFPostWorkOrder 
+(
+	@strXML NVARCHAR(MAX)
+)
 AS
 SET ANSI_WARNINGS ON
 
 BEGIN TRY
-	DECLARE @idoc INT
-		,@ErrMsg NVARCHAR(MAX)
-		,@dblProduceQty NUMERIC(38, 20)
-		,@intItemUOMId INT
-		,@strRetBatchId NVARCHAR(40)
-		,@intBatchId INT
-		,@intWorkOrderId INT
-		,@ysnNegativeQtyAllowed BIT
-		,@intUserId INT
-		,@dtmCurrentDateTime DATETIME
-		,@intTransactionCount INT
-		,@intAttributeId INT
-		,@strYieldAdjustmentAllowed NVARCHAR(50)
-		,@ysnExcessConsumptionAllowed INT
-		,@intManufacturingProcessId INT
-		,@intLocationId INT
-		,@strInstantConsumption NVARCHAR(50)
-		,@intSubLocationId INT
-		,@intManufacturingCellId INT
-		,@intItemId INT
-		,@intCategoryId INT
-		,@dblPhysicalCount DECIMAL(38, 24)
-		,@intPhysicalItemUOMId INT
-		,@str3rdPartyPalletsMandatory NVARCHAR(50)
-		,@str3rdPartyPalletsItemId NVARCHAR(MAX)
-		,@dblProduceQty1 DECIMAL(38, 24)
-		,@dblPhysicalCount1 DECIMAL(38, 24)
-		,@intItemUOMId1 INT
-		,@intPhysicalItemUOMId1 INT
-		,@intYieldCostId INT
-		,@strYieldCostValue NVARCHAR(50)
-		,@ysnPostGL BIT
-		,@dblOtherCharges DECIMAL(38, 24)
-		,@intWOItemUOMId INT
-		,@intUnitMeasureId INT
-		,@ysnCostEnabled BIT
-		,@strOriginalPostedDate NVARCHAR(50)
-		,@dtmProductionDate DATETIME
-		,@strWorkOrderNo NVARCHAR(50)
-		,@dblNewValue NUMERIC(38, 20)
-		,@dblVariance NUMERIC(38, 20)
-		,@intTransactionDetailId INT
-		,@strConsumeSourceLocation NVARCHAR(50)
-		,@intRecipeId INT
-		,@dblQuantity NUMERIC(38, 20)
-	DECLARE @dtmDate DATETIME = Convert(DATE, GetDate())
-	DECLARE @intDayOfYear INT = DATEPART(dy, @dtmDate)
-	DECLARE @tblItem TABLE (
-		intRowNo INT Identity(1, 1)
-		,intItemId INT
-		,dblReqQty NUMERIC(38, 20)
-		,dblUpperToleranceQty NUMERIC(38, 20)
-		,dblLowerToleranceQty NUMERIC(38, 20)
-		)
+	DECLARE @idoc							INT
+		  , @ErrMsg							NVARCHAR(MAX)
+		  , @dblProduceQty					NUMERIC(38, 20)
+		  , @intItemUOMId					INT
+		  , @strRetBatchId					NVARCHAR(40)
+		  , @intBatchId						INT
+		  , @intWorkOrderId					INT
+		  , @ysnNegativeQtyAllowed			BIT
+		  , @intUserId						INT
+		  , @dtmCurrentDateTime				DATETIME
+		  , @intTransactionCount			INT
+		  , @intAttributeId					INT
+		  , @strYieldAdjustmentAllowed		NVARCHAR(50)
+		  , @ysnExcessConsumptionAllowed	INT
+		  , @intManufacturingProcessId		INT
+		  , @intLocationId					INT
+		  , @strInstantConsumption			NVARCHAR(50)
+		  , @intSubLocationId				INT
+		  , @intManufacturingCellId			INT
+		  , @intItemId						INT
+		  , @intCategoryId					INT
+		  , @dblPhysicalCount				DECIMAL(38, 24)
+		  , @intPhysicalItemUOMId			INT
+		  , @str3rdPartyPalletsMandatory	NVARCHAR(50)
+		  , @str3rdPartyPalletsItemId		NVARCHAR(MAX)
+		  , @dblProduceQty1					DECIMAL(38, 24)
+		  , @dblPhysicalCount1				DECIMAL(38, 24)
+		  , @intItemUOMId1					INT
+		  , @intPhysicalItemUOMId1			INT
+		  , @intYieldCostId					INT
+		  , @strYieldCostValue				NVARCHAR(50)
+		  , @ysnPostGL						BIT
+		  , @dblOtherCharges				DECIMAL(38, 24)
+		  , @intWOItemUOMId					INT
+		  , @intUnitMeasureId				INT
+		  , @ysnCostEnabled					BIT
+		  , @strOriginalPostedDate			NVARCHAR(50)
+		  , @dtmProductionDate				DATETIME
+		  , @strWorkOrderNo					NVARCHAR(50)
+		  , @dblNewValue					NUMERIC(38, 20)
+		  , @dblVariance					NUMERIC(38, 20)
+		  , @intTransactionDetailId			INT
+		  , @strConsumeSourceLocation		NVARCHAR(50)
+		  , @intRecipeId					INT
+		  , @dblQuantity					NUMERIC(38, 20)
+		  , @dtmDate						DATETIME = CONVERT(DATE, GETDATE())
+		  , @intDayOfYear					INT = DATEPART(dy, CONVERT(DATE, GETDATE()))
+
+	DECLARE @tblItem TABLE 
+	(
+		intRowNo				INT IDENTITY(1, 1)
+	  , intItemId				INT
+	  , dblReqQty				NUMERIC(38, 20)
+	  , dblUpperToleranceQty	NUMERIC(38, 20)
+	  , dblLowerToleranceQty	NUMERIC(38, 20)
+	)
 
 	SELECT TOP 1 @ysnCostEnabled = ysnCostEnabled
 	FROM tblMFCompanyPreference
@@ -66,7 +71,7 @@ BEGIN TRY
 	SELECT @intTransactionCount = @@TRANCOUNT
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
-		,@strXML
+							  , @strXML
 
 	SELECT @intWorkOrderId = intWorkOrderId
 		,@ysnNegativeQtyAllowed = ysnNegativeQtyAllowed
@@ -77,49 +82,52 @@ BEGIN TRY
 			,intUserId INT
 			)
 
-	SELECT @dtmCurrentDateTime = Max(dtmProductionDate)
+	SELECT @dtmCurrentDateTime = MAX(dtmProductionDate)
 	FROM tblMFWorkOrderInputLot
 	WHERE intWorkOrderId = @intWorkOrderId
 		AND ysnConsumptionReversed = 0
 
 	IF @dtmCurrentDateTime IS NULL
-	BEGIN
-		SELECT @dtmCurrentDateTime = Max(dtmProductionDate)
-		FROM tblMFWorkOrderProducedLot
-		WHERE intWorkOrderId = @intWorkOrderId
-			AND ysnProductionReversed = 0
-
-		IF @dtmCurrentDateTime IS NULL
-			SELECT @dtmCurrentDateTime = Getdate()
-	END
-	ELSE
-	BEGIN
-		SELECT @dtmProductionDate = Max(dtmProductionDate)
-		FROM tblMFWorkOrderProducedLot
-		WHERE intWorkOrderId = @intWorkOrderId
-			AND ysnProductionReversed = 0
-
-		IF @dtmProductionDate IS NOT NULL
 		BEGIN
-			IF @dtmProductionDate > @dtmCurrentDateTime
-				SELECT @dtmCurrentDateTime = @dtmProductionDate
-		END
-	END
+			SELECT @dtmCurrentDateTime = MAX(dtmProductionDate)
+			FROM tblMFWorkOrderProducedLot
+			WHERE intWorkOrderId = @intWorkOrderId AND ysnProductionReversed = 0
 
-	SELECT @dblProduceQty = SUM(dblQuantity)
-		,@intItemUOMId = MIN(intItemUOMId)
-		,@dblPhysicalCount = SUM(dblPhysicalCount)
-		,@intPhysicalItemUOMId = MIN(intPhysicalItemUOMId)
+			IF @dtmCurrentDateTime IS NULL
+				BEGIN
+					SET @dtmCurrentDateTime = GETDATE();
+				END
+		END
+	ELSE
+		BEGIN
+			SELECT @dtmProductionDate = MAX(dtmProductionDate)
+			FROM tblMFWorkOrderProducedLot
+			WHERE intWorkOrderId = @intWorkOrderId AND ysnProductionReversed = 0;
+
+			IF @dtmProductionDate IS NOT NULL
+				BEGIN
+					IF @dtmProductionDate > @dtmCurrentDateTime
+						BEGIN
+							SET @dtmCurrentDateTime = @dtmProductionDate;
+						END
+				END
+		END
+
+	SELECT @dblProduceQty			= SUM(dblQuantity)
+		 , @intItemUOMId			= MIN(intItemUOMId)
+		 , @dblPhysicalCount		= SUM(dblPhysicalCount)
+		 , @intPhysicalItemUOMId	= MIN(intPhysicalItemUOMId)
 	FROM dbo.tblMFWorkOrderProducedLot WP
 	WHERE WP.intWorkOrderId = @intWorkOrderId
-		AND WP.ysnProductionReversed = 0
-		AND WP.intItemId IN (
+	  AND WP.ysnProductionReversed = 0
+	  AND WP.intItemId IN 
+	  (
 			SELECT intItemId
 			FROM dbo.tblMFWorkOrderRecipeItem
 			WHERE intRecipeItemTypeId = 2
-				AND ysnConsumptionRequired = 1
-				AND intWorkOrderId = @intWorkOrderId
-			)
+			  AND ysnConsumptionRequired = 1
+			  AND intWorkOrderId = @intWorkOrderId
+	  )
 
 	IF @intTransactionCount = 0
 		BEGIN TRANSACTION
@@ -203,257 +211,262 @@ BEGIN TRY
 			AND intAttributeId = 88 --3rd Party Pallets (e.g. iGPS) Item Id
 
 		IF @strInstantConsumption = 'False'
-		BEGIN
-			SELECT @intAttributeId = intAttributeId
-			FROM tblMFAttribute
-			WHERE strAttributeName = 'Is Yield Adjustment Allowed'
-
-			SELECT @strYieldAdjustmentAllowed = strAttributeValue
-			FROM tblMFManufacturingProcessAttribute
-			WHERE intManufacturingProcessId = @intManufacturingProcessId
-				AND intLocationId = @intLocationId
-				AND intAttributeId = @intAttributeId
-
-			SELECT @ysnExcessConsumptionAllowed = 0
-
-			IF @strYieldAdjustmentAllowed = 'True'
 			BEGIN
-				SELECT @ysnExcessConsumptionAllowed = 1
-			END
+				SELECT @intAttributeId = intAttributeId
+				FROM tblMFAttribute
+				WHERE strAttributeName = 'Is Yield Adjustment Allowed'
 
-			SELECT @intCategoryId = intCategoryId
-			FROM dbo.tblICItem
-			WHERE intItemId = @intItemId
+				SELECT @strYieldAdjustmentAllowed = strAttributeValue
+				FROM tblMFManufacturingProcessAttribute
+				WHERE intManufacturingProcessId = @intManufacturingProcessId
+				  AND intLocationId = @intLocationId
+				  AND intAttributeId = @intAttributeId
 
-			EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
-				,@intItemId = @intItemId
-				,@intManufacturingId = @intManufacturingCellId
-				,@intSubLocationId = @intSubLocationId
-				,@intLocationId = @intLocationId
-				,@intOrderTypeId = NULL
-				,@intBlendRequirementId = NULL
-				,@intPatternCode = 33
-				,@ysnProposed = 0
-				,@strPatternString = @intBatchId OUTPUT
+				SELECT @ysnExcessConsumptionAllowed = 0
 
-			IF @strConsumeSourceLocation = 'True'
-			BEGIN
-				INSERT INTO dbo.tblMFWorkOrderConsumedLot (
-					intWorkOrderId
-					,intItemId
-					,intLotId
-					,dblQuantity
-					,intItemUOMId
-					,dblIssuedQuantity
-					,intItemIssuedUOMId
-					,intBatchId
-					,intSequenceNo
-					,dtmCreated
-					,intCreatedUserId
-					,dtmLastModified
-					,intLastModifiedUserId
-					,intShiftId
-					,dtmActualInputDateTime
-					,intStorageLocationId
-					,intSubLocationId
-					)
-				SELECT WI.intWorkOrderId
-					,WI.intItemId
-					,WI.intLotId
-					,WI.dblQuantity
-					,WI.intItemUOMId
-					,WI.dblIssuedQuantity
-					,WI.intItemIssuedUOMId
-					,@intBatchId
-					,WI.intSequenceNo
-					,@dtmCurrentDateTime
-					,@intUserId
-					,@dtmCurrentDateTime
-					,@intUserId
-					,WI.intBusinessShiftId
-					,WI.dtmBusinessDate
-					,WI.intStorageLocationId
-					,S.intSubLocationId
-				FROM tblMFWorkOrderInputLot WI
-				JOIN tblICStorageLocation S ON S.intStorageLocationId = WI.intStorageLocationId
-				WHERE WI.intWorkOrderId = @intWorkOrderId
-					AND IsNULL(WI.ysnConsumptionReversed, 0) = 0
+				IF @strYieldAdjustmentAllowed = 'True'
+				BEGIN
+					SELECT @ysnExcessConsumptionAllowed = 1
+				END
 
-				SELECT @dblQuantity = NULL
+				SELECT @intCategoryId = intCategoryId
+				FROM dbo.tblICItem
+				WHERE intItemId = @intItemId
 
-				SELECT @dblQuantity = dblQuantity
-				FROM dbo.tblMFWorkOrderProducedLot
+				EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
+					,@intItemId = @intItemId
+					,@intManufacturingId = @intManufacturingCellId
+					,@intSubLocationId = @intSubLocationId
+					,@intLocationId = @intLocationId
+					,@intOrderTypeId = NULL
+					,@intBlendRequirementId = NULL
+					,@intPatternCode = 33
+					,@ysnProposed = 0
+					,@strPatternString = @intBatchId OUTPUT
+
+				IF @strConsumeSourceLocation = 'True'
+					BEGIN
+						INSERT INTO dbo.tblMFWorkOrderConsumedLot 
+						(
+							intWorkOrderId
+						  , intItemId
+						  , intLotId
+						  , dblQuantity
+						  , intItemUOMId
+						  , dblIssuedQuantity
+						  , intItemIssuedUOMId
+						  , intBatchId
+						  , intSequenceNo
+						  , dtmCreated
+						  , intCreatedUserId
+						  , dtmLastModified
+						  , intLastModifiedUserId
+						  , intShiftId
+						  , dtmActualInputDateTime
+						  , intStorageLocationId
+						  , intSubLocationId
+						)
+						SELECT WI.intWorkOrderId
+							 , WI.intItemId
+							 , WI.intLotId
+							 , WI.dblQuantity
+							 , WI.intItemUOMId
+							 , WI.dblIssuedQuantity
+							 , WI.intItemIssuedUOMId
+							 , @intBatchId
+							 , WI.intSequenceNo
+							 , @dtmCurrentDateTime
+							 , @intUserId
+							 , @dtmCurrentDateTime
+							 , @intUserId
+							 , WI.intBusinessShiftId
+							 , WI.dtmBusinessDate
+							 , WI.intStorageLocationId
+							 , S.intSubLocationId
+						FROM tblMFWorkOrderInputLot WI
+						JOIN tblICStorageLocation S ON S.intStorageLocationId = WI.intStorageLocationId
+						WHERE WI.intWorkOrderId = @intWorkOrderId AND ISNULL(WI.ysnConsumptionReversed, 0) = 0
+
+						SET @dblQuantity = NULL;
+
+						SELECT @dblQuantity = dblQuantity
+						FROM dbo.tblMFWorkOrderProducedLot
+						WHERE intWorkOrderId = @intWorkOrderId AND ysnProductionReversed = 0
+
+						SET @intRecipeId = NULL;
+
+						SELECT @intRecipeId = intRecipeId
+						FROM tblMFWorkOrderRecipe a
+						WHERE intWorkOrderId = @intWorkOrderId
+
+						DELETE FROM @tblItem
+
+						INSERT INTO @tblItem 
+						(
+							intItemId
+						  , dblReqQty
+						  , dblUpperToleranceQty
+						  , dblLowerToleranceQty
+						)
+						SELECT ri.intItemId
+							, (ri.dblCalculatedQuantity * (@dblQuantity / r.dblQuantity)) AS RequiredQty
+							, (ri.dblCalculatedUpperTolerance * (@dblQuantity / r.dblQuantity)) AS dblUpperToleranceQty
+							, (ri.dblCalculatedLowerTolerance * (@dblQuantity / r.dblQuantity)) AS dblLowerToleranceQty
+						FROM tblMFRecipeItem ri
+						JOIN tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
+						WHERE ri.intRecipeId = @intRecipeId
+						  AND ri.intRecipeItemTypeId = 1
+						  AND 
+						  (
+								(ri.ysnYearValidationRequired = 1 AND @dtmDate BETWEEN ri.dtmValidFrom AND ri.dtmValidTo)
+							 OR (ri.ysnYearValidationRequired = 0 AND @intDayOfYear BETWEEN DATEPART(dy, ri.dtmValidFrom) AND DATEPART(dy, ri.dtmValidTo) )
+						  )
+						  AND ri.intConsumptionMethodId IN 
+						  (
+							 1
+						   , 2
+						   , 3
+						  )
+						UNION
+						SELECT rs.intSubstituteItemId
+							, (rs.dblQuantity * (@dblQuantity / r.dblQuantity)) AS RequiredQty
+							, (ri.dblCalculatedUpperTolerance * (@dblQuantity / r.dblQuantity)) AS dblUpperToleranceQty
+							, (ri.dblCalculatedLowerTolerance * (@dblQuantity / r.dblQuantity)) AS dblLowerToleranceQty
+						FROM tblMFRecipeSubstituteItem rs
+						JOIN tblMFRecipeItem ri ON ri.intRecipeItemId = rs.intRecipeItemId
+						JOIN tblMFRecipe r ON r.intRecipeId = rs.intRecipeId
+						WHERE rs.intRecipeId = @intRecipeId AND rs.intRecipeItemTypeId = 1
+
+						UPDATE tblMFProductionSummary
+						SET dblRequiredQty = I.dblReqQty
+							,dblConsumedQuantity = (
+								CASE 
+									WHEN PS.dblInputQuantity < I.dblReqQty
+										THEN PS.dblInputQuantity
+									ELSE I.dblReqQty
+									END
+								)
+							,dblYieldQuantity = PS.dblInputQuantity - I.dblReqQty
+						FROM tblMFProductionSummary PS
+						JOIN @tblItem I ON I.intItemId = PS.intItemId
+						WHERE intWorkOrderId = @intWorkOrderId
+					END
+
+				DECLARE @tblMFMachine TABLE (intMachineId INT)
+				DECLARE @intMachineId INT
+					,@ysnProducedByPackUnit INT
+
+				INSERT INTO @tblMFMachine (intMachineId)
+				SELECT DISTINCT intMachineId
+				FROM tblMFWorkOrderProducedLot
 				WHERE intWorkOrderId = @intWorkOrderId
 					AND ysnProductionReversed = 0
 
-				SELECT @intRecipeId = NULL
+				SELECT @intMachineId = MIN(intMachineId)
+				FROM @tblMFMachine
 
-				SELECT @intRecipeId = intRecipeId
-				FROM tblMFWorkOrderRecipe a
-				WHERE intWorkOrderId = @intWorkOrderId
-
-				DELETE
-				FROM @tblItem
-
-				INSERT INTO @tblItem (
-					intItemId
-					,dblReqQty
-					,dblUpperToleranceQty
-					,dblLowerToleranceQty
-					)
-				SELECT ri.intItemId
-					,(ri.dblCalculatedQuantity * (@dblQuantity / r.dblQuantity)) AS RequiredQty
-					,(ri.dblCalculatedUpperTolerance * (@dblQuantity / r.dblQuantity)) AS dblUpperToleranceQty
-					,(ri.dblCalculatedLowerTolerance * (@dblQuantity / r.dblQuantity)) AS dblLowerToleranceQty
-				FROM tblMFRecipeItem ri
-				JOIN tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
-				WHERE ri.intRecipeId = @intRecipeId
-					AND ri.intRecipeItemTypeId = 1
-					AND (
-						(
-							ri.ysnYearValidationRequired = 1
-							AND @dtmDate BETWEEN ri.dtmValidFrom
-								AND ri.dtmValidTo
-							)
-						OR (
-							ri.ysnYearValidationRequired = 0
-							AND @intDayOfYear BETWEEN DATEPART(dy, ri.dtmValidFrom)
-								AND DATEPART(dy, ri.dtmValidTo)
-							)
-						)
-					AND ri.intConsumptionMethodId IN (
-						1
-						,2
-						,3
-						)
-				
-				UNION
-				
-				SELECT rs.intSubstituteItemId
-					,(rs.dblQuantity * (@dblQuantity / r.dblQuantity)) AS RequiredQty
-					,(ri.dblCalculatedUpperTolerance * (@dblQuantity / r.dblQuantity)) AS dblUpperToleranceQty
-					,(ri.dblCalculatedLowerTolerance * (@dblQuantity / r.dblQuantity)) AS dblLowerToleranceQty
-				FROM tblMFRecipeSubstituteItem rs
-				JOIN tblMFRecipeItem ri ON ri.intRecipeItemId = rs.intRecipeItemId
-				JOIN tblMFRecipe r ON r.intRecipeId = rs.intRecipeId
-				WHERE rs.intRecipeId = @intRecipeId
-					AND rs.intRecipeItemTypeId = 1
-
-				UPDATE tblMFProductionSummary
-				SET dblRequiredQty = I.dblReqQty
-					,dblConsumedQuantity = (
-						CASE 
-							WHEN PS.dblInputQuantity < I.dblReqQty
-								THEN PS.dblInputQuantity
-							ELSE I.dblReqQty
-							END
-						)
-					,dblYieldQuantity = PS.dblInputQuantity - I.dblReqQty
-				FROM tblMFProductionSummary PS
-				JOIN @tblItem I ON I.intItemId = PS.intItemId
-				WHERE intWorkOrderId = @intWorkOrderId
-			END
-
-			DECLARE @tblMFMachine TABLE (intMachineId INT)
-			DECLARE @intMachineId INT
-				,@ysnProducedByPackUnit INT
-
-			INSERT INTO @tblMFMachine (intMachineId)
-			SELECT DISTINCT intMachineId
-			FROM tblMFWorkOrderProducedLot
-			WHERE intWorkOrderId = @intWorkOrderId
-				AND ysnProductionReversed = 0
-
-			SELECT @intMachineId = MIN(intMachineId)
-			FROM @tblMFMachine
-
-			WHILE @intMachineId IS NOT NULL
-			BEGIN
-				SELECT @dblProduceQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(WP.intItemUOMId, IsNULL(IU.intItemUOMId, WP.intItemUOMId), WP.dblQuantity))
-					,@intItemUOMId = @intWOItemUOMId
-					,@dblPhysicalCount = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(WP.intPhysicalItemUOMId, IsNULL(IU.intItemUOMId, WP.intPhysicalItemUOMId), WP.dblPhysicalCount))
-					,@intPhysicalItemUOMId = @intWOItemUOMId
-					,@ysnProducedByPackUnit = CASE 
-						WHEN MIN(WP.intItemUOMId) = MAX(WP.intPhysicalItemUOMId)
-							THEN 0
-						ELSE 1
-						END
-				FROM dbo.tblMFWorkOrderProducedLot WP
-				LEFT JOIN dbo.tblICItemUOM IU ON IU.intItemId = WP.intItemId
-					AND IU.intUnitMeasureId = @intUnitMeasureId
-				WHERE WP.intWorkOrderId = @intWorkOrderId
-					AND WP.ysnProductionReversed = 0
-					AND intMachineId = @intMachineId
-					AND WP.intItemId IN (
-						SELECT intItemId
-						FROM dbo.tblMFWorkOrderRecipeItem
-						WHERE intRecipeItemTypeId = 2
-							AND ysnConsumptionRequired = 1
-							AND intWorkOrderId = @intWorkOrderId
-						)
-
-				IF EXISTS (
-						SELECT *
-						FROM tblMFWorkOrderRecipe
-						WHERE intWorkOrderId = @intWorkOrderId
-							AND intItemUOMId = @intItemUOMId
-						)
-					AND @ysnProducedByPackUnit = 0
+				WHILE @intMachineId IS NOT NULL
 				BEGIN
+					SELECT @dblProduceQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(WP.intItemUOMId, IsNULL(IU.intItemUOMId, WP.intItemUOMId), WP.dblQuantity))
+						,@intItemUOMId = @intWOItemUOMId
+						,@dblPhysicalCount = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(WP.intPhysicalItemUOMId, IsNULL(IU.intItemUOMId, WP.intPhysicalItemUOMId), WP.dblPhysicalCount))
+						,@intPhysicalItemUOMId = @intWOItemUOMId
+						,@ysnProducedByPackUnit = CASE 
+							WHEN MIN(WP.intItemUOMId) = MAX(WP.intPhysicalItemUOMId)
+								THEN 0
+							ELSE 1
+							END
+					FROM dbo.tblMFWorkOrderProducedLot WP
+					LEFT JOIN dbo.tblICItemUOM IU ON IU.intItemId = WP.intItemId
+						AND IU.intUnitMeasureId = @intUnitMeasureId
+					WHERE WP.intWorkOrderId = @intWorkOrderId
+						AND WP.ysnProductionReversed = 0
+						AND intMachineId = @intMachineId
+						AND WP.intItemId IN (
+							SELECT intItemId
+							FROM dbo.tblMFWorkOrderRecipeItem
+							WHERE intRecipeItemTypeId = 2
+								AND ysnConsumptionRequired = 1
+								AND intWorkOrderId = @intWorkOrderId
+							)
+
 					IF EXISTS (
 							SELECT *
-							FROM dbo.tblMFWorkOrderProducedLot
+							FROM tblMFWorkOrderRecipe
 							WHERE intWorkOrderId = @intWorkOrderId
-								AND ysnProductionReversed = 0
-								AND ysnFillPartialPallet = 1
-								AND intMachineId = @intMachineId
+								AND intItemUOMId = @intItemUOMId
 							)
+						AND @ysnProducedByPackUnit = 0
 					BEGIN
-						SELECT @dblProduceQty = NULL
-							,@intItemUOMId = NULL
-							,@dblProduceQty1 = NULL
-
-						SELECT @dblProduceQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(WP.intItemUOMId, IsNULL(IU.intItemUOMId, WP.intItemUOMId), WP.dblQuantity))
-							,@intItemUOMId = @intWOItemUOMId
-						FROM dbo.tblMFWorkOrderProducedLot WP
-						LEFT JOIN dbo.tblICItemUOM IU ON IU.intItemId = WP.intItemId
-							AND IU.intUnitMeasureId = @intUnitMeasureId
-						WHERE WP.intWorkOrderId = @intWorkOrderId
-							AND WP.ysnProductionReversed = 0
-							AND ysnFillPartialPallet = 0
-							AND WP.intMachineId = @intMachineId
-							AND WP.intItemId IN (
-								SELECT intItemId
-								FROM dbo.tblMFWorkOrderRecipeItem
-								WHERE intRecipeItemTypeId = 2
-									AND ysnConsumptionRequired = 1
-									AND intWorkOrderId = @intWorkOrderId
+						IF EXISTS (
+								SELECT *
+								FROM dbo.tblMFWorkOrderProducedLot
+								WHERE intWorkOrderId = @intWorkOrderId
+									AND ysnProductionReversed = 0
+									AND ysnFillPartialPallet = 1
+									AND intMachineId = @intMachineId
 								)
+						BEGIN
+							SELECT @dblProduceQty = NULL
+								,@intItemUOMId = NULL
+								,@dblProduceQty1 = NULL
 
-						IF @dblProduceQty IS NULL
-							SELECT @dblProduceQty = 0
+							SELECT @dblProduceQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(WP.intItemUOMId, IsNULL(IU.intItemUOMId, WP.intItemUOMId), WP.dblQuantity))
+								,@intItemUOMId = @intWOItemUOMId
+							FROM dbo.tblMFWorkOrderProducedLot WP
+							LEFT JOIN dbo.tblICItemUOM IU ON IU.intItemId = WP.intItemId
+								AND IU.intUnitMeasureId = @intUnitMeasureId
+							WHERE WP.intWorkOrderId = @intWorkOrderId
+								AND WP.ysnProductionReversed = 0
+								AND ysnFillPartialPallet = 0
+								AND WP.intMachineId = @intMachineId
+								AND WP.intItemId IN (
+									SELECT intItemId
+									FROM dbo.tblMFWorkOrderRecipeItem
+									WHERE intRecipeItemTypeId = 2
+										AND ysnConsumptionRequired = 1
+										AND intWorkOrderId = @intWorkOrderId
+									)
 
-						SELECT @dblProduceQty1 = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(WP.intItemUOMId, IsNULL(IU.intItemUOMId, WP.intItemUOMId), WP.dblQuantity))
-							,@intItemUOMId1 = @intWOItemUOMId
-						FROM dbo.tblMFWorkOrderProducedLot WP
-						LEFT JOIN dbo.tblICItemUOM IU ON IU.intItemId = WP.intItemId
-							AND IU.intUnitMeasureId = @intUnitMeasureId
-						WHERE WP.intWorkOrderId = @intWorkOrderId
-							AND WP.ysnProductionReversed = 0
-							AND ysnFillPartialPallet = 1
-							AND WP.intMachineId = @intMachineId
-							AND WP.intItemId IN (
-								SELECT intItemId
-								FROM dbo.tblMFWorkOrderRecipeItem
-								WHERE intRecipeItemTypeId = 2
-									AND ysnConsumptionRequired = 1
-									AND intWorkOrderId = @intWorkOrderId
-								)
+							IF @dblProduceQty IS NULL
+								SELECT @dblProduceQty = 0
 
-						IF @intItemUOMId IS NULL
-							SELECT @intItemUOMId = @intItemUOMId1
+							SELECT @dblProduceQty1 = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(WP.intItemUOMId, IsNULL(IU.intItemUOMId, WP.intItemUOMId), WP.dblQuantity))
+								,@intItemUOMId1 = @intWOItemUOMId
+							FROM dbo.tblMFWorkOrderProducedLot WP
+							LEFT JOIN dbo.tblICItemUOM IU ON IU.intItemId = WP.intItemId
+								AND IU.intUnitMeasureId = @intUnitMeasureId
+							WHERE WP.intWorkOrderId = @intWorkOrderId
+								AND WP.ysnProductionReversed = 0
+								AND ysnFillPartialPallet = 1
+								AND WP.intMachineId = @intMachineId
+								AND WP.intItemId IN (
+									SELECT intItemId
+									FROM dbo.tblMFWorkOrderRecipeItem
+									WHERE intRecipeItemTypeId = 2
+										AND ysnConsumptionRequired = 1
+										AND intWorkOrderId = @intWorkOrderId
+									)
 
-						IF @dblProduceQty >= 0
+							IF @intItemUOMId IS NULL
+								SELECT @intItemUOMId = @intItemUOMId1
+
+							IF @dblProduceQty >= 0
+							BEGIN
+								EXEC dbo.uspMFPickWorkOrder @intWorkOrderId = @intWorkOrderId
+									,@dblProduceQty = @dblProduceQty
+									,@intProduceUOMId = @intItemUOMId
+									,@intBatchId = @intBatchId
+									,@intUserId = @intUserId
+									,@strPickPreference = 'Substitute Item'
+									,@ysnExcessConsumptionAllowed = @ysnExcessConsumptionAllowed
+									,@dblUnitQty = NULL
+									,@dblProducePartialQty = @dblProduceQty1
+									,@intMachineId = @intMachineId
+									,@dtmCurrentDateTime = @dtmCurrentDateTime
+							END
+						END
+						ELSE
 						BEGIN
 							EXEC dbo.uspMFPickWorkOrder @intWorkOrderId = @intWorkOrderId
 								,@dblProduceQty = @dblProduceQty
@@ -463,93 +476,93 @@ BEGIN TRY
 								,@strPickPreference = 'Substitute Item'
 								,@ysnExcessConsumptionAllowed = @ysnExcessConsumptionAllowed
 								,@dblUnitQty = NULL
-								,@dblProducePartialQty = @dblProduceQty1
+								,@dblProducePartialQty = 0
 								,@intMachineId = @intMachineId
 								,@dtmCurrentDateTime = @dtmCurrentDateTime
 						END
+
+						EXEC dbo.uspMFConsumeWorkOrder @intWorkOrderId = @intWorkOrderId
+							,@dblProduceQty = @dblProduceQty
+							,@intProduceUOMKey = @intItemUOMId
+							,@intUserId = @intUserId
+							,@ysnNegativeQtyAllowed = @ysnNegativeQtyAllowed
+							,@strRetBatchId = @strRetBatchId OUTPUT
+							,@ysnPostConsumption = 1
+							,@intBatchId = @intBatchId
+							,@ysnPostGL = @ysnPostGL
+							,@dtmDate = @dtmCurrentDateTime
 					END
 					ELSE
 					BEGIN
-						EXEC dbo.uspMFPickWorkOrder @intWorkOrderId = @intWorkOrderId
-							,@dblProduceQty = @dblProduceQty
-							,@intProduceUOMId = @intItemUOMId
-							,@intBatchId = @intBatchId
-							,@intUserId = @intUserId
-							,@strPickPreference = 'Substitute Item'
-							,@ysnExcessConsumptionAllowed = @ysnExcessConsumptionAllowed
-							,@dblUnitQty = NULL
-							,@dblProducePartialQty = 0
-							,@intMachineId = @intMachineId
-							,@dtmCurrentDateTime = @dtmCurrentDateTime
-					END
+						IF EXISTS (
+								SELECT *
+								FROM dbo.tblMFWorkOrderProducedLot
+								WHERE intWorkOrderId = @intWorkOrderId
+									AND ysnProductionReversed = 0
+									AND ysnFillPartialPallet = 1
+									AND intMachineId = @intMachineId
+								)
+						BEGIN
+							SELECT @dblPhysicalCount = NULL
+								,@intPhysicalItemUOMId = NULL
+								,@dblPhysicalCount1 = NULL
 
-					EXEC dbo.uspMFConsumeWorkOrder @intWorkOrderId = @intWorkOrderId
-						,@dblProduceQty = @dblProduceQty
-						,@intProduceUOMKey = @intItemUOMId
-						,@intUserId = @intUserId
-						,@ysnNegativeQtyAllowed = @ysnNegativeQtyAllowed
-						,@strRetBatchId = @strRetBatchId OUTPUT
-						,@ysnPostConsumption = 1
-						,@intBatchId = @intBatchId
-						,@ysnPostGL = @ysnPostGL
-						,@dtmDate = @dtmCurrentDateTime
-				END
-				ELSE
-				BEGIN
-					IF EXISTS (
-							SELECT *
-							FROM dbo.tblMFWorkOrderProducedLot
-							WHERE intWorkOrderId = @intWorkOrderId
-								AND ysnProductionReversed = 0
+							SELECT @dblPhysicalCount = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(WP.intPhysicalItemUOMId, IsNULL(IU.intItemUOMId, WP.intPhysicalItemUOMId), WP.dblPhysicalCount))
+								,@intPhysicalItemUOMId = @intWOItemUOMId
+							FROM dbo.tblMFWorkOrderProducedLot WP
+							LEFT JOIN dbo.tblICItemUOM IU ON IU.intItemId = WP.intItemId
+								AND IU.intUnitMeasureId = @intUnitMeasureId
+							WHERE WP.intWorkOrderId = @intWorkOrderId
+								AND WP.ysnProductionReversed = 0
+								AND ysnFillPartialPallet = 0
+								AND WP.intMachineId = @intMachineId
+								AND WP.intItemId IN (
+									SELECT intItemId
+									FROM dbo.tblMFWorkOrderRecipeItem
+									WHERE intRecipeItemTypeId = 2
+										AND ysnConsumptionRequired = 1
+										AND intWorkOrderId = @intWorkOrderId
+									)
+
+							IF @dblPhysicalCount IS NULL
+								SELECT @dblPhysicalCount = 0
+
+							SELECT @dblPhysicalCount1 = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(WP.intPhysicalItemUOMId, IsNULL(IU.intItemUOMId, WP.intPhysicalItemUOMId), WP.dblPhysicalCount))
+								,@intPhysicalItemUOMId1 = @intWOItemUOMId
+							FROM dbo.tblMFWorkOrderProducedLot WP
+							LEFT JOIN dbo.tblICItemUOM IU ON IU.intItemId = WP.intItemId
+								AND IU.intUnitMeasureId = @intUnitMeasureId
+							WHERE WP.intWorkOrderId = @intWorkOrderId
+								AND WP.ysnProductionReversed = 0
 								AND ysnFillPartialPallet = 1
-								AND intMachineId = @intMachineId
-							)
-					BEGIN
-						SELECT @dblPhysicalCount = NULL
-							,@intPhysicalItemUOMId = NULL
-							,@dblPhysicalCount1 = NULL
+								AND WP.intMachineId = @intMachineId
+								AND WP.intItemId IN (
+									SELECT intItemId
+									FROM dbo.tblMFWorkOrderRecipeItem
+									WHERE intRecipeItemTypeId = 2
+										AND ysnConsumptionRequired = 1
+										AND intWorkOrderId = @intWorkOrderId
+									)
 
-						SELECT @dblPhysicalCount = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(WP.intPhysicalItemUOMId, IsNULL(IU.intItemUOMId, WP.intPhysicalItemUOMId), WP.dblPhysicalCount))
-							,@intPhysicalItemUOMId = @intWOItemUOMId
-						FROM dbo.tblMFWorkOrderProducedLot WP
-						LEFT JOIN dbo.tblICItemUOM IU ON IU.intItemId = WP.intItemId
-							AND IU.intUnitMeasureId = @intUnitMeasureId
-						WHERE WP.intWorkOrderId = @intWorkOrderId
-							AND WP.ysnProductionReversed = 0
-							AND ysnFillPartialPallet = 0
-							AND WP.intMachineId = @intMachineId
-							AND WP.intItemId IN (
-								SELECT intItemId
-								FROM dbo.tblMFWorkOrderRecipeItem
-								WHERE intRecipeItemTypeId = 2
-									AND ysnConsumptionRequired = 1
-									AND intWorkOrderId = @intWorkOrderId
-								)
+							IF @intPhysicalItemUOMId IS NULL
+								SELECT @intPhysicalItemUOMId = @intPhysicalItemUOMId1
 
-						IF @dblPhysicalCount IS NULL
-							SELECT @dblPhysicalCount = 0
-
-						SELECT @dblPhysicalCount1 = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(WP.intPhysicalItemUOMId, IsNULL(IU.intItemUOMId, WP.intPhysicalItemUOMId), WP.dblPhysicalCount))
-							,@intPhysicalItemUOMId1 = @intWOItemUOMId
-						FROM dbo.tblMFWorkOrderProducedLot WP
-						LEFT JOIN dbo.tblICItemUOM IU ON IU.intItemId = WP.intItemId
-							AND IU.intUnitMeasureId = @intUnitMeasureId
-						WHERE WP.intWorkOrderId = @intWorkOrderId
-							AND WP.ysnProductionReversed = 0
-							AND ysnFillPartialPallet = 1
-							AND WP.intMachineId = @intMachineId
-							AND WP.intItemId IN (
-								SELECT intItemId
-								FROM dbo.tblMFWorkOrderRecipeItem
-								WHERE intRecipeItemTypeId = 2
-									AND ysnConsumptionRequired = 1
-									AND intWorkOrderId = @intWorkOrderId
-								)
-
-						IF @intPhysicalItemUOMId IS NULL
-							SELECT @intPhysicalItemUOMId = @intPhysicalItemUOMId1
-
-						IF @dblPhysicalCount >= 0
+							IF @dblPhysicalCount >= 0
+							BEGIN
+								EXEC dbo.uspMFPickWorkOrder @intWorkOrderId = @intWorkOrderId
+									,@dblProduceQty = @dblPhysicalCount
+									,@intProduceUOMId = @intPhysicalItemUOMId
+									,@intBatchId = @intBatchId
+									,@intUserId = @intUserId
+									,@strPickPreference = 'Substitute Item'
+									,@ysnExcessConsumptionAllowed = @ysnExcessConsumptionAllowed
+									,@dblUnitQty = NULL
+									,@dblProducePartialQty = @dblPhysicalCount1
+									,@intMachineId = @intMachineId
+									,@dtmCurrentDateTime = @dtmCurrentDateTime
+							END
+						END
+						ELSE
 						BEGIN
 							EXEC dbo.uspMFPickWorkOrder @intWorkOrderId = @intWorkOrderId
 								,@dblProduceQty = @dblPhysicalCount
@@ -559,84 +572,69 @@ BEGIN TRY
 								,@strPickPreference = 'Substitute Item'
 								,@ysnExcessConsumptionAllowed = @ysnExcessConsumptionAllowed
 								,@dblUnitQty = NULL
-								,@dblProducePartialQty = @dblPhysicalCount1
+								,@dblProducePartialQty = 0
 								,@intMachineId = @intMachineId
 								,@dtmCurrentDateTime = @dtmCurrentDateTime
 						END
-					END
-					ELSE
-					BEGIN
-						EXEC dbo.uspMFPickWorkOrder @intWorkOrderId = @intWorkOrderId
+
+						EXEC dbo.uspMFConsumeWorkOrder @intWorkOrderId = @intWorkOrderId
 							,@dblProduceQty = @dblPhysicalCount
-							,@intProduceUOMId = @intPhysicalItemUOMId
-							,@intBatchId = @intBatchId
+							,@intProduceUOMKey = @intPhysicalItemUOMId
 							,@intUserId = @intUserId
-							,@strPickPreference = 'Substitute Item'
-							,@ysnExcessConsumptionAllowed = @ysnExcessConsumptionAllowed
-							,@dblUnitQty = NULL
-							,@dblProducePartialQty = 0
-							,@intMachineId = @intMachineId
-							,@dtmCurrentDateTime = @dtmCurrentDateTime
+							,@ysnNegativeQtyAllowed = @ysnNegativeQtyAllowed
+							,@strRetBatchId = @strRetBatchId OUTPUT
+							,@ysnPostConsumption = 1
+							,@intBatchId = @intBatchId
+							,@ysnPostGL = @ysnPostGL
+							,@dtmDate = @dtmCurrentDateTime
 					END
 
-					EXEC dbo.uspMFConsumeWorkOrder @intWorkOrderId = @intWorkOrderId
-						,@dblProduceQty = @dblPhysicalCount
-						,@intProduceUOMKey = @intPhysicalItemUOMId
-						,@intUserId = @intUserId
-						,@ysnNegativeQtyAllowed = @ysnNegativeQtyAllowed
-						,@strRetBatchId = @strRetBatchId OUTPUT
-						,@ysnPostConsumption = 1
-						,@intBatchId = @intBatchId
-						,@ysnPostGL = @ysnPostGL
-						,@dtmDate = @dtmCurrentDateTime
+					SELECT @intMachineId = MIN(intMachineId)
+					FROM @tblMFMachine
+					WHERE intMachineId > @intMachineId
 				END
 
-				SELECT @intMachineId = MIN(intMachineId)
-				FROM @tblMFMachine
-				WHERE intMachineId > @intMachineId
-			END
+				EXEC uspMFConsumeSKU @intWorkOrderId = @intWorkOrderId
 
-			EXEC uspMFConsumeSKU @intWorkOrderId = @intWorkOrderId
-
-			IF @str3rdPartyPalletsMandatory = 'False'
-				AND @str3rdPartyPalletsItemId <> ''
-			BEGIN
-				DECLARE @intRecordId INT
-					,@intLotId INT
-				DECLARE @tblMFWorkOrderConsumedLot TABLE (
-					intRecordId INT
-					,intLotId INT
-					)
-
-				INSERT INTO @tblMFWorkOrderConsumedLot (intLotId)
-				SELECT intLotId
-				FROM tblMFWorkOrderConsumedLot
-				WHERE intWorkOrderId = @intWorkOrderId
-					AND intItemId IN (
-						SELECT Item Collate Latin1_General_CI_AS
-						FROM [dbo].[fnSplitString](@str3rdPartyPalletsItemId, ',')
+				IF @str3rdPartyPalletsMandatory = 'False'
+					AND @str3rdPartyPalletsItemId <> ''
+				BEGIN
+					DECLARE @intRecordId INT
+						,@intLotId INT
+					DECLARE @tblMFWorkOrderConsumedLot TABLE (
+						intRecordId INT
+						,intLotId INT
 						)
 
-				SELECT @intRecordId = Min(intRecordId)
-				FROM @tblMFWorkOrderConsumedLot
-
-				WHILE @intRecordId IS NOT NULL
-				BEGIN
-					SELECT @intLotId = intLotId
-					FROM @tblMFWorkOrderConsumedLot
-					WHERE intRecordId = @intRecordId
-
-					UPDATE tblMFWorkOrderProducedLot
-					SET intSpecialPalletLotId = @intLotId
+					INSERT INTO @tblMFWorkOrderConsumedLot (intLotId)
+					SELECT intLotId
+					FROM tblMFWorkOrderConsumedLot
 					WHERE intWorkOrderId = @intWorkOrderId
-						AND intSpecialPalletLotId IS NULL
+						AND intItemId IN (
+							SELECT Item Collate Latin1_General_CI_AS
+							FROM [dbo].[fnSplitString](@str3rdPartyPalletsItemId, ',')
+							)
 
 					SELECT @intRecordId = Min(intRecordId)
 					FROM @tblMFWorkOrderConsumedLot
-					WHERE intRecordId > @intRecordId
+
+					WHILE @intRecordId IS NOT NULL
+					BEGIN
+						SELECT @intLotId = intLotId
+						FROM @tblMFWorkOrderConsumedLot
+						WHERE intRecordId = @intRecordId
+
+						UPDATE tblMFWorkOrderProducedLot
+						SET intSpecialPalletLotId = @intLotId
+						WHERE intWorkOrderId = @intWorkOrderId
+							AND intSpecialPalletLotId IS NULL
+
+						SELECT @intRecordId = Min(intRecordId)
+						FROM @tblMFWorkOrderConsumedLot
+						WHERE intRecordId > @intRecordId
+					END
 				END
 			END
-		END
 	END
 
 	IF @strConsumeSourceLocation = 'False'
@@ -681,211 +679,225 @@ BEGIN TRY
 			,@strBatchId OUTPUT
 
 		IF @strYieldCostValue = 'True'
-		BEGIN
-			INSERT INTO dbo.tblMFWorkOrderConsumedLot (
-				intWorkOrderId
-				,intItemId
-				,intLotId
-				,dblQuantity
-				,intItemUOMId
-				,dblIssuedQuantity
-				,intItemIssuedUOMId
-				,intBatchId
-				,intSequenceNo
-				,dtmCreated
-				,intCreatedUserId
-				,dtmLastModified
-				,intLastModifiedUserId
-				,intShiftId
-				,dtmActualInputDateTime
-				,intStorageLocationId
-				,intSubLocationId
-				,strBatchId
-				)
-			SELECT @intWorkOrderId
-				,PL.intItemId
-				,PL.intLotId
-				,PL.dblQuantity
-				,PL.intItemUOMId
-				,PL.dblQuantity
-				,PL.intItemUOMId
-				,IsNULL(PL.intBatchId, @intTransactionId)
-				,9999
-				,@dtmCurrentDateTime
-				,@intUserId
-				,@dtmCurrentDateTime
-				,@intUserId
-				,@intBusinessShiftId
-				,@dtmBusinessDate
-				,IsNULL(L.intStorageLocationId, PL.intStorageLocationId)
-				,IsNULL(L.intSubLocationId, PL.intSubLocationId)
-				,IsNULL(WP.strBatchId, @strBatchId)
-			FROM tblMFWorkOrderProducedLotTransaction PL
-			LEFT JOIN dbo.tblICLot L ON L.intLotId = PL.intLotId
-			LEFT JOIN tblMFWorkOrderProducedLot WP ON WP.intBatchId = PL.intBatchId
-				AND WP.intWorkOrderId = PL.intWorkOrderId
-			WHERE PL.intWorkOrderId = @intWorkOrderId
-				AND intTransactionTypeId = 25
-
-			INSERT INTO tblMFInventoryAdjustment (
-				dtmDate
-				,intTransactionTypeId
-				,intItemId
-				,intSourceLotId
-				,dblQty
-				,intItemUOMId
-				,intUserId
-				,intLocationId
-				,intStorageLocationId
-				,intWorkOrderConsumedLotId
-				,intWorkOrderId
-				,dtmBusinessDate
-				,intBusinessShiftId
-				)
-			SELECT @dtmCurrentDateTime
-				,8
-				,intItemId
-				,intLotId
-				,dblQuantity
-				,intItemUOMId
-				,intCreatedUserId
-				,@intLocationId
-				,intStorageLocationId
-				,intWorkOrderConsumedLotId
-				,intWorkOrderId
-				,@dtmBusinessDate
-				,@intBusinessShiftId
-			FROM tblMFWorkOrderConsumedLot
-			WHERE intWorkOrderId = @intWorkOrderId
-				AND intSequenceNo = 9999
-
-			DELETE
-			FROM @ItemsForPost
-
-			--Lot Tracking
-			INSERT INTO @ItemsForPost (
-				intItemId
-				,intItemLocationId
-				,intItemUOMId
-				,dtmDate
-				,dblQty
-				,dblUOMQty
-				,dblCost
-				,dblSalesPrice
-				,intCurrencyId
-				,dblExchangeRate
-				,intTransactionId
-				,intTransactionDetailId
-				,strTransactionId
-				,intTransactionTypeId
-				,intLotId
-				,intSubLocationId
-				,intStorageLocationId
-				,intSourceTransactionId
-				,strSourceTransactionId
-				)
-			SELECT intItemId = ISNULL(l.intItemId, cl.intItemId)
-				,intItemLocationId = IsNULL(l.intItemLocationId, IL.intItemLocationId)
-				,intItemUOMId = cl.intItemUOMId
-				,dtmDate = @dtmCurrentDateTime
-				,dblQty = (- cl.dblQuantity)
-				,dblUOMQty = ISNULL(l.dblWeightPerQty, ItemUOM.dblUnitQty)
-				,dblCost = IsNULL(l.dblLastCost, (
-						SELECT TOP 1 IP.dblLastCost
-						FROM tblICItemPricing IP
-						WHERE IP.intItemLocationId = IL.intItemLocationId
-						))
-				,dblSalesPrice = 0
-				,intCurrencyId = NULL
-				,dblExchangeRate = 1
-				,intTransactionId = cl.intBatchId
-				,intTransactionDetailId = cl.intWorkOrderConsumedLotId
-				,strTransactionId = @strTransactionId --cl.strBatchId
-				,intTransactionTypeId = @INVENTORY_CONSUME
-				,intLotId = l.intLotId
-				,intSubLocationId = ISNULL(l.intSubLocationId, cl.intSubLocationId)
-				,intStorageLocationId = ISNULL(l.intStorageLocationId, cl.intStorageLocationId)
-				,intSourceTransactionId = @INVENTORY_CONSUME
-				,strSourceTransactionId = @strTransactionId
-			FROM dbo.tblMFWorkOrderConsumedLot cl
-			LEFT JOIN dbo.tblICLot l ON cl.intLotId = l.intLotId
-			JOIN dbo.tblICItemUOM ItemUOM ON ISNULL(l.intItemUOMId, cl.intItemUOMId) = ItemUOM.intItemUOMId
-			LEFT JOIN dbo.tblICItemUOM WeightUOM ON l.intWeightUOMId = WeightUOM.intItemUOMId
-			LEFT JOIN tblICItemLocation IL ON IL.intItemId = cl.intItemId
-				AND IL.intLocationId = @intLocationId
-			WHERE cl.intWorkOrderId = @intWorkOrderId
-				AND intSequenceNo = 9999
-
-			DELETE
-			FROM @GLEntries
-
-			-- Call the post routine 
-			INSERT INTO @GLEntries (
-				[dtmDate]
-				,[strBatchId]
-				,[intAccountId]
-				,[dblDebit]
-				,[dblCredit]
-				,[dblDebitUnit]
-				,[dblCreditUnit]
-				,[strDescription]
-				,[strCode]
-				,[strReference]
-				,[intCurrencyId]
-				,[dblExchangeRate]
-				,[dtmDateEntered]
-				,[dtmTransactionDate]
-				,[strJournalLineDescription]
-				,[intJournalLineNo]
-				,[ysnIsUnposted]
-				,[intUserId]
-				,[intEntityId]
-				,[strTransactionId]
-				,[intTransactionId]
-				,[strTransactionType]
-				,[strTransactionForm]
-				,[strModuleName]
-				,[intConcurrencyId]
-				,[dblDebitForeign]
-				,[dblDebitReport]
-				,[dblCreditForeign]
-				,[dblCreditReport]
-				,[dblReportingRate]
-				,[dblForeignRate]
-				,[strRateType]
-				,[intSourceEntityId]
-				,[intCommodityId]
-				)
-			EXEC dbo.uspICPostCosting @ItemsForPost
-				,@strBatchId
-				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-				,@intUserId
-
-			IF EXISTS (
-					SELECT *
-					FROM @GLEntries
-					)
 			BEGIN
+				INSERT INTO dbo.tblMFWorkOrderConsumedLot (
+					intWorkOrderId
+					,intItemId
+					,intLotId
+					,dblQuantity
+					,intItemUOMId
+					,dblIssuedQuantity
+					,intItemIssuedUOMId
+					,intBatchId
+					,intSequenceNo
+					,dtmCreated
+					,intCreatedUserId
+					,dtmLastModified
+					,intLastModifiedUserId
+					,intShiftId
+					,dtmActualInputDateTime
+					,intStorageLocationId
+					,intSubLocationId
+					,strBatchId
+					)
+				SELECT @intWorkOrderId
+					,PL.intItemId
+					,PL.intLotId
+					,PL.dblQuantity
+					,PL.intItemUOMId
+					,PL.dblQuantity
+					,PL.intItemUOMId
+					,IsNULL(PL.intBatchId, @intTransactionId)
+					,9999
+					,@dtmCurrentDateTime
+					,@intUserId
+					,@dtmCurrentDateTime
+					,@intUserId
+					,@intBusinessShiftId
+					,@dtmBusinessDate
+					,IsNULL(L.intStorageLocationId, PL.intStorageLocationId)
+					,IsNULL(L.intSubLocationId, PL.intSubLocationId)
+					,IsNULL(WP.strBatchId, @strBatchId)
+				FROM tblMFWorkOrderProducedLotTransaction PL
+				LEFT JOIN dbo.tblICLot L ON L.intLotId = PL.intLotId
+				LEFT JOIN tblMFWorkOrderProducedLot WP ON WP.intBatchId = PL.intBatchId
+					AND WP.intWorkOrderId = PL.intWorkOrderId
+				WHERE PL.intWorkOrderId = @intWorkOrderId
+					AND intTransactionTypeId = 25
+
+				INSERT INTO tblMFInventoryAdjustment (
+					dtmDate
+					,intTransactionTypeId
+					,intItemId
+					,intSourceLotId
+					,dblQty
+					,intItemUOMId
+					,intUserId
+					,intLocationId
+					,intStorageLocationId
+					,intWorkOrderConsumedLotId
+					,intWorkOrderId
+					,dtmBusinessDate
+					,intBusinessShiftId
+					)
+				SELECT @dtmCurrentDateTime
+					,8
+					,intItemId
+					,intLotId
+					,dblQuantity
+					,intItemUOMId
+					,intCreatedUserId
+					,@intLocationId
+					,intStorageLocationId
+					,intWorkOrderConsumedLotId
+					,intWorkOrderId
+					,@dtmBusinessDate
+					,@intBusinessShiftId
+				FROM tblMFWorkOrderConsumedLot
+				WHERE intWorkOrderId = @intWorkOrderId
+					AND intSequenceNo = 9999
+
+				DELETE
+				FROM @ItemsForPost	
+				
+				IF (SELECT COUNT( cl.intBatchId)
+				    FROM dbo.tblMFWorkOrderConsumedLot cl
+				    LEFT JOIN dbo.tblICLot l ON cl.intLotId = l.intLotId
+				    JOIN dbo.tblICItemUOM ItemUOM ON ISNULL(l.intItemUOMId, cl.intItemUOMId) = ItemUOM.intItemUOMId
+				    LEFT JOIN dbo.tblICItemUOM WeightUOM ON l.intWeightUOMId = WeightUOM.intItemUOMId
+				    LEFT JOIN tblICItemLocation IL ON IL.intItemId = cl.intItemId AND IL.intLocationId = @intLocationId
+				    WHERE cl.intWorkOrderId = @intWorkOrderId AND intSequenceNo = 9999) = 0
+					BEGIN
+						EXEC uspMFGetErrorMessage 01 
+						RETURN 01
+					END
+
+				--Lot Tracking
+				INSERT INTO @ItemsForPost (
+					intItemId
+					,intItemLocationId
+					,intItemUOMId
+					,dtmDate
+					,dblQty
+					,dblUOMQty
+					,dblCost
+					,dblSalesPrice
+					,intCurrencyId
+					,dblExchangeRate
+					,intTransactionId
+					,intTransactionDetailId
+					,strTransactionId
+					,intTransactionTypeId
+					,intLotId
+					,intSubLocationId
+					,intStorageLocationId
+					,intSourceTransactionId
+					,strSourceTransactionId
+					)
+				SELECT intItemId = ISNULL(l.intItemId, cl.intItemId)
+					,intItemLocationId = IsNULL(l.intItemLocationId, IL.intItemLocationId)
+					,intItemUOMId = cl.intItemUOMId
+					,dtmDate = @dtmCurrentDateTime
+					,dblQty = (- cl.dblQuantity)
+					,dblUOMQty = ISNULL(l.dblWeightPerQty, ItemUOM.dblUnitQty)
+					,dblCost = IsNULL(l.dblLastCost, (
+							SELECT TOP 1 IP.dblLastCost
+							FROM tblICItemPricing IP
+							WHERE IP.intItemLocationId = IL.intItemLocationId
+							))
+					,dblSalesPrice = 0
+					,intCurrencyId = NULL
+					,dblExchangeRate = 1
+					,intTransactionId = cl.intBatchId
+					,intTransactionDetailId = cl.intWorkOrderConsumedLotId
+					,strTransactionId = @strTransactionId --cl.strBatchId
+					,intTransactionTypeId = @INVENTORY_CONSUME
+					,intLotId = l.intLotId
+					,intSubLocationId = ISNULL(l.intSubLocationId, cl.intSubLocationId)
+					,intStorageLocationId = ISNULL(l.intStorageLocationId, cl.intStorageLocationId)
+					,intSourceTransactionId = @INVENTORY_CONSUME
+					,strSourceTransactionId = @strTransactionId
+				FROM dbo.tblMFWorkOrderConsumedLot cl
+				LEFT JOIN dbo.tblICLot l ON cl.intLotId = l.intLotId
+				JOIN dbo.tblICItemUOM ItemUOM ON ISNULL(l.intItemUOMId, cl.intItemUOMId) = ItemUOM.intItemUOMId
+				LEFT JOIN dbo.tblICItemUOM WeightUOM ON l.intWeightUOMId = WeightUOM.intItemUOMId
+				LEFT JOIN tblICItemLocation IL ON IL.intItemId = cl.intItemId
+					AND IL.intLocationId = @intLocationId
+				WHERE cl.intWorkOrderId = @intWorkOrderId
+					AND intSequenceNo = 9999
+
+				DELETE
+				FROM @GLEntries
+
+				
+
+				-- Call the post routine 
+				INSERT INTO @GLEntries (
+					[dtmDate]
+					,[strBatchId]
+					,[intAccountId]
+					,[dblDebit]
+					,[dblCredit]
+					,[dblDebitUnit]
+					,[dblCreditUnit]
+					,[strDescription]
+					,[strCode]
+					,[strReference]
+					,[intCurrencyId]
+					,[dblExchangeRate]
+					,[dtmDateEntered]
+					,[dtmTransactionDate]
+					,[strJournalLineDescription]
+					,[intJournalLineNo]
+					,[ysnIsUnposted]
+					,[intUserId]
+					,[intEntityId]
+					,[strTransactionId]
+					,[intTransactionId]
+					,[strTransactionType]
+					,[strTransactionForm]
+					,[strModuleName]
+					,[intConcurrencyId]
+					,[dblDebitForeign]
+					,[dblDebitReport]
+					,[dblCreditForeign]
+					,[dblCreditReport]
+					,[dblReportingRate]
+					,[dblForeignRate]
+					,[strRateType]
+					,[intSourceEntityId]
+					,[intCommodityId]
+					)
+				EXEC dbo.uspICPostCosting @ItemsForPost
+					,@strBatchId
+					,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+					,@intUserId
+
 				IF EXISTS (
 						SELECT *
-						FROM tblMFWorkOrderRecipeItem WRI
-						JOIN tblICItem I ON I.intItemId = WRI.intItemId
-						WHERE I.strType = 'Other Charge'
-							AND WRI.intWorkOrderId = @intWorkOrderId
+						FROM @GLEntries
 						)
 				BEGIN
-					EXEC dbo.uspGLBookEntries @GLEntries
-						,1
-						,1
-						,1
-				END
-				ELSE
-				BEGIN
-					EXEC dbo.uspGLBookEntries @GLEntries
-						,1
+					IF EXISTS (
+							SELECT *
+							FROM tblMFWorkOrderRecipeItem WRI
+							JOIN tblICItem I ON I.intItemId = WRI.intItemId
+							WHERE I.strType = 'Other Charge'
+								AND WRI.intWorkOrderId = @intWorkOrderId
+							)
+					BEGIN
+						EXEC dbo.uspGLBookEntries @GLEntries
+							,1
+							,1
+							,1
+					END
+					ELSE
+					BEGIN
+						EXEC dbo.uspGLBookEntries @GLEntries
+							,1
+					END
 				END
 			END
-		END
 
 		DECLARE @adjustedEntries AS ItemCostAdjustmentTableType
 		DECLARE @dblNewCost NUMERIC(38, 20)
@@ -1022,7 +1034,7 @@ BEGIN TRY
 				,[dblQty] = PL.dblQuantity
 				,[dblUOMQty] = 1
 				,[intCostUOMId] = PL.intItemUOMId
-				,[dblNewCost] = Round(CASE 
+				,[dblNewValue] = Round(CASE 
 						WHEN IsNULL(RI.dblPercentage, 0) = 0
 							THEN @dblNewUnitCost * dbo.fnMFConvertQuantityToTargetItemUOM(PL.intItemUOMId, IsNULL(IU.intItemUOMId, PL.intItemUOMId), PL.dblQuantity)
 						ELSE ((@dblNewCost * RI.dblPercentage / 100 / SUM(dbo.fnMFConvertQuantityToTargetItemUOM(PL.intItemUOMId, IsNULL(IU.intItemUOMId, PL.intItemUOMId), PL.dblQuantity)) OVER (PARTITION BY PL.intItemId)) * dbo.fnMFConvertQuantityToTargetItemUOM(PL.intItemUOMId, IsNULL(IU.intItemUOMId, PL.intItemUOMId), PL.dblQuantity))
@@ -1465,7 +1477,6 @@ BEGIN TRY
 
 			UPDATE PL
 			SET PL.dblItemValue = CostAdj.dblNewValue
-			  , PL.dblFirstItemValue = CostAdj.dblNewValue
 			FROM @adjustedEntries CostAdj
 			JOIN dbo.tblMFWorkOrderProducedLot PL ON PL.intWorkOrderProducedLotId = CostAdj.intTransactionDetailId
 
@@ -1525,6 +1536,8 @@ BEGIN TRY
 					,dblForeignRate
 					,intSourceEntityId
 					,intCommodityId
+					,intCurrencyExchangeRateTypeId
+					,strRateType
 					)
 				EXEC dbo.uspICCreateGLEntriesOnCostAdjustment @strBatchId = @strBatchId
 					,@intEntityUserSecurityId = @userId

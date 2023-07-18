@@ -23,6 +23,7 @@ This tables holds all inventory transactions for storage/custody items (not comp
 		[dblQty] NUMERIC(38, 20) NOT NULL DEFAULT 0, 
 		[dblUOMQty] NUMERIC(38, 20) NOT NULL DEFAULT 0, 		
 		[dblCost] NUMERIC(38, 20) NOT NULL DEFAULT 0, 
+		[dblForexCost] NUMERIC(38, 20) NULL, 
 		[dblValue] NUMERIC(38, 20) NULL, 
 		[dblSalesPrice] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
 		[intCurrencyId] INT NULL,

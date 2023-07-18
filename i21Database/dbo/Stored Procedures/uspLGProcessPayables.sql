@@ -81,7 +81,10 @@ BEGIN
 			,[intPurchaseTaxGroupId]
 			,[intPayFromBankAccountId]
 			,[strFinancingSourcedFrom]
-			,[strFinancingTransactionNumber])
+			,[strFinancingTransactionNumber]
+			,[strTaxPoint]
+			,[intTaxLocationId]
+			,[ysnOverrideTaxGroup])
 		SELECT
 			[intEntityVendorId] = D1.intEntityId
 			,[intTransactionType] = 1
@@ -108,7 +111,10 @@ BEGIN
 			,[dblQuantityToBill] = LD.dblQuantity
 			,[dblQtyToBillUnitQty] = ISNULL(ItemUOM.dblUnitQty,1)
 			,[intQtyToBillUOMId] = LD.intItemUOMId
-			,[dblCost] = (CASE WHEN intPurchaseSale = 3 THEN COALESCE(AD.dblSeqPrice, dbo.fnCTGetSequencePrice(CT.intContractDetailId, NULL), 0) ELSE ISNULL(LD.dblUnitPrice, 0) END)
+			,[dblCost] =	CASE WHEN CH.intPricingTypeId = 2 AND CT.intPricingTypeId = 1 -- Priced basis contract
+								THEN ISNULL(dbo.fnCTGetSequencePrice(CT.intContractDetailId, NULL), 0)
+								ELSE COALESCE(LD.dblUnitPrice, dbo.fnCTGetSequencePrice(CT.intContractDetailId, NULL), 0)
+							END
 			,[dblCostUnitQty] = CAST(ISNULL(ItemCostUOM.dblUnitQty,1) AS DECIMAL(38,20))
 			,[intCostUOMId] = (CASE WHEN intPurchaseSale = 3 THEN ISNULL(AD.intSeqPriceUOMId, 0) ELSE ISNULL(AD.intSeqPriceUOMId, LD.intPriceUOMId) END) 
 			,[dblNetWeight] = ISNULL(LD.dblNet,0)
@@ -146,6 +152,9 @@ BEGIN
 			,[intPayFromBankAccountId] = BA.intBankAccountId
 			,[strFinancingSourcedFrom] = CASE WHEN (BA.intBankAccountId IS NOT NULL) THEN 'Logistics' ELSE '' END
 			,[strFinancingTransactionNumber] = CASE WHEN (BA.intBankAccountId IS NOT NULL) THEN L.strLoadNumber ELSE '' END
+			,[strTaxPoint] = L.strTaxPoint
+			,[intTaxLocationId] = L.intTaxLocationId
+			,[ysnOverrideTaxGroup] = LD.ysnTaxGroupOverride
 		FROM tblLGLoad L
 		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		JOIN tblCTContractDetail CT ON CT.intContractDetailId = LD.intPContractDetailId
@@ -238,6 +247,9 @@ BEGIN
 			,[intPayFromBankAccountId] = NULL
 			,[strFinancingSourcedFrom] = NULL
 			,[strFinancingTransactionNumber] = NULL
+			,[strTaxPoint] = NULL
+			,[intTaxLocationId] = NULL
+			,[ysnOverrideTaxGroup] = NULL
 		FROM vyuLGLoadCostForVendor A
 			OUTER APPLY tblLGCompanyPreference CP
 			JOIN tblLGLoad L ON L.intLoadId = A.intLoadId

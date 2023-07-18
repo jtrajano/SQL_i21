@@ -119,5 +119,7 @@
 	ysnTBSReserveOnSave BIT,
 	ysnAllowToCreateMultipleBlendSheetOnDemand BIT,
 	ysnDisplayLandedPriceInBlendManagement BIT,
+	ysnReservationByStorageLocation BIT,
+	ysnDemandForecastDataFix BIT,
 	CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]) 
 )

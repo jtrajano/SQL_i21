@@ -134,9 +134,9 @@ BEGIN TRY
 			,strPositionLabel						=   (case when pos.strPositionType = 'Shipment' then 'Shipment' when pos.strPositionType = 'Spot' then 'Delivery' else '' end)
 			,strContractCondtionDescription			=	(select top 1 a.strConditionDescription from tblCTContractCondition a, tblCTCondition b where a.intContractHeaderId = CH.intContractHeaderId and b.intConditionId = a.intConditionId and b.strConditionName like '%_SAMPLE_INSTRUCTION%')
 			--, blbFooterLogo = dbo.fnSMGetCompanyLogo('Footer')
-			,blbFooterLogo = ISNULL((SELECT TOP 1 imgLogo FROM tblSMLogoPreferenceFooter WHERE ysnAllOtherReports = 1 AND intCompanyLocationId = CD.intCompanyLocationId), dbo.fnSMGetCompanyLogo('Footer'))
+			,blbFooterLogo = ISNULL((SELECT TOP 1 imgLogo FROM tblSMLogoPreferenceFooter WHERE ysnAllOtherReports = 1 AND intCompanyLocationId = CD.intCompanyLocationId AND DATALENGTH(imgLogo) > 0), dbo.fnSMGetCompanyLogo('Footer'))
 			,strLogoFooterType = CASE WHEN (SELECT TOP 1 1 FROM tblSMLogoPreferenceFooter WHERE ysnAllOtherReports = 1 AND intCompanyLocationId = CD.intCompanyLocationId) IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
-			,blbHeaderLogo = ISNULL((SELECT TOP 1 imgLogo FROM tblSMLogoPreference WHERE ysnAllOtherReports = 1 AND intCompanyLocationId = CD.intCompanyLocationId), dbo.fnSMGetCompanyLogo('Header'))
+			,blbHeaderLogo = ISNULL((SELECT TOP 1 imgLogo FROM tblSMLogoPreference WHERE ysnAllOtherReports = 1 AND intCompanyLocationId = CD.intCompanyLocationId AND DATALENGTH(imgLogo) > 0), dbo.fnSMGetCompanyLogo('Header'))
 			,strLogoType = CASE WHEN (SELECT TOP 1 1 FROM tblSMLogoPreference WHERE ysnAllOtherReports = 1 AND intCompanyLocationId = CD.intCompanyLocationId) IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
 
 			,strStraussEntityName = LTRIM(RTRIM(EY.strEntityName))

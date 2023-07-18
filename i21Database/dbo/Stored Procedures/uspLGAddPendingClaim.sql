@@ -263,17 +263,11 @@ BEGIN
 							,dblFranchiseWt = CASE WHEN ((CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt - ISNULL(IRN.dblIRNet, 0)) ELSE LD.dblNet END) * WG.dblFranchise / 100) <> 0.0
 													THEN ((CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt - ISNULL(IRN.dblIRNet, 0)) ELSE LD.dblNet END) * WG.dblFranchise / 100)
 												ELSE 0.0 END
-							,dblWeightLoss = CASE WHEN (RI.dblNet - CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END) < 0.0
-													THEN (RI.dblNet - CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END)
-												ELSE (CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END - RI.dblNet) END
-							,dblClaimableWt = CASE WHEN (ABS((RI.dblNet - CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END)) > (LD.dblNet * WG.dblFranchise / 100))
-												THEN
-													CASE WHEN (RI.dblNet - CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END) < 0.0
-														THEN (RI.dblNet - CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END) + (LD.dblNet * WG.dblFranchise / 100)
-													ELSE 
-														(CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END - RI.dblNet) - (LD.dblNet * WG.dblFranchise / 100)
-													END
-												ELSE 0.0 END
+							,dblWeightLoss = RI.dblNet - CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END
+							,dblClaimableWt = RI.dblNet - CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END +
+												CASE WHEN (RI.dblNet - CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END) < 0.0
+													THEN (LD.dblNet * WG.dblFranchise / 100) ELSE 0.0
+												END
 							,dblSeqPrice = AD.dblSeqPrice
 							,strSeqCurrency = AD.strSeqCurrency
 							,strSeqPriceUOM = AD.strSeqPriceUOM

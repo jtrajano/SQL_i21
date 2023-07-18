@@ -133,9 +133,8 @@ BEGIN TRY
 				CD.strContractNumber,
 				CASE 
 					WHEN CD.intPricingTypeId = 3 THEN PF.dblOriginalBasis
-					WHEN @ysnEnableFXFieldInContractPricing = 1 and CD.intCurrencyId <> CD.intInvoiceCurrencyId and isnull(CD.intMainCurrencyId,0) <> CD.intInvoiceCurrencyId then CD.dblBasis * CD.dblRate
 					ELSE
-						dbo.fnCTConvertQuantityToTargetCommodityUOM( CD.intPriceCommodityUOMId,BU.intCommodityUnitMeasureId,CD.dblBasis) / 
+						dbo.[fnCTConvertPriceToTargetCommodityUOM]( BU.intCommodityUnitMeasureId,CD.intPriceCommodityUOMId,CD.dblBasis) / 
 						CASE	WHEN	intBasisCurrencyId = CD.intCurrencyId	THEN 1
 								WHEN	CD.intBasisCurrencyId <> CD.intCurrencyId 
 								AND		CD.ysnBasisSubCurrency = 1			THEN 100 
@@ -178,6 +177,8 @@ BEGIN TRY
 				dblDefaultFx = (select top 1 erd.dblRate from tblSMCurrencyExchangeRateDetail erd where erd.intCurrencyExchangeRateId = CD.intCurrencyExchangeRateId and erd.dtmValidFromDate <= getdate() order by erd.dtmValidFromDate desc)
 		INTO	#NonMultiPriceFixation
 		FROM	#tblCTPriceFixation			PF
+		join	tblCTPriceContract pc on pc.intPriceContractId = PF.intPriceContractId
+		join	tblICCommodityUnitMeasure commUOM on commUOM.intCommodityUnitMeasureId = pc.intFinalPriceUOMId
 		JOIN	vyuCTContractSequence		CD	ON	CD.intContractDetailId	=	PF.intContractDetailId
 		JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
 		JOIN	tblRKFutureMarket			MA	ON	MA.intFutureMarketId	=	CD.intFutureMarketId

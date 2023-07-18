@@ -318,10 +318,10 @@ BEGIN TRY
 			strStraussDestinationPointName = (case when PO.strPositionType = 'Spot' then CT.strCity else ISNULL(CTY.strCity,'') end),
 			strWalterPositionLabel	= ISNULL(strPosition,'') + ' ' + 'Period',
 			strWalterOrigin			= dbo.[fnCTGetSeqDisplayField](CD.intContractDetailId, 'Origin'),
-			strWalterPricing		= CASE WHEN CD.intPricingTypeId in (1,6) THEN 'Priced at ' + LTRIM(CAST(CD.dblCashPrice AS NUMERIC(18, 2))) +' ' + CY.strCurrency + '/' + PU.strUnitMeasure ELSE 
+			strWalterPricing		= CASE WHEN CD.intPricingTypeId in (1,6) THEN 'Priced at ' + LTRIM(CAST(CD.dblCashPrice AS NUMERIC(18, 2))) +' ' + ISNULL(OP.strCurrency,CY.strCurrency) + '/' + PU.strUnitMeasure ELSE 
 									   'To be fixed at ' + CASE WHEN ISNULL(CD.strFixationBy,'') <> '' THEN CD.strFixationBy +'''s Call, against '  ELSE '' END
 									   +  MA.strFutMarketName +	' ' + DATENAME(mm,MO.dtmFutureMonthsDate) + '-' + CAST(MO.intYear AS NVARCHAR) + ' '
-									   +  CASE WHEN CD.intPricingTypeId in (2) AND CD.dblBasis > 0	  THEN '  +' +  LTRIM(CAST(CD.dblBasis AS NUMERIC(18, 2)))  + ' ' + CY.strCurrency + '/' + PU.strUnitMeasure  ELSE '     ' +  LTRIM(CAST(CD.dblBasis AS NUMERIC(18, 2)))  + ' ' + CY.strCurrency + '/' + PU.strUnitMeasure END + ''	
+									   +  CASE WHEN CD.intPricingTypeId in (2) AND CD.dblBasis > 0	  THEN '  +' +  LTRIM(CAST(CD.dblBasis AS NUMERIC(18, 2)))  + ' ' + ISNULL(OP.strCurrency,CY.strCurrency) + '/' + PU.strUnitMeasure  ELSE '     ' +  LTRIM(CAST(CD.dblBasis AS NUMERIC(18, 2)))  + ' ' + ISNULL(OP.strCurrency,CY.strCurrency) + '/' + PU.strUnitMeasure END + ''	
 									   +  CASE WHEN CD.intPricingTypeId = 2 AND CO.strCommodityCode != 'Cocoa' THEN @space+'(Lots to be fixed:' + LTRIM(dbo.fnRemoveTrailingZeroes(CD.dblNoOfLots)) +')'
 											   ELSE '' END
 									 END, 
@@ -349,6 +349,7 @@ BEGIN TRY
 	JOIN	tblICItemUOM		PM	WITH (NOLOCK) ON	PM.intItemUOMId			=	CD.intPriceItemUOMId	LEFT
 	JOIN	tblICUnitMeasure	PU	WITH (NOLOCK) ON	PU.intUnitMeasureId		=	PM.intUnitMeasureId		LEFT
 	JOIN	tblSMCurrency		CY	WITH (NOLOCK) ON	CY.intCurrencyID		=	CD.intCurrencyId		LEFT
+	JOIN	tblSMCurrency		OP	WITH (NOLOCK) ON	OP.intCurrencyID		=	CD.intCashCurrencyId	LEFT
 	JOIN	tblRKFutureMarket	MA	WITH (NOLOCK) ON	MA.intFutureMarketId	=	CD.intFutureMarketId	LEFT
 	JOIN	tblRKFuturesMonth	MO	WITH (NOLOCK) ON	MO.intFutureMonthId		=	CD.intFutureMonthId		LEFT
 	JOIN	tblICItem			IM	WITH (NOLOCK) ON	IM.intItemId			=	CD.intItemId			LEFT

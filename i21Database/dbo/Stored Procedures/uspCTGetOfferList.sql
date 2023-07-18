@@ -230,18 +230,18 @@ BEGIN
 					s.ysnIsHedged = 1
 			)
 	--SORTING LABELS
-	--0 VIEW FOR STATIC CONTRACT 235
-	--1 VIEW FOR PICK LOTS 439
-	--2 VIEW FOR ALLOCATION ROWS  620
-	--3 VIEW FOR RESERVE 826
-	--4 VIEW FOR SECONDARY CONTRACT 1081
-	--5 VIEW FOR SI PARTIAL LINE 1234
-	--6 VIEW FOR LS PARTIAL LINE 1431
-	--7 VIEW FOR IR PARTIAL 1706
-	--8 VIEW FOR FULL CT/IR/LS/SI 1948
-	--9 VIEW FOR AVAILABLE BALANCE LINE 2214
+	--0 VIEW FOR STATIC CONTRACT 244
+	--1 VIEW FOR PICK LOTS 494
+	--2 VIEW FOR ALLOCATION ROWS  695
+	--3 VIEW FOR RESERVE 921
+	--4 VIEW FOR SECONDARY CONTRACT 1132
+	--5 VIEW FOR SI PARTIAL LINE 1374
+	--6 VIEW FOR LS PARTIAL LINE 1631
+	--7 VIEW FOR IR PARTIAL 1889
+	--8 VIEW FOR FULL CT/IR/LS/SI 2162
+	--9 VIEW FOR AVAILABLE BALANCE LINE 2459
 
-	--VIEW FOR STATIC CONTRACT  235
+	--VIEW FOR STATIC CONTRACT  244
 	SELECT 
 		   intContractDetailId
 		  ,intCompanyLocationId
@@ -322,7 +322,7 @@ BEGIN
 						       WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 0) THEN 1
 							   ELSE 100 END	
 		  ,strPricingStatus = VPC.strStatus
-		  ,dblCashPrice =  dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId,
+		  ,dblCashPrice =  dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),UPM.intUnitMeasureId,
 							(CASE WHEN VPC.strStatus = 'Fully Price' THEN CTD.dblCashPrice
 							   WHEN VPC.strStatus = 'Unprice' 	THEN dbo.fnRKGetLatestClosingPrice(CTD.intFutureMarketId,CTD.intFutureMonthId,GETDATE()) + CTD.dblBasis
 							   WHEN VPC.strStatus = 'Partially Price' THEN VPC.dblFinalPrice + dbo.fnRKGetLatestClosingPrice(CTD.intFutureMarketId,CTD.intFutureMonthId,GETDATE()) + CTD.dblBasis
@@ -344,8 +344,8 @@ BEGIN
 						where intContractDetailId = CTD.intContractDetailId
 						FOR XML PATH('')),' #!',', '), 1, 2, '')
 					) 
-		  ,dblLastSettlementPrice = dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId, 
-									dbo.fnRKGetLatestClosingPrice(CTD.intFutureMarketId,CTD.intFutureMonthId,GETDATE())
+		  ,dblLastSettlementPrice = dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),BPM.intUnitMeasureId, 
+									dbo.fnRKGetLastSettlementPrice(CTD.intFutureMarketId,CTD.intFutureMonthId)
 									* dbo.fnCMGetForexRateFromCurrency( CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 1 ) THEN (SELECT intMainCurrencyId FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId ) ELSE CTD.intCurrencyId END,@IntCurrencyId,CTD.intRateTypeId,getdate()) 
 									--Check if need to consider the sub currency
 									/ CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  @IntCurrencyId and ysnSubCurrency = 1) THEN 1
@@ -423,6 +423,10 @@ BEGIN
 	LEFT JOIN tblSMCity					DP  WITH (NOLOCK) ON CTD.intDestinationPortId = DP.intCityId 
 	LEFT JOIN tblICItemUOM				UOM  WITH (NOLOCK) ON UOM.intItemUOMId = CTD.intItemUOMId
 	LEFT JOIN tblICUnitMeasure		    UM   WITH (NOLOCK) ON UM.intUnitMeasureId = UOM.intUnitMeasureId
+	LEFT JOIN tblICItemUOM				POM  WITH (NOLOCK) ON POM.intItemUOMId = CTD.intPriceItemUOMId
+	LEFT JOIN tblICUnitMeasure		    UPM   WITH (NOLOCK) ON UPM.intUnitMeasureId = POM.intUnitMeasureId
+	LEFT JOIN tblICItemUOM				BOM  WITH (NOLOCK) ON BOM.intItemUOMId = ISNULL(CTD.intBudgetUOMId,CTD.intPriceItemUOMId)
+	LEFT JOIN tblICUnitMeasure		    BPM   WITH (NOLOCK) ON BPM.intUnitMeasureId = BOM.intUnitMeasureId
 	INNER JOIN vyuCTEntity				EY   WITH (NOLOCK) ON EY.intEntityId = CH.intEntityId AND EY.strEntityType = (CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END) AND ISNULL(EY.ysnDefaultLocation, 0) = 1
 	LEFT JOIN tblCTPricingType			PT   WITH (NOLOCK) ON PT.intPricingTypeId  = CTD.intPricingTypeId
 	LEFT JOIN tblRKFutureMarket			FMA	 WITH (NOLOCK) ON FMA.intFutureMarketId	=CTD.intFutureMarketId		
@@ -579,7 +583,7 @@ BEGIN
 						       WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 0) THEN 1
 							   ELSE 100 END
 		  ,strPricingStatus = VPC.strStatus
-		  ,dblCashPrice = dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId, 
+		  ,dblCashPrice =  dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),UPM.intUnitMeasureId,
 							 (CASE WHEN VPC.strStatus = 'Fully Price' THEN CTD.dblCashPrice
 							   WHEN VPC.strStatus = 'Unprice' 	THEN dbo.fnRKGetLatestClosingPrice(CTD.intFutureMarketId,CTD.intFutureMonthId,GETDATE()) + CTD.dblBasis
 							   WHEN VPC.strStatus = 'Partially Price' THEN VPC.dblFinalPrice + dbo.fnRKGetLatestClosingPrice(CTD.intFutureMarketId,CTD.intFutureMonthId,GETDATE()) + CTD.dblBasis
@@ -593,14 +597,14 @@ BEGIN
 		  ,strCurrentHedge = h.strFutureMonth
 		  ,strBroker = h.strName
 		  ,strBrokerAccount = h.strAccountNumber
-		  ,dblLastSettlementPrice =  dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId,
-									 dbo.fnRKGetLatestClosingPrice(CTD.intFutureMarketId,CTD.intFutureMonthId,GETDATE()) 
-									 * dbo.fnCMGetForexRateFromCurrency( CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 1 ) THEN (SELECT intMainCurrencyId FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId ) ELSE CTD.intCurrencyId END,@IntCurrencyId,CTD.intRateTypeId,getdate()) 
-									 --Check if need to consider the sub currency
+		  ,dblLastSettlementPrice = dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),BPM.intUnitMeasureId, 
+									dbo.fnRKGetLastSettlementPrice(CTD.intFutureMarketId,CTD.intFutureMonthId)
+									* dbo.fnCMGetForexRateFromCurrency( CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 1 ) THEN (SELECT intMainCurrencyId FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId ) ELSE CTD.intCurrencyId END,@IntCurrencyId,CTD.intRateTypeId,getdate()) 
+									--Check if need to consider the sub currency
 									/ CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  @IntCurrencyId and ysnSubCurrency = 1) THEN 1
-										   WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 0) THEN 1
-										   ELSE 100 END	
-									 )
+								   WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 0) THEN 1
+								   ELSE 100 END	
+									)
 		  ,strSalesContract = SCTH.strContractNumber
 		  ,strCustomer = CASE WHEN SCD.intContractDetailId IS NOT NULL THEN SE.strName ELSE LGR.strComments END
 		  ,strOrigin =  dbo.[fnCTGetSeqDisplayField](CTD.intContractDetailId, 'Origin')
@@ -648,6 +652,10 @@ BEGIN
 	left join realize					r with (nolock)    on r.intContractDetailId = CTD.intContractDetailId
 	LEFT JOIN tblICItemUOM				UOM  WITH (NOLOCK) ON UOM.intItemUOMId = CTD.intItemUOMId
 	LEFT JOIN tblICUnitMeasure		    UM   WITH (NOLOCK) ON UM.intUnitMeasureId = UOM.intUnitMeasureId
+	LEFT JOIN tblICItemUOM				POM  WITH (NOLOCK) ON POM.intItemUOMId = CTD.intPriceItemUOMId
+	LEFT JOIN tblICUnitMeasure		    UPM   WITH (NOLOCK) ON UPM.intUnitMeasureId = POM.intUnitMeasureId
+	LEFT JOIN tblICItemUOM				BOM  WITH (NOLOCK) ON BOM.intItemUOMId = ISNULL(CTD.intBudgetUOMId,CTD.intPriceItemUOMId)
+	LEFT JOIN tblICUnitMeasure		    BPM   WITH (NOLOCK) ON BPM.intUnitMeasureId = BOM.intUnitMeasureId
 	INNER JOIN vyuCTEntity				EY   WITH (NOLOCK) ON EY.intEntityId = CH.intEntityId AND EY.strEntityType = (CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END) AND ISNULL(EY.ysnDefaultLocation, 0) = 1
 	LEFT JOIN tblCTPricingType			PT   WITH (NOLOCK) ON PT.intPricingTypeId  = CTD.intPricingTypeId
 	LEFT JOIN tblRKFutureMarket			FMA	 WITH (NOLOCK) ON FMA.intFutureMarketId	=CTD.intFutureMarketId		
@@ -778,7 +786,7 @@ BEGIN
 						       WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 0) THEN 1
 							   ELSE 100 END
 		  ,strPricingStatus = VPC.strStatus
-		  ,dblCashPrice =  dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId,
+		  ,dblCashPrice =  dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),UPM.intUnitMeasureId,
 							(CASE WHEN VPC.strStatus = 'Fully Price' THEN CTD.dblCashPrice
 							   WHEN VPC.strStatus = 'Unprice' 	THEN dbo.fnRKGetLatestClosingPrice(CTD.intFutureMarketId,CTD.intFutureMonthId,GETDATE()) + CTD.dblBasis
 							   WHEN VPC.strStatus = 'Partially Price' THEN VPC.dblFinalPrice + dbo.fnRKGetLatestClosingPrice(CTD.intFutureMarketId,CTD.intFutureMonthId,GETDATE()) + CTD.dblBasis
@@ -800,8 +808,8 @@ BEGIN
 						where intContractDetailId = CTD.intContractDetailId
 						FOR XML PATH('')),' #!',', '), 1, 2, '')
 					) 
-		  ,dblLastSettlementPrice = dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId, 
-									dbo.fnRKGetLatestClosingPrice(CTD.intFutureMarketId,CTD.intFutureMonthId,GETDATE())
+		  ,dblLastSettlementPrice = dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),BPM.intUnitMeasureId,
+									dbo.fnRKGetLastSettlementPrice(CTD.intFutureMarketId,CTD.intFutureMonthId)
 									* dbo.fnCMGetForexRateFromCurrency( CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 1 ) THEN (SELECT intMainCurrencyId FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId ) ELSE CTD.intCurrencyId END,@IntCurrencyId,CTD.intRateTypeId,getdate()) 
 									--Check if need to consider the sub currency
 									/ CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  @IntCurrencyId and ysnSubCurrency = 1) THEN 1
@@ -857,6 +865,10 @@ BEGIN
 	left join realize					r with (nolock)    on r.intContractDetailId = CTD.intContractDetailId
 	LEFT JOIN tblICItemUOM				UOM  WITH (NOLOCK) ON UOM.intItemUOMId = CTD.intItemUOMId
 	LEFT JOIN tblICUnitMeasure		    UM   WITH (NOLOCK) ON UM.intUnitMeasureId = UOM.intUnitMeasureId
+	LEFT JOIN tblICItemUOM				POM  WITH (NOLOCK) ON POM.intItemUOMId = CTD.intPriceItemUOMId
+	LEFT JOIN tblICUnitMeasure		    UPM   WITH (NOLOCK) ON UPM.intUnitMeasureId = POM.intUnitMeasureId
+	LEFT JOIN tblICItemUOM				BOM  WITH (NOLOCK) ON BOM.intItemUOMId = ISNULL(CTD.intBudgetUOMId,CTD.intPriceItemUOMId)
+	LEFT JOIN tblICUnitMeasure		    BPM   WITH (NOLOCK) ON BPM.intUnitMeasureId = BOM.intUnitMeasureId
 	INNER JOIN vyuCTEntity				EY   WITH (NOLOCK) ON EY.intEntityId = CH.intEntityId AND EY.strEntityType = (CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END) AND ISNULL(EY.ysnDefaultLocation, 0) = 1
 	LEFT JOIN tblCTPricingType			PT   WITH (NOLOCK) ON PT.intPricingTypeId  = CTD.intPricingTypeId
 	LEFT JOIN tblRKFutureMarket			FMA	 WITH (NOLOCK) ON FMA.intFutureMarketId	=CTD.intFutureMarketId		
@@ -995,7 +1007,7 @@ BEGIN
 						       WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 0) THEN 1
 							   ELSE 100 END
 		  ,strPricingStatus = VPC.strStatus
-		  ,dblCashPrice =  dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId,
+		  ,dblCashPrice =  dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),UPM.intUnitMeasureId,
 							(CASE WHEN VPC.strStatus = 'Fully Price' THEN CTD.dblCashPrice
 							   WHEN VPC.strStatus = 'Unprice' 	THEN dbo.fnRKGetLatestClosingPrice(CTD.intFutureMarketId,CTD.intFutureMonthId,GETDATE()) + CTD.dblBasis
 							   WHEN VPC.strStatus = 'Partially Price' THEN VPC.dblFinalPrice + dbo.fnRKGetLatestClosingPrice(CTD.intFutureMarketId,CTD.intFutureMonthId,GETDATE()) + CTD.dblBasis
@@ -1017,8 +1029,8 @@ BEGIN
 						where intContractDetailId = CTD.intContractDetailId
 						FOR XML PATH('')),' #!',', '), 1, 2, '')
 					) 
-		  ,dblLastSettlementPrice = dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId, 
-									dbo.fnRKGetLatestClosingPrice(CTD.intFutureMarketId,CTD.intFutureMonthId,GETDATE())
+		  ,dblLastSettlementPrice = dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),BPM.intUnitMeasureId,
+									dbo.fnRKGetLastSettlementPrice(CTD.intFutureMarketId,CTD.intFutureMonthId)
 									* dbo.fnCMGetForexRateFromCurrency( CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 1 ) THEN (SELECT intMainCurrencyId FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId ) ELSE CTD.intCurrencyId END,@IntCurrencyId,CTD.intRateTypeId,getdate()) 
 									--Check if need to consider the sub currency
 									/ CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  @IntCurrencyId and ysnSubCurrency = 1) THEN 1
@@ -1074,6 +1086,10 @@ BEGIN
 	left join realize					r with (nolock)    on r.intContractDetailId = CTD.intContractDetailId
 	LEFT JOIN tblICItemUOM				UOM  WITH (NOLOCK) ON UOM.intItemUOMId = CTD.intItemUOMId
 	LEFT JOIN tblICUnitMeasure		    UM   WITH (NOLOCK) ON UM.intUnitMeasureId = UOM.intUnitMeasureId
+	LEFT JOIN tblICItemUOM				POM  WITH (NOLOCK) ON POM.intItemUOMId = CTD.intPriceItemUOMId
+	LEFT JOIN tblICUnitMeasure		    UPM   WITH (NOLOCK) ON UPM.intUnitMeasureId = POM.intUnitMeasureId
+	LEFT JOIN tblICItemUOM				BOM  WITH (NOLOCK) ON BOM.intItemUOMId = ISNULL(CTD.intBudgetUOMId,CTD.intPriceItemUOMId)
+	LEFT JOIN tblICUnitMeasure		    BPM   WITH (NOLOCK) ON BPM.intUnitMeasureId = BOM.intUnitMeasureId
 	INNER JOIN vyuCTEntity				EY   WITH (NOLOCK) ON EY.intEntityId = CH.intEntityId AND EY.strEntityType = (CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END) AND ISNULL(EY.ysnDefaultLocation, 0) = 1
 	LEFT JOIN tblCTPricingType			PT   WITH (NOLOCK) ON PT.intPricingTypeId  = CTD.intPricingTypeId
 	LEFT JOIN tblRKFutureMarket			FMA	 WITH (NOLOCK) ON FMA.intFutureMarketId	=CTD.intFutureMarketId		
@@ -1121,7 +1137,7 @@ BEGIN
 	AND 1 = (CASE WHEN @YsnyAllocated = 1 THEN 1 ELSE ( CASE WHEN NOT EXISTS (SELECT 1 FROM @AllocatedContracts where intContractDetailId = a.intContractDetailId) THEN 1 ELSE 0 END ) END)
 	
 	UNION ALL
-	--VIEW FOR SECONDARY CONTRACT 1081
+	--VIEW FOR SECONDARY CONTRACT 1132
 	SELECT 
 		   intContractDetailId
 		  ,intCompanyLocationId
@@ -1202,7 +1218,7 @@ BEGIN
 						       WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 0) THEN 1
 							   ELSE 100 END
 		  ,strPricingStatus = VPC.strStatus
-		  ,dblCashPrice =  dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId,
+		  ,dblCashPrice =  dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),UPM.intUnitMeasureId,
 							(CASE WHEN VPC.strStatus = 'Fully Price' THEN CTD.dblCashPrice
 							   WHEN VPC.strStatus = 'Unprice' 	THEN dbo.fnRKGetLatestClosingPrice(CTD.intFutureMarketId,CTD.intFutureMonthId,GETDATE()) + CTD.dblBasis
 							   WHEN VPC.strStatus = 'Partially Price' THEN VPC.dblFinalPrice + dbo.fnRKGetLatestClosingPrice(CTD.intFutureMarketId,CTD.intFutureMonthId,GETDATE()) + CTD.dblBasis
@@ -1224,8 +1240,8 @@ BEGIN
 						where intContractDetailId = CTD.intContractDetailId
 						FOR XML PATH('')),' #!',', '), 1, 2, '')
 					) 
-		  ,dblLastSettlementPrice = dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId, 
-									dbo.fnRKGetLatestClosingPrice(CTD.intFutureMarketId,CTD.intFutureMonthId,GETDATE())
+		  ,dblLastSettlementPrice = dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),BPM.intUnitMeasureId,
+									dbo.fnRKGetLastSettlementPrice(CTD.intFutureMarketId,CTD.intFutureMonthId)
 									* dbo.fnCMGetForexRateFromCurrency( CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 1 ) THEN (SELECT intMainCurrencyId FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId ) ELSE CTD.intCurrencyId END,@IntCurrencyId,CTD.intRateTypeId,getdate()) 
 									--Check if need to consider the sub currency
 									/ CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  @IntCurrencyId and ysnSubCurrency = 1) THEN 1
@@ -1283,6 +1299,10 @@ BEGIN
 	LEFT JOIN tblSMCity					DP  WITH (NOLOCK) ON CTD.intDestinationPortId = DP.intCityId 
 	LEFT JOIN tblICItemUOM				UOM  WITH (NOLOCK) ON UOM.intItemUOMId = CTD.intItemUOMId
 	LEFT JOIN tblICUnitMeasure		    UM   WITH (NOLOCK) ON UM.intUnitMeasureId = UOM.intUnitMeasureId
+	LEFT JOIN tblICItemUOM				POM  WITH (NOLOCK) ON POM.intItemUOMId = CTD.intPriceItemUOMId
+	LEFT JOIN tblICItemUOM				BOM  WITH (NOLOCK) ON BOM.intItemUOMId = ISNULL(CTD.intBudgetUOMId,CTD.intPriceItemUOMId)
+	LEFT JOIN tblICUnitMeasure		    BPM   WITH (NOLOCK) ON BPM.intUnitMeasureId = BOM.intUnitMeasureId
+	LEFT JOIN tblICUnitMeasure		    UPM   WITH (NOLOCK) ON UPM.intUnitMeasureId = POM.intUnitMeasureId
 	INNER JOIN vyuCTEntity				EY   WITH (NOLOCK) ON EY.intEntityId = CH.intEntityId AND EY.strEntityType = (CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END) AND ISNULL(EY.ysnDefaultLocation, 0) = 1
 	LEFT JOIN tblCTPricingType			PT   WITH (NOLOCK) ON PT.intPricingTypeId  = CTD.intPricingTypeId
 	LEFT JOIN tblRKFutureMarket			FMA	 WITH (NOLOCK) ON FMA.intFutureMarketId	=CTD.intFutureMarketId		
@@ -1361,7 +1381,7 @@ BEGIN
 	AND 1 = (CASE WHEN @YsnyAllocated = 1 THEN 1 ELSE ( CASE WHEN NOT EXISTS (SELECT 1 FROM @AllocatedContracts where intContractDetailId = a.intContractDetailId) THEN 1 ELSE 0 END ) END)
 	UNION ALL
 
-	--VIEW FOR SI PARTIAL 1234
+	--VIEW FOR SI PARTIAL 1374
 	SELECT DISTINCT
 		   intContractDetailId
 		  ,intCompanyLocationId
@@ -1452,7 +1472,7 @@ BEGIN
 						       --WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 0) THEN 1
 							   ELSE 2 END	
 		  ,strPricingStatus = VPC.strStatus
-		  ,dblCashPrice = dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId,
+		  ,dblCashPrice =  dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),UPM.intUnitMeasureId,
 							(CASE WHEN VPC.strStatus = 'Fully Price' THEN CTD.dblCashPrice
 							   WHEN VPC.strStatus = 'Unprice' 	THEN dbo.fnRKGetLatestClosingPrice(CTD.intFutureMarketId,CTD.intFutureMonthId,GETDATE()) + CTD.dblBasis
 							   WHEN VPC.strStatus = 'Partially Price' THEN VPC.dblFinalPrice + dbo.fnRKGetLatestClosingPrice(CTD.intFutureMarketId,CTD.intFutureMonthId,GETDATE()) + CTD.dblBasis
@@ -1474,13 +1494,13 @@ BEGIN
 						where intContractDetailId = CTD.intContractDetailId
 						FOR XML PATH('')),' #!',', '), 1, 2, '')
 					) 
-		  ,dblLastSettlementPrice = dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId, 
-									dbo.fnRKGetLatestClosingPrice(CTD.intFutureMarketId,CTD.intFutureMonthId,GETDATE())
+		  ,dblLastSettlementPrice = dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),BPM.intUnitMeasureId, 
+									dbo.fnRKGetLastSettlementPrice(CTD.intFutureMarketId,CTD.intFutureMonthId)
 									* dbo.fnCMGetForexRateFromCurrency( CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 1 ) THEN (SELECT intMainCurrencyId FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId ) ELSE CTD.intCurrencyId END,@IntCurrencyId,CTD.intRateTypeId,getdate()) 
 									--Check if need to consider the sub currency
 									/ CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  @IntCurrencyId and ysnSubCurrency = 1) THEN 1
-										   WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 0) THEN 1
-										   ELSE 100 END	
+								   WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 0) THEN 1
+								   ELSE 100 END	
 									)
 		  ,strSalesContract = SCTH.strContractNumber
 		  ,strCustomer = CASE WHEN SCD.intContractDetailId IS NOT NULL THEN SE.strName ELSE LGR.strComments END
@@ -1537,6 +1557,10 @@ BEGIN
 	LEFT JOIN tblSMCity					DP  WITH (NOLOCK) ON CTD.intDestinationPortId = DP.intCityId 
 	LEFT JOIN tblICItemUOM				UOM  WITH (NOLOCK) ON UOM.intItemUOMId = CTD.intItemUOMId
 	LEFT JOIN tblICUnitMeasure		    UM   WITH (NOLOCK) ON UM.intUnitMeasureId = UOM.intUnitMeasureId
+	LEFT JOIN tblICItemUOM				POM  WITH (NOLOCK) ON POM.intItemUOMId = CTD.intPriceItemUOMId
+	LEFT JOIN tblICUnitMeasure		    UPM   WITH (NOLOCK) ON UPM.intUnitMeasureId = POM.intUnitMeasureId
+	LEFT JOIN tblICItemUOM				BOM  WITH (NOLOCK) ON BOM.intItemUOMId = ISNULL(CTD.intBudgetUOMId,CTD.intPriceItemUOMId)
+	LEFT JOIN tblICUnitMeasure		    BPM   WITH (NOLOCK) ON BPM.intUnitMeasureId = BOM.intUnitMeasureId
 	INNER JOIN vyuCTEntity				EY   WITH (NOLOCK) ON EY.intEntityId = CH.intEntityId AND EY.strEntityType = (CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END) AND ISNULL(EY.ysnDefaultLocation, 0) = 1
 	LEFT JOIN tblCTPricingType			PT   WITH (NOLOCK) ON PT.intPricingTypeId  = CTD.intPricingTypeId
 	LEFT JOIN tblRKFutureMarket			FMA	 WITH (NOLOCK) ON FMA.intFutureMarketId	=CTD.intFutureMarketId		
@@ -1707,7 +1731,7 @@ BEGIN
 						       WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 0) THEN 1
 							   ELSE 100 END
 		  ,strPricingStatus = VPC.strStatus
-		  ,dblCashPrice = dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId,
+		  ,dblCashPrice =  dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),UPM.intUnitMeasureId,
 							(CASE WHEN VPC.strStatus = 'Fully Price' THEN CTD.dblCashPrice
 							   WHEN VPC.strStatus = 'Unprice' 	THEN dbo.fnRKGetLatestClosingPrice(CTD.intFutureMarketId,CTD.intFutureMonthId,GETDATE()) + CTD.dblBasis
 							   WHEN VPC.strStatus = 'Partially Price' THEN VPC.dblFinalPrice + dbo.fnRKGetLatestClosingPrice(CTD.intFutureMarketId,CTD.intFutureMonthId,GETDATE()) + CTD.dblBasis
@@ -1729,8 +1753,8 @@ BEGIN
 						where intContractDetailId = CTD.intContractDetailId
 						FOR XML PATH('')),' #!',', '), 1, 2, '')
 					) 
-		  ,dblLastSettlementPrice = dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId, 
-									dbo.fnRKGetLatestClosingPrice(CTD.intFutureMarketId,CTD.intFutureMonthId,GETDATE())
+		  ,dblLastSettlementPrice = dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),BPM.intUnitMeasureId, 
+									dbo.fnRKGetLastSettlementPrice(CTD.intFutureMarketId,CTD.intFutureMonthId)
 									* dbo.fnCMGetForexRateFromCurrency( CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 1 ) THEN (SELECT intMainCurrencyId FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId ) ELSE CTD.intCurrencyId END,@IntCurrencyId,CTD.intRateTypeId,getdate()) 
 									--Check if need to consider the sub currency
 									/ CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  @IntCurrencyId and ysnSubCurrency = 1) THEN 1
@@ -1793,6 +1817,10 @@ BEGIN
 	LEFT JOIN tblSMCity					DP  WITH (NOLOCK) ON CTD.intDestinationPortId = DP.intCityId 
 	LEFT JOIN tblICItemUOM				UOM  WITH (NOLOCK) ON UOM.intItemUOMId = CTD.intItemUOMId
 	LEFT JOIN tblICUnitMeasure		    UM   WITH (NOLOCK) ON UM.intUnitMeasureId = UOM.intUnitMeasureId
+	LEFT JOIN tblICItemUOM				POM  WITH (NOLOCK) ON POM.intItemUOMId = CTD.intPriceItemUOMId
+	LEFT JOIN tblICItemUOM				BOM  WITH (NOLOCK) ON BOM.intItemUOMId = ISNULL(CTD.intBudgetUOMId,CTD.intPriceItemUOMId)
+	LEFT JOIN tblICUnitMeasure		    BPM   WITH (NOLOCK) ON BPM.intUnitMeasureId = BOM.intUnitMeasureId
+	LEFT JOIN tblICUnitMeasure		    UPM   WITH (NOLOCK) ON UPM.intUnitMeasureId = POM.intUnitMeasureId
 	INNER JOIN vyuCTEntity				EY   WITH (NOLOCK) ON EY.intEntityId = CH.intEntityId AND EY.strEntityType = (CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END) AND ISNULL(EY.ysnDefaultLocation, 0) = 1
 	LEFT JOIN tblCTPricingType			PT   WITH (NOLOCK) ON PT.intPricingTypeId  = CTD.intPricingTypeId
 	LEFT JOIN tblRKFutureMarket			FMA	 WITH (NOLOCK) ON FMA.intFutureMarketId	=CTD.intFutureMarketId		
@@ -1961,7 +1989,7 @@ BEGIN
 						       WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 0) THEN 1
 							   ELSE 100 END	
 		  ,strPricingStatus = VPC.strStatus
-		  ,dblCashPrice = dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId,
+		  ,dblCashPrice =  dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),UPM.intUnitMeasureId,
 							(CASE WHEN VPC.strStatus = 'Fully Price' THEN CTD.dblCashPrice
 							   WHEN VPC.strStatus = 'Unprice' 	THEN dbo.fnRKGetLatestClosingPrice(CTD.intFutureMarketId,CTD.intFutureMonthId,GETDATE()) + CTD.dblBasis
 							   WHEN VPC.strStatus = 'Partially Price' THEN VPC.dblFinalPrice + dbo.fnRKGetLatestClosingPrice(CTD.intFutureMarketId,CTD.intFutureMonthId,GETDATE()) + CTD.dblBasis
@@ -1983,8 +2011,8 @@ BEGIN
 						where intContractDetailId = CTD.intContractDetailId
 						FOR XML PATH('')),' #!',', '), 1, 2, '')
 					) 
-		  ,dblLastSettlementPrice = dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId, 
-									dbo.fnRKGetLatestClosingPrice(CTD.intFutureMarketId,CTD.intFutureMonthId,GETDATE())
+		  ,dblLastSettlementPrice = dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),BPM.intUnitMeasureId,
+									dbo.fnRKGetLastSettlementPrice(CTD.intFutureMarketId,CTD.intFutureMonthId)
 									* dbo.fnCMGetForexRateFromCurrency( CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 1 ) THEN (SELECT intMainCurrencyId FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId ) ELSE CTD.intCurrencyId END,@IntCurrencyId,CTD.intRateTypeId,getdate()) 
 									--Check if need to consider the sub currency
 									/ CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  @IntCurrencyId and ysnSubCurrency = 1) THEN 1
@@ -2062,6 +2090,10 @@ BEGIN
 	LEFT JOIN tblSMCity					DP  WITH (NOLOCK) ON CTD.intDestinationPortId = DP.intCityId 
 	LEFT JOIN tblICItemUOM				UOM  WITH (NOLOCK) ON UOM.intItemUOMId = CTD.intItemUOMId
 	LEFT JOIN tblICUnitMeasure		    UM   WITH (NOLOCK) ON UM.intUnitMeasureId = UOM.intUnitMeasureId
+	LEFT JOIN tblICItemUOM				POM  WITH (NOLOCK) ON POM.intItemUOMId = CTD.intPriceItemUOMId
+	LEFT JOIN tblICUnitMeasure		    UPM   WITH (NOLOCK) ON UPM.intUnitMeasureId = POM.intUnitMeasureId
+	LEFT JOIN tblICItemUOM				BOM  WITH (NOLOCK) ON BOM.intItemUOMId = ISNULL(CTD.intBudgetUOMId,CTD.intPriceItemUOMId)
+	LEFT JOIN tblICUnitMeasure		    BPM   WITH (NOLOCK) ON BPM.intUnitMeasureId = BOM.intUnitMeasureId
 	INNER JOIN vyuCTEntity				EY   WITH (NOLOCK) ON EY.intEntityId = CH.intEntityId AND EY.strEntityType = (CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END) AND ISNULL(EY.ysnDefaultLocation, 0) = 1
 	LEFT JOIN tblCTPricingType			PT   WITH (NOLOCK) ON PT.intPricingTypeId  = CTD.intPricingTypeId
 	LEFT JOIN tblRKFutureMarket			FMA	 WITH (NOLOCK) ON FMA.intFutureMarketId	=CTD.intFutureMarketId		
@@ -2237,8 +2269,8 @@ BEGIN
 							   WHEN LGL.intLoadId <> 0 THEN LGL.strLoadNumber
 						  ELSE CH.strContractNumber END
 		  ,dblQuantity = CASE WHEN IR.ysnPosted = 1 THEN TQIR.dblTotalQty ELSE ( --UNSOLD QTY 
-						 CASE WHEN LGAS.strAllocationStatus = 'Partially Allocated' THEN  LGAS.dblAllocatedQuantity --ALLOCATED QTY
-							  WHEN LGL.intLoadId <> 0 AND IRI.intLoadShipmentId IS NULL THEN LGD.dblQuantity	--SHIPPED LS QTY
+						 CASE WHEN LGL.intLoadId <> 0 AND IRI.intLoadShipmentId IS NULL THEN LGD.dblQuantity	--SHIPPED LS QTY
+							  WHEN LGAS.strAllocationStatus = 'Partially Allocated' THEN  LGAS.dblAllocatedQuantity --ALLOCATED QTY	
 							  WHEN IRI.intLoadShipmentId <> 0  OR IRI.intLoadShipmentId IS NOT NULL THEN TQ.dblTotalQty --IN STORE IR QTY
 						 ELSE CTD.dblQuantity - ISNULL(CTD.dblScheduleQty,0) END ) --OPEN CT QTY  
 						 END
@@ -2255,7 +2287,7 @@ BEGIN
 						       WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 0) THEN 1
 							   ELSE 100 END
 		  ,strPricingStatus = VPC.strStatus
-		  ,dblCashPrice = dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId,
+		  ,dblCashPrice =  dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),UPM.intUnitMeasureId,
 							(CASE WHEN VPC.strStatus = 'Fully Price' THEN CTD.dblCashPrice
 							   WHEN VPC.strStatus = 'Unprice' 	THEN dbo.fnRKGetLatestClosingPrice(CTD.intFutureMarketId,CTD.intFutureMonthId,GETDATE()) + CTD.dblBasis
 							   WHEN VPC.strStatus = 'Partially Price' THEN VPC.dblFinalPrice + dbo.fnRKGetLatestClosingPrice(CTD.intFutureMarketId,CTD.intFutureMonthId,GETDATE()) + CTD.dblBasis
@@ -2277,8 +2309,8 @@ BEGIN
 						where intContractDetailId = CTD.intContractDetailId
 						FOR XML PATH('')),' #!',', '), 1, 2, '')
 					) 
-		  ,dblLastSettlementPrice = dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId, 
-									dbo.fnRKGetLatestClosingPrice(CTD.intFutureMarketId,CTD.intFutureMonthId,GETDATE())
+		  ,dblLastSettlementPrice = dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),BPM.intUnitMeasureId,
+									dbo.fnRKGetLastSettlementPrice(CTD.intFutureMarketId,CTD.intFutureMonthId)
 									* dbo.fnCMGetForexRateFromCurrency( CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 1 ) THEN (SELECT intMainCurrencyId FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId ) ELSE CTD.intCurrencyId END,@IntCurrencyId,CTD.intRateTypeId,getdate()) 
 									--Check if need to consider the sub currency
 									/ CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  @IntCurrencyId and ysnSubCurrency = 1) THEN 1
@@ -2356,6 +2388,10 @@ BEGIN
 	LEFT JOIN tblSMCity					DP  WITH (NOLOCK) ON CTD.intDestinationPortId = DP.intCityId 
 	LEFT JOIN tblICItemUOM				UOM  WITH (NOLOCK) ON UOM.intItemUOMId = CTD.intItemUOMId
 	LEFT JOIN tblICUnitMeasure		    UM   WITH (NOLOCK) ON UM.intUnitMeasureId = UOM.intUnitMeasureId
+	LEFT JOIN tblICItemUOM				POM  WITH (NOLOCK) ON POM.intItemUOMId = CTD.intPriceItemUOMId
+	LEFT JOIN tblICUnitMeasure		    UPM   WITH (NOLOCK) ON UPM.intUnitMeasureId = POM.intUnitMeasureId
+	LEFT JOIN tblICItemUOM				BOM  WITH (NOLOCK) ON BOM.intItemUOMId = ISNULL(CTD.intBudgetUOMId,CTD.intPriceItemUOMId)
+	LEFT JOIN tblICUnitMeasure		    BPM   WITH (NOLOCK) ON BPM.intUnitMeasureId = BOM.intUnitMeasureId
 	INNER JOIN vyuCTEntity				EY   WITH (NOLOCK) ON EY.intEntityId = CH.intEntityId AND EY.strEntityType = (CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END) AND ISNULL(EY.ysnDefaultLocation, 0) = 1
 	LEFT JOIN tblCTPricingType			PT   WITH (NOLOCK) ON PT.intPricingTypeId  = CTD.intPricingTypeId
 	LEFT JOIN tblRKFutureMarket			FMA	 WITH (NOLOCK) ON FMA.intFutureMarketId	=CTD.intFutureMarketId		
@@ -2379,7 +2415,7 @@ BEGIN
 	LEFT JOIN tblICInventoryReceiptItem IRI  WITH (NOLOCK) ON IRI.intLineNo = CTD.intContractDetailId --IRI.intLoadShipmentId = LGL.intLoadId
 	LEFT JOIN tblICInventoryReceipt		IR   WITH (NOLOCK) ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId AND IR.ysnPosted = 1
 	LEFT JOIN tblLGLoadDetail			LGD  WITH (NOLOCK) ON CTD.intContractDetailId = CASE WHEN IRI.intInventoryReceiptId <> 0 THEN NULL ELSE ISNULL(LGD.intPContractDetailId,LGD.intSContractDetailId) END
-	LEFT JOIN tblLGLoad					LGL  WITH (NOLOCK) ON LGL.intContractDetailId = CTD.intContractDetailId AND LGL.ysnPosted = 1
+	LEFT JOIN tblLGLoad					LGL  WITH (NOLOCK) ON LGL.intContractDetailId = CTD.intContractDetailId --AND LGL.ysnPosted = 1
 	LEFT JOIN tblLGLoadDetail			LSID WITH (NOLOCK) ON CTD.intContractDetailId =  LSID.intPContractDetailId
 	LEFT JOIN tblLGLoad					LSI  WITH (NOLOCK) ON LSI.intContractDetailId = CTD.intContractDetailId AND ISNULL(LGL.ysnPosted,0) = 0
 	LEFT JOIN tblLGLoadStorageCost		LSC  WITH (NOLOCK) ON LSC.intLoadId = LGL.intLoadId

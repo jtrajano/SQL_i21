@@ -7,7 +7,7 @@
 	[intRegisterDepartmentId] INT NULL,
 	[strLocationName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 	
 	[strCategoryCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-	[strCategoryDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+	[strCategoryDescription] NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL, 
 	[dblBeginningRetail] NUMERIC(38, 20) NULL DEFAULT 0, 	
 	[dblReceipts] NUMERIC(38, 20) NULL DEFAULT 0, 	
 	[dblSales] NUMERIC(38, 20) NULL DEFAULT 0, 	

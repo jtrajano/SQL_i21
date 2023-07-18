@@ -133,6 +133,7 @@ BEGIN TRY
 																WHEN TR.strGrossOrNet = 'Gross' THEN DD.dblDistributionGrossSalesUnits 
 																ELSE DD.dblUnits END
 														ELSE DD.dblUnits END
+		,[dblFreightQty]						= DD.dblFreightUnit	
 		,[dblDiscount]							= 0
 		,[dblPrice]								--= DD.dblPrice
 												= CASE WHEN DD.ysnFreightInPrice = 0 THEN DD.dblPrice
@@ -734,6 +735,7 @@ BEGIN TRY
 		,[ysnBlended]
 		,[ysnComboFreight]
 		,[dblComboFreightRate]
+		,[dblFreightQty]
 		,[intInventoryReceiptId]
 		,[ysnUseOriginIdAsInvoiceNumber]
 	)
@@ -823,6 +825,7 @@ BEGIN TRY
 		,[ysnBlended]							= IE.ysnBlended
 		,[ysnComboFreight]						= IE.ysnComboFreight
 		,[dblComboFreightRate]					= IE.dblComboFreightRate
+		,[dblFreightQty]						= IE.dblFreightQty
 		,[intInventoryReceiptId]				= IE.intInventoryReceiptId
 		,[ysnUseOriginIdAsInvoiceNumber]        = IE.ysnUseOriginIdAsInvoiceNumber
 	FROM #tmpSourceTableFinal IE
@@ -915,6 +918,7 @@ BEGIN TRY
 		,[ysnBlended]							= IE.ysnBlended
 		,[ysnComboFreight]						= IE.ysnComboFreight
 		,[dblComboFreightRate]					= IE.dblComboFreightRate
+		,[dblFreightQty]						= IE.dblFreightQty
 		,[intInventoryReceiptId]				= IE.intInventoryReceiptId
 		,[ysnUseOriginIdAsInvoiceNumber]        = IE.ysnUseOriginIdAsInvoiceNumber
 	FROM #tmpSourceTableFinal IE

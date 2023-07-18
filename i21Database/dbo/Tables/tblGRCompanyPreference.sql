@@ -39,6 +39,7 @@
     
     [strSpecialTicketImportImplementation] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 
+	[intGrainBankUnitMeasureId] INT NULL, 
 
     [ysnShowLoadOutAddressForFullSheetTicket] BIT NOT NULL DEFAULT(0),
 
@@ -61,5 +62,6 @@
 
     CONSTRAINT [PK_tblGRCompanyPreference_intCompanyPreferenceId] PRIMARY KEY CLUSTERED ([intCompanyPreferenceId] ASC),
 	CONSTRAINT [FK_tblGRCompanyPreference_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
-	CONSTRAINT [FK_tblGRCompanyPreference_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId])
+	CONSTRAINT [FK_tblGRCompanyPreference_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
+	CONSTRAINT [FK_tblGRCompanyPreference_tblICUnitMeasure_intGrainBankUnitMeasureId] FOREIGN KEY ([intGrainBankUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId])
 )

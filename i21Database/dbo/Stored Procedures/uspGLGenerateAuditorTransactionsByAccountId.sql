@@ -12,6 +12,8 @@ CREATE PROCEDURE [dbo].[uspGLGenerateAuditorTransactionsByAccountId]
     @intAccountIdTo INT
 AS
 BEGIN
+
+
 	SET QUOTED_IDENTIFIER OFF;
 	SET ANSI_NULLS ON;
 	SET NOCOUNT ON;
@@ -78,6 +80,7 @@ BEGIN
                 , B.strAccountId
                 , strPrimary = B.strCode
                 , B.intOrderId
+                , strPostedBy = EM.strName 
             FROM  
 			tblGLDetail A LEFT JOIN vyuGLAccountDetail B ON A.intAccountId = B.intAccountId
             LEFT JOIN tblSMCurrency SM on SM.intCurrencyID = A.intCurrencyId
@@ -88,6 +91,9 @@ BEGIN
 			OUTER APPLY (
 				SELECT TOP 1 strName, strEntityNo  from tblEMEntity  WHERE intEntityId = A.intSourceEntityId
 			)SE
+            OUTER APPLY (
+				SELECT TOP 1 strName  from tblEMEntity  WHERE intEntityId = A.intEntityId
+			)EM
 			OUTER APPLY (
 				SELECT TOP 1 dblLbsPerUnit,strUOMCode FROM tblGLAccountUnit WHERE intAccountUnitId = B.intAccountUnitId
 			)U
@@ -214,7 +220,11 @@ BEGIN
             @beginBalanceDebit NUMERIC(18,6)         = 0,
             @beginBalanceCredit NUMERIC(18,6)        = 0,
             @beginBalanceDebitForeign NUMERIC(18,6)  = 0,
-            @beginBalanceCreditForeign NUMERIC(18,6) = 0
+            @beginBalanceCreditForeign NUMERIC(18,6) = 0,
+            @groupId INT,
+            @totalId INT,
+            @hideTotal BIT
+
 
             WHILE EXISTS(SELECT TOP 1 1 FROM #TransactionGroupAll)
             BEGIN
@@ -285,6 +295,9 @@ BEGIN
                             SET @intAccountIdLoop = @_intAccountId
                             SET @intCurrencyIdLoop = @_intCurrencyId
 
+
+                     
+
                             INSERT INTO tblGLAuditorTransaction (
                             ysnGroupFooter
                             ,ysnGroupHeader
@@ -323,6 +336,9 @@ BEGIN
                                 FROM ##TransactionGroup 
                                 WHERE intAccountId = @_intAccountId
                                 AND @_intCurrencyId = intCurrencyId
+
+                            SELECT @groupId=SCOPE_IDENTITY()
+                            
 
                         END
                         ;WITH cteOrder AS(
@@ -382,6 +398,7 @@ BEGIN
                             , strLOBSegmentDescription
                             , strCurrency
                             , strAccountId
+                            , strPostedBy
                             , total - (dblDebit - dblCredit) + @beginBalance dblBeginningBalance 
                             , totalf - (dblDebitForeign - dblCreditForeign) + @beginBalanceForeign dblBeginningBalanceForeign
                             , total + @beginBalance  dblEndingBalance
@@ -437,6 +454,7 @@ BEGIN
                                 , strLOBSegmentDescription
                                 , strCurrency
                                 , strAccountId
+                                , strPostedBy
                                 , dblBeginningBalance
                                 , dblEndingBalance
                                 , dblBeginningBalanceForeign
@@ -490,14 +508,35 @@ BEGIN
                                 , strLOBSegmentDescription
                                 , strCurrency
                                 , strAccountId
+                                , strPostedBy
                                 , dblBeginningBalance
                                 , dblEndingBalance
                                 , dblBeginningBalanceForeign
                                 , dblEndingBalanceForeign
                                 FROM cteResult
 
-                                SELECT
-                                @dblTotalDebit = sum(dblDebit) , 
+
+							 SET @hideTotal = 0
+						
+							IF NOT EXISTS(
+								SELECT 1
+								 FROM ##AuditorTransactions 
+                                WHERE @_intAccountId =intAccountId 
+                                AND @_intCurrencyId = intCurrencyId 
+
+								
+							)
+							BEGIN
+							   IF @beginBalance = 0 AND ISNULL(@ysnSuppressZero,0) = 1
+								   BEGIN
+										 DELETE FROM tblGLAuditorTransaction WHERE intAuditorTransactionId = @groupId
+									SET @hideTotal = 1
+								END
+                            END
+
+
+							    SELECT
+                                @dblTotalDebit =  sum(dblDebit) , 
                                 @dblTotalCredit= sum(dblCredit) ,
                                 @dblTotalDebitUnit = sum(ISNULL(dblDebitUnit,0)) , 
                                 @dblTotalCreditUnit= sum(ISNULL(dblCreditUnit,0)) ,
@@ -509,6 +548,8 @@ BEGIN
                                 WHERE @_intAccountId =intAccountId 
                                 AND @_intCurrencyId = intCurrencyId    
 
+
+                            IF @hideTotal = 0
                                         -- Total record
                             INSERT INTO tblGLAuditorTransaction (
                                 ysnGroupFooter
@@ -538,8 +579,8 @@ BEGIN
                                 , intConcurrencyId
                             )
                             SELECT TOP 1
-                                CAST(1 AS BIT)
-                                ,CAST(0 AS BIT)
+                                  CAST(1 AS BIT)
+                                , CAST(0 AS BIT)
                                 , 0
                                 , @intEntityId
                                 , @dtmNow
@@ -565,6 +606,8 @@ BEGIN
                                 FROM ##TransactionGroup 
                                 WHERE intAccountId = @_intAccountId
                                 AND @_intCurrencyId = intCurrencyId
+
+                             
                             
                                 --SET @beginBalance = @beginBalance +  (@dblTotalDebit - @dblTotalCredit)
                                 DELETE ##TransactionGroup WHERE @_intAccountId = intAccountId AND @_intCurrencyId = intCurrencyId

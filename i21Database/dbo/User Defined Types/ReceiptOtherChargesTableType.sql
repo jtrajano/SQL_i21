@@ -39,7 +39,10 @@ CREATE TYPE [dbo].[ReceiptOtherChargesTableType] AS TABLE
 	,[strChargesLink] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL 
 	,[ysnAllowVoucher] BIT NULL
 	,[intLoadShipmentId] INT NULL
+	,[intLoadShipmentDetailId] INT NULL
 	,[intLoadShipmentCostId] INT NULL
 	,[intSort] INT NULL
 	,[dblQuantity] NUMERIC(18, 6) NULL DEFAULT ((0))										-- Used if Cost method used is 'Custom Unit'. This is usually used with the 'Minimum Units' that goes with the other charges.
+	,[ysnLock] BIT NULL DEFAULT ((0))														-- True if we need to lock and prevent users from making changes in the other charge. 
+	,[ysnWithGLReversal] BIT NULL															-- True if IR will need to create reversal GL entris for the other charges. 
 )

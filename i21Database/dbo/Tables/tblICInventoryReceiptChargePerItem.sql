@@ -16,6 +16,7 @@
 	[ysnPrice] BIT NULL DEFAULT ((0)),
 	[dblTax] NUMERIC(18, 6) NULL DEFAULT ((0)),
 	[strChargesLink] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL, 
+	[dblOriginalCalculatedAmount] NUMERIC(38, 20) NULL DEFAULT ((0)), 
 	--[dblAmountBilled] NUMERIC(18, 6) NULL DEFAULT ((0)), -- Removed these field. Use tblICInventoryReceiptCharge.dblAmountBilled
 	--[dblAmountPaid] NUMERIC(18, 6) NULL DEFAULT ((0)), -- Removed these field. Use tblICInventoryReceiptCharge.dblAmountBilled
 	CONSTRAINT [PK_tblICInventoryReceiptChargePerItem] PRIMARY KEY ([intInventoryReceiptChargePerItemId]), 

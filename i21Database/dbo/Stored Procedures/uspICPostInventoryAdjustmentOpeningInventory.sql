@@ -52,10 +52,13 @@ BEGIN
 			,dtmDate			
 			,dblQty				
 			,dblUOMQty			
-			,dblCost  
+			,dblCost 
+			,dblForexCost
 			,dblSalesPrice  
 			,intCurrencyId  
+			,intForexRateTypeId
 			,dblExchangeRate  
+			,dblForexRate
 			,intTransactionId 
 			,intTransactionDetailId
 			,strTransactionId  
@@ -71,10 +74,36 @@ BEGIN
 			,dtmDate				= Header.dtmAdjustmentDate
 			,dblQty					= CASE WHEN Detail.intNewWeightUOMId IS NOT NULL THEN ISNULL(Detail.dblNewWeight, 0) ELSE ISNULL(Detail.dblNewQuantity, 0) END
 			,dblUOMQty				= COALESCE(WeightUOM.dblUnitQty, ItemUOM.dblUnitQty, 0)
-			,dblCost				= ISNULL(ISNULL(Detail.dblNewCost, ItemPricing.dblLastCost), 0)
+			,dblCost				= 
+					CASE 
+						WHEN Detail.intCostUOMId IS NOT NULL AND Detail.dblNewCost IS NOT NULL THEN 
+							dbo.fnCalculateCostBetweenUOM(Detail.intCostUOMId, ISNULL(Detail.intNewWeightUOMId, Detail.intNewItemUOMId), Detail.dblNewCost) 
+						ELSE 
+							COALESCE(
+								Detail.dblNewCost
+								, dbo.fnCalculateCostBetweenUOM(stockUnit.intItemUOMId, ISNULL(Detail.intNewWeightUOMId, Detail.intNewItemUOMId), ItemPricing.dblLastCost) 
+								, 0
+							)
+					END 
+					
+			,dblForexCost			= 
+					CASE 
+						WHEN Detail.intCurrencyId <> @intFunctionalCurrencyId THEN 
+							CASE 
+								WHEN Detail.intCostUOMId IS NOT NULL AND Detail.dblUnitCostInForeignCurrency IS NOT NULL  THEN 
+									dbo.fnCalculateCostBetweenUOM(Detail.intCostUOMId, ISNULL(Detail.intNewWeightUOMId, Detail.intNewItemUOMId), Detail.dblUnitCostInForeignCurrency) 
+								ELSE 
+									Detail.dblUnitCostInForeignCurrency
+							END 
+						ELSE 
+							NULL 
+					END 
+
 			,dblSalesPrice			= 0
-			,intCurrencyId			= NULL 
-			,dblExchangeRate		= 1
+			,intCurrencyId			= Detail.intCurrencyId 
+			,intForexRateTypeId		= Detail.intForexRateTypeId
+			,dblExchangeRate		= ISNULL(Detail.dblForexRate, 1) 
+			,dblForexRate			= ISNULL(Detail.dblForexRate, 1) 
 			,intTransactionId		= Header.intInventoryAdjustmentId
 			,intTransactionDetailId = Detail.intInventoryAdjustmentDetailId
 			,strTransactionId		= Header.strAdjustmentNo
@@ -90,6 +119,15 @@ BEGIN
 			INNER JOIN dbo.tblICItemLocation ItemLocation 
 				ON ItemLocation.intLocationId = Header.intLocationId
 				AND ItemLocation.intItemId = Detail.intItemId
+			OUTER APPLY (
+				SELECT TOP 1 *
+				FROM 
+					tblICItemUOM stockUnit
+				WHERE
+					stockUnit.intItemId = Detail.intItemId
+					AND stockUnit.ysnStockUnit = 1
+			) stockUnit
+
 			LEFT JOIN dbo.tblICItemUOM ItemUOM
 				ON Detail.intNewItemUOMId = ItemUOM.intItemUOMId
 			LEFT JOIN dbo.tblICItemUOM WeightUOM
@@ -111,14 +149,35 @@ BEGIN
 			,dtmDate				= Header.dtmAdjustmentDate
 			,dblQty					= Detail.dblNewQuantity
 			,dblUOMQty				= ItemUOM.dblUnitQty
-			,dblCost				= ISNULL(dbo.fnCalculateCostBetweenUOM( 
-										dbo.fnGetItemStockUOM(Detail.intItemId)
-										,Detail.intNewItemUOMId
-										,ISNULL(Detail.dblNewCost, ItemPricing.dblLastCost)
-									), 0)
+			,dblCost				= 
+					CASE 
+						WHEN Detail.intCostUOMId IS NOT NULL AND Detail.dblNewCost IS NOT NULL THEN 
+							dbo.fnCalculateCostBetweenUOM(Detail.intCostUOMId, ISNULL(Detail.intNewWeightUOMId, Detail.intNewItemUOMId), Detail.dblNewCost) 
+						ELSE 
+							COALESCE(
+								Detail.dblNewCost
+								, dbo.fnCalculateCostBetweenUOM(stockUnit.intItemUOMId, ISNULL(Detail.intNewWeightUOMId, Detail.intNewItemUOMId), ItemPricing.dblLastCost) 
+								, 0
+							)
+					END 
+					
+			,dblForexCost			= 
+					CASE 
+						WHEN Detail.intCurrencyId <> @intFunctionalCurrencyId THEN 
+							CASE 
+								WHEN Detail.intCostUOMId IS NOT NULL AND Detail.dblUnitCostInForeignCurrency IS NOT NULL  THEN 
+									dbo.fnCalculateCostBetweenUOM(Detail.intCostUOMId, ISNULL(Detail.intNewWeightUOMId, Detail.intNewItemUOMId), Detail.dblUnitCostInForeignCurrency) 
+								ELSE 
+									Detail.dblUnitCostInForeignCurrency
+							END 
+						ELSE 
+							NULL 
+					END 
 			,dblSalesPrice			= 0
-			,intCurrencyId			= NULL 
-			,dblExchangeRate		= 1
+			,intCurrencyId			= Detail.intCurrencyId 
+			,intForexRateTypeId		= Detail.intForexRateTypeId
+			,dblExchangeRate		= ISNULL(Detail.dblForexRate, 1) 
+			,dblForexRate			= ISNULL(Detail.dblForexRate, 1) 
 			,intTransactionId		= Header.intInventoryAdjustmentId
 			,intTransactionDetailId = Detail.intInventoryAdjustmentDetailId
 			,strTransactionId		= Header.strAdjustmentNo
@@ -134,6 +193,14 @@ BEGIN
 			INNER JOIN dbo.tblICItemLocation ItemLocation 
 				ON ItemLocation.intLocationId = Header.intLocationId
 				AND ItemLocation.intItemId = Detail.intItemId
+			OUTER APPLY (
+				SELECT TOP 1 *
+				FROM 
+					tblICItemUOM stockUnit
+				WHERE
+					stockUnit.intItemId = Detail.intItemId
+					AND stockUnit.ysnStockUnit = 1
+			) stockUnit
 			LEFT JOIN dbo.tblICItemUOM ItemUOM
 				ON Detail.intNewItemUOMId = ItemUOM.intItemUOMId
 			LEFT JOIN dbo.tblICItemPricing ItemPricing
@@ -174,8 +241,10 @@ BEGIN
 			,dblUOMQty			
 			,dblCost  
 			,dblSalesPrice  
-			,intCurrencyId  
-			,dblExchangeRate  
+			,intCurrencyId
+			,intForexRateTypeId
+			,dblExchangeRate
+			,dblForexRate
 			,intTransactionId 
 			,intTransactionDetailId
 			,strTransactionId  
@@ -193,8 +262,10 @@ BEGIN
 			,dblUOMQty				= COALESCE(WeightUOM.dblUnitQty, ItemUOM.dblUnitQty, 0)
 			,dblCost				= ISNULL(ISNULL(Detail.dblNewCost, ItemPricing.dblLastCost), 0)
 			,dblSalesPrice			= 0
-			,intCurrencyId			= NULL 
-			,dblExchangeRate		= 1
+			,intCurrencyId			= Detail.intCurrencyId 
+			,intForexRateTypeId		= Detail.intForexRateTypeId
+			,dblExchangeRate		= ISNULL(Detail.dblForexRate, 1) 
+			,dblForexRate			= ISNULL(Detail.dblForexRate, 1) 
 			,intTransactionId		= Header.intInventoryAdjustmentId
 			,intTransactionDetailId = Detail.intInventoryAdjustmentDetailId
 			,strTransactionId		= Header.strAdjustmentNo
@@ -237,8 +308,10 @@ BEGIN
 										,ISNULL(Detail.dblNewCost, ItemPricing.dblLastCost)
 									), 0)
 			,dblSalesPrice			= 0
-			,intCurrencyId			= NULL 
-			,dblExchangeRate		= 1
+			,intCurrencyId			= Detail.intCurrencyId 
+			,intForexRateTypeId		= Detail.intForexRateTypeId
+			,dblExchangeRate		= ISNULL(Detail.dblForexRate, 1) 
+			,dblForexRate			= ISNULL(Detail.dblForexRate, 1) 
 			,intTransactionId		= Header.intInventoryAdjustmentId
 			,intTransactionDetailId = Detail.intInventoryAdjustmentDetailId
 			,strTransactionId		= Header.strAdjustmentNo

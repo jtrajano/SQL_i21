@@ -1,13 +1,14 @@
 ﻿CREATE PROCEDURE [dbo].[uspARUpdateInvoiceIntegrations] 
-	 @InvoiceId			INT = NULL	
-	,@ForDelete			BIT = 0    
-	,@UserId			INT = NULL
-	,@InvoiceDetailId 	INT = NULL
-	,@ysnLogRisk		BIT = 1
-	,@Post				BIT	= 0
-	,@Recap				BIT	= 1
-	,@FromPosting		BIT = 0
-	,@strSessionId		NVARCHAR(50) = NULL
+	 @InvoiceId				INT = NULL	
+	,@ForDelete				BIT = 0    
+	,@UserId				INT = NULL
+	,@InvoiceDetailId 		INT = NULL
+	,@ysnLogRisk			BIT = 1
+	,@Post					BIT	= 0
+	,@Recap					BIT	= 1
+	,@FromPosting			BIT = 0
+	,@LogTradeFinanceInfo	BIT = 0
+	,@strSessionId			NVARCHAR(50) = NULL
 AS  
 
 SET QUOTED_IDENTIFIER OFF  
@@ -75,6 +76,8 @@ BEGIN TRY
 			IF @intTranCount = 0
 				COMMIT TRANSACTION
 
+			EXEC dbo.[uspARProcessTradeFinanceLog] @InvoiceIds, @intUserId, 'Invoice', @ForDelete, @Post, @FromPosting, @LogTradeFinanceInfo
+			
 			RETURN
 		END
 

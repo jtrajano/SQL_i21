@@ -191,7 +191,7 @@ Type the overview for the table here.
 		[guiApiUniqueId] UNIQUEIDENTIFIER NULL,
 		[intRowNumber] INT NULL,
 		[intComputeItemTotalOption] TINYINT NOT NULL DEFAULT(0),
-		[ysnProducePartialPacking] BIT NOT NULL DEFAULT(0),
+		[ysnProducePartialPacking] BIT NULL DEFAULT((0)),
 		[intSubcategoriesId] [int] NULL,
 		[intStoreFamilyId] [int] NULL,
 		[intStoreClassId] [int] NULL,

@@ -13,10 +13,12 @@ SELECT
 	, A.intBillId 
 	, A.strBillId 
 	, 0 AS dblAmountPaid 
-	, CAST(CASE WHEN A.intTransactionType NOT IN (1,14) THEN (B.dblTotal) *  B.dblRate * -1 
+	, CAST(CASE WHEN A.intTransactionType IN (16) THEN (B.dblTotal * (B.dblProvisionalPercentage / 100)) * B.dblRate
+						WHEN A.intTransactionType NOT IN (1,14) THEN (B.dblTotal) *  B.dblRate * -1 
 				ELSE (B.dblTotal) * B.dblRate
 		END AS DECIMAL(18,2)) AS dblTotal
-	, CASE WHEN A.intTransactionType NOT IN (1,14) THEN A.dblAmountDue * -1 ELSE A.dblAmountDue
+	,	CASE WHEN A.intTransactionType IN (16) THEN A.dblProvisionalAmountDue
+				WHEN A.intTransactionType NOT IN (1,14) THEN A.dblAmountDue * -1 ELSE A.dblAmountDue
 		END * B.dblRate AS dblAmountDue 
 	, dblWithheld = 0
 	, dblDiscount = 0 
@@ -45,10 +47,12 @@ SELECT
 	, A.intBillId 
 	, A.strBillId 
 	, 0 AS dblAmountPaid 
-	, CAST(CASE WHEN A.intTransactionType NOT IN (1,14) THEN (B.dblTotal) *  B.dblRate * -1 
+	, CAST(CASE WHEN A.intTransactionType IN (16) THEN (B.dblTotal * (ISNULL(BL.dblProvisionalPercentage, 100) / 100)) * B.dblRate 
+				WHEN A.intTransactionType NOT IN (1,14) THEN (B.dblTotal) *  B.dblRate * -1 
 				ELSE (B.dblTotal) * B.dblRate
 		END AS DECIMAL(18,2)) AS dblTotal
-	, CASE WHEN A.intTransactionType NOT IN (1,14) THEN A.dblAmountDue * -1 ELSE A.dblAmountDue
+	, CASE WHEN A.intTransactionType IN (16) THEN BL.dblProvisionalAmountDue
+	WHEN A.intTransactionType NOT IN (1,14) THEN A.dblAmountDue * -1 ELSE A.dblAmountDue
 		END * B.dblRate AS dblAmountDue 
 	, dblWithheld = 0
 	, dblDiscount = 0 
@@ -65,12 +69,13 @@ SELECT
 	, A.intCurrencyId
 	-- ,'Bill' AS [Info]
 FROM dbo.tblAPBillArchive A
+INNER JOIN tblAPBill BL ON A.intBillId = BL.intBillId
 LEFT JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityId] = C2.intEntityId)
 	ON C1.[intEntityId] = A.[intEntityVendorId]
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C2.intEntityClassId	
 LEFT JOIN dbo.tblAPBillDetailArchive B ON B.intBillId = A.intBillId
 LEFT JOIN dbo.tblGLAccount F ON  A.intAccountId = F.intAccountId
-WHERE A.ysnPosted = 1 AND intTransactionType NOT IN (7, 2, 12, 13, 15)  AND A.ysnOrigin = 0
+WHERE A.ysnPosted = 1 AND A.intTransactionType NOT IN (7, 2, 12, 13, 15)  AND A.ysnOrigin = 0
 -- GROUP BY  
 -- 	 A.dtmDate
 -- 	,A.intBillId 
@@ -93,10 +98,12 @@ SELECT
 	, A.intBillId 
 	, A.strBillId 
 	, 0 AS dblAmountPaid 
-	, CAST(CASE WHEN A.intTransactionType NOT IN (1,14) THEN ISNULL(B.dblTax, 0) *  B.dblRate * -1 
+	, CAST(CASE WHEN A.intTransactionType IN (16) THEN  (ISNULL(B.dblTax, 0) * (A.dblProvisionalPercentage / 100)) * B.dblRate
+				WHEN A.intTransactionType NOT IN (1,14) THEN ISNULL(B.dblTax, 0) *  B.dblRate * -1 
 				ELSE ISNULL(B.dblTax, 0) * B.dblRate
 		END AS DECIMAL(18,2)) AS dblTotal
-	, CASE WHEN A.intTransactionType NOT IN (1,14) THEN A.dblAmountDue * -1 ELSE A.dblAmountDue
+	, CASE WHEN A.intTransactionType IN (16) THEN A.dblProvisionalAmountDue
+		WHEN A.intTransactionType NOT IN (1,14) THEN A.dblAmountDue * -1 ELSE A.dblAmountDue
 		END * B.dblRate AS dblAmountDue 
 	, dblWithheld = 0
 	, dblDiscount = 0 
@@ -127,8 +134,10 @@ SELECT
 	, A.intBillId 
 	, A.strBillId 
 	, 0 AS dblAmountPaid 
-	, CAST(CASE WHEN A.intTransactionType NOT IN (1,14) AND A.dblTotal > 0 THEN (A.dblTotal + A.dblTax) * -1 ELSE A.dblTotal + A.dblTax END AS DECIMAL(18,2)) AS dblTotal
-	, CASE WHEN A.intTransactionType NOT IN (1,14) THEN A.dblAmountDue * -1 ELSE A.dblAmountDue END AS dblAmountDue 
+	, CAST(CASE WHEN A.intTransactionType IN (16) AND A.dblProvisionalTotal > 0 THEN (A.dblProvisionalTotal + (A.dblTax * (A.dblProvisionalPercentage / 100)))
+							WHEN A.intTransactionType NOT IN (1,14) AND A.dblTotal > 0 THEN (A.dblTotal + A.dblTax) * -1 ELSE A.dblTotal + A.dblTax END AS DECIMAL(18,2)) AS dblTotal
+	, CASE WHEN A.intTransactionType IN (16) THEN A.dblProvisionalAmountDue
+	WHEN A.intTransactionType NOT IN (1,14) THEN A.dblAmountDue * -1 ELSE A.dblAmountDue END AS dblAmountDue 
 	, dblWithheld = 0
 	, dblDiscount = 0 
 	, dblInterest = 0 
@@ -165,7 +174,7 @@ SELECT  A.dtmDatePaid AS dtmDate,
 	, dblAmountDue = 0 
 	, dblWithheld = B.dblWithheld
 	, CAST(CASE 
-				WHEN C.intTransactionType NOT IN (1,2,14) AND ABS(B.dblDiscount) > 0 
+				WHEN C.intTransactionType NOT IN (1,2,14,16) AND ABS(B.dblDiscount) > 0 
 				THEN B.dblDiscount --* -1 note: we expect that the discount in 20.1 is already negative  
 			ELSE 
 			(
@@ -178,7 +187,7 @@ SELECT  A.dtmDatePaid AS dtmDate,
 			)
 			END * ISNULL(C.dblAverageExchangeRate,1) AS DECIMAL(18,2)) AS dblDiscount
 	, CAST(CASE 
-			WHEN C.intTransactionType NOT IN (1,2,14) AND ABS(B.dblInterest) > 0 
+			WHEN C.intTransactionType NOT IN (1,2,14,16) AND ABS(B.dblInterest) > 0 
 			THEN B.dblInterest --* -1 
 			ELSE B.dblInterest
 			END * ISNULL(C.dblAverageExchangeRate,1) AS DECIMAL(18,2)) AS dblInterest 
@@ -249,7 +258,7 @@ SELECT
 	C.dtmDate --THIS SHOUD BE THE DATE OF THE VOUCHER THAT APPLIED THE DM
 	,A.intBillId
 	,A.strBillId
-	,B.dblAmountApplied * (CASE WHEN A.intTransactionType NOT IN (1,14) THEN -1 ELSE 1 END)
+	,B.dblAmountApplied * (CASE WHEN A.intTransactionType NOT IN (1,14,16) THEN -1 ELSE 1 END)
 	,0 AS dblTotal
 	,0 AS dblAmountDue
 	,0 AS dblWithheld
@@ -279,8 +288,10 @@ SELECT --OVERPAYMENT
 	, A.intBillId 
 	, A.strBillId 
 	, 0 AS dblAmountPaid 
-	, CASE WHEN A.intTransactionType NOT IN (1,14) AND A.dblTotal > 0 THEN A.dblTotal * -1 ELSE A.dblTotal END AS dblTotal
-	, CASE WHEN A.intTransactionType NOT IN (1,14) AND A.dblAmountDue > 0 THEN A.dblAmountDue * -1 ELSE A.dblAmountDue END AS dblAmountDue 
+	, CASE WHEN A.intTransactionType IN (16) AND A.dblProvisionalTotal > 0 THEN A.dblProvisionalTotal
+		WHEN A.intTransactionType NOT IN (1,14) AND A.dblTotal > 0 THEN A.dblTotal * -1 ELSE A.dblTotal END AS dblTotal
+	, CASE WHEN A.intTransactionType IN (16) AND A.dblProvisionalAmountDue > 0 THEN A.dblProvisionalAmountDue
+		WHEN A.intTransactionType NOT IN (1,14) AND A.dblAmountDue > 0 THEN A.dblAmountDue * -1 ELSE A.dblAmountDue END AS dblAmountDue 
 	, dblWithheld = 0
 	, dblDiscount = 0 
 	, dblInterest = 0 
@@ -332,17 +343,17 @@ UNION ALL
 SELECT A.dtmDatePaid AS dtmDate,   
 	 B.intBillId,   
 	 C.strBillId ,
-	 CAST(CASE WHEN C.intTransactionType NOT IN (1,2, 14) AND B.dblPayment != 0
+	 CAST(CASE WHEN C.intTransactionType NOT IN (1,2, 14,16) AND B.dblPayment != 0
 			THEN (CASE WHEN (E.intBankTransactionTypeId <> 19 OR E.intBankTransactionTypeId <> 116 OR E.intBankTransactionTypeId IS NULL)
 						 THEN B.dblPayment * -1 ELSE B.dblPayment END)
-			WHEN C.intTransactionType NOT IN (1,2, 14) AND B.dblPayment < 0 AND (E.intBankTransactionTypeId = 116 OR E.intBankTransactionTypeId = 19)
+			WHEN C.intTransactionType NOT IN (1,2, 14,16) AND B.dblPayment < 0 AND (E.intBankTransactionTypeId = 116 OR E.intBankTransactionTypeId = 19)
 				THEN B.dblPayment * -1 --MAKE THE REVERSAL DEBIT MEMO TRANSACTION POSITIVE
 			ELSE ABS(B.dblPayment) * ISNULL(A.dblExchangeRate,1) END AS DECIMAL(18,2)) AS dblAmountPaid, --ALWAYS CONVERT TO POSSITIVE TO OFFSET THE PAYMENT
 	 dblTotal = 0 
 	, dblAmountDue = 0 
 	, dblWithheld = 0
-	, CASE WHEN C.intTransactionType NOT IN (1,2,14) AND B.dblDiscount > 0 THEN B.dblDiscount * -1 ELSE ABS(B.dblDiscount) END AS dblDiscount
-	, CASE WHEN C.intTransactionType NOT IN (1,2,14) AND B.dblInterest > 0 THEN B.dblInterest * -1 ELSE ABS(B.dblInterest) END AS dblInterest 
+	, CASE WHEN C.intTransactionType NOT IN (1,2,14,16) AND B.dblDiscount > 0 THEN B.dblDiscount * -1 ELSE ABS(B.dblDiscount) END AS dblDiscount
+	, CASE WHEN C.intTransactionType NOT IN (1,2,14,16) AND B.dblInterest > 0 THEN B.dblInterest * -1 ELSE ABS(B.dblInterest) END AS dblInterest 
 	, dblPrepaidAmount = 0 
 	, D.strVendorId 
 	, isnull(D.strVendorId,'') + ' - ' + isnull(D2.strName,'') as strVendorIdName 
@@ -407,7 +418,7 @@ OUTER APPLY (
 ) prepaidDetail		
  WHERE A.ysnPosted = 1  
 	AND C.ysnPosted = 1
-	AND C.intTransactionType IN (1, 3) --BILL TRANSACTION ONLY
+	AND C.intTransactionType IN (1, 3,16) --BILL TRANSACTION ONLY
 	AND A.ysnPrepay = 1
 	AND NOT EXISTS (
 		SELECT 1 FROM vyuAPPaidOriginPrepaid originPrepaid WHERE originPrepaid.intBillId = C.intBillId

@@ -41,6 +41,7 @@ BEGIN
 			AND ISNULL(C.intInventoryShipmentChargeId,-1) = ISNULL(A.intInventoryShipmentChargeId,-1)
 			AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(A.intLoadShipmentDetailId,-1)
 			AND ISNULL(C.intLoadShipmentCostId,-1) = ISNULL(A.intLoadShipmentCostId,-1)
+			AND ISNULL(C.intLoadHeaderId,-1) = ISNULL(A.intLoadHeaderId,-1)
 			AND ISNULL(C.intWeightClaimDetailId,-1) = ISNULL(A.intWeightClaimDetailId,-1)
 			AND ISNULL(C.intCustomerStorageId,-1) = ISNULL(A.intCustomerStorageId,-1)
 			AND ISNULL(C.intSettleStorageId,-1) = ISNULL(A.intSettleStorageId,-1)
@@ -103,6 +104,7 @@ BEGIN
 			,[intLoadShipmentId]				=	A.intLoadShipmentId
 			,[intLoadShipmentDetailId]			=	A.intLoadShipmentDetailId
 			,[intLoadShipmentCostId]			=	A.intLoadShipmentCostId
+			,[intLoadHeaderId]					=	A.intLoadHeaderId
 			,[intWeightClaimId]					=	A.intWeightClaimId
 			,[intWeightClaimDetailId]			=	A.intWeightClaimDetailId
 			,[intCustomerStorageId]				=	A.intCustomerStorageId
@@ -400,7 +402,8 @@ BEGIN
 		,[intInventoryShipmentChargeId]
 		,[intLoadShipmentId]				
 		,[intLoadShipmentDetailId]		
-		,[intLoadShipmentCostId]	
+		,[intLoadShipmentCostId]
+		,[intLoadHeaderId]
 		,[intWeightClaimId]
 		,[intWeightClaimDetailId]
 		,[intCustomerStorageId]	
@@ -525,7 +528,8 @@ BEGIN
 		,[intInventoryShipmentChargeId]
 		,[intLoadShipmentId]				
 		,[intLoadShipmentDetailId]	
-		,[intLoadShipmentCostId]	
+		,[intLoadShipmentCostId]
+		,[intLoadHeaderId]
 		,[intWeightClaimId]				
 		,[intWeightClaimDetailId]	
 		,[intCustomerStorageId]
@@ -669,7 +673,25 @@ BEGIN
 		ON A.intVoucherPayableId = B.intNewPayableId
 	INNER JOIN tblAPVoucherPayableTaxStaging C
 		ON B.intNewPayableId = C.intVoucherPayableId
-		
+
+	--Update tax group of claims from voucher payable that are created from Weight Claims Screen
+	--Using DR/CR Memo button
+	BEGIN
+		UPDATE A
+			SET A.intPurchaseTaxGroupId = Tax.intTaxGroupId,
+					A.strTaxGroup = Tax.strTaxGroup
+		FROM tblAPVoucherPayable A
+		INNER JOIN @insertedData B
+			ON A.intVoucherPayableId = B.intNewPayableId
+		OUTER APPLY (
+			SELECT	TG.intTaxGroupId, TG.strTaxGroup
+			FROM	tblSMTaxGroup TG
+			WHERE	TG.intTaxGroupId = dbo.fnGetTaxGroupIdForVendor(A.intEntityVendorId, A.intLocationId, A.intItemId, A.intShipFromId, A.intFreightTermId, DEFAULT)
+			AND A.intPurchaseTaxGroupId IS NULL
+		) Tax
+		WHERE A.intPurchaseTaxGroupId IS NULL AND A.intWeightClaimId IS NOT NULL AND A.intWeightClaimDetailId IS NOT NULL
+	END
+
 	--IF NO TAX PROVIDED, WE WILL GENERATE TAX AND WILL USE TAX ACCOUNT
 	DECLARE @ParamTable AS TABLE
 		(intVoucherPayableId		INT
@@ -706,13 +728,13 @@ BEGIN
 		,intItemId					= A.intItemId
 		,intVendorId				= CASE WHEN A.intShipFromEntityId != A.intEntityVendorId THEN A.intShipFromEntityId ELSE A.intEntityVendorId END
 		,dtmTransactionDate			= A.dtmDate
-		,dblItemCost				= A.dblCost
-		,dblQuantity				= CASE WHEN A.intWeightUOMId > 0 AND A.dblNetWeight > 0
-										THEN A.dblNetWeight
-										ELSE A.dblQuantityToBill END
+		,dblItemCost				= CASE WHEN A.intComputeTotalOption = 0 AND  ISNULL(A.intWeightUOMId,0) > 0 AND ISNULL(A.intWeightClaimDetailId,0) > 0 THEN A.dblCost / A.dblCostUnitQty ELSE A.dblCost END
+		,dblQuantity				= CASE WHEN A.intComputeTotalOption = 0 AND  ISNULL(A.intWeightUOMId,0) > 0 AND ISNULL(A.intWeightClaimDetailId,0) > 0
+										THEN A.dblQuantityToBill
+										ELSE A.dblNetWeight END
 		,intTaxGroupId				= CASE 
-									WHEN A.intPurchaseTaxGroupId > 0 THEN A.intPurchaseTaxGroupId
-									ELSE NULL END 
+									WHEN ISNULL(A.intPurchaseTaxGroupId,0) > 0 THEN A.intPurchaseTaxGroupId
+									ELSE dbo.fnGetTaxGroupIdForVendor(A.intEntityVendorId, A.intLocationId, A.intItemId, A.intShipFromId, A.intFreightTermId, DEFAULT) END
 		,intCompanyLocationId		= A.intShipToId
 		,intVendorLocationId		= A.intShipFromId
 		,ysnIncludeExemptedCodes	= 1

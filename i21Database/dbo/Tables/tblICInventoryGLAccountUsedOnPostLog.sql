@@ -31,6 +31,7 @@ Type the overview for the table here.
 		[intRevalueBuildAssembly] INT NULL,
 		[intRevalueInTransit] INT NULL,
 		intNonInventoryId INT,
+		[intRealizedForeignExchangeGainLossOnInventory] INT,
 		intContraNonInventoryId INT,
 		[intIntraCompanyTransferDueFrom] INT NULL,
 		[intIntraCompanyTransferDueTo] INT NULL,

@@ -12,6 +12,7 @@ CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentRetroactiveLot]
 	,@intCostUOMId AS INT 
 	,@dblNewCost AS NUMERIC(38,20)
 	,@dblNewValue AS NUMERIC(38,20)
+	,@dblNewForexValue AS NUMERIC(38,20)
 	,@intTransactionId AS INT
 	,@intTransactionDetailId AS INT
 	,@strTransactionId AS NVARCHAR(20)
@@ -31,6 +32,13 @@ CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentRetroactiveLot]
 	,@intLotId AS INT = NULL 
 	,@IsEscalate AS BIT = 0 
 	,@intSourceEntityId AS INT = NULL
+	,@intCurrencyId AS INT = NULL 
+	,@intForexRateTypeId AS INT = NULL
+	,@dblForexRate AS NUMERIC(38, 20)
+	,@intOtherChargeCurrencyId AS INT = NULL 
+	,@intOtherChargeForexRateTypeId AS INT = NULL 
+	,@dblOtherChargeForexRate AS NUMERIC(38, 20) 
+	,@dblOtherChargeValue AS NUMERIC(38, 20) 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -81,10 +89,14 @@ BEGIN
 			,@INV_TRANS_TYPE_NegativeStock AS INT = 35
 
 	DECLARE	
-			@CostAdjustment AS NUMERIC(38, 20)			
+			@CostAdjustment AS NUMERIC(38, 20)
+			,@ForexCostAdjustment AS NUMERIC(38, 20)
 			,@CostAdjustmentPerCb AS NUMERIC(38, 20) 
+			,@ForexCostAdjustmentPerCb AS NUMERIC(38, 20) 
 			,@CurrentCostAdjustment AS NUMERIC(38, 20)
+			,@ForexCurrentCostAdjustment AS NUMERIC(38, 20)
 			,@CostBucketNewCost AS NUMERIC(38, 20)			
+			,@CostBucketNewForexCost AS NUMERIC(38, 20)			
 			,@TotalCostAdjustment AS NUMERIC(38, 20)
 
 			,@t_intInventoryTransactionId AS INT 
@@ -120,8 +132,12 @@ BEGIN
 
     DECLARE @strReceiptType AS NVARCHAR(50)
 			,@self AS INT 
-			,@costAdjustmentType_DETAILED AS TINYINT = 1
-			,@costAdjustmentType_SUMMARIZED AS TINYINT = 2
+
+	DECLARE @costAdjustmentType_DETAILED AS TINYINT = 1
+		,@costAdjustmentType_SUMMARIZED AS TINYINT = 2
+		,@costAdjustmentType_RETROACTIVE_DETAILED AS TINYINT = 3
+		,@costAdjustmentType_RETROACTIVE_SUMMARIZED AS TINYINT = 4
+		,@costAdjustmentType_CURRENT_AVG AS TINYINT = 5
 
 	DECLARE @costAdjustmentType AS TINYINT 
 	SET @costAdjustmentType = dbo.fnICGetCostAdjustmentSetup(@intItemId, @intItemLocationId) 
@@ -129,11 +145,18 @@ END
 
 -- Compute the cost adjustment
 BEGIN 
-	SET @CostAdjustment = 
-		CASE	WHEN @dblNewValue IS NOT NULL THEN @dblNewValue
+	SET @ForexCostAdjustment = 
+		CASE	WHEN @dblNewForexValue IS NOT NULL THEN @dblNewForexValue
 				WHEN @dblQty IS NOT NULL THEN @dblQty * ISNULL(@dblNewCost, 0) 
 				ELSE NULL 
-		END 
+		END 	
+
+	SET @CostAdjustment = 
+		CASE	WHEN @dblNewValue IS NOT NULL THEN @dblNewValue
+				WHEN @dblQty IS NOT NULL AND NULLIF(@dblForexRate, 0) <> 1 THEN @dblQty * ISNULL(@dblNewCost, 0) * @dblForexRate
+				WHEN @dblQty IS NOT NULL THEN @dblQty * ISNULL(@dblNewCost, 0) 
+				ELSE NULL 
+		END 	
 
 	-- If there is no cost adjustment, exit immediately. 
 	IF @CostAdjustment IS NULL 
@@ -184,6 +207,8 @@ BEGIN
 			,@CostBucketOriginalCost AS NUMERIC(38, 20)
 			,@CostBucketOriginalValue AS NUMERIC(38, 20) 
 			,@CostBucketDate AS DATETIME 
+			,@CostBucketOriginalForexCost AS NUMERIC(38, 20)
+			,@CostBucketOriginalForexValue AS NUMERIC(38, 20) 
 
 	--SELECT	TOP 1 
 	--		@InventoryTransactionStartId = t.intInventoryTransactionId 
@@ -329,6 +354,9 @@ BEGIN
 			,[intLotId] INT 
 			,[dblCost] NUMERIC(38, 20)
 			,[dblValue] NUMERIC(38, 20)
+			,[dblForexCost] NUMERIC(38, 20)
+			,[dblForexValue] NUMERIC(38, 20)
+
 		)
 
 		CREATE NONCLUSTERED INDEX [IX_tmpCostBucketOriginal] ON dbo.#tmpCostBucketOriginal(intLotId ASC);
@@ -340,11 +368,15 @@ BEGIN
 			,[intLotId] 
 			,[dblCost] 
 			,[dblValue] 
+			,[dblForexCost] 
+			,[dblForexValue]
 	)
 	SELECT cb.intInventoryLotId
 			,cb.intLotId 
 			,cb.dblCost 
 			,dblValue = cb.dblStockIn * cb.dblCost
+			,cb.dblForexCost 
+			,dblForexValue = cb.dblStockIn * cb.dblForexCost
 	FROM	tblICInventoryLot cb
 	WHERE	cb.intItemId = @intItemId
 			AND cb.intItemLocationId = @intItemLocationId
@@ -358,6 +390,7 @@ END
 -- Calculate how much cost adjustment goes for each lot qty. 
 BEGIN 
 	SELECT	@CostAdjustmentPerCb = dbo.fnDivide(@CostAdjustment, SUM(ISNULL(cb.dblStockIn, 0))) 
+			,@ForexCostAdjustmentPerCb = dbo.fnDivide(@ForexCostAdjustment, SUM(ISNULL(cb.dblStockIn, 0))) 
 	FROM	tblICInventoryLot cb
 	WHERE	cb.intItemId = @intItemId
 			AND cb.intItemLocationId = @intItemLocationId
@@ -385,6 +418,7 @@ BEGIN
 				,[intInventoryCostAdjustmentTypeId] 
 				,[dblQty] 
 				,[dblCost] 
+				,[dblForexCost]
 				,[dblValue] 
 				,[ysnIsUnposted] 
 				,[dtmCreated] 
@@ -400,6 +434,7 @@ BEGIN
 				,[intInventoryCostAdjustmentTypeId] = @COST_ADJ_TYPE_Original_Cost
 				,[dblQty] = cb.dblStockIn
 				,[dblCost] = cb.dblCost
+				,[dblForexCost] = cb.dblForexCost
 				,[dblValue] = NULL 
 				,[ysnIsUnposted]  = 0 
 				,[dtmCreated] = GETDATE()
@@ -478,6 +513,7 @@ BEGIN
 		SET @t_dblCost = ISNULL(@t_dblCost, 0)
 		SET @t_dblValue = ISNULL(@t_dblValue, 0) 
 		SET @CostBucketNewCost = ISNULL(@CostBucketNewCost, 0) 
+		SET @CostBucketNewForexCost = ISNULL(@CostBucketNewForexCost, 0) 
 		SET @CurrentCostAdjustment = ISNULL(@CurrentCostAdjustment, 0) 		
 
 		SET @IsSourceTransaction = 0
@@ -535,6 +571,8 @@ BEGIN
 			SELECT	@CostBucketOriginalValue = cbo.dblValue
 					,@CostBucketOriginalCost = cbo.dblCost
 					,@intInventoryLotId = cb.intInventoryLotId
+					,@CostBucketOriginalForexCost  = cbo.dblForexCost 
+					,@CostBucketOriginalForexValue = cbo.dblForexValue
 			FROM	tblICInventoryLot cb INNER JOIN #tmpCostBucketOriginal cbo
 						ON cb.intInventoryLotId = cbo.intInventoryLotId
 			WHERE	cbo.intLotId = @t_intLotId
@@ -553,6 +591,13 @@ BEGIN
 						(@CostBucketOriginalValue + @CostAdjustmentPerCb * @t_dblQty) / @t_dblQty
 					ELSE
 						@CostBucketNewCost
+			END 
+
+		SET @CostBucketNewForexCost = 
+			CASE	WHEN @IsSourceTransaction = 1 THEN 
+						(@CostBucketOriginalForexValue + @ForexCostAdjustmentPerCb * @t_dblQty) / @t_dblQty
+					ELSE
+						@CostBucketNewForexCost
 			END 
 		
 		-- Calculate the current cost adjustment
@@ -593,14 +638,12 @@ BEGIN
 							WHEN NOT (ROUND(@CostBucketNewCost, 2) < 0) AND @CostBucketNewCost < 0 THEN 0 
 							ELSE @CostBucketNewCost
 						END 
-						--dbo.fnDivide(
-						--	(@CostBucketOriginalValue + @CostAdjustment) 
-						--	,cb.dblStockIn 
-						--) 
-						--dbo.fnDivide(
-						--	(dbo.fnMultiply(cb.dblStockIn, cb.dblCost) + dbo.fnMultiply(@CostAdjustmentPerCb, cb.dblStockIn)) 
-						--	,cb.dblStockIn 
-						--) 
+
+					,cb.dblForexCost = 
+						CASE 
+							WHEN NOT (ROUND(@CostBucketNewForexCost, 2) < 0) AND @CostBucketNewForexCost < 0 THEN 0 
+							ELSE @CostBucketNewForexCost
+						END 
 			FROM	tblICInventoryLot cb
 			WHERE	cb.intInventoryLotId = @intInventoryLotId
 
@@ -615,7 +658,7 @@ BEGIN
 		END 
 
 		-- Check if there is a transaction where the cost change needs escalation. 
-		IF @costAdjustmentType = @costAdjustmentType_DETAILED
+		IF @costAdjustmentType IN (@costAdjustmentType_DETAILED, @costAdjustmentType_RETROACTIVE_DETAILED)
 		BEGIN 
 			SET @EscalateCostAdjustment = 0 
 			SET @EscalateCostAdjustment = (@t_dblQty * @CostBucketNewCost) - (@t_dblQty * @CostBucketOriginalCost)
@@ -689,6 +732,14 @@ BEGIN
 				,[intCreatedUserId] 
 				,[intCreatedEntityUserId] 
 				,[intOtherChargeItemId] 
+				,[dblForexValue] 
+				,[intCurrencyId] 
+				,[intForexRateTypeId] 
+				,[dblForexRate] 
+				,[intOtherChargeCurrencyId]
+				,[intOtherChargeForexRateTypeId]
+				,[dblOtherChargeForexRate]
+				,[dblOtherChargeValue]
 			)
 			SELECT
 				[intInventoryLotId] = @CostBucketId
@@ -696,7 +747,7 @@ BEGIN
 				,[intInventoryCostAdjustmentTypeId] = 
 						CASE	WHEN @t_dblQty > 0 THEN 
 									CASE	
-											WHEN @costAdjustmentType = @costAdjustmentType_SUMMARIZED THEN 
+											WHEN @costAdjustmentType IN (@costAdjustmentType_SUMMARIZED, @costAdjustmentType_RETROACTIVE_SUMMARIZED) THEN 
 												@COST_ADJ_TYPE_Adjust_Value
 											WHEN @t_intTransactionTypeId = @INV_TRANS_TYPE_Produce THEN 
 												@COST_ADJ_TYPE_Adjust_WIP
@@ -723,7 +774,7 @@ BEGIN
 									END 
 								WHEN @t_dblQty < 0 THEN 
 									CASE	
-											WHEN @costAdjustmentType = @costAdjustmentType_SUMMARIZED THEN 
+											WHEN @costAdjustmentType IN (@costAdjustmentType_SUMMARIZED, @costAdjustmentType_RETROACTIVE_SUMMARIZED) THEN 
 												@COST_ADJ_TYPE_Adjust_Sold									
 											WHEN @t_intTransactionTypeId = @INV_TRANS_TYPE_Consume THEN 
 												@COST_ADJ_TYPE_Adjust_WIP
@@ -755,10 +806,21 @@ BEGIN
 				,[dblCost] = NULL 
 				,[dblValue] = 
 					CASE	WHEN @IsSourceTransaction = 1 THEN 
-								@t_dblQty * @CostAdjustmentPerCb
+								CASE 
+									WHEN @dblForexRate <> 0 THEN 
+										@t_dblQty * @ForexCostAdjustmentPerCb * @dblForexRate
+									ELSE 
+										@t_dblQty * @CostAdjustmentPerCb
+								END		
+
 							WHEN @t_dblQty < 0 THEN 
-								--(@t_dblQty * @CostBucketNewCost) - (@t_dblQty * @CostBucketOriginalCost)
-								@t_dblQty * @CostAdjustmentPerCb
+								--@t_dblQty * @CostAdjustmentPerCb
+								CASE 
+									WHEN @dblForexRate <> 0 THEN 
+										@t_dblQty * @ForexCostAdjustmentPerCb * @dblForexRate
+									ELSE 
+										@t_dblQty * @CostAdjustmentPerCb
+								END		
 							ELSE 
 								0
 					END 
@@ -771,11 +833,45 @@ BEGIN
 				,[intCreatedUserId] = @intEntityUserSecurityId
 				,[intCreatedEntityUserId] = @intEntityUserSecurityId
 				,[intOtherChargeItemId] = @intOtherChargeItemId 
+				,[dblForexValue] = 
+					CASE	WHEN @IsSourceTransaction = 1 THEN 
+								@t_dblQty * @ForexCostAdjustmentPerCb
+							WHEN @t_dblQty < 0 THEN 
+								@t_dblQty * @ForexCostAdjustmentPerCb
+							ELSE 
+								0
+					END 
+				,[intCurrencyId] = @intCurrencyId
+				,[intForexRateTypeId] = @intForexRateTypeId
+				,[dblForexRate] = @dblForexRate
+				,[intOtherChargeCurrencyId] = 
+					CASE	WHEN @IsSourceTransaction = 1 THEN 
+								@intOtherChargeCurrencyId
+							ELSE 
+								NULL
+					END
+				,[intOtherChargeForexRateTypeId] = 
+					CASE	WHEN @IsSourceTransaction = 1 THEN 
+								@intOtherChargeForexRateTypeId
+							ELSE 
+								NULL
+					END
+				,[dblOtherChargeForexRate] = 
+					CASE	WHEN @IsSourceTransaction = 1 THEN 
+								@dblOtherChargeForexRate
+							ELSE 
+								NULL
+					END
+				,[dblOtherChargeValue] = 
+					CASE	WHEN @IsSourceTransaction = 1 THEN 
+								@dblOtherChargeValue
+							ELSE 
+								NULL
+					END
 			WHERE		
 				CASE	WHEN @IsSourceTransaction = 1 THEN 
 							@t_dblQty * @CostAdjustmentPerCb
 						WHEN @t_dblQty < 0 THEN 
-							--(@t_dblQty * @CostBucketNewCost) - (@t_dblQty * @CostBucketOriginalCost)
 							@t_dblQty * @CostAdjustmentPerCb
 						ELSE 
 							0
@@ -871,12 +967,13 @@ END
 --			END 
 --	END 
 --END 
-IF @costAdjustmentType = @costAdjustmentType_SUMMARIZED
+IF @costAdjustmentType IN (@costAdjustmentType_SUMMARIZED, @costAdjustmentType_RETROACTIVE_SUMMARIZED) 
 BEGIN 
 
 	DECLARE loopCostAdjustmentLogSummarized CURSOR LOCAL FAST_FORWARD
 	FOR 
 	SELECT	dblCurrentAdjustment = SUM(ROUND(ISNULL(dblValue, 0), 2)) 
+			,dblForexCurrentAdjustment = SUM(ROUND(ISNULL(dblForexValue, 0), 2)) 
 			,intLotId 
 	FROM	tblICInventoryLotCostAdjustmentLog cbLog INNER JOIN tblICInventoryLot cb
 				ON cbLog.intInventoryLotId = cb.intInventoryLotId
@@ -888,6 +985,7 @@ BEGIN
 	OPEN loopCostAdjustmentLogSummarized
 	FETCH NEXT FROM loopCostAdjustmentLogSummarized INTO 
 		@CurrentCostAdjustment 
+		,@ForexCurrentCostAdjustment 
 		,@intLotId 
 
 	WHILE @@FETCH_STATUS = 0 
@@ -910,9 +1008,11 @@ BEGIN
 			,@dblQty								= 0
 			,@dblUOMQty								= 0
 			,@dblCost								= 0
+			,@dblForexCost							= 0 
 			,@dblValue								= @CurrentCostAdjustment
+			,@dblForexValue							= @ForexCurrentCostAdjustment
 			,@dblSalesPrice							= 0
-			,@intCurrencyId							= NULL 
+			,@intCurrencyId							= @intCurrencyId 
 			,@intTransactionId						= @intTransactionId
 			,@intTransactionDetailId				= @intTransactionDetailId
 			,@strTransactionId						= @strTransactionId
@@ -928,8 +1028,8 @@ BEGIN
 			,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
 			,@intFobPointId							= @intFobPointId 
 			,@intInTransitSourceLocationId			= @intInTransitSourceLocationId
-			,@intForexRateTypeId					= NULL
-			,@dblForexRate							= 1
+			,@intForexRateTypeId					= @intForexRateTypeId
+			,@dblForexRate							= @dblForexRate
 			,@strDescription						= @strDescription	
 			,@intSourceEntityId						= @intSourceEntityId
 
@@ -950,6 +1050,7 @@ BEGIN
 
 		FETCH NEXT FROM loopCostAdjustmentLogSummarized INTO 
 			@CurrentCostAdjustment 
+			,@ForexCurrentCostAdjustment 
 			,@intLotId 
 	END 
 
@@ -959,7 +1060,7 @@ BEGIN
 
 END 
 
-ELSE IF @costAdjustmentType = @costAdjustmentType_DETAILED
+ELSE IF @costAdjustmentType IN (@costAdjustmentType_DETAILED, @costAdjustmentType_RETROACTIVE_DETAILED)
 BEGIN 
 
 	DECLARE @strTransactionIdCostAdjLog AS NVARCHAR(50)
@@ -971,6 +1072,7 @@ BEGIN
 	FOR 
 	SELECT	
 			ROUND(ISNULL(cbLog.dblValue, 0), 2) 
+			,ROUND(ISNULL(cbLog.dblForexValue, 0), 2) 
 			,cbLog.strRelatedTransactionId
 			,cbLog.intRelatedTransactionId
 			,cbLog.intRelatedTransactionDetailId
@@ -984,6 +1086,7 @@ BEGIN
 	OPEN loopCostAdjustmentLog
 	FETCH NEXT FROM loopCostAdjustmentLog INTO 
 		@CurrentCostAdjustment 
+		,@ForexCurrentCostAdjustment 
 		,@strTransactionIdCostAdjLog
 		,@intTransactionIdCostAdjLog
 		,@intTransactionDetailIdCostAdjLog
@@ -1009,9 +1112,11 @@ BEGIN
 			,@dblQty								= 0
 			,@dblUOMQty								= 0
 			,@dblCost								= 0
+			,@dblForexCost							= 0 
 			,@dblValue								= @CurrentCostAdjustment
+			,@dblForexValue							= @ForexCurrentCostAdjustment
 			,@dblSalesPrice							= 0
-			,@intCurrencyId							= NULL 
+			,@intCurrencyId							= @intCurrencyId 
 			,@intTransactionId						= @intTransactionId
 			,@intTransactionDetailId				= @intTransactionDetailId
 			,@strTransactionId						= @strTransactionId
@@ -1027,8 +1132,8 @@ BEGIN
 			,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
 			,@intFobPointId							= @intFobPointId 
 			,@intInTransitSourceLocationId			= @intInTransitSourceLocationId
-			,@intForexRateTypeId					= NULL
-			,@dblForexRate							= 1
+			,@intForexRateTypeId					= @intForexRateTypeId
+			,@dblForexRate							= @dblForexRate
 			,@strDescription						= @strDescription	
 			,@intSourceEntityId						= @intSourceEntityId
 
@@ -1050,6 +1155,7 @@ BEGIN
 
 		FETCH NEXT FROM loopCostAdjustmentLog INTO 
 			@CurrentCostAdjustment 
+			,@ForexCurrentCostAdjustment
 			,@strTransactionIdCostAdjLog
 			,@intTransactionIdCostAdjLog
 			,@intTransactionDetailIdCostAdjLog

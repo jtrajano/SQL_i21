@@ -287,7 +287,7 @@ BEGIN
 		[dblCredit]						=	0,
 		[dblDebitUnit]					=	ISNULL(Details.dblUnits, 0),
 		[dblCreditUnit]					=	0,
-		[strDescription]				=	dbo.fnAPFormatBillGLDescription(Details.intBillDetailId, Details.intFormat),
+		[strDescription]				=	dbo.fnAPFormatBillGLDescription(Details.intBillDetailId, Details.intFormat, OVERRIDESEGMENT.intOverrideAccount),
 		[strCode]						=	'AP',
 		[strReference]					=	C.strVendorId,
 		[intCurrencyId]					=	A.intCurrencyId,
@@ -542,7 +542,7 @@ BEGIN
 		[dblCredit]						=	0, -- Bill
 		[dblDebitUnit]					=	ISNULL(voucherDetails.dblTotalUnits,0),
 		[dblCreditUnit]					=	0,
-		[strDescription]				=	dbo.fnAPFormatBillGLDescription(voucherDetails.intBillDetailId, 1),
+		[strDescription]				= dbo.fnAPFormatBillGLDescription(voucherDetails.intBillDetailId, 1, OVERRIDESEGMENT.intOverrideAccount),
 		[strCode]						=	'AP',
 		[strReference]					=	C.strVendorId,
 		[intCurrencyId]					=	A.intCurrencyId,
@@ -604,7 +604,7 @@ BEGIN
 		[dblCredit]						=	voucherDetails.dblTotal,
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	ISNULL(voucherDetails.dblTotalUnits, 0),
-		[strDescription]				=	dbo.fnAPFormatBillGLDescription(voucherDetails.intBillDetailId, 1),
+		[strDescription]				=	dbo.fnAPFormatBillGLDescription(voucherDetails.intBillDetailId, 1, OVERRIDESEGMENT.intOverrideAccount),
 		[strCode]						=	'AP',
 		[strReference]					=	C.strVendorId,
 		[intCurrencyId]					=	A.intCurrencyId,
@@ -900,7 +900,7 @@ BEGIN
 		[dblCredit]						=	0, -- Bill
 		[dblDebitUnit]					=	voucherDetails.dblTotalUnits,
 		[dblCreditUnit]					=	0,
-		[strDescription]				=	dbo.fnAPFormatBillGLDescription(voucherDetails.intBillDetailId, 3),
+		[strDescription]				=	dbo.fnAPFormatBillGLDescription(voucherDetails.intBillDetailId, 3, DEFAULT),
 		[strCode]						=	'AP',
 		[strReference]					=	C.strVendorId,
 		[intCurrencyId]					=	A.intCurrencyId,
@@ -956,7 +956,7 @@ BEGIN
 		[dblCredit]						=	voucherDetails.dblTotal,
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
-		[strDescription]				=	dbo.fnAPFormatBillGLDescription(voucherDetails.intBillDetailId, 2),
+		[strDescription]				=	dbo.fnAPFormatBillGLDescription(voucherDetails.intBillDetailId, 2, DEFAULT),
 		[strCode]						=	'AP',	
 		[strReference]					=	C.strVendorId,
 		[intCurrencyId]					=	A.intCurrencyId,
@@ -1008,7 +1008,7 @@ BEGIN
 		[dblCredit]						=	0,
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
-		[strDescription]				=	dbo.fnAPFormatBillGLDescription(voucherDetails.intBillDetailId, 2),
+		[strDescription]				=	dbo.fnAPFormatBillGLDescription(voucherDetails.intBillDetailId, 2, OVERRIDESEGMENT.intOverrideAccount),
 		[strCode]						=	'AP',	
 		[strReference]					=	C.strVendorId,
 		[intCurrencyId]					=	A.intCurrencyId,
@@ -1089,7 +1089,7 @@ BEGIN
 		[dblCredit]						=	voucherDetails.dblTotal,
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
-		[strDescription]				=	dbo.fnAPFormatBillGLDescription(voucherDetails.intBillDetailId, 2),
+		[strDescription]				=	dbo.fnAPFormatBillGLDescription(voucherDetails.intBillDetailId, 2, OVERRIDESEGMENT.intOverrideAccount),
 		[strCode]						=	'AP',	
 		[strReference]					=	C.strVendorId,
 		[intCurrencyId]					=	A.intCurrencyId,
@@ -1494,7 +1494,7 @@ BEGIN
 	LEFT JOIN (tblAPVendor D INNER JOIN tblEMEntity E ON E.intEntityId = D.intEntityId) ON A.intEntityVendorId = D.[intEntityId]
 	LEFT JOIN dbo.tblSMCurrencyExchangeRateType F ON F.intCurrencyExchangeRateTypeId = B.intCurrencyExchangeRateTypeId
 	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
-		  AND B.ysnOverrideTaxGroup = 1 AND B.intTaxGroupId <> C.intSourceTaxGroupId
+		  AND B.ysnOverrideTaxGroup = 1 AND (B.intTaxGroupId <> C.intSourceTaxGroupId OR B.intTaxGroupId IS NULL)
 
 	--TAX ADJUSTMENT FOR OVERRIDE TAX LOCATION DEBIT
 	UNION ALL 
@@ -1549,7 +1549,7 @@ BEGIN
 	LEFT JOIN tblICItemLocation H ON H.intItemId = B.intItemId AND H.intLocationId = B.intLocationId
 	LEFT JOIN tblICItemLocation I ON I.intItemId = B.intItemId AND I.intLocationId = A.intShipToId
 	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
-		  AND B.ysnOverrideTaxGroup = 1 AND B.intTaxGroupId <> C.intSourceTaxGroupId
+		  AND B.ysnOverrideTaxGroup = 1 AND (B.intTaxGroupId <> C.intSourceTaxGroupId OR B.intTaxGroupId IS NULL)
 
 	UPDATE A
 		SET A.strDescription = B.strDescription

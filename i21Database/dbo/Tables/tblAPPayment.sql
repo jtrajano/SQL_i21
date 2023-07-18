@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblAPPayment] (
     [intPaymentId]        INT             IDENTITY (1, 1) NOT NULL,
     [intAccountId]        INT             NOT NULL,
-    [intBankAccountId]    INT             NOT NULL,
+    [intBankAccountId]    INT             NULL,
 	[intPayToBankAccountId]    INT              NULL,
     [intPaymentMethodId]    INT             NOT NULL,
 	[intPayToAddressId]  INT             NULL,

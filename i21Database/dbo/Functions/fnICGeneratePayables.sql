@@ -848,7 +848,7 @@ SELECT DISTINCT
 		,intShipFromEntityId						=	IR.intShipFromEntityId 
 		,intPaytoAddressId							=	payToAddress.intEntityLocationId
 		,[intLoadShipmentId]			 			= A.intLoadShipmentId     
-		,[intLoadShipmentDetailId]	     			= NULL 
+		,[intLoadShipmentDetailId]	     			= A.intLoadShipmentDetailId 
 		,[intLoadShipmentCostId]	     			= A.intLoadShipmentCostId
 		,[intBookId]								= A.intBookId
 		,[intSubBookId]								= A.intSubBookId
@@ -1012,29 +1012,29 @@ WHERE
 				END 
 		)
 
-		/*
-			IC-7556
-			If there's a contract involved and it already generated payables for costs/charges, don't re-generate them during posting but remove all of them during unposting.
-		*/
-		AND (
-			CD.intContractDetailId IS NULL OR 
-			(
-				CASE WHEN CD.intContractDetailId IS NOT NULL AND A.strReceiptType = 'Purchase Contract' 
-					AND EXISTS(
-						SELECT TOP 1 1 
-						FROM tblAPVoucherPayable 
-						WHERE intEntityVendorId = A.intEntityVendorId 
-						AND intContractDetailId = CD.intContractDetailId
-						--AND strSourceNumber <> A.strSourceNumber
-						AND strSourceNumber IN (A.strLoadNumber)
-						AND intInventoryReceiptItemId IS NULL 
-						AND intInventoryReceiptChargeId IS NULL 
-						AND intInventoryShipmentChargeId IS NULL						
-					)
-					THEN 0 ELSE 1 
-				END = 1
-			)
-		)
+		--/*
+		--	IC-7556
+		--	If there's a contract involved and it already generated payables for costs/charges, don't re-generate them during posting but remove all of them during unposting.
+		--*/
+		--AND (
+		--	CD.intContractDetailId IS NULL OR 
+		--	(
+		--		CASE WHEN CD.intContractDetailId IS NOT NULL AND A.strReceiptType = 'Purchase Contract' 
+		--			AND EXISTS(
+		--				SELECT TOP 1 1 
+		--				FROM tblAPVoucherPayable 
+		--				WHERE intEntityVendorId = A.intEntityVendorId 
+		--				AND intContractDetailId = CD.intContractDetailId
+		--				--AND strSourceNumber <> A.strSourceNumber
+		--				AND strSourceNumber IN (A.strLoadNumber)
+		--				AND intInventoryReceiptItemId IS NULL 
+		--				AND intInventoryReceiptChargeId IS NULL 
+		--				AND intInventoryShipmentChargeId IS NULL						
+		--			)
+		--			THEN 0 ELSE 1 
+		--		END = 1
+		--	)
+		--)
 		AND ISNULL(A.ysnAllowVoucher, 1) = 1
 	)
 RETURN

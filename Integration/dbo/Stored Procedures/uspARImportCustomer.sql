@@ -997,7 +997,8 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				ptcus_budget_amt = Cus.dblBudgetAmountForBudgetBilling,
 				ptcus_budget_beg_mm = SUBSTRING(Cus.strBudgetBillingBeginMonth,1,2),
 				ptcus_budget_end_mm = SUBSTRING(Cus.strBudgetBillingEndMonth,1,2),
-				ptcus_acct_stat_x_1 = (SELECT strAccountStatusCode FROM tblARAccountStatus WHERE intAccountStatusId = (SELECT TOP 1 intAccountStatusId FROM tblARCustomerAccountStatus WHERE intEntityCustomerId = Cus.intEntityId)),
+				ptcus_acct_stat_x_1 = (SELECT strAccountStatusCode FROM tblARAccountStatus WHERE intAccountStatusId = (SELECT TOP 1 intAccountStatusId FROM tblARCustomerAccountStatus WHERE intEntityCustomerId = Cus.intEntityId ORDER BY intCustomerAccountStatusId)),
+				ptcus_acct_stat_x_2 = (SELECT strAccountStatusCode FROM tblARAccountStatus WHERE intAccountStatusId = (SELECT  intAccountStatusId FROM tblARCustomerAccountStatus WHERE intEntityCustomerId = Cus.intEntityId ORDER BY intCustomerAccountStatusId OFFSET (2) ROW FETCH NEXT (2) ROW ONLY)),
 				ptcus_slsmn_id		= (SELECT strSalespersonId FROM tblARSalesperson WHERE intEntityId = Cus.intSalespersonId),
 				ptcus_srv_cd		= (SELECT strServiceChargeCode FROM tblARServiceCharge WHERE intServiceChargeId = Cus.intServiceChargeId),
 				ptcus_terms_code = (SELECT case when ISNUMERIC(strTermCode) = 0 then null else strTermCode end  FROM tblSMTerm WHERE intTermID = Cus.intTermsId and cast( (case when isnumeric(strTermCode) = 1 then  strTermCode else 266 end ) as bigint) <= 255 ),
@@ -1346,6 +1347,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				SELECT TOP 1 intAccountStatusId 
 				FROM tblARAccountStatus 
 				WHERE strAccountStatusCode COLLATE Latin1_General_CI_AS = ptcus_acct_stat_x_1 COLLATE Latin1_General_CI_AS
+				OR strAccountStatusCode COLLATE Latin1_General_CI_AS = ptcus_acct_stat_x_2 COLLATE Latin1_General_CI_AS
 			) ACCS
 			OUTER APPLY (
 				SELECT TOP 1 intEntityId 

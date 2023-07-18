@@ -3,6 +3,7 @@ AS
 	SELECT 
 		r.intInventoryReceiptId
 		,tfh.* 
+		,ba.strNickname
 	FROM 
 		tblICInventoryReceipt r 
 		-- Get the TF related to the IR. 
@@ -30,7 +31,7 @@ AS
 			SELECT 
 				* 
 			FROM 
-				tblTRFTradeFinanceHistory tfh
+				tblTRFTradeFinanceHistory tfh 
 			WHERE				
 				tfh.strTradeFinanceNumber = tf.strTradeFinanceNumber				
 				AND (
@@ -40,4 +41,6 @@ AS
 						AND tfh.strTransactionType NOT IN ('Inventory')
 					)
 				)				
-		) tfh 
+		) tfh
+		INNER JOIN tblCMBankAccount ba
+			ON ba.intBankAccountId = r.intBankAccountId

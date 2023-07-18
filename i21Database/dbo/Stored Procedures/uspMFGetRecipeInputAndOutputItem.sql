@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspMFGetRecipeInputAndOutputItem] 
 (
-	@strXML NVARCHAR(MAX) = ''
+	@strXML			NVARCHAR(MAX) = ''
+  , @ysnConsume		BIT = 0
 )
 AS
 BEGIN TRY
@@ -22,29 +23,29 @@ BEGIN TRY
 		  , @intLocationId					INT
 		  , @intWorkOrderId					INT
 		  , @dblPartialQuantity				NUMERIC(24, 10)
-		  , @strType						NVARCHAR(1)
+		  , @strType						NVARCHAR(50)
 		  , @intTransferStorageLocationId	INT
 		  , @intProductId					INT
 		  , @dblCalculatedQuantity			DECIMAL(24, 10)
 		  , @ysnSubstituteItem				BIT
 		  , @intMainItemId					INT
-		  , @strWorkOrderNo					NVARCHAR(50) 
+		  , @strWorkOrderNo					NVARCHAR(250) 
 		  , @dblTareWeight					DECIMAL(24, 10)
 		  , @dblGrossWeight					DECIMAL(24, 10)
 		  , @dblNetWeight					DECIMAL(24, 10)
 		  , @intWeightItemUOMId				INT
 		  , @dblWeightPerUnit				DECIMAL(24, 10)
 		  , @intActualItemUnitMeasureId		INT
-		  , @strActualItemUnitMeasure		NVARCHAR(50)
+		  , @strActualItemUnitMeasure		NVARCHAR(250)
 		  , @intQuantityUnitMeasureId		INT
-		  , @strQuantityUnitMeasure			NVARCHAR(50)
+		  , @strQuantityUnitMeasure			NVARCHAR(250)
 
 	CREATE TABLE #tblMFConsumptionDetail 
 	(
 		intContainerId			INT
-	  , strContainerId			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	  , strContainerId			NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
 	  , intStorageLocationId	INT
-	  , strStorageLocationName  NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	  , strStorageLocationName  NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
 	  , intStorageSubLocationId INT
 	  , intInputItemId			INT
 	  , strInputItemNo			NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL
@@ -52,23 +53,23 @@ BEGIN TRY
 	  , dblInputQuantity		NUMERIC(38, 20) NULL
 	  , intInputItemUOMId		INT
 	  , intUnitMeasureId		INT
-	  , strInputItemUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	  , strInputItemUnitMeasure NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
 	  , intInputLotId			INT
-	  , strInputLotNumber		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	  , strInputLotNumber		NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
 	  , dblInputLotQuantity		NUMERIC(38, 20) NULL
-	  , strInputLotUnitMeasure	NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	  , strInputLotUnitMeasure	NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
 	  , ysnEmptyOutSource		BIT
 	  , dtmFeedTime				DATETIME
-	  , strReferenceNo			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	  , strReferenceNo			NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
 	  , dtmActualInputDateTime	DATETIME
 	  , intRowNo				INT IDENTITY(1, 1)
-	  , strInventoryTracking	NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	  , strInventoryTracking	NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
 	  , ysnInputItem			BIT
 	  , intMainItemId			INT
 	)
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
-		,@strXML
+							  , @strXML
 
 	SELECT @intLocationId = intLocationId
 		,@intWorkOrderId = intWorkOrderId
@@ -90,14 +91,14 @@ BEGIN TRY
 		,ysnFillPartialPallet BIT
 		,ysnSelected BIT
 		,intStorageLocationId INT
-		,strLotNumber NVARCHAR(50)
-		,strParentLotNumber NVARCHAR(50)
+		,strLotNumber NVARCHAR(250)
+		,strParentLotNumber NVARCHAR(250)
 		,intContainerId INT
-		,strReferenceNo NVARCHAR(50)
+		,strReferenceNo NVARCHAR(250)
 		,strRemarks NVARCHAR(MAX)
-		,strLotAlias NVARCHAR(50)
+		,strLotAlias NVARCHAR(250)
 		,intParentLotId INT
-		,strThirdPartyLotNumber NVARCHAR(50)
+		,strThirdPartyLotNumber NVARCHAR(250)
 		,intThirdPartyLotId INT
 		)
 	DECLARE @tblMFConsumeItem TABLE (
@@ -109,10 +110,10 @@ BEGIN TRY
 		,intStorageLocationId INT
 		,intContainerId INT
 		,intInputLotId INT
-		,strLotNumber NVARCHAR(50)
+		,strLotNumber NVARCHAR(250)
 		,ysnEmptyOutSource BIT
 		,dtmFeedTime DATETIME
-		,strReferenceNo NVARCHAR(50)
+		,strReferenceNo NVARCHAR(250)
 		)
 
 	INSERT INTO @tblMFProduceItem (
@@ -169,14 +170,14 @@ BEGIN TRY
 			,intWeightItemUOMId INT
 			,dblWeightPerUnit NUMERIC(24, 10)
 			,intStorageLocationId INT
-			,strLotNumber NVARCHAR(50)
-			,strParentLotNumber NVARCHAR(50)
+			,strLotNumber NVARCHAR(250)
+			,strParentLotNumber NVARCHAR(250)
 			,intContainerId INT
-			,strReferenceNo NVARCHAR(50)
+			,strReferenceNo NVARCHAR(250)
 			,strRemarks NVARCHAR(MAX)
-			,strLotAlias NVARCHAR(50)
+			,strLotAlias NVARCHAR(250)
 			,intParentLotId INT
-			,strThirdPartyLotNumber NVARCHAR(50)
+			,strThirdPartyLotNumber NVARCHAR(250)
 			,intThirdPartyLotId INT
 			)
 
@@ -221,10 +222,10 @@ BEGIN TRY
 			,intStorageLocationId INT
 			,intContainerId INT
 			,intInputLotId INT
-			,strLotNumber NVARCHAR(50)
+			,strLotNumber NVARCHAR(250)
 			,ysnEmptyOutSource BIT
 			,dtmFeedTime DATETIME
-			,strReferenceNo NVARCHAR(50)
+			,strReferenceNo NVARCHAR(250)
 			)
 
 	SELECT @intItemId = intItemId
@@ -711,37 +712,41 @@ BEGIN TRY
 			WHERE ysnSelected = 1
 			)
 	BEGIN
-		SELECT NULL AS intContainerId
-			,NULL AS strContainerId
-			,SL.intStorageLocationId
-			,SL.strName AS strStorageLocationName
-			,SL.intSubLocationId AS intStorageSubLocationId
-			,I.intItemId AS intInputItemId
-			,I.strItemNo AS strInputItemNo
-			,I.strDescription AS strInputItemDescription
-			,T.dblPickQty AS dblInputQuantity
-			,T.intItemUOMId AS intInputItemUOMId
-			,UM.intUnitMeasureId
-			,UM.strUnitMeasure strInputItemUnitMeasure
-			,L.intLotId intInputLotId
-			,L.strLotNumber strInputLotNumber
-			,L.dblQty dblInputLotQuantity
-			,UM.strUnitMeasure strInputLotUnitMeasure
-			,Convert(BIT, 0) ysnEmptyOutSource
-			,GETDATE() AS dtmFeedTime
-			,NULL strReferenceNo
-			,GETDATE() dtmActualInputDateTime
-			,T.intTaskId AS intRowNo
-			,T.dblPickQty dblReadingQuantity
-			,I.intItemId AS intMainItemId
-		FROM tblMFTask T
-		JOIN tblMFStageWorkOrder SW ON T.intOrderHeaderId = SW.intOrderHeaderId
-			AND SW.intWorkOrderId = @intWorkOrderId
-		JOIN tblICLot L ON L.intLotId = T.intLotId
-		JOIN tblICItem I ON I.intItemId = L.intItemId
-		JOIN tblICItemUOM IU ON IU.intItemUOMId = L.intItemUOMId
-		JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-		JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
+		IF (@ysnConsume = 1)
+			BEGIN
+				SELECT NULL AS intContainerId
+					,NULL AS strContainerId
+					,SL.intStorageLocationId
+					,SL.strName AS strStorageLocationName
+					,SL.intSubLocationId AS intStorageSubLocationId
+					,I.intItemId AS intInputItemId
+					,I.strItemNo AS strInputItemNo
+					,I.strDescription AS strInputItemDescription
+					,T.dblPickQty AS dblInputQuantity
+					,T.intItemUOMId AS intInputItemUOMId
+					,UM.intUnitMeasureId
+					,UM.strUnitMeasure strInputItemUnitMeasure
+					,L.intLotId intInputLotId
+					,L.strLotNumber strInputLotNumber
+					,L.dblQty dblInputLotQuantity
+					,UM.strUnitMeasure strInputLotUnitMeasure
+					,Convert(BIT, 0) ysnEmptyOutSource
+					,GETDATE() AS dtmFeedTime
+					,NULL strReferenceNo
+					,GETDATE() dtmActualInputDateTime
+					,T.intTaskId AS intRowNo
+					,T.dblPickQty dblReadingQuantity
+					,I.intItemId AS intMainItemId
+				FROM tblMFTask T
+				JOIN tblMFStageWorkOrder SW ON T.intOrderHeaderId = SW.intOrderHeaderId
+					AND SW.intWorkOrderId = @intWorkOrderId
+				JOIN tblICLot L ON L.intLotId = T.intLotId
+				JOIN tblICItem I ON I.intItemId = L.intItemId
+				JOIN tblICItemUOM IU ON IU.intItemUOMId = L.intItemUOMId
+				JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
+				JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
+			END
+		
 	END
 	ELSE
 	BEGIN
@@ -1764,36 +1769,48 @@ BEGIN TRY
 					)
 		END
 
-		SELECT WC.intContainerId
-			,WC.strContainerId
-			,SL.intStorageLocationId
-			,SL.strName AS strStorageLocationName
-			,SL.intSubLocationId AS intStorageSubLocationId
-			,WC.intInputItemId
-			,WC.strInputItemNo
-			,WC.strInputItemDescription
-			,WC.dblInputQuantity
-			,WC.intInputItemUOMId
-			,WC.intUnitMeasureId
-			,WC.strInputItemUnitMeasure
-			,L.intLotId intInputLotId
-			,L.strLotNumber strInputLotNumber
-			,IsNULL(PL.dblQty, WC.dblInputQuantity) dblInputLotQuantity
-			,UM.strUnitMeasure strInputLotUnitMeasure
-			,WC.ysnEmptyOutSource
-			,WC.dtmFeedTime
-			,WC.strReferenceNo
-			,WC.dtmActualInputDateTime
-			,WC.intRowNo
-			,IsNULL(PL.dblQty, WC.dblInputQuantity) dblReadingQuantity
-			,WC.intMainItemId
-		FROM #tblMFConsumptionDetail WC
-		LEFT JOIN @tblMFPickLots PL ON PL.intItemId = WC.intInputItemId
-		LEFT JOIN tblICLot L ON L.intLotId = IsNULL(PL.intLotId, WC.intInputLotId)
-		LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = L.intItemUOMId
-		LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-		LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = IsNULL(L.intStorageLocationId, WC.intStorageLocationId)
-		WHERE dblInputQuantity > 0
+		IF (@ysnConsume = 1)
+			BEGIN
+				SELECT WC.intContainerId
+					 , WC.strContainerId
+					 , SL.intStorageLocationId
+					 , SL.strName			AS strStorageLocationName
+					 , SL.intSubLocationId	AS intStorageSubLocationId
+					 , WC.intInputItemId
+					 , WC.strInputItemNo
+					 , WC.strInputItemDescription
+					 , WC.dblInputQuantity
+					 , WC.intInputItemUOMId
+					 , WC.intUnitMeasureId
+					 , WC.strInputItemUnitMeasure
+					 , L.intLotId intInputLotId
+					 , L.strLotNumber strInputLotNumber
+					 , ISNULL(PL.dblQty, WC.dblInputQuantity) dblInputLotQuantity
+					 , UM.strUnitMeasure strInputLotUnitMeasure
+					 , WC.ysnEmptyOutSource
+					 , WC.dtmFeedTime
+					 , WC.strReferenceNo
+					 , WC.dtmActualInputDateTime
+					 , WC.intRowNo
+					 , ISNULL(PL.dblQty, WC.dblInputQuantity) dblReadingQuantity
+					 , WC.intMainItemId
+					 , Item.strLotTracking
+					 , ItemLocation.intAllowNegativeInventory
+				FROM #tblMFConsumptionDetail WC
+				LEFT JOIN @tblMFPickLots PL ON PL.intItemId = WC.intInputItemId
+				LEFT JOIN tblICLot L ON L.intLotId = IsNULL(PL.intLotId, WC.intInputLotId)
+				LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = L.intItemUOMId
+				LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
+				LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = IsNULL(L.intStorageLocationId, WC.intStorageLocationId)
+				OUTER APPLY (SELECT strLotTracking
+							 FROM tblICItem AS ICItem
+							 WHERE ICItem.intItemId = WC.intInputItemId) AS Item
+				OUTER APPLY (SELECT intAllowNegativeInventory
+							 FROM tblICItemLocation AS ICItemLocation
+							 WHERE ICItemLocation.intItemId = WC.intInputItemId AND ICItemLocation.intLocationId = @intLocationId) AS ItemLocation
+				WHERE dblInputQuantity > 0
+			END
+		
 	END
 
 	EXEC sp_xml_removedocument @idoc
@@ -1803,12 +1820,15 @@ BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()
 
 	IF @idoc <> 0
-		EXEC sp_xml_removedocument @idoc
+		BEGIN
+			EXEC sp_xml_removedocument @idoc
+		END
 
-	RAISERROR (
-			@ErrMsg
-			,16
-			,1
-			,'WITH NOWAIT'
-			)
+	RAISERROR 
+	(
+		@ErrMsg
+	  , 16
+	  , 1
+	  , 'WITH NOWAIT'
+	)
 END CATCH

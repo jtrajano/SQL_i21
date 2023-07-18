@@ -103,6 +103,7 @@ SELECT ItemLocation.intItemLocationId
 						THEN 0
 						ELSE Transact.dblOnHandQty
 					END
+	, ItemLocation.intAvailableQtyFormulaId
 FROM tblICItemLocation ItemLocation
 	INNER JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = ItemLocation.intLocationId
 	INNER JOIN tblICItem Item ON Item.intItemId = ItemLocation.intItemId

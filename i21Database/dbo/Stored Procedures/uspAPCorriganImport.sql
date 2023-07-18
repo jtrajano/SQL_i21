@@ -327,7 +327,7 @@ BEGIN
 		,intPayToId						=	F.intEntityLocationId	
 		,strPayTo						=	A2.strPayTo
 		,intCurrencyId					=	H.intCurrencyID
-		,dblCost						=	A4.dblTotal
+		,dblCost						=	A4.dblTotal * (CASE WHEN A.dblTotal < 0 THEN -1 ELSE 1 END)
 		,dblQuantityToBill				=	IIF(A4.dblQuantity=0,1,A4.dblQuantity)
 		,dblQuantityOrdered				=	IIF(A4.dblQuantity=0,1,A4.dblQuantity)
 		,intContactId					=	C3.intEntityId
@@ -355,7 +355,7 @@ BEGIN
 	LEFT JOIN (tblEMEntityToContact C2 INNER JOIN tblEMEntity C3 ON C2.intEntityId = C3.intEntityId)
 		ON C2.ysnDefaultContact = 1 AND C2.intEntityId = C.intEntityId
 	LEFT JOIN tblEMEntityLocation F ON F.strLocationName = A2.strPayTo AND D.intEntityId = F.intEntityId
-	LEFT JOIN tblEMEntityLocation F2 ON F.strLocationName = A2.strPayTo AND D.intEntityId = F2.intEntityId
+	-- LEFT JOIN tblEMEntityLocation F2 ON F.strLocationName = A2.strPayTo AND D.intEntityId = F2.intEntityId
 	LEFT JOIN tblSMCompanyLocation E ON E.strLocationNumber = A2.strShipTo
 	LEFT JOIN tblSMTerm G ON G.strTermCode = A3.strTermCode
 	LEFT JOIN tblSMCurrency H ON H.strCurrency = A.strCurrency
@@ -374,11 +374,19 @@ BEGIN
 	END CATCH
 END
 
+	DECLARE @defaultAPAccount NVARCHAR(50) = '200000-0000-0000-0090'
+	DECLARE @apAccountId INT = (SELECT TOP 1 intAccountId FROM tblGLAccount WHERE strAccountId = @defaultAPAccount)
+
+	DECLARE @currentTime DATETIME = GETDATE()
+	DECLARE @timeStamp NVARCHAR(100) = CONVERT(CHAR(19), @currentTime, 120);
+
 	INSERT INTO @voucherPayables(
 		intPartitionId
 		,strVendorOrderNumber
 		,intTransactionType
+		,intAPAccount
 		,intEntityVendorId
+		,strReference
 		,intLocationId
 		,intShipToId
 		,intShipFromId
@@ -403,7 +411,9 @@ END
 		intPartitionId			= 	intPartitionId, --1 voucher per 1 payable
 		strVendorOrderNumber	=	strVendorOrderNumber,
 		intTransactionType 		=	intTransactionType,
+		intAPAccount			=	@apAccountId,
 		intEntityVendorId		=	intEntityVendorId,
+		strReference			=	@timeStamp,
 		intLocationId			=	intShipToId,
 		intShipToId				=	intShipToId,
 		intShipFromId			=	intShipFromId,
@@ -548,6 +558,12 @@ END
 			INNER JOIN @ids B ON A.intBillId = B.intId
 
 			EXEC uspAPUpdateVoucherDetailTax  @billDetailIds
+
+			-- UPDATE A
+			-- SET
+			-- 	A.dblTotalController = A.dblTotal
+			-- FROM tblAPBill A
+			-- INNER JOIN @ids B ON A.intBillId = B.intId
 
 		END
 	--END

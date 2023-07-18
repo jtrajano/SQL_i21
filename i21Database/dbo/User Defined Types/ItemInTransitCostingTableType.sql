@@ -32,4 +32,5 @@ CREATE TYPE [dbo].[ItemInTransitCostingTableType] AS TABLE
 	,[strSourceNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 	,[strBOLNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 	,[intTicketId] INT NULL 
+	,[dblForexCost] NUMERIC(38, 20)	NULL					-- Item cost in foreign currency.	
 )

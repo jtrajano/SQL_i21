@@ -297,6 +297,7 @@ INNER JOIN @ADCUSTOMERS C ON P.intEntityCustomerId = C.intEntityCustomerId
 LEFT JOIN (
 	SELECT intTransactionId, dtmDate, strTransactionType
 	FROM dbo.tblARNSFStagingTableDetail
+	WHERE ysnProcessed = 1
 	GROUP BY intTransactionId, dtmDate, strTransactionType
 ) NSF ON P.intPaymentId = NSF.intTransactionId AND NSF.strTransactionType = 'Payment'
 WHERE P.ysnPosted = 1
@@ -507,7 +508,7 @@ INSERT INTO #CASHREFUNDS (
 )
 SELECT intOriginalInvoiceId	= I.intOriginalInvoiceId
 	, strDocumentNumber		= ID.strDocumentNumber
-	, dblRefundTotal		= SUM(ID.dblTotal)
+	, dblRefundTotal		= SUM(I.dblPayment)
 FROM tblARInvoiceDetail ID
 INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
 INNER JOIN @ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
@@ -742,6 +743,7 @@ FROM (
 			FROM dbo.tblAPPaymentDetail APD WITH (NOLOCK)
 			INNER JOIN tblAPPayment P ON APD.intPaymentId = P.intPaymentId
 			WHERE P.dtmDatePaid BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
+			  AND P.ysnPosted = 1
 			GROUP BY APD.intInvoiceId
 		) APD ON I.intInvoiceId = APD.intInvoiceId
 		LEFT JOIN #CASHREFUNDS CR ON (I.intInvoiceId = CR.intOriginalInvoiceId OR I.strInvoiceNumber = CR.strDocumentNumber) AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')

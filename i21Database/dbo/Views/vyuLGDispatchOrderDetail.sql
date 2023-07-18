@@ -23,6 +23,7 @@ SELECT
 	,DOD.strOrderNumber
 	,DOD.strOrderType
 	,DOD.strPONumber
+	,DOD.strReleasePONumber
 	,strTerminalName = TCN.strName
 	,strTerminalControlNumber = TCN.strTerminalControlNumber
 	,strFromSupplier = V.strName
@@ -65,6 +66,8 @@ SELECT
 	,strItemDescription = I.strDescription
 	,DOD.dblQuantity
 	,DOD.dblStandardWeight
+	,DOD.dblPrice
+	,DOD.dblTotal
 	,DOD.strOrderComments
 	,DOD.strDeliveryComments
 	,DOD.intEntityShipViaId

@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblARCustomer] (
     [intEntityId]                     INT             NOT NULL,
-    [strCustomerNumber]               NVARCHAR (15)   COLLATE Latin1_General_CI_AS NULL,
+    [strCustomerNumber]               NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
     [strType]                         NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [dblCreditLimit]                  NUMERIC (18, 6) NULL,
     [dblARBalance]                    NUMERIC (18, 6) NOT NULL,

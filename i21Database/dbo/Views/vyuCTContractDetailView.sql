@@ -205,11 +205,6 @@ AS
 		, CD.dblTotalBudget
 		, CH.intSampleTypeId
 		, sam.strSampleTypeName
-		, CD.intLocalCurrencyId
-		, CD.intLocalUOMId
-		, CD.dblLocalCashPrice
-		, ILU.strUnitMeasure AS strLocalUOM
-		, LUC.strCurrency AS strLocalCurrency
 		, CD.intAverageUOMId
 		, CD.dblAverageQuantity
 		, IAU.strUnitMeasure AS strAverageUOM
@@ -229,11 +224,30 @@ AS
 		, CD.dblConvertedQuantity
 		, LL.strName AS strLogisticsLeadName
 		, CD.intLogisticsLeadId
+		, CD.intItemXrefId
+		, strItemXrefProduct = case when CH.intContractTypeId = 1 then vx.strVendorProduct else cx.strCustomerProduct end
+		,CD.intFuturesCurrencyId
+		,CD.intFuturesUOMId
+		,CD.intBudgetCurrencyId
+		,CD.intBudgetUOMId
+		,CD.intCashCurrencyId
+		,strFuturesCurrency = fcu.strCurrency
+		,strBudgetCurrency = bcu.strCurrency
+		,strCashCurrency = ccu.strCurrency
+		,strFuturesUOM = fum.strUnitMeasure
+		,strBudgetUOM = bum.strUnitMeasure
 	FROM	tblCTContractDetail				CD	CROSS
 	JOIN	tblCTCompanyPreference			CP	CROSS
 	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
 	Cross apply (select intDefaultCurrencyId from tblSMCompanyPreference) smcp
 	JOIN	tblSMCompanyLocation			CL	ON	CL.intCompanyLocationId		=	CD.intCompanyLocationId
+	left join tblSMCurrency fcu on fcu.intCurrencyID = CD.intFuturesCurrencyId
+	left join tblSMCurrency bcu on bcu.intCurrencyID = CD.intBudgetCurrencyId
+	left join tblSMCurrency ccu on ccu.intCurrencyID = CD.intCashCurrencyId
+	left join tblICItemUOM fuom on fuom.intItemUOMId = CD.intFuturesUOMId
+	left join tblICUnitMeasure fum on fum.intUnitMeasureId = fuom.intUnitMeasureId
+	left join tblICItemUOM buom on buom.intItemUOMId = CD.intBudgetUOMId
+	left join tblICUnitMeasure bum on bum.intUnitMeasureId = buom.intUnitMeasureId
 	JOIN	vyuCTContractHeaderView			CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId		LEFT		
 	JOIN	tblCTContractStatus				CS	ON	CS.intContractStatusId		=	CD.intContractStatusId		LEFT	
 	JOIN	tblCTPricingType				PT	ON	PT.intPricingTypeId			=	CD.intPricingTypeId			LEFT	
@@ -328,15 +342,14 @@ AS
 	LEFT JOIN tblCMBankValuationRule BVR ON BVR.intBankValuationRuleId = CD.intBankValuationRuleId
 	LEFT JOIN tblSMFreightTerms CostTerm ON CostTerm.intFreightTermId = CD.intCostTermId
 	LEFT JOIN tblQMSampleType sam on sam.intSampleTypeId = CH.intSampleTypeId
-	LEFT JOIN tblICItemUOM   LU	ON	LU.intItemUOMId	= CD.intLocalUOMId
-	LEFT JOIN tblICUnitMeasure ILU ON ILU.intUnitMeasureId = LU.intUnitMeasureId	--strLocalUOM
-	LEFT JOIN tblSMCurrency	LUC	ON LUC.intCurrencyID = CD.intLocalCurrencyId		--strLocalCurrency
 	LEFT JOIN tblICItemUOM   AU2	ON	AU2.intItemUOMId	= CD.intAverageUOMId
 	LEFT JOIN tblICUnitMeasure IAU ON IAU.intUnitMeasureId = AU2.intUnitMeasureId	--strAverageUOM
 	LEFT JOIN [vyuAPEntityEFTInformation] EFT on EFT.intEntityId = CH.intEntityId and isnull(EFT.ysnDefaultAccount,0) = 1 and EFT.intCurrencyId = CD.intCurrencyId
  	LEFT JOIN tblSMCurrency INV ON INV.intCurrencyID = CD.intInvoiceCurrencyId
 	LEFT JOIN tblEMEntity LL on LL.intEntityId = CD.intLogisticsLeadId
 	LEFT JOIN tblQMGardenMark GM on GM.intGardenMarkId = CD.intGardenMarkId
+	left join tblICItemVendorXref vx on vx.intItemVendorXrefId = CD.intItemXrefId
+	left join tblICItemCustomerXref cx on cx.intItemCustomerXrefId = CD.intItemXrefId
     cross apply (
      select
      dblHeaderBalance = CH.dblHeaderQuantity - sum(cd.dblQuantity - cd.dblBalance)

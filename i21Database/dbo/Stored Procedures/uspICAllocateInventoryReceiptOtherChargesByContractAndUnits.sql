@@ -68,6 +68,10 @@ BEGIN
 								SUM(
 									dblCalculatedAmount
 								)
+							,dblOriginalTotalOtherCharge = 
+								SUM(
+									dblOriginalCalculatedAmount
+								)
 							,CalculatedCharge.ysnAccrue
 							,CalculatedCharge.intContractId
 							,CalculatedCharge.intContractDetailId 
@@ -145,6 +149,14 @@ BEGIN
 								)  								
 								, 2
 							)
+				,dblOriginalAmount = ROUND(
+								ISNULL(dblOriginalAmount, 0) 
+								+ dbo.fnDivide(
+										dbo.fnMultiply(Source_Query.dblOriginalTotalOtherCharge, Source_Query.Qty)
+										,Source_Query.dblTotalUnits
+								)  								
+								, 2
+							)
 
 	-- Create a new allocation record for the item. 
 	WHEN NOT MATCHED AND ISNULL(Source_Query.dblTotalUnits, 0) <> 0 THEN 
@@ -158,13 +170,15 @@ BEGIN
 			,[ysnInventoryCost]
 			,[ysnPrice]
 			,[strChargesLink]
+			,[dblOriginalAmount]
 		)
 		VALUES (
 			Source_Query.intInventoryReceiptId
 			,Source_Query.intInventoryReceiptChargeId
 			,Source_Query.intInventoryReceiptItemId
 			,Source_Query.intEntityVendorId
-			,ROUND (
+			,--dblAmount:
+			ROUND (
 				dbo.fnDivide(
 					dbo.fnMultiply(Source_Query.dblTotalOtherCharge, Source_Query.Qty) 
 					,Source_Query.dblTotalUnits 
@@ -175,6 +189,14 @@ BEGIN
 			,Source_Query.ysnInventoryCost
 			,Source_Query.ysnPrice
 			,Source_Query.strChargesLink
+			,--dblOriginalAmount:
+			ROUND (
+				dbo.fnDivide(
+					dbo.fnMultiply(Source_Query.dblOriginalTotalOtherCharge, Source_Query.Qty) 
+					,Source_Query.dblTotalUnits 
+				)
+				,2 
+			)
 		)
 	;
 END 
