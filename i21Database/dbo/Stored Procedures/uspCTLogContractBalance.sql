@@ -423,6 +423,24 @@ BEGIN
 	FROM @FinalTable F
 	LEFT JOIN tblRKLogAction A ON A.intLogActionId = F.intActionId
 
+	if exists (
+		select top 1 1
+		from
+			@FinalTable f
+			join tblCTContractBalanceLog l on l.intContractHeaderId = f.intContractHeaderId
+		where
+			l.intEntityId <> f.intEntityId
+	)
+	begin
+		update l
+			set l.intEntityId = f.intEntityId
+		from
+			@FinalTable f
+			join tblCTContractBalanceLog l on l.intContractHeaderId = f.intContractHeaderId
+		where
+			l.intEntityId <> f.intEntityId
+	end
+
 	INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('Bulk Insert done.')
 
 	DROP TABLE #tmpLogItems
