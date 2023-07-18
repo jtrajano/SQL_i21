@@ -115,6 +115,17 @@ BEGIN TRY
 		,@ItemsToUnReserve AS dbo.ItemReservationTableType
 		,@ItemsToReserve1 AS dbo.ItemReservationTableType
 		,@intWorkOrderInputLotId INT
+		,@intGardenMarkId INT
+		,@strLeafGrade NVARCHAR(50)
+		,@strLotMarks NVARCHAR(50)
+		,@dtmLotManufacturedDate DATETIME
+		,@strVendorLotNumber  nvarchar(50)
+		,@strGarden nvarchar(50)
+		,@intGradeId int
+		,@intMixingUnitLocationId int
+		,@strMixingUnit nvarchar(50)
+		,@strContainerNumber NVARCHAR(100)
+		,@strRemarks nvarchar(MAX)
 	DECLARE @StockReservation TABLE (
 		intStockId INT identity(1, 1)
 		,intStockReservationId INT
@@ -726,7 +737,7 @@ BEGIN TRY
 						,[intItemUOMId] = @intLotItemUOMId
 						,[dblQuantityToTransfer] = ABS(@dblLotQuantity)
 						,intItemWeightUOMId = @intNetWeightItemUOMId
-						,[dblGrossWeight] = ABS(dbo.fnMFConvertQuantityToTargetItemUOM(@intLotItemUOMId, @intNetWeightItemUOMId, @dblLotQuantity))
+						,[dblGrossWeight] = ABS(@dblQuantity)
 						,[dblTareWeight] = 0
 						,[strNewLotId] = NULL
 						,[intFromSubLocationId] = @intCompanyLocationSubLocationId
@@ -825,6 +836,40 @@ BEGIN TRY
 					WHERE intItemId = @intItemId
 						AND intUnitMeasureId = @intNetWeightUnitMeasureId
 
+					SELECT @intGardenMarkId	=	NULL
+									,@strLeafGrade	=	NULL
+									,@strLotMarks	=	NULL
+									,@strVendorLotNumber=NULL 
+									,@intMixingUnitLocationId=NULL
+									,@dtmLotManufacturedDate=NULL
+									,@strContainerNumber =NULL
+									,@strRemarks=NULL
+
+					SELECT TOP 1 @intGardenMarkId	=	B.intGardenMarkId
+									,@strLeafGrade	=	B.strLeafGrade
+									,@strLotMarks	=	B.strTeaGardenChopInvoiceNumber
+									,@strVendorLotNumber=B.strVendorLotNumber 
+									,@intMixingUnitLocationId=intMixingUnitLocationId
+									,@dtmLotManufacturedDate=IsNULL(@dtmLotManufacturedDate,B.dtmProductionBatch)
+									,@strContainerNumber =strContainerNumber
+					FROM tblMFBatch B WITH (NOLOCK)
+					Where B.strBatchId = @strLotNo
+
+					SELECT @strGarden	=	NULL
+					SELECT @strGarden	=	strGardenMark 
+					FROM tblQMGardenMark 
+					WHERE intGardenMarkId =@intGardenMarkId
+
+					SELECT @intGradeId	=	NULL
+					SELECT @intGradeId	=	intCommodityAttributeId  
+					FROM tblICCommodityAttribute 
+					WHERE strDescription  =@strLeafGrade
+					AND strType ='Grade'
+
+					SELECT @strMixingUnit =strLocationName 
+					FROM tblSMCompanyLocation 
+					WHERE intCompanyLocationId=@intMixingUnitLocationId
+
 					INSERT INTO @ReceiptStagingTable (
 						strReceiptType
 						,intEntityVendorId
@@ -892,8 +937,8 @@ BEGIN TRY
 							ELSE Round(@dblLotQuantity, 0)
 							END
 						,intGrossNetUOMId = @intNetWeightItemUOMId
-						,dblGross = dbo.fnMFConvertQuantityToTargetItemUOM(ITD.intItemUOMId, @intNetWeightItemUOMId, @dblLotQuantity)
-						,dblNet = dbo.fnMFConvertQuantityToTargetItemUOM(ITD.intItemUOMId, @intNetWeightItemUOMId, @dblLotQuantity)
+						,dblGross = @dblQuantity
+						,dblNet = @dblQuantity
 						,dblCost = ITD.dblCost
 						,intCostUOMId = @intItemUOMId
 						,intCurrencyId = ITD.intCurrencyId
@@ -972,10 +1017,15 @@ BEGIN TRY
 						,intLotStatusId
 						,strCertificate
 						,strCertificateId
+						,dtmManufacturedDate
+						,strGarden
+						,intGradeId
+						,strVendorLotId 
+						,strRemarks
 						)
 					SELECT intLotId = NULL
 						,strLotNumber = @strLotNo
-						,strLotAlias = NULL
+						,strLotAlias = @strMixingUnit
 						,intSubLocationId = RI.intSubLocationId
 						,intStorageLocationId = RI.intStorageLocationId
 						,intContractHeaderId = RI.intContractHeaderId
@@ -983,12 +1033,12 @@ BEGIN TRY
 						,intItemUnitMeasureId = RI.intItemUOMId
 						,intItemId = RI.intItemId
 						,dblQuantity = RI.dblQty
-						,dblGrossWeight = dbo.fnMFConvertQuantityToTargetItemUOM(RI.intItemUOMId, @intNetWeightItemUOMId, RI.dblQty)
+						,dblGrossWeight = RI.dblGross
 						,dblTareWeight = 0
 						,dblCost = 0
-						,strContainerNo = NULL
+						,strContainerNo = @strContainerNumber
 						,intSort = RI.intSort
-						,strMarkings = NULL
+						,strMarkings = @strLotMarks
 						,strCondition = 'Clean Wgt'
 						,intEntityVendorId = RI.intEntityVendorId
 						,strReceiptType = RI.strReceiptType
@@ -1004,9 +1054,24 @@ BEGIN TRY
 						,intLotStatusId = @intLotStatusId
 						,strCertificate = NULL --@strCertificate
 						,strCertificateId = NULL --@strCertificateId
+						,dtmManufacturedDate = @dtmLotManufacturedDate
+						,strGarden=@strGarden
+						,intGradeId=@intGradeId
+						,strVendorLotId=@strVendorLotNumber
+						,strRemarks=@strRemarks
 					FROM @ReceiptStagingTable RI
 					WHERE RI.intInventoryTransferId = @intInventoryTransferId
 						AND RI.intInventoryTransferDetailId = @intInventoryTransferDetailId
+
+					SELECT @intBatchId=LI.intBatchId,@strRemarks=L.strNotes 
+					FROM tblICLot L
+					JOIN tblMFLotInventory LI on LI.intLotId=L.intLotId
+					WHERE L.strLotNumber =@strLotNo 
+					AND LI.intBatchId IS NOT NULL
+
+					UPDATE tblMFLotInventory 
+					SET intBatchId=@intBatchId
+					WHERE intLotId=@intLotId
 				END
 
 				IF EXISTS (
