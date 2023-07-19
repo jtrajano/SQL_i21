@@ -80,8 +80,10 @@ SELECT strCompanyName			= CASE WHEN L.strUseLocationAddress = 'Letterhead' THEN 
 	 , intShipToLocationId		= INV.intShipToLocationId
 	 , strBillToLocationName	= EMBT.strEntityNo
 	 , strShipToLocationName	= EMST.strEntityNo
-	 , strBillToAddress			= CASE WHEN (SELECTEDINV.strInvoiceFormat IN ('Format 9 - Berry Oil', 'Format 10 - Berry Trucking','Format 11 - Newton Oil'))
+	 , strBillToAddress			= CASE WHEN (SELECTEDINV.strInvoiceFormat IN ('Format 9 - Berry Oil', 'Format 10 - Berry Trucking'))
 									   THEN ISNULL(RTRIM(INV.strBillToLocationName) + CHAR(13) + char(10), '') + ISNULL(RTRIM(INV.strBillToAddress) + CHAR(13) + char(10), '') + ISNULL(RTRIM(INV.strBillToCity), '') + ISNULL(RTRIM(', ' + INV.strBillToState), '') + ISNULL(RTRIM(' ' + INV.strBillToZipCode), '') + ISNULL(RTRIM(' ' + INV.strBillToCountry), '')
+									   WHEN (SELECTEDINV.strInvoiceFormat = 'Format 11 - Newton Oil')	
+									   THEN ISNULL(RTRIM(BILLTO.strCheckPayeeName) + CHAR(13) + char(10), '') + ISNULL(RTRIM(INV.strBillToAddress) + CHAR(13) + char(10), '') + ISNULL(RTRIM(INV.strBillToCity), '') + ISNULL(RTRIM(', ' + INV.strBillToState), '') + ISNULL(RTRIM(' ' + INV.strBillToZipCode), '') + ISNULL(RTRIM(' ' + INV.strBillToCountry), '')							
 	 							  	   ELSE ISNULL(RTRIM(INV.strBillToLocationName) + CHAR(13) + char(10), '') + ISNULL(RTRIM(INV.strBillToAddress) + CHAR(13) + char(10), '') + ISNULL(RTRIM(INV.strBillToCity), '') + ISNULL(RTRIM(', ' + INV.strBillToState), '') + ISNULL(RTRIM(', ' + INV.strBillToZipCode), '') + ISNULL(RTRIM(', ' + INV.strBillToCountry), '')
 								  END
 	 , strShipToAddress			= CASE WHEN (SELECTEDINV.strInvoiceFormat IN ('Format 9 - Berry Oil', 'Format 10 - Berry Trucking','Format 11 - Newton Oil'))
