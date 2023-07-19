@@ -791,6 +791,16 @@ BEGIN TRY
 				GOTO NextRec
 			END
 
+			IF @intContractDetailId IS NOT NULL
+			BEGIN
+				UPDATE B
+				SET B.dtmStock = CD.dtmUpdatedAvailabilityDate
+				FROM tblMFBatch B
+				JOIN tblCTContractDetail CD ON CD.intContractDetailId = B.intContractDetailId
+					AND B.dtmStock IS NULL
+					AND CD.dtmUpdatedAvailabilityDate IS NOT NULL
+			END
+
 			SELECT @strBatchXML = ''
 
 			SELECT @strBatchXML = @strBatchXML
