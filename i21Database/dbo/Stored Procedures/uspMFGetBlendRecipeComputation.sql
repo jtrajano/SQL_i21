@@ -472,7 +472,18 @@ BEGIN
 		,PP.dblPinpointValue
 END
 
-SELECT *
+SELECT intWorkOrderRecipeComputationId 
+  	 , intTestId						
+  	 , strTestName						
+  , intPropertyId					
+  , strPropertyName					
+  , ISNULL(dblComputedValue, 0)				 
+  , ISNULL(dblMinValue, 0)						
+  , ISNULL(dblMaxValue, 0)						
+  , strMethodName					
+  , intMethodId						
+  , intSequenceNo					
+  , dblPinpointValue
 FROM @tblComputedValue
 ORDER BY intSequenceNo
 
