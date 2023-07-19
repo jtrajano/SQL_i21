@@ -378,12 +378,16 @@ END
 	DECLARE @defaultAPAccount NVARCHAR(50) = '200000-0000-0000-0090'
 	DECLARE @apAccountId INT = (SELECT TOP 1 intAccountId FROM tblGLAccount WHERE strAccountId = @defaultAPAccount)
 
+	DECLARE @currentTime DATETIME = GETDATE()
+	DECLARE @timeStamp NVARCHAR(100) = CONVERT(CHAR(19), @currentTime, 120);
+
 	INSERT INTO @voucherPayables(
 		intPartitionId
 		,strVendorOrderNumber
 		,intTransactionType
 		,intAPAccount
 		,intEntityVendorId
+		,strReference
 		,intLocationId
 		,intShipToId
 		,intShipFromId
@@ -410,6 +414,7 @@ END
 		intTransactionType 		=	intTransactionType,
 		intAPAccount			=	@apAccountId,
 		intEntityVendorId		=	intEntityVendorId,
+		strReference			=	@timeStamp,
 		intLocationId			=	intShipToId,
 		intShipToId				=	intShipToId,
 		intShipFromId			=	intShipFromId,
@@ -592,6 +597,12 @@ END
 			INNER JOIN @ids B ON A.intBillId = B.intId
 
 			EXEC uspAPUpdateVoucherDetailTax  @billDetailIds
+
+			-- UPDATE A
+			-- SET
+			-- 	A.dblTotalController = A.dblTotal
+			-- FROM tblAPBill A
+			-- INNER JOIN @ids B ON A.intBillId = B.intId
 
 		END
 	--END

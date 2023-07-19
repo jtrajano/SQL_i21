@@ -9337,6 +9337,7 @@
     <Build Include="dbo\Views\vyuRKGetFuturesVsUnfixedSaleContract.sql" />
     <Build Include="dbo\Functions\fCTConvertUOMtoUnit.sql" />
     <Build Include="dbo\Functions\fnCMGetReconGridResult.sql" />
+    <Build Include="dbo\Tables\tblCMGridSelectedRow.sql" />
     <Build Include="dbo\Stored Procedures\uspCMGetBankReconDebitCreditValues.sql" />
     <Build Include="dbo\Stored Procedures\uspLGContractVsMarketDifferentialAnalysis.sql" />
     <Build Include="dbo\Stored Procedures\uspCMGetBankReconReportDetail.sql" />

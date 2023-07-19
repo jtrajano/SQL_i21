@@ -378,6 +378,7 @@ BEGIN
 				intItemId  
 				,intItemLocationId 
 				,intItemUOMId  
+				,intCategoryId
 				,dtmDate  
 				,dblQty  
 				,dblUOMQty  
@@ -398,6 +399,7 @@ BEGIN
 		SELECT	Detail.intItemId  
 				,dbo.fnICGetItemLocation(Detail.intItemId, Header.intFromLocationId)
 				,intItemUOMId = Detail.intItemUOMId
+				,Item.intCategoryId
 				,Header.dtmTransferDate
 				,dblQty = -Detail.dblQuantity
 				,dblUOMQty = ItemUOM.dblUnitQty
