@@ -73,6 +73,8 @@
 	[strAzureApplicationInsightsInstrumentationKey] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     [ysnLogPerformanceRuntime] BIT NOT NULL DEFAULT 0,
     [dtmPerformanceLoggingEffectivity] DATETIME NULL,
+    [strMonitorId] 				    				NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+    [ysnEnableFrontEndMonitoring]                   BIT NOT NULL DEFAULT 0,
     [intConcurrencyId] INT NOT NULL DEFAULT 1,
 	[strApiHostUrl] NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
 )
