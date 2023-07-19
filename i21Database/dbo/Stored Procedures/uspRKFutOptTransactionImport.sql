@@ -280,7 +280,7 @@ BEGIN TRY
 					, ROW_NUMBER() OVER(ORDER BY intFutOptTransactionId) strInternalTradeNo
 					, ti.strBrokerTradeNo
 					, ti.strBuySell
-					, dblNoOfContract = ABS(ti.dblNoOfContract)
+					, ti.dblNoOfContract
 					, m.intFutureMonthId
 					, intOptionMonthId
 					, strOptionType
@@ -530,6 +530,7 @@ BEGIN TRY
 		SELECT DE.strInternalTradeNo AS Result1
 			, DE.strBrokerTradeNo AS Result2
 			, DE.dtmFilledDate AS Result3
+			, '' AS Result4
 		FROM tblRKFutOptTransaction DE
 		WHERE intFutOptTransactionHeaderId IN (SELECT intFutOptTransactionHeaderId FROM @tmpOTCTable)
 	END

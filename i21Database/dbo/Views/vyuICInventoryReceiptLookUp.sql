@@ -19,12 +19,13 @@ SELECT
 	, bank.strBankName
 	, bankAccount.strBankAccountNo
 	, borrowingFacility.strBorrowingFacilityId
-	, strLimit = limit.strBorrowingFacilityLimit COLLATE Latin1_General_CI_AS
-	, strSublimit = sublimit.strLimitDescription COLLATE Latin1_General_CI_AS
+	, strLimit = limit.strBorrowingFacilityLimit
+	, strSublimit = sublimit.strLimitDescription
 	, strOverrideFacilityValuation = overrideFacilityValuation.strBankValuationRule
 	, ysnOverrideTaxPoint = overrideTaxPoint.ysnOverrideTaxPoint
 	, ysnOverrideTaxLocation = overrideTaxLocation.ysnOverrideTaxLocation
 	, strTaxLocation = ISNULL(CompanyLocationTaxLocation.strTaxLocation, EntityLocationTaxLocation.strTaxLocation) 
+	, bankAccount.strNickname
 FROM tblICInventoryReceipt Receipt LEFT JOIN vyuAPVendor Vendor 
 		ON Vendor.[intEntityId] = Receipt.intEntityVendorId
 	LEFT JOIN tblSMCompanyLocation [Location] 

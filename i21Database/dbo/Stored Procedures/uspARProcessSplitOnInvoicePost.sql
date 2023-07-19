@@ -89,12 +89,8 @@ BEGIN TRY
 		, dblSplitPercent		= SD.dblSplitPercent
 		, strTransactionType	= SD.strTransactionType
 	FROM #SPLITINVOICEDETAILS SD
-	INNER JOIN (
-		SELECT intInvoiceId		= SDD.intInvoiceId
-			 , intSplitEntityId	= MIN(SDD.intSplitEntityId)
-		FROM #SPLITINVOICEDETAILS SDD
-		GROUP BY SDD.intInvoiceId
-	) SDO ON SD.intInvoiceId = SDO.intInvoiceId AND SD.intSplitEntityId = SDO.intSplitEntityId
+	INNER JOIN tblARPostInvoiceHeader I ON SD.intSplitEntityId = I.intEntityCustomerId AND I.intInvoiceId = SD.intInvoiceId
+	WHERE I.strSessionId = @strSessionId
 
 	--REMOVE INVOICE TO UPDATE
 	DELETE SD
@@ -167,9 +163,13 @@ BEGIN TRY
 		, dblPrice				= I.dblPrice
 		, ysnRecomputeTax		= 1
 		, intCustomerStorageId	= I.intCustomerStorageId
-		, intStorageScheduleTypeId	= I.intStorageScheduleTypeId
+		, intStorageScheduleTypeId	= GCS.intStorageTypeId
 	FROM #SPLITINVOICEDETAILS SD
 	INNER JOIN tblARPostInvoiceDetail I ON I.intInvoiceId = SD.intInvoiceId
+	LEFT JOIN tblGRCustomerStorage GCS ON I.intStorageScheduleTypeId = GCS.intStorageTypeId
+									  AND SD.intSplitEntityId = GCS.intEntityId 
+									  AND I.intItemId = GCS.intItemId 
+									  AND I.intCompanyLocationId = GCS.intCompanyLocationId
 	WHERE I.intContractDetailId IS NULL
 	  AND I.strSessionId = @strSessionId
 	

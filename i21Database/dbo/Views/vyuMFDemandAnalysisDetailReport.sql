@@ -8,7 +8,9 @@ AS
  Created By: Jonathan Valenzuela
  Date: 06/22/2023
  ***************************************************************/
-SELECT strAttributeName			AS [Plan Detail]
+SELECT strInvPlngReportName		AS [Plan Name]
+	 , dtmDemandDate			AS [Date]
+	 , strAttributeName			AS [Plan Detail]
 	 , strItemNo				AS [Item No]
 	 , CASE WHEN intReportAttributeID = 1 THEN PivotData.OpeningInv
 		    ELSE ''
@@ -46,12 +48,19 @@ FROM
 		 , DemandAttribute.intDisplayOrder
 		 , DemandAnalysis.intItemId
 		 , DemandAttribute.intReportAttributeID
+		 , ReportMaster.strInvPlngReportName
+		 , ReportMaster.dtmDemandDate
 	FROM tblCTInvPlngReportAttributeValue AS DemandAnalysis
 	JOIN tblICItem AS Item ON DemandAnalysis.intItemId = Item.intItemId
 	JOIN tblCTReportAttribute AS DemandAttribute ON DemandAnalysis.intReportAttributeID = DemandAttribute.intReportAttributeID
 	OUTER APPLY (SELECT TOP 1 strLocationName
 				 FROM tblSMCompanyLocation AS SMCompanyLocation
 				 WHERE SMCompanyLocation.intCompanyLocationId = DemandAnalysis.intLocationId) AS CompanyLocation
+	OUTER APPLY (SELECT TOP 1 CTReportMaster.strInvPlngReportName
+							, CONVERT(DATE, CTReportMaster.dtmDate) AS dtmDemandDate
+				 FROM tblCTInvPlngReportMaster AS CTReportMaster
+				 JOIN tblMFDemandHeader AS DemandHeader ON CTReportMaster.intDemandHeaderId = DemandHeader.intDemandHeaderId
+				 WHERE CTReportMaster.intInvPlngReportMasterID = DemandAnalysis.intInvPlngReportMasterID) AS ReportMaster
 ) AS SourceData
 PIVOT
 (
@@ -73,7 +82,8 @@ PIVOT
 	, strMonth12
 	)
 ) AS PivotData
-ORDER BY intInvPlngReportMasterID ASC
-		, intItemId ASC
-		, intDisplayOrder ASC 
+ORDER BY dtmDemandDate DESC
+	   , intInvPlngReportMasterID ASC
+	   , intItemId ASC
+	   , intDisplayOrder ASC 
 OFFSET 0 ROWS

@@ -33,9 +33,12 @@ CREATE TABLE [dbo].[tblCMCompanyPreferenceOption](
 	intBankFileFormatPrenoteAPId INT NULL,
 	intBankFileFormatPrenoteARId INT NULL,
 	ysnProcessMultipleBankAccounts BIT NULL,
-	ysnRemittanceAdvice_DisplayVendorAccountNumber BIT NULL,
-	ysnRemittanceAdvice_AttachSettlement BIT NULL,
+	ysnRestrictGLByHeaderLocation BIT NULL,
 	intConcurrencyId int NULL,
+	ysnRemittanceAdvice_DisplayVendorAccountNumber BIT NULL,
+ 	ysnRemittanceAdvice_AttachSettlement BIT NULL,
+	ysnAllowBetweenLocations_Transfer BIT NULL,
+	ysnAllowBetweenCompanies_Transfer BIT NULL,
  CONSTRAINT [PK_tblCMCompanyPreferenceOption] PRIMARY KEY CLUSTERED 
 (
 	[intCompanyPreferenceOptionId] ASC

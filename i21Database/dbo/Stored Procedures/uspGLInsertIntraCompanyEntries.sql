@@ -9,27 +9,17 @@ BEGIN
     IF ISNULL(@ysnAllowIntraCompanyEntries, 0) = 0 RETURN
 
     DECLARE @cntSegment INT, @msg NVARCHAR(50), @errorMsg NVARCHAR(500),@ysnHasError BIT = 0
-    SELECT 1  FROM #tmpGLDetail A JOIN tblGLAccount B ON
+    SELECT intCompanySegmentId  FROM #tmpGLDetail A JOIN tblGLAccount B ON
         A.intAccountId = B.intAccountId
         GROUP BY intCompanySegmentId
 
-	SET @rowCount = @@ROWCOUNT
+    select @rowCount = @@ROWCOUNT
+    IF @rowCount = 1
+        RETURN
 
     IF @rowCount > 2
     BEGIN
-        SET @msg = ' only have '
-        SET @ysnHasError = 1
-    END
-
-    IF @rowCount < 2
-    BEGIN
-        SET @msg = ' have '
-        SET @ysnHasError = 1
-    END
-
-    IF @ysnHasError = 1
-    BEGIN
-        SET @errorMsg = 'GL Entries should' + @msg + '2 (two) distinct Company Segment Entries '
+        SET @errorMsg = 'GL Entries should only have 2 (two) distinct Company Segment Entries '
         RAISERROR(@errorMsg, 11, 1 )   
         RETURN
     END

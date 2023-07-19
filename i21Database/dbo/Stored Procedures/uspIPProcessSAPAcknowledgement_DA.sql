@@ -168,7 +168,7 @@ BEGIN TRY
 
 					SELECT @intContractHeaderId = intContractHeaderId
 					FROM tblCTContractHeader
-					WHERE strContractNumber = @TRACKING_NO
+					WHERE strContractNumber = @REF_NO
 
 					SELECT @intContractDetailId = intContractDetailId
 					FROM tblCTContractDetail
@@ -224,7 +224,7 @@ BEGIN TRY
 						VALUES (
 							@MSG_TYPE
 							,'Success'
-							,@TRACKING_NO + ' / ' + LTRIM(@SEQUENCE_NO)
+							,@REF_NO + ' / ' + LTRIM(@SEQUENCE_NO)
 							,@PO_NUMBER
 							)
 					END
@@ -249,7 +249,7 @@ BEGIN TRY
 						VALUES (
 							@MSG_TYPE
 							,@strMessage
-							,@TRACKING_NO + ' / ' + LTRIM(@SEQUENCE_NO)
+							,@REF_NO + ' / ' + LTRIM(@SEQUENCE_NO)
 							,@PO_NUMBER
 							)
 					END
@@ -265,7 +265,7 @@ BEGIN TRY
 
 					SELECT @intContractHeaderId = intContractHeaderId
 					FROM tblCTContractHeader
-					WHERE strContractNumber = @TRACKING_NO
+					WHERE strContractNumber = @REF_NO
 
 					SELECT @intContractDetailId = intContractDetailId
 						,@strERPPONumber = strERPPONumber
@@ -314,7 +314,7 @@ BEGIN TRY
 						VALUES (
 							@MSG_TYPE
 							,'Success'
-							,@TRACKING_NO + ' / ' + LTRIM(@SEQUENCE_NO)
+							,@REF_NO + ' / ' + LTRIM(@SEQUENCE_NO)
 							,@PO_NUMBER
 							)
 					END
@@ -348,7 +348,7 @@ BEGIN TRY
 						VALUES (
 							@MSG_TYPE
 							,@strMessage
-							,@TRACKING_NO + ' / ' + LTRIM(@SEQUENCE_NO)
+							,@REF_NO + ' / ' + LTRIM(@SEQUENCE_NO)
 							,@PO_NUMBER
 							)
 					END
