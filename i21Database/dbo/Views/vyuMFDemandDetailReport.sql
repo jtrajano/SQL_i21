@@ -8,10 +8,13 @@ AS
 	Created By: Jonathan Valenzuela
 	Date: 06/22/2023
 *****************************************************************/
-SELECT strItemNo				AS [Item]
+SELECT dtmDate					AS [Date]
+	 , strItemNo				AS [Item]
 	 , strSubstituteItemNo		AS [Substitute Item]
 	 , dtmDemandDate			AS [Demand Date]
 	 , dblQuantity				AS [Quantity]
 	 , strItemUOM				AS [Item UOM]
 	 , strLocationName			AS [Location]
 FROM vyuMFGetDemandEntry
+ORDER BY dtmDate DESC
+OFFSET 0 ROWS
