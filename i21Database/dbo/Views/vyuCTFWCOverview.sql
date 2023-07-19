@@ -95,5 +95,11 @@ AS
 			AND (SELECT  dbo.[fnCTGetSeqDisplayField](CTD.intContractDetailId, 'Origin')) = MFL.strOrigin
 			LEFT JOIN tblSMPurchasingGroup		PG	 WITH (NOLOCK) ON PG.intPurchasingGroupId = CTD.intPurchasingGroupId
 			LEFT JOIN tblARMarketZone			MZ   WITH (NOLOCK) ON MZ.intMarketZoneId	  = CTD.intMarketZoneId
-			OUTER APPLY dbo.fnCTGetSampleDetailAllocation(CTD.intContractDetailId) QA
+			--OUTER APPLY dbo.fnCTGetSampleDetailAllocation(CTD.intContractDetailId) QA
+			OUTER APPLY (
+				SELECT Sum(MB.dblPackagesBought) dblApprovedQty
+				FROM vyuMFBatch MB
+				INNER JOIN tblQMSample QS ON QS.strSampleNumber = MB.strSampleNumber  
+				WHERE QS.intTypeId = 1    AND CTD.intContractDetailId =  QS.intContractDetailId 
+			) QA
 			WHERE CTD.intContractStatusId IN ( 1,2,4) --Open, Unconfirmed,Re-Open
