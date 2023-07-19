@@ -194,7 +194,7 @@ BEGIN TRY
 				JOIN tblARInvoice I ON L.intLoadId = I.intLoadId
 				WHERE L.intLoadId = @intLoadId
 					AND I.ysnReturned = 0 and I.strTransactionType NOT IN ('Credit Memo', 'Proforma Invoice')
-				) AND @ysnPost = 0
+				) AND @ysnPost = 0 AND @ysnRecap = 0
 			BEGIN
 				SELECT TOP 1 @strInvoiceNo = I.strInvoiceNumber
 				FROM tblLGLoad L
@@ -211,7 +211,7 @@ BEGIN TRY
 				FROM tblAPBillDetail BD
 				INNER JOIN tblAPBill B ON B.intBillId = BD.intBillId
 				WHERE intLoadId = @intLoadId
-				) AND @ysnPost = 0
+				) AND @ysnPost = 0 AND @ysnRecap = 0
 			BEGIN
 				SELECT TOP 1 @strInvoiceNo = B.strBillId
 				FROM tblAPBillDetail BD
