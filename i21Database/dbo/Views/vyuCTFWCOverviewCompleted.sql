@@ -2,7 +2,7 @@
 
 AS
 
-		SELECT	DISTINCT
+		SELECT	
 				CH.intContractHeaderId,
 				CTD.intContractDetailId,
 				strPONumber = LGL.strCustomerReference,	
