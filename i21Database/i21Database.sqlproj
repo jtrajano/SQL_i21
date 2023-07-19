@@ -1545,6 +1545,8 @@
     <Build Include="dbo\Views\vyuAPStraussPendingPayables.sql" />
     <Build Include="dbo\Views\vyuAPStraussVendor.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetCoverageReport.sql" />
+    <None Include="Scripts\Post-Deployment\MF\14_ImportTypeDefaultValue.sql" />
+    <None Include="Scripts\Post-Deployment\MF\15_DemandForecastFix.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

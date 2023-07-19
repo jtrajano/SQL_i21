@@ -784,5 +784,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\PAT\6_CleanupObjects.sql
 :r .\TF\01_CleanupObjects.sql
 :r .\MF\13_CleanupObjects.sql
+:r .\MF\14_ImportTypeDefaultValue.sql
+:r .\MF\15_DemandForecastFix.sql
 
 print 'END POST DEPLOYMENT'
