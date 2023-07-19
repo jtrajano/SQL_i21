@@ -40,7 +40,8 @@ LEFT JOIN tblEMEntity Seller ON Seller.intEntityId = detail.intSellerId
 LEFT JOIN tblEMEntity Salesperson ON Salesperson.intEntityId = detail.intSalespersonId                                
 left join tblEMEntityLocation location on detail.intEntityLocationId = location.intEntityLocationId and detail.intEntityId = location.intEntityId                                  
 left join tblSMCompanyLocation companylocation on detail.intCompanyLocationId = companylocation.intCompanyLocationId                                  
-left join tblSMCompanySetup company on 1=1          
+left join tblSMCompanySetup company on 1=1   
+where load.ysnDispatched = 1
 Group by detail.intLoadHeaderId                          
    ,case when load.strType = 'Outbound' and entity.intEntityId is null then NULL else entity.intEntityId end              
    ,case when load.strType = 'Outbound' and entity.intEntityId is null then detail.intCompanyLocationId else isnull(detail.intEntityLocationId,detail.intCompanyLocationId) end                       

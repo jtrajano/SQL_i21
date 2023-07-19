@@ -1055,5 +1055,43 @@ END
 
 GO
 	PRINT N'End Update Existing tblHDTicketJIRAIssue Icons';
+	PRINT N'Start Remove Project, Customer and Ticket of Holiday Time Entries';
 GO
 
+IF  EXISTS(		SELECT TOP 1 ''
+				FROM tblHDTicketHoursWorked TicketHoursWorked
+					INNER JOIN tblHDTicketHoursWorked TimeEntryToUpdate
+				ON TimeEntryToUpdate.intTicketHoursWorkedId = TicketHoursWorked.intTicketHoursWorkedId
+					INNER JOIN tblICItem Item ON TicketHoursWorked.intItemId = Item.intItemId
+				WHERE Item.strItemNo = 'Holiday' AND 
+				(
+					 TicketHoursWorked.intTicketId IS NOT NULL OR
+					 TicketHoursWorked.intCustomerId IS NOT NULL OR
+					 TicketHoursWorked.intProjectId IS NOT NULL
+				)
+			)
+BEGIN
+
+	UPDATE TimeEntryToUpdate
+	SET  TimeEntryToUpdate.intTicketId = NULL
+		 ,TimeEntryToUpdate.intCustomerId = NULL
+	     ,TimeEntryToUpdate.intProjectId = NULL
+	FROM tblHDTicketHoursWorked TicketHoursWorked
+		INNER JOIN tblHDTicketHoursWorked TimeEntryToUpdate
+	ON TimeEntryToUpdate.intTicketHoursWorkedId = TicketHoursWorked.intTicketHoursWorkedId
+	INNER JOIN tblICItem Item ON TicketHoursWorked.intItemId = Item.intItemId
+	WHERE Item.strItemNo = 'Holiday' AND 
+	(
+	 TicketHoursWorked.intTicketId IS NOT NULL OR
+	 TicketHoursWorked.intCustomerId IS NOT NULL OR
+	 TicketHoursWorked.intProjectId IS NOT NULL
+	)
+
+	 --Insert into EM Preferences. This will serve as the checking if the datafix will be executed or not.
+    INSERT INTO tblEMEntityPreferences (strPreference,strValue) VALUES ('Remove Project, Customer and Ticket of Holiday Time Entries','1')
+
+END
+
+GO
+	PRINT N'End Remove Project, Customer and Ticket of Holiday Time Entries';
+GO

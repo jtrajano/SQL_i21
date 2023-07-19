@@ -12280,6 +12280,8 @@
     <Build Include="dbo\Functions\fnCTGetSampleDetailAllocation.sql" />
     <Build Include="dbo\Stored Procedures\uspARProcessTradeFinanceLog.sql" />
     <Build Include="dbo\Tables\tblARCustomerInquiryStagingTable.sql" />
+    <Build Include="dbo\Tables\tblAPVoucherPayableReversed.sql" />
+    <Build Include="dbo\Tables\tblAPVoucherPayableTaxReversed.sql" />
     <Build Include="dbo\Stored Procedures\uspARMainCustomerInquiryReport.sql" />
   </ItemGroup>
   <ItemGroup>

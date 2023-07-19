@@ -1,4 +1,4 @@
-CREATE PROCEDURE uspCTReportContractDetailAgSource
+Create PROCEDURE [dbo].[uspCTReportContractDetailAgSource] 
 
 	@intContractHeaderId	INT
 	
@@ -89,7 +89,7 @@ BEGIN TRY
 			,dtmStartDate				 = dtmStartDate
 			,dtmEndDate					 = dtmEndDate
 			,strPricingType				 = strPricingType
-			,strShipVia					 = strShipVia
+			,strShipVia					 = ISNULL(strShipVia,'')
 			,strLocationName			 = strLocationName
 			,intContractHeaderId		 = intContractHeaderId
 			,intContractDetailId		 = @intContractDetailId
@@ -103,8 +103,8 @@ BEGIN TRY
 							               END	
 			,strTerm					 = strTerm
 			,strFutureMonth				 = REPLACE(MO.strFutureMonth,' ','('+MO.strSymbol+') ')
-			,strFutures					 = dbo.fnFormatNumber(DV.dblFutures)
-			,strBasis					 = dbo.fnFormatNumber(DV.dblBasis)
+			,strFutures					 = ISNULL(dbo.fnFormatNumber(DV.dblFutures), '')
+			,strBasis					 = ISNULL(dbo.fnFormatNumber(DV.dblBasis), '')
 			,strFutureMonthZee			 = CASE	WHEN intPricingTypeId = 1 THEN '' ELSE REPLACE(MO.strFutureMonth,' ','('+MO.strSymbol+') ') END
 			,strQuantity				 = dbo.fnFormatNumber(dblDetailQuantity) + ' ' + strItemUOM
 			-- ,strPrice					 = dbo.fnFormatNumber(CAST(ISNULL(dblCashPrice,0) AS DECIMAL(24,4))) + ' per ' + strPriceUOM + ' ' + strCurrency
@@ -159,7 +159,7 @@ BEGIN TRY
             ,dtmStartDate			 = NULL
 		    ,dtmEndDate				 = NULL
 			,strPricingType			 = NULL
-			,strShipVia				 = NULL
+			,strShipVia				 = ''
 			,strLocationName		 = CL.strLocationName
 			,intContractHeaderId	 = NULL
 			,intContractDetailId	 = @intContractDetailId
@@ -236,4 +236,3 @@ BEGIN CATCH
 	RAISERROR (@ErrMsg,18,1,'WITH NOWAIT')  
 	
 END CATCH
-GO
