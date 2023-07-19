@@ -1175,6 +1175,7 @@ AS
 						,intRateTypeId
 						,intBudgetUOMId
 						,intBudgetCurrencyId
+						,ysnUseFXPrice
 						)
 					SELECT
 							@intContractHeaderId
@@ -1289,6 +1290,7 @@ AS
 						,intRateTypeId
 						,intBudgetUOMId
 						,intBudgetCurrencyId
+						,ysnUseFXPrice = case when intCurrencyId <> intInvoiceCurrencyId then convert(bit,1) else convert(bit,0) end
 					FROM #tmpExtracted
 					WHERE
 							ISNULL(intContractTypeId, 0) = ISNULL(@intContractTypeId, 0)
