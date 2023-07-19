@@ -1845,6 +1845,9 @@
     <Build Include="dbo\Stored Procedures\uspGLCorrigaCOAiPayables.sql" />
     <None Include="Scripts\Post-Deployment\MF\14_ImportTypeDefaultValue.sql" />
     <None Include="Scripts\Post-Deployment\MF\15_DemandForecastFix.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreateGLEntriesOnInTransitValueAdjustment.sql" />
+    <Build Include="dbo\Tables\tblICInventoryValueAdjustmentLog.sql" />
+    <Build Include="dbo\Functions\fnCreateInTransitValueAdjDescription.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
