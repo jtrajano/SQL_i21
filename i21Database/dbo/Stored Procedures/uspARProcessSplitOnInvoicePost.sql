@@ -163,9 +163,13 @@ BEGIN TRY
 		, dblPrice				= I.dblPrice
 		, ysnRecomputeTax		= 1
 		, intCustomerStorageId	= I.intCustomerStorageId
-		, intStorageScheduleTypeId	= I.intStorageScheduleTypeId
+		, intStorageScheduleTypeId	= GCS.intStorageTypeId
 	FROM #SPLITINVOICEDETAILS SD
 	INNER JOIN tblARPostInvoiceDetail I ON I.intInvoiceId = SD.intInvoiceId
+	LEFT JOIN tblGRCustomerStorage GCS ON I.intStorageScheduleTypeId = GCS.intStorageTypeId
+									  AND SD.intSplitEntityId = GCS.intEntityId 
+									  AND I.intItemId = GCS.intItemId 
+									  AND I.intCompanyLocationId = GCS.intCompanyLocationId
 	WHERE I.intContractDetailId IS NULL
 	  AND I.strSessionId = @strSessionId
 	
