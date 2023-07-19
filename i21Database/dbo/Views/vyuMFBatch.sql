@@ -149,9 +149,6 @@ SELECT
 	,dtmPOCreated=A.dtmPOCreated
 	,strIBDNo=A.strIBDNo
 	,dtmEtaPol=CD.dtmEtaPol
-    ,dblValue = ISNULL(S.dblSampleQty, 0) * ISNULL(S.dblB1Price, 0)
-	,strLastPrice = '0.0'
-	,S.dblSupplierValuationPrice
 FROM tblMFBatch A
 LEFT JOIN tblMFBatch B ON A.intParentBatchId = B.intBatchId
 LEFT JOIN tblQMGardenMark Garden ON Garden.intGardenMarkId = A.intGardenMarkId
