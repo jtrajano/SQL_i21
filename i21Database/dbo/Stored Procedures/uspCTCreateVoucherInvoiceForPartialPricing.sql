@@ -106,11 +106,8 @@ BEGIN TRY
 			,@dblInvoicedPriced					numeric(18,6)
 			,@dblPricedForInvoice				numeric(18,6)
 			,@dblQuantityForInvoice				numeric(18,6)
-			,@intShipmentCount					int = 0
 			,@intActiveShipmentId				int = 0
 			,@intPricedLoad						int = 0
-			,@intTotalLoadPriced				int = 0
-			,@intCommulativeLoadPriced			int = 0
 			,@intApplied						numeric(18,6) = 0
 			,@intPreviousPricedLoad				numeric(18,6)
 			,@dblLoadAppliedAndPriced			numeric(18,6)
@@ -130,12 +127,6 @@ BEGIN TRY
 			,@dblSpotQuantity numeric(18,6)
 			,@intItemId int
 			;
-
-		
-	declare @PricedShipment table
-	(
-		intInventoryShipmentId int
-	)
 
 	declare @InvShp table (
 		intInventoryShipmentId int
@@ -394,10 +385,6 @@ BEGIN TRY
 			BEGIN			
 				
 				/*Loop Shipment*/
-				set @intShipmentCount = 0;
-				set @intCommulativeLoadPriced = @intCommulativeLoadPriced + @dblPriced;
-
-				--@ysnDestinationWeightsGrades
 
 				SET @shipment = CURSOR FOR
 					select
@@ -470,7 +457,7 @@ BEGIN TRY
 									
 						WHERE
 							RI.intLineNo = @intContractDetailId
-					) t
+					) t where t.intInvoiceDetailId is null
 					ORDER BY t.intInventoryShipmentItemId
 
 
@@ -489,18 +476,6 @@ BEGIN TRY
 
 					WHILE @@FETCH_STATUS = 0
 					BEGIN
-
-						if (@dblShipped = 0)
-						begin
-							UPDATE  tblICInventoryShipmentItem SET ysnAllowInvoice = 1 WHERE intInventoryShipmentItemId = @intInventoryShipmentItemId;
-							goto SkipShipmentLoop;
-						end
-
-						if (@intActiveShipmentId <> @intInventoryShipmentId)
-						begin
-							set @intShipmentCount = @intShipmentCount + 1;
-							set @intActiveShipmentId = @intInventoryShipmentId;
-						end
 
 						set @intPricedLoad = (
 								select count(*) from
@@ -523,35 +498,6 @@ BEGIN TRY
 		  				begin
 							goto SkipShipmentLoop; 
 						end
-
-						select @intTotalLoadPriced = sum(df.dblLoadPriced) from tblCTPriceFixation f, tblCTPriceFixationDetail df where f.intContractDetailId = @intContractDetailId and df.intPriceFixationId = f.intPriceFixationId;
-
-						if (@intShipmentCount <= @intPricedLoad)
-						begin
-							goto SkipShipmentLoop;
-						end
-						if (@intShipmentCount > @intTotalLoadPriced)
-						begin
-							goto SkipShipmentLoop;
-						end
-
-						if exists (select * from @PricedShipment where intInventoryShipmentId = @intInventoryShipmentId)
-						begin
-							goto SkipShipmentLoop;
-						end
-
-
-						if (@intInvoiceDetailId is not null)
-						begin
-							insert into @PricedShipment (intInventoryShipmentId) select intInventoryShipmentId = @intInventoryShipmentId;
-							goto SkipShipmentLoop;
-						end
-
-						if (@intCommulativeLoadPriced < @intShipmentCount)
-						begin
-							goto SkipShipmentLoop;
-						end
-
 
 						/*Do Invoicing*/
 
@@ -630,8 +576,8 @@ BEGIN TRY
 										,@intInvoiceDetailId = @intInvoiceDetailId
 							END
 
-							insert into @PricedShipment (intInventoryShipmentId)
-							select intInventoryShipmentId = @intInventoryShipmentId
+							--insert into @PricedShipment (intInventoryShipmentId)
+							--select intInventoryShipmentId = @intInventoryShipmentId
 
 
 							--Update the load applied and priced
