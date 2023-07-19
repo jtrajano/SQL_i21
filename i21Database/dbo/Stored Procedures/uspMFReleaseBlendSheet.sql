@@ -1,7 +1,11 @@
-﻿CREATE PROCEDURE [dbo].[uspMFReleaseBlendSheet] @strXml NVARCHAR(Max)
-	,@strWorkOrderNoOut NVARCHAR(50) = '' OUT
-	,@dblBalancedQtyToProduceOut NUMERIC(38, 20) = 0 OUTPUT
-	,@intWorkOrderIdOut INT = 0 OUTPUT
+﻿CREATE PROCEDURE [dbo].[uspMFReleaseBlendSheet] 
+(
+	@strXml						NVARCHAR(MAX)
+  , @strWorkOrderNoOut			NVARCHAR(50) = '' OUT
+  , @dblBalancedQtyToProduceOut NUMERIC(38, 20) = 0 OUTPUT
+  , @intWorkOrderIdOut			INT = 0 OUTPUT
+
+)
 AS
 BEGIN TRY
 	SET QUOTED_IDENTIFIER OFF
@@ -11,101 +15,105 @@ BEGIN TRY
 	SET ANSI_WARNINGS OFF
 
 	DECLARE @idoc INT
-	DECLARE @intWorkOrderId INT
-	DECLARE @strNextWONo NVARCHAR(50)
-	DECLARE @strDemandNo NVARCHAR(50)
-	DECLARE @intBlendRequirementId INT
-	DECLARE @ErrMsg NVARCHAR(Max)
-	DECLARE @intLocationId INT
-	DECLARE @intCellId INT
-	DECLARE @intUserId INT
-	DECLARE @dblQtyToProduce NUMERIC(38, 20)
-	DECLARE @dtmDueDate DATETIME
-	DECLARE @intExecutionOrder INT = 1
-	DECLARE @intBlendItemId INT
-	DECLARE @strBlendItemNo NVARCHAR(50)
-	DECLARE @strBlendItemStatus NVARCHAR(50)
-	DECLARE @strInputItemNo NVARCHAR(50)
-	DECLARE @strInputItemStatus NVARCHAR(50)
-	DECLARE @ysnEnableParentLot BIT = 0
-	DECLARE @intRecipeId INT
-	DECLARE @intManufacturingProcessId INT
-	DECLARE @dblBinSize NUMERIC(38, 20)
-	DECLARE @intNoOfSheet INT
-	DECLARE @intNoOfSheetOriginal INT
-	DECLARE @dblRemainingQtyToProduce NUMERIC(38, 20)
-	DECLARE @PerBlendSheetQty NUMERIC(38, 20)
-	DECLARE @ysnCalculateNoSheetUsingBinSize BIT = 0
-	DECLARE @ysnKittingEnabled BIT
-	DECLARE @ysnRequireCustomerApproval BIT
-	DECLARE @intWorkOrderStatusId INT
-	DECLARE @intKitStatusId INT = NULL
-	DECLARE @dblBulkReqQuantity NUMERIC(38, 20)
-	DECLARE @dblPlannedQuantity NUMERIC(38, 20)
-	DECLARE @ysnRecipeHeaderValidation BIT = 0;
-	DECLARE @ysnAllInputItemsMandatory BIT
-		,@dtmBusinessDate DATETIME
-		,@intBusinessShiftId INT
-		,@dtmCurrentDateTime DATETIME
-		,@dtmProductionDate DATETIME
-		,@intMachineId INT
-		,@dblWeightPerUnit NUMERIC(38, 20)
-		,@ysnMinorIngredient BIT
-		,@dblSuggestedCeilingQty DECIMAL(38, 20)
-		,@dblSuggestedFloorQty DECIMAL(38, 20)
-		,@dblCeilingQtyDiff DECIMAL(38, 20)
-		,@dblFloorQtyDiff DECIMAL(38, 20)
-		,@dblOriginalRequiredQty DECIMAL(38, 20)
-		,@dblQty1 DECIMAL(38, 20)
-		,@intRowNo INT
-		,@ysnReleaseBlendsheetByNoOfMixes BIT
-		,@intTrialBlendSheetStatusId INT
-		,@intConfirmedBy INT
-		,@intApprovedBy INT
-		,@dtmConfirmedDate DATETIME
-		,@dtmApprovedDate DATETIME
-		,@dtmPrintedDate DATETIME
-		,@intPrintedBy INT
-		,@strERPComment NVARCHAR(max)
-		,@strERPOrderNo nvarchar(50)
-		,@ysnOverrideRecipe BIT
-		,@ysnCopyRecipeOnSave BIT
-		,@intLotId int
-		,@dblWeight numeric(18,6)
-		,@intWorkOrderInputLotId INT
-		,@dblTBSQuantity NUMERIC(18, 6)
-		,@strFW NVARCHAR(3)
-		,@intRecordId INT
-		,@intSavedWorkOrderId INT
-	DECLARE @intCategoryId INT
-	DECLARE @strInActiveItems NVARCHAR(max)
-	DECLARE @dtmDate DATETIME = Convert(DATE, GetDate())
-	DECLARE @intDayOfYear INT = DATEPART(dy, @dtmDate)
-	DECLARE @strPackagingCategoryId NVARCHAR(Max)
-	DECLARE @intPlannedShiftId INT
-	DECLARE @strSavedWONo NVARCHAR(50)
-		,@intSubLocationId INT
-		,@intIssuedUOMTypeId INT
-		,@dblQuantity NUMERIC(18, 6)
-		,@dblIssuedQuantity NUMERIC(18, 6)
-		,@intItemIssuedUOMId INT
-		,@intItemUOMId INT
-		,@dblPickedQty NUMERIC(38, 20)
-		,@intSeq INT
-		,@dblTotalPickedQty NUMERIC(38, 20)
-		,@intMinRowNo INT
-		,@ysnComplianceItem BIT
-		,@dblCompliancePercent NUMERIC(38, 20)
-		,@sRequiredQty NUMERIC(18, 6)
-		,@ysnPercResetRequired BIT = 0
-		,@dblQuantityTaken NUMERIC(18, 6)
-		,@dblPercentageIncrease NUMERIC(18, 6)
-		,@strChar NVARCHAR(1)
+		  , @intWorkOrderId INT
+		  , @strNextWONo NVARCHAR(50)
+		  , @strDemandNo NVARCHAR(50)
+		  , @intBlendRequirementId INT
+		  , @ErrMsg NVARCHAR(Max)
+		  , @intLocationId INT
+		  , @intCellId INT
+		  , @intUserId INT
+		  , @dblQtyToProduce NUMERIC(38, 20)
+		  , @dtmDueDate DATETIME
+		  , @intExecutionOrder INT = 1
+		  , @intBlendItemId INT
+		  , @strBlendItemNo NVARCHAR(50)
+		  , @strBlendItemStatus NVARCHAR(50)
+		  , @strInputItemNo NVARCHAR(50)
+		  , @strInputItemStatus NVARCHAR(50)
+		  , @ysnEnableParentLot BIT = 0
+		  , @intRecipeId INT
+		  , @intManufacturingProcessId INT
+		  , @dblBinSize NUMERIC(38, 20)
+		  , @intNoOfSheet INT
+		  , @intNoOfSheetOriginal INT
+		  , @dblRemainingQtyToProduce NUMERIC(38, 20)
+		  , @PerBlendSheetQty NUMERIC(38, 20)
+		  , @ysnCalculateNoSheetUsingBinSize BIT = 0
+		  , @ysnKittingEnabled BIT
+		  , @ysnRequireCustomerApproval BIT
+		  , @intWorkOrderStatusId INT
+		  , @intKitStatusId INT = NULL
+		  , @dblBulkReqQuantity NUMERIC(38, 20)
+		  , @dblPlannedQuantity NUMERIC(38, 20)
+		  , @ysnRecipeHeaderValidation BIT = 0
+		  , @ysnAllInputItemsMandatory BIT
+		  , @dtmBusinessDate DATETIME
+		  , @intBusinessShiftId INT
+		  , @dtmCurrentDateTime DATETIME
+		  , @dtmProductionDate DATETIME
+		  , @intMachineId INT
+		  , @dblWeightPerUnit NUMERIC(38, 20)
+		  , @ysnMinorIngredient BIT
+		  , @dblSuggestedCeilingQty DECIMAL(38, 20)
+		  , @dblSuggestedFloorQty DECIMAL(38, 20)
+		  , @dblCeilingQtyDiff DECIMAL(38, 20)
+		  , @dblFloorQtyDiff DECIMAL(38, 20)
+		  , @dblOriginalRequiredQty DECIMAL(38, 20)
+		  , @dblQty1 DECIMAL(38, 20)
+		  , @intRowNo INT
+		  , @ysnReleaseBlendsheetByNoOfMixes BIT
+		  , @intTrialBlendSheetStatusId INT
+		  , @intConfirmedBy INT
+		  , @intApprovedBy INT
+		  , @dtmConfirmedDate DATETIME
+		  , @dtmApprovedDate DATETIME
+		  , @dtmPrintedDate DATETIME
+		  , @intPrintedBy INT
+		  , @strERPComment NVARCHAR(max)
+		  , @strERPOrderNo nvarchar(50)
+		  , @ysnOverrideRecipe BIT
+		  , @ysnCopyRecipeOnSave BIT
+		  , @intLotId int
+		  , @dblWeight numeric(18,6)
+		  , @intWorkOrderInputLotId INT
+		  , @dblTBSQuantity NUMERIC(18, 6)
+		  , @strFW NVARCHAR(3)
+		  , @intRecordId INT
+		  , @intSavedWorkOrderId INT
+	      , @intCategoryId INT
+	      , @strInActiveItems NVARCHAR(max)
+	      , @dtmDate DATETIME = CONVERT(DATE, GETDATE())
+	      , @intDayOfYear INT = DATEPART(dy, CONVERT(DATE, GETDATE()))
+	      , @strPackagingCategoryId NVARCHAR(Max)
+	      , @intPlannedShiftId INT
+	      , @strSavedWONo NVARCHAR(50)
+		  , @intSubLocationId INT
+		  , @intIssuedUOMTypeId INT
+		  , @dblQuantity NUMERIC(18, 6)
+		  , @dblIssuedQuantity NUMERIC(18, 6)
+		  , @intItemIssuedUOMId INT
+		  , @intItemUOMId INT
+		  , @dblPickedQty NUMERIC(38, 20)
+		  , @intSeq INT
+		  , @dblTotalPickedQty NUMERIC(38, 20)
+		  , @intMinRowNo INT
+		  , @ysnComplianceItem BIT
+		  , @dblCompliancePercent NUMERIC(38, 20)
+		  , @sRequiredQty NUMERIC(18, 6)
+		  , @ysnPercResetRequired BIT = 0
+		  , @dblQuantityTaken NUMERIC(18, 6)
+		  , @dblPercentageIncrease NUMERIC(18, 6)
+		  , @strChar NVARCHAR(1)
+		  , @dblCalculatedUpperTolerance NUMERIC(38, 20)
+		  , @dblCalculatedLowerTolerance NUMERIC(38, 20)
 
-	DECLARE @tblInputItemSeq TABLE (
-		intItemId INT
-		,intSeq INT
-		)
+	DECLARE @tblInputItemSeq TABLE 
+	(
+		intItemId	INT
+	  , intSeq		INT
+	)
+
 DECLARE @tblFW TABLE (
 		strChar CHAR(1)
 		,intItemId INT
@@ -219,6 +227,10 @@ DECLARE @tblFW TABLE (
 		,dblNoOfPallet NUMERIC(38, 20)
 		,strFW NVARCHAR(3)
 		,ysnOverrideRecipe BIT
+		,dblUpperTolerance NUMERIC(38, 20)
+		,dblLowerTolerance NUMERIC(38, 20)
+		,dblCalculatedUpperTolerance NUMERIC(38, 20)
+		,dblCalculatedLowerTolerance NUMERIC(38, 20)
 		)
 	DECLARE @tblPreItem TABLE (
 		intRowNo INT Identity(1, 1)
@@ -325,6 +337,10 @@ DECLARE @tblFW TABLE (
 		,dblNoOfPallet
 		,strFW
 		,ysnOverrideRecipe
+		,dblUpperTolerance 
+		,dblLowerTolerance
+		,dblCalculatedUpperTolerance 
+		,dblCalculatedLowerTolerance 
 		)
 	SELECT intWorkOrderId
 		,intItemId
@@ -346,6 +362,10 @@ DECLARE @tblFW TABLE (
 		,dblNoOfPallet
 		,strFW
 		,ysnOverrideRecipe
+		,dblUpperTolerance 
+		,dblLowerTolerance
+		,dblCalculatedUpperTolerance 
+		,dblCalculatedLowerTolerance 
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intWorkOrderId INT
 			,intItemId INT
@@ -367,6 +387,10 @@ DECLARE @tblFW TABLE (
 			,dblNoOfPallet NUMERIC(38, 20)
 			,strFW NVARCHAR(50)
 			,ysnOverrideRecipe BIT
+			,dblUpperTolerance NUMERIC(38, 20)
+			,dblLowerTolerance NUMERIC(38, 20)
+			,dblCalculatedUpperTolerance NUMERIC(38, 20)
+			,dblCalculatedLowerTolerance NUMERIC(38, 20)
 			)
 
 	INSERT INTO @tblPreLot (
@@ -2014,6 +2038,10 @@ DECLARE @tblFW TABLE (
 			,strERPComment
 			,strERPOrderNo
 			,ysnOverrideRecipe 
+			,dblUpperTolerance
+			,dblLowerTolerance
+			,dblCalculatedUpperTolerance
+			,dblCalculatedLowerTolerance
 			)
 		SELECT @strNextWONo
 			,intItemId
@@ -2061,6 +2089,10 @@ DECLARE @tblFW TABLE (
 			,@strERPComment
 			,@strERPOrderNo
 			,ysnOverrideRecipe
+			,dblUpperTolerance
+			,dblLowerTolerance
+			,dblCalculatedUpperTolerance
+			,dblCalculatedLowerTolerance
 		FROM @tblBlendSheet
 
 		SET @intWorkOrderId = SCOPE_IDENTITY()
@@ -2402,10 +2434,17 @@ DECLARE @tblFW TABLE (
 			)
 	WHERE intBlendRequirementId = @intBlendRequirementId
 
+	/* SET Tolerance Variable Value. */
+	SELECT @dblCalculatedUpperTolerance = dblCalculatedUpperTolerance
+		 , @dblCalculatedLowerTolerance = dblCalculatedLowerTolerance
+	FROM @tblBlendSheet
+	WHERE intBlendRequirementId = @intBlendRequirementId
+
 	UPDATE tblMFBlendRequirement
 	SET intStatusId = 2
 	WHERE intBlendRequirementId = @intBlendRequirementId
-		AND ISNULL(dblIssuedQty, 0) >= dblQuantity
+	  AND ISNULL(dblIssuedQty, 0) >= @dblCalculatedLowerTolerance AND ISNULL(dblIssuedQty, 0) <= @dblCalculatedUpperTolerance;
+
 
 	SELECT @dblBalancedQtyToProduceOut = (dblQuantity - ISNULL(dblIssuedQty, 0))
 	FROM tblMFBlendRequirement
