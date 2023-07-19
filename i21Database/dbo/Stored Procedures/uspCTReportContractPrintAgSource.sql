@@ -1,5 +1,5 @@
-CREATE PROCEDURE uspCTReportContractPrintAgSource
 
+Create PROCEDURE [dbo].[uspCTReportContractPrintAgSource]
 	@xmlParam NVARCHAR(MAX) = NULL  
 	
 AS
@@ -114,18 +114,18 @@ BEGIN TRY
 			CH.strSalesperson,
 			--(SELECT TOP 1 Sig.blbDetail FROM tblSMSignature Sig  WITH (NOLOCK) WHERE Sig.intEntityId=CH.intSalespersonId) SalespersonSignature,
 			(SELECT TOP 1 Sig.blbFile FROM tblSMUpload Sig  WITH (NOLOCK) WHERE Sig.intAttachmentId=CH.intAttachmentSignatureId) SalespersonSignature,
-			TX.strText,
-			CH.strContractBasis +
+			ISNULL(TX.strText,'') strText ,
+			ISNULL(CH.strContractBasis,'') +
 			ISNULL(', '+CASE WHEN LTRIM(RTRIM(CH.strINCOLocation)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strINCOLocation)) END,'') + 
 			ISNULL(', '+CASE WHEN LTRIM(RTRIM(CH.strCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strCountry)) END,'') strContractBasis ,
-			CH.strWeight,
-			CH.strGrade,
+			ISNULL(CH.strWeight,'') strWeight,
+			ISNULL(CH.strGrade, '') strGrade,
 			dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo,
 			'Remarks : '+ strRemark as strPrintableRemarks,
 			CH.strTerm
 		   ,lblCustomerContract					=	CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor Ref' ELSE 'Customer Ref' END
 		   ,strCustomerContract					=   ISNULL(CH.strCustomerContract,'')
-		   ,CH.strFreightTerm
+		   ,ISNULL(CH.strFreightTerm,'') strFreightTerm
 		   ,CH.strSalesperson
 	FROM	vyuCTContractHeaderView CH
 	LEFT
@@ -145,4 +145,3 @@ BEGIN CATCH
 	RAISERROR (@ErrMsg,18,1,'WITH NOWAIT')  
 	
 END CATCH
-GO
