@@ -43,7 +43,7 @@ CREATE TRIGGER trgInsteadOfInsertSMUpload
             DECLARE @fileSize FLOAT;
             SELECT @fileSize = CONVERT(FLOAT, SUM(DATALENGTH(blbFile)))
             FROM inserted;
-            IF (@currentStorageSize + (@fileSize / (1024 * 1024 * 1024))) > @StorageLimit
+            IF (@currentStorageSize + (@fileSize / (1024 * 1024 * 1024))) > @storageLimit
             BEGIN
                 DECLARE @currentStorageSizeString VARCHAR(10)
                 SELECT @currentStorageSizeString = CAST(@currentStorageSize AS VARCHAR)
