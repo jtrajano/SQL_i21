@@ -644,7 +644,7 @@ BEGIN
 			dbo.fnCalculateCostBetweenUOM(
 				voucherCostUOM.intItemUOMId
 				,receiptCostUOM.intItemUOMId
-				,B.dblCost - (B.dblCost * (B.dblDiscount / 100))
+				,B.dblCost - CAST((dblCost * (B.dblDiscount / 100)) AS DECIMAL(38,20))
 				) <> E2.dblUnitCost
 			OR E2.dblForexRate <> B.dblRate
 			OR E2.intTaxGroupId <> B.intTaxGroupId
