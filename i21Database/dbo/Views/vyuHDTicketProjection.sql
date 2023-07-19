@@ -78,6 +78,7 @@
 		,a.strResolutionTrainingAgendaLink
 		,a.strResolutionSOPLink
 		,a.intConcurrencyId
+		,a.strFixedInBuild
 		,strProjectionContactName = b.strName
 		,strProjectionCustomerName = c.strName
 		,strProjectionMileStone = d.strMileStone
