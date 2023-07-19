@@ -515,8 +515,8 @@ BEGIN
 	SELECT dtmDate = ForGLEntries_CTE.dtmDate
 		,strBatchId = @strBatchId
 		,intAccountId = GLAccount.intAccountId
-		,dblDebit = ROUND(DebitForeign.Value * ItemCurrencyToFunctional.dblForexRate, 2)
-		,dblCredit = ROUND(CreditForeign.Value * ItemCurrencyToFunctional.dblForexRate, 2)
+		,dblDebit = ROUND(DebitForeign.Value * ISNULL(ItemCurrencyToFunctional.dblForexRate, ChargeCurrencyToFunctional.dblForexRate), 2)
+		,dblCredit = ROUND(CreditForeign.Value * ISNULL(ItemCurrencyToFunctional.dblForexRate, ChargeCurrencyToFunctional.dblForexRate), 2)
 		,dblDebitUnit = 0
 		,dblCreditUnit = 0
 		,strDescription = ISNULL(GLAccount.strDescription, '') + ' (' + ForGLEntries_CTE.strItemNo + ')'
@@ -540,13 +540,13 @@ BEGIN
 		,dblDebitForeign = CASE 
 			WHEN ForGLEntries_CTE.intShipmentCurrencyId <> @intFunctionalCurrencyId
 				THEN DebitForeign.Value
-			ELSE ROUND(DebitForeign.Value * ItemCurrencyToFunctional.dblForexRate, 2)
+			ELSE ROUND(DebitForeign.Value * ISNULL(ItemCurrencyToFunctional.dblForexRate,ChargeCurrencyToFunctional.dblForexRate), 2)
 			END
 		,dblDebitReport = NULL
 		,dblCreditForeign = CASE 
 			WHEN ForGLEntries_CTE.intShipmentCurrencyId <> @intFunctionalCurrencyId
 				THEN CreditForeign.Value
-			ELSE ROUND(CreditForeign.Value * ItemCurrencyToFunctional.dblForexRate, 2)
+			ELSE ROUND(CreditForeign.Value * ISNULL(ItemCurrencyToFunctional.dblForexRate,ChargeCurrencyToFunctional.dblForexRate), 2)
 			END
 		,dblCreditReport = NULL
 		,dblReportingRate = NULL
@@ -582,8 +582,8 @@ BEGIN
 				ORDER BY dtmValidFromDate DESC) ItemCurrencyToFunctional
 	-- CROSS APPLY dbo.fnGetDebitFunctional(dbo.fnMultiply(ForGLEntries_CTE.dblCost, ISNULL(ItemCurrencyToFunctional.dblForexRate,1)), ForGLEntries_CTE.intShipmentCurrencyId, @intFunctionalCurrencyId, FX.dblForexRate) Debit
 	-- CROSS APPLY dbo.fnGetCreditFunctional(dbo.fnMultiply(ForGLEntries_CTE.dblCost, ISNULL(ItemCurrencyToFunctional.dblForexRate,1)), ForGLEntries_CTE.intShipmentCurrencyId, @intFunctionalCurrencyId, FX.dblForexRate) Credit
-	CROSS APPLY dbo.fnGetDebit(dbo.fnDivide(dbo.fnMultiply(ForGLEntries_CTE.dblCost, ISNULL(ChargeCurrencyToFunctional.dblForexRate,1)),ItemCurrencyToFunctional.dblForexRate)) DebitForeign
-	CROSS APPLY dbo.fnGetCredit(dbo.fnDivide(dbo.fnMultiply(ForGLEntries_CTE.dblCost, ISNULL(ChargeCurrencyToFunctional.dblForexRate,1)),ItemCurrencyToFunctional.dblForexRate)) CreditForeign
+	CROSS APPLY dbo.fnGetDebit(dbo.fnDivide(dbo.fnMultiply(ForGLEntries_CTE.dblCost, ISNULL(ChargeCurrencyToFunctional.dblForexRate,1)),ISNULL(ItemCurrencyToFunctional.dblForexRate,ChargeCurrencyToFunctional.dblForexRate))) DebitForeign
+	CROSS APPLY dbo.fnGetCredit(dbo.fnDivide(dbo.fnMultiply(ForGLEntries_CTE.dblCost, ISNULL(ChargeCurrencyToFunctional.dblForexRate,1)),ISNULL(ItemCurrencyToFunctional.dblForexRate,ChargeCurrencyToFunctional.dblForexRate))) CreditForeign
 	WHERE ISNULL(ForGLEntries_CTE.ysnAccrue, 0) = 1 AND ISNULL(ForGLEntries_CTE.ysnInventoryCost, 0) = 1 AND ForGLEntries_CTE.intCurrencyId <> @intInvoiceCurrency
 
 	UNION ALL
