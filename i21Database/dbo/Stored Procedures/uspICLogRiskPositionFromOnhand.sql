@@ -134,7 +134,7 @@ BEGIN
 			,intFutureMonthId = NULL
 			,dblNoOfLots = NULL
 			,dblQty = ISNULL(dbo.fnCalculateQtyBetweenUOM (t.intItemUOMId, iuomCDefault.intItemUOMId, t.dblQty), 0.00)
-			,dblPrice = ISNULL(dbo.fnCalculateCostBetweenUOM(t.intItemUOMId, stockUOM.intItemUOMId, t.dblCost), 0) --t.dblCost
+			,dblPrice = ISNULL(dbo.fnCalculateCostBetweenUOM(t.intItemUOMId, iuomCDefault.intItemUOMId, t.dblCost), 0) --t.dblCost
 			,intEntityId = t.intSourceEntityId --v.intEntityId
 			,ysnDelete = 0
 			,intUserId = @intEntityUserSecurityId
