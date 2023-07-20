@@ -5911,6 +5911,7 @@ BEGIN
 									ON CH.intStoreId = ST.intStoreId
 								INNER JOIN tblICItemUOM STUOM
 									ON ST.intCustomerChargesItemId = STUOM.intItemId
+									AND STUOM.ysnStockUnit = 1
 								INNER JOIN vyuEMEntityCustomerSearch vC 
 									ON CC.intCustomerId = vC.intEntityId					
 								INNER JOIN tblICItemUOM UOM 
@@ -5956,7 +5957,6 @@ BEGIN
 				------------------------------------------------------------------------
 				-- END CREATE SEPARATE INVOICE for Customer Charges
 
-				
 				------------------------------------------------------
 				----------------- TEMP TABLE FOR LOTTERY  ------------
 				------------------------------------------------------
