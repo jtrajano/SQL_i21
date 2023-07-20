@@ -19,8 +19,7 @@ DECLARE @InventoryReceiptId AS INT;
 DECLARE @ErrMsg                    NVARCHAR(MAX);
 
 DECLARE @ReceiptStagingTable AS ReceiptStagingTable,
-		@OtherCharges AS ReceiptOtherChargesTableType,
-		@OtherChargesGrouped AS ReceiptOtherChargesTableType,
+		@OtherCharges AS ReceiptOtherChargesTableType, 
         @total as int,
 		@defaultCurrency int,
 		@intSurchargeItemId as int,
@@ -412,81 +411,6 @@ END
 
 	DROP TABLE #tmpReceipts
 
-
-
-	INSERT into @OtherChargesGrouped
-	(
-		[intEntityVendorId]   
-	   ,[strBillOfLadding]   
-	   ,[strReceiptType]   
-	   ,[intLocationId]   
-	   ,[intShipViaId]   
-	   ,[intShipFromId]   
-	   ,[intCurrencyId]     
-	   ,[intChargeId]   
-	   ,[ysnInventoryCost]   
-	   ,[strCostMethod]   
-	   ,[dblRate]   
-	   ,[intCostUOMId]   
-	   ,[intOtherChargeEntityVendorId]   
-	   ,[dblAmount]   
-	   ,[strAllocateCostBy]   
-	   ,[intContractHeaderId]  
-	   ,[intContractDetailId]   
-	   ,[ysnAccrue]  
-	   ,[strChargesLink]  
-	   ,[dblQuantity]  
-	 )
-	  SELECT DISTINCT MIN([intEntityVendorId])
-	   ,MIN([strBillOfLadding])
-	   ,MIN([strReceiptType])
-	   ,MIN([intLocationId])
-	   ,MIN([intShipViaId])
-	   ,MIN([intShipFromId])
-	   ,MIN([intCurrencyId])
-	   ,MIN([intChargeId])
-	   ,MAX(CAST([ysnInventoryCost] AS tinyint))   			
-	   ,MIN([strCostMethod])
-	   ,MIN([dblRate])
-	   ,MIN([intCostUOMId])
-	   ,MIN([intOtherChargeEntityVendorId]) 
-	   ,MIN([dblAmount])
-	   ,MIN([strAllocateCostBy])
-	   ,MIN([intContractHeaderId])
-	   ,MIN([intContractDetailId])
-	   ,MAX(CAST([ysnAccrue]  AS tinyint))  					
-	   ,MIN([strChargesLink])
-	   ,SUM([dblQuantity])
-	   FROM @OtherCharges
-	   WHERE intChargeId = @intFreightItemId
-	   GROUP BY intChargeId, strChargesLink
-	   --Fuel Surcharge
-	   UNION ALL
-	   SELECT [intEntityVendorId]   
-	   ,[strBillOfLadding]   
-	   ,[strReceiptType]   
-	   ,[intLocationId]   
-	   ,[intShipViaId]   
-	   ,[intShipFromId]   
-	   ,[intCurrencyId]     
-	   ,[intChargeId]   
-	   ,[ysnInventoryCost]   
-	   ,[strCostMethod]   
-	   ,[dblRate]   
-	   ,[intCostUOMId]   
-	   ,[intOtherChargeEntityVendorId]   
-	   ,[dblAmount]   
-	   ,[strAllocateCostBy]   
-	   ,[intContractHeaderId]  
-	   ,[intContractDetailId]   
-	   ,[ysnAccrue]  
-	   ,[strChargesLink]  
-	   ,[dblQuantity]  
-	   FROM @OtherCharges
-	   WHERE intChargeId = @intSurchargeItemId
-
-
-
 	-- No Records to process so exit
     SELECT @total = COUNT(*) FROM @ReceiptStagingTable;
     IF (@total = 0)
@@ -494,7 +418,7 @@ END
 
 	EXEC dbo.uspICAddItemReceipt 
 			@ReceiptStagingTable
-			,@OtherChargesGrouped
+			,@OtherCharges
 			,@intUserId;
 
 	-- Update the Inventory Receipt Key to the Transaction Table
