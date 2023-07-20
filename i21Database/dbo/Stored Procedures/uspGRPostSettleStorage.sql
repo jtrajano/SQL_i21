@@ -111,6 +111,7 @@ BEGIN TRY
 	DECLARE @origdblSpotUnits DECIMAL(24, 10) 
 
 	DECLARE @intShipFrom INT
+	DECLARE @intShipFromFreightId INT
 	DECLARE @shipFromEntityId INT	
 	DECLARE @strCommodityCode NVARCHAR(50)
     DECLARE @intPayToEntityId INT
@@ -956,6 +957,16 @@ BEGIN TRY
 				JOIN tblGRStorageType ST 
 					ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
 				WHERE CS.intCustomerStorageId = @intCustomerStorageId
+
+
+				IF(@intShipFrom IS NOT NULL)
+				BEGIN
+					SELECT 
+						@intShipFromFreightId = intFreightTermId
+					FROM tblEMEntityLocation 
+					WHERE intEntityLocationId = @intShipFrom
+				END
+
 
 				--Storage Due		
 				SET @dblStorageDuePerUnit = 0
@@ -2754,7 +2765,7 @@ BEGIN TRY
 																								@LocationId,
 																								a.intItemId,
 																								coalesce(@intShipFrom, EM.intEntityLocationId),
-																								EM.intFreightTermId,
+																								CASE WHEN @shipFromEntityId != @EntityId THEN COALESCE(@intShipFromFreightId, EM.intFreightTermId) ELSE EM.intFreightTermId END, 																								
 																								default
 																							)
 														ELSE RI.intTaxGroupId
