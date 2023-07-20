@@ -97,7 +97,7 @@ BEGIN
 			)
 			,intTicketId = v.intTicketId
 			,intCommodityId = v.intCommodityId
-			,intCommodityUOMId = commodityUOM.intCommodityUnitMeasureId
+			,intCommodityUOMId = cuomDefault.intCommodityUnitMeasureId
 			,intItemId = t.intItemId
 			,intBookId = NULL
 			,intSubBookId = NULL
@@ -105,7 +105,7 @@ BEGIN
 			,intFutureMarketId = NULL
 			,intFutureMonthId = NULL
 			,dblNoOfLots = NULL
-			,dblQty = v.dblQuantityInStockUOM --t.dblQty
+			,dblQty = ISNULL(dbo.fnCalculateQtyBetweenUOM (t.intItemUOMId, iuomCDefault.intItemUOMId, t.dblQty), 0.00)
 			,dblPrice = v.dblCostInStockUOM -- t.dblCost
 			,intEntityId = v.intEntityId
 			,ysnDelete = 0
@@ -134,20 +134,12 @@ BEGIN
 		FROM	
 			tblICInventoryTransactionStorage t inner join vyuICGetInventoryStorage v 
 				ON t.intInventoryTransactionStorageId = v.intInventoryTransactionStorageId
-			INNER JOIN tblICItemUOM iu
-				ON iu.intItemUOMId = t.intItemUOMId
-			INNER JOIN tblICUnitMeasure u
-				ON u.intUnitMeasureId = iu.intUnitMeasureId
-			CROSS APPLY (
-				SELECT TOP 1 
-					commodityUOM.* 
-				FROM 
-					tblICCommodityUnitMeasure commodityUOM
-				WHERE 
-					commodityUOM.intCommodityId = v.intCommodityId 
-					AND commodityUOM.intUnitMeasureId = u.intUnitMeasureId	
-			) commodityUOM
-
+			INNER JOIN tblICCommodityUnitMeasure cuomDefault
+				ON cuomDefault.intCommodityId = v.intCommodityId
+				AND cuomDefault.ysnDefault = 1 AND cuomDefault.ysnStockUOM = 1
+			INNER JOIN tblICItemUOM iuomCDefault
+				ON iuomCDefault.intItemId = t.intItemId
+				AND iuomCDefault.intUnitMeasureId = cuomDefault.intUnitMeasureId
 			OUTER APPLY (
 				SELECT 
 					intContractDetailId = ISNULL(ri.intContractDetailId, CASE WHEN r.strReceiptType IN ('Purchase Contract', 'Inventory Return') THEN ri.intLineNo ELSE NULL END ) 
