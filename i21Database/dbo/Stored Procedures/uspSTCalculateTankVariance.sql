@@ -11,12 +11,13 @@ AS BEGIN
 	DECLARE @dblDeliveries DECIMAL(18, 6) = 0
 	DECLARE @dblRowDelivery DECIMAL(18, 6) = 0
 	DECLARE @dblEndFuelVolume DECIMAL(18, 6) = 0
+	DECLARE @dblSales DECIMAL(18, 6) = 0
 	DECLARE @intDeviceId INT
 	DECLARE @intSiteId INT
 	DECLARE @dtmStartDate DATETIME
 	DECLARE @dtmEndDate DATETIME
 	DECLARE @dtmDeliveryDate DATETIME
-	
+	DECLARE @intCompanyLocationId INT
 
 	SELECT	@intStoreId = intStoreId,
 			@dtmCheckoutDate = dtmCheckoutDate,
@@ -30,6 +31,31 @@ AS BEGIN
 	WHERE	intStoreId = @intStoreId AND
 			strCheckoutType = 'Automatic' AND
 			dtmCheckoutDate < @dtmCheckoutDate
+
+	SELECT	@intCompanyLocationId = intCompanyLocationId
+	FROM	tblSTStore
+	WHERE	intStoreId = @intStoreId
+
+	INSERT INTO tblSTCheckoutTankVarianceCalculation (intCheckoutId, intDeviceId, dblStartFuelVolume, dblSales, dblEndFuelVolume, dblCalculatedVariance, intConcurrencyId)
+	SELECT		@intCheckoutId,
+				c.intDeviceId,
+				0,
+				0,
+				0,
+				0,
+				1
+	FROM		tblSTStore a
+	INNER JOIN	tblTMSite b
+	ON			a.intCompanyLocationId = b.intLocationId
+	INNER JOIN	tblTMSiteDevice c
+	ON			b.intSiteID = c.intSiteID
+	INNER JOIN	tblTMDevice d
+	ON			c.intDeviceId = d.intDeviceId
+	WHERE		a.intCompanyLocationId = @intCompanyLocationId AND
+				c.intDeviceId NOT IN (	SELECT		intDeviceId 
+										FROM		tblSTCheckoutTankVarianceCalculation 
+										WHERE		@intCheckoutId = @intCheckoutId) AND
+				d.intDeviceTypeId = 1 --Tank
 	
 	DECLARE MY_CURSOR CURSOR LOCAL STATIC READ_ONLY FORWARD_ONLY
 	FOR  
@@ -120,12 +146,14 @@ AS BEGIN
 
 		SET @dblDeliveries = ISNULL(@dblDeliveries, 0)
 		SET @dblEndFuelVolume = ISNULL(@dblEndFuelVolume, 0)
+		SET @dblSales = ISNULL(dbo.fnTMGetSalesFromStoreEOD(@dtmCheckoutDate, @intSiteId), 0)
 
 		UPDATE	tblSTCheckoutTankVarianceCalculation
 		SET		dblStartFuelVolume = @dblPreviousCheckoutTankMonitorFuelVolume,
 				dblDeliveries = @dblDeliveries,
-				dblCalculatedVariance = ABS((@dblPreviousCheckoutTankMonitorFuelVolume + @dblDeliveries - dblSales) - @dblEndFuelVolume),
-				dblEndFuelVolume = @dblEndFuelVolume
+				dblCalculatedVariance = ABS((@dblPreviousCheckoutTankMonitorFuelVolume + @dblDeliveries - @dblSales) - @dblEndFuelVolume),
+				dblEndFuelVolume = @dblEndFuelVolume,
+				dblSales = @dblSales
 		WHERE	intCheckoutId = @intCheckoutId AND intDeviceId = @intDeviceId
 
 		FETCH NEXT FROM MY_CURSOR INTO @intDeviceId
