@@ -45,15 +45,10 @@ SELECT CONVERT(INT, ROW_NUMBER() OVER (
 			THEN D.strQtyUOM
 		ELSE LCIU.strUnitMeasure
 		END AS strQtyUOM
-	,CASE 
-		WHEN D.intAttributeId = 5
-			THEN D.dblWeight
-		WHEN D.intAttributeId IN (
-				12
-				,13
-				)
-			THEN CD.dblNetWeight
-		ELSE LC.dblNetWt
+	,CASE WHEN D .intAttributeId IN (5, 12, 13, 15) THEN 
+		D .dblWeight 
+		ELSE
+		dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, CD.intUnitMeasureId, IU.intUnitMeasureId, LDCL.dblQuantity - ISNULL(LDCL.dblReceivedQty, 0))
 		END AS dblWeight
 	,CASE 
 		WHEN D.intAttributeId = 5
