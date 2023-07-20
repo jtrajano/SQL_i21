@@ -1,4 +1,4 @@
-﻿create procedure uspTRFreightCommissionFreightParams  
+﻿CREATE PROCEDURE uspTRFreightCommissionFreightParams  
 @intItemId INT,  
 @intInvoiceId INT,
 @intFreightItemId INT,
@@ -10,7 +10,7 @@
 --@dtmFrom NVARCHAR(50),
 --@dtmTo NVARCHAR(50)
   
-as
+AS
 
 SET QUOTED_IDENTIFIER OFF    
 SET ANSI_NULLS ON    
@@ -22,13 +22,10 @@ SET ANSI_WARNINGS OFF
 --DECLARE @dto DATETIME = CONVERT(NVARCHAR(255),CONVERT(SMALLDATETIME, @dtmTo,105))
 --DECLARE @dfrom DATETIME = CONVERT(NVARCHAR(255),CONVERT(SMALLDATETIME, @dtmFrom,105))
 
-select   
+SELECT   
   intItemId  = @intItemId
 , intTrueItemId = intItemId
-, strItemDescription  = CASE 
-							WHEN intItemId = @intFreightItemId THEN 'Unit Freight Charge'
-							--WHEN intItemId = @intSurchargeItemId THEN 'Surcharge'
-							ELSE strItemDescription END
+, strItemDescription  = CASE WHEN intItemId = @intFreightItemId THEN 'Unit Freight Charge' ELSE 'Surcharge' END
 , intInvoiceId  
 , dblFreightRate  
 , dblFreight = dblTotal
@@ -36,8 +33,8 @@ select
 , dblTotalCommission = CASE WHEN intItemId = @intFreightItemId THEN ((@dblFreightUnitCommissionPct/CONVERT(DECIMAL(18,6),100)) * dblTotal) ELSE ((@dblOtherUnitCommissionPct/CONVERT(DECIMAL(18,6),100)) * dblTotal) END
 
   
-from vyuTRGetFreightCommissionFreight fcf
-where intInvoiceId = @intInvoiceId
+FROM vyuTRGetFreightCommissionFreight fcf
+WHERE intInvoiceId = @intInvoiceId
 	AND (
 		(intItemId = @intFreightItemId AND intCategoryId = @intFreightCategoryId AND intLoadDistributionDetailId = @intLoadDistributionDetailId)
 		--OR (intItemId = @intSurchargeItemId AND intCategoryId = @intFreightCategoryId AND intLoadDistributionDetailId = @intLoadDistributionDetailId)

@@ -55,6 +55,8 @@ select dtmFrom = @dtmDateFrom
 ,intLoadHeaderId
 ,intLoadDistributionHeaderId
 ,intLoadDistributionDetailId
+,dblTotalBillUnit = NULL
+,dblTotalCommision = NULL
 
 from vyuTRGetFreightCommissionLine cl
 where ((cl.intDriverId =  @intDriverId OR @intDriverId = 0) OR (RTRIM(LTRIM(ISNULL(cl.strReceiptLink, ''))) = '' AND cl.intItemCategoryId = @intFreightCategoryId))
