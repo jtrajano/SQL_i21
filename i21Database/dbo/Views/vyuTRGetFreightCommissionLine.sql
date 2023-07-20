@@ -40,8 +40,7 @@
     strItemDescription = ii.strDescription,  
    dblUnits = ldd.dblUnits,  
    dblPrice = ldd.dblPrice,  
-   intInvoiceId = ai.intInvoiceId,  
-  
+   intInvoiceId = ai.intInvoiceId,
   
     strCompanyAddress = dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, CompanySetup.strAddress, CompanySetup.strCity, CompanySetup.strState, CompanySetup.strZip, CompanySetup.strCountry, NULL, 0) COLLATE Latin1_General_CI_AS    
     , strCompanyName = CompanySetup.strCompanyName    
@@ -49,6 +48,9 @@
     , ldh.intLoadDistributionHeaderId  
 	, ldd.intLoadDistributionDetailId
   , ldd.strReceiptLink  
+  , dblFreightRate = ldd.dblFreightRate
+  , dblFreight = ldd.dblFreightUnit
+  , dblSurcharge = ldd.dblDistSurcharge
    from tblTRLoadDistributionDetail ldd  
    left join tblTRLoadDistributionHeader ldh on ldd.intLoadDistributionHeaderId = ldh.intLoadDistributionHeaderId  
    LEFT JOIN tblSMCompanyLocation accl ON accl.intCompanyLocationId = ldh.intCompanyLocationId  
