@@ -1,4 +1,4 @@
-CREATE PROCEDURE [dbo].[uspApiSchemaTransformRecipeItem] (
+CREATE [dbo].[uspApiSchemaTransformRecipeItem] (
     @guiApiUniqueId UNIQUEIDENTIFIER,
     @guiLogId UNIQUEIDENTIFIER
 )
@@ -42,6 +42,21 @@ FROM tblApiSchemaRecipeItem sr
 LEFT JOIN tblMFRecipe r ON r.strName = sr.strRecipeName
 WHERE sr.guiApiUniqueId = @guiApiUniqueId
 AND r.intRecipeId IS NULL
+
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+SELECT
+      NEWID()
+    , guiApiImportLogId = @guiLogId
+    , strField = 'Recipe Detail Item No'
+    , strValue = sr.strRecipeItemNo
+    , strLogLevel = 'Error'
+    , strStatus = 'Failed'
+    , intRowNo = sr.intRowNumber
+    , strMessage = 'The Recipe Detail Item No ' + ISNULL(sr.strRecipeItemNo, '') + ' does not exists.'
+FROM tblApiSchemaRecipeItem sr
+LEFT JOIN tblICItem AS Item ON Item.strItemNo = sr.strRecipeItemNo
+WHERE sr.guiApiUniqueId = @guiApiUniqueId
+AND Item.intItemId IS NULL;
 
 INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
 SELECT
@@ -511,87 +526,91 @@ BEGIN
 	END
 	
 	IF @intRecipeItemId IS NULL
-	BEGIN		
-		-- Create a default output items
-		INSERT INTO tblMFRecipeItem (
-			  intRecipeId
-			, intItemId
-			, strDescription
-			, dblQuantity
-			, dblCalculatedQuantity
-			, intItemUOMId
-			, intRecipeItemTypeId
-			, strItemGroupName
-			, dblUpperTolerance
-			, dblLowerTolerance
-			, dblCalculatedUpperTolerance
-			, dblCalculatedLowerTolerance
-			, dblShrinkage
-			, ysnScaled
-			, intConsumptionMethodId
-			, intStorageLocationId
-			, dtmValidFrom
-			, dtmValidTo
-			, ysnYearValidationRequired
-			, ysnMinorIngredient
-			, ysnOutputItemMandatory
-			, dblScrap
-			, ysnConsumptionRequired
-			, dblCostAllocationPercentage
-			, intMarginById
-			, dblMargin
-			, ysnCostAppliedAtInvoice
-			, intCommentTypeId
-			, strDocumentNo
-			, intSequenceNo
-			, ysnPartialFillConsumption
-			, intCreatedUserId
-			, dtmCreated
-			, intLastModifiedUserId
-			, dtmLastModified
-			, intConcurrencyId
-            , guiApiUniqueId
-            , intRowNumber)
-		SELECT
-			  intRecipeId                       = @intRecipeId
-			, intItemId                         = @intItemId
-			, strDescription                    = @strDescription
-			, dblQuantity                       = ISNULL(@dblQuantity, 0)
-			, dblCalculatedQuantity             = ISNULL(@dblCalculatedQuantity, 0)
-			, intItemUOMId                      = @intItemUOMId
-			, intRecipeItemTypeId               = @intRecipeItemTypeId
-			, strItemGroupName                  = @strItemGroupName
-			, dblUpperTolerance                 = ISNULL(@dblUpperTolerance, 0)
-			, dblLowerTolerance                 = ISNULL(@dblLowerTolerance, 0)
-			, dblCalculatedUpperTolerance       = ISNULL(@dblCalculatedUpperTolerance, 0)
-			, dblCalculatedLowerTolerance       = ISNULL(@dblCalculatedLowerTolerance, 0)
-			, dblShrinkage                      = ISNULL(@dblShrinkage, 0)
-			, ysnScaled                         = @ysnScaled
-			, intConsumptionMethodId            = @intConsumptionMethodId
-			, intStorageLocationId              = @intStorageLocationId
-			, dtmValidFrom                      = @dtmValidFrom
-			, dtmValidTo                        = @dtmValidTo
-			, ysnYearValidationRequired         = @ysnYearValidationRequired
-			, ysnMinorIngredient                = @ysnMinorIngredient
-			, ysnOutputItemMandatory            = @ysnOutputItemMandatory
-			, dblScrap                          = ISNULL(@dblScrap, 0)
-			, ysnConsumptionRequired            = @ysnConsumptionRequired
-			, dblCostAllocationPercentage       = ISNULL(@dblCostAllocationPercentage, 0)
-			, intMarginById                     = @intMarginById
-			, dblMargin                         = ISNULL(@dblMargin, 0)
-			, ysnCostAppliedAtInvoice           = @ysnCostAppliedAtInvoice
-			, intCommentTypeId                  = @intCommentTypeId
-			, strDocumentNo                     = @strDocumentNo
-			, intSequenceNo                     = @intSequenceNo
-			, ysnPartialFillConsumption         = @ysnPartialFillConsumption
-			, intCreatedUserId                  = @intUserId
-			, dtmCreated                        = GETUTCDATE()
-			, intLastModifiedUserId             = @intUserId
-			, dtmLastModified                   = GETUTCDATE()
-			, intConcurrencyId                  = 1
-            , guiApiUniqueId                    = @guiApiUniqueId
-            , intRowNumber                      = @intRowNumber
-	END
+		BEGIN		
+			IF @intItemId IS NOT NULL
+				BEGIN
+					-- Create a default output items
+					INSERT INTO tblMFRecipeItem (
+						  intRecipeId
+						, intItemId
+						, strDescription
+						, dblQuantity
+						, dblCalculatedQuantity
+						, intItemUOMId
+						, intRecipeItemTypeId
+						, strItemGroupName
+						, dblUpperTolerance
+						, dblLowerTolerance
+						, dblCalculatedUpperTolerance
+						, dblCalculatedLowerTolerance
+						, dblShrinkage
+						, ysnScaled
+						, intConsumptionMethodId
+						, intStorageLocationId
+						, dtmValidFrom
+						, dtmValidTo
+						, ysnYearValidationRequired
+						, ysnMinorIngredient
+						, ysnOutputItemMandatory
+						, dblScrap
+						, ysnConsumptionRequired
+						, dblCostAllocationPercentage
+						, intMarginById
+						, dblMargin
+						, ysnCostAppliedAtInvoice
+						, intCommentTypeId
+						, strDocumentNo
+						, intSequenceNo
+						, ysnPartialFillConsumption
+						, intCreatedUserId
+						, dtmCreated
+						, intLastModifiedUserId
+						, dtmLastModified
+						, intConcurrencyId
+						, guiApiUniqueId
+						, intRowNumber)
+					SELECT
+						  intRecipeId                       = @intRecipeId
+						, intItemId                         = @intItemId
+						, strDescription                    = @strDescription
+						, dblQuantity                       = ISNULL(@dblQuantity, 0)
+						, dblCalculatedQuantity             = ISNULL(@dblCalculatedQuantity, 0)
+						, intItemUOMId                      = @intItemUOMId
+						, intRecipeItemTypeId               = @intRecipeItemTypeId
+						, strItemGroupName                  = @strItemGroupName
+						, dblUpperTolerance                 = ISNULL(@dblUpperTolerance, 0)
+						, dblLowerTolerance                 = ISNULL(@dblLowerTolerance, 0)
+						, dblCalculatedUpperTolerance       = ISNULL(@dblCalculatedUpperTolerance, 0)
+						, dblCalculatedLowerTolerance       = ISNULL(@dblCalculatedLowerTolerance, 0)
+						, dblShrinkage                      = ISNULL(@dblShrinkage, 0)
+						, ysnScaled                         = @ysnScaled
+						, intConsumptionMethodId            = @intConsumptionMethodId
+						, intStorageLocationId              = @intStorageLocationId
+						, dtmValidFrom                      = @dtmValidFrom
+						, dtmValidTo                        = @dtmValidTo
+						, ysnYearValidationRequired         = @ysnYearValidationRequired
+						, ysnMinorIngredient                = @ysnMinorIngredient
+						, ysnOutputItemMandatory            = @ysnOutputItemMandatory
+						, dblScrap                          = ISNULL(@dblScrap, 0)
+						, ysnConsumptionRequired            = @ysnConsumptionRequired
+						, dblCostAllocationPercentage       = ISNULL(@dblCostAllocationPercentage, 0)
+						, intMarginById                     = @intMarginById
+						, dblMargin                         = ISNULL(@dblMargin, 0)
+						, ysnCostAppliedAtInvoice           = @ysnCostAppliedAtInvoice
+						, intCommentTypeId                  = @intCommentTypeId
+						, strDocumentNo                     = @strDocumentNo
+						, intSequenceNo                     = @intSequenceNo
+						, ysnPartialFillConsumption         = @ysnPartialFillConsumption
+						, intCreatedUserId                  = @intUserId
+						, dtmCreated                        = GETUTCDATE()
+						, intLastModifiedUserId             = @intUserId
+						, dtmLastModified                   = GETUTCDATE()
+						, intConcurrencyId                  = 1
+						, guiApiUniqueId                    = @guiApiUniqueId
+						, intRowNumber                      = @intRowNumber
+				END
+			
+		END
 	ELSE
 	BEGIN
 		IF @OverwriteExisting = 1
