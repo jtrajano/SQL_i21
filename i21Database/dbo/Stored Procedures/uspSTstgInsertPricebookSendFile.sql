@@ -368,8 +368,8 @@ BEGIN
 																	ELSE 'addchange' 
 																END,
 	
-							[strICPOSCodeFormatFormat]			= PCF.strPosCodeFormat,
-							[strICPOSCode]						= dbo.fnSTRemoveCheckDigit(ISNULL(PCF.strUPCA, PCF.strLongUPCCode)), --IUOM.strLongUPCCode, -- IF PASSPORT DO NOT include check digit
+							[strICPOSCodeFormatFormat]			= ISNULL(IUOM.strPosCodeFormat, 'plu'),
+							[strICPOSCode]						= ISNULL(dbo.fnSTRemoveCheckDigit(ISNULL(IUOM.strUPCA, IUOM.strLongUPCCode)), IUOM.strUpcCode), --IUOM.strLongUPCCode, -- IF PASSPORT DO NOT include check digit
 							[strICPOSCodeModifier]				= CAST(ISNULL(IUOM.intModifier, '0') AS NVARCHAR(10)),
 
 							[strITTDataActiveFlgValue]			= CASE 
@@ -431,10 +431,59 @@ BEGIN
 							AND StoreDepartments.intCompanyLocationId = ST.intCompanyLocationId
 						INNER JOIN tblSMCompanyLocation L 
 							ON L.intCompanyLocationId = ST.intCompanyLocationId
-						INNER JOIN tblICItemUOM AS IUOM 
-							ON IUOM.intItemId = item.intItemId 
-						INNER JOIN vyuSTItemUOMPosCodeFormat PCF
-							ON IUOM.intItemUOMId = PCF.intItemUOMId
+						INNER JOIN (
+							SELECT *
+								, CASE WHEN dblUPCwthOrwthOutCheckDigit <= 99999 THEN 'plu'
+										WHEN dblUPCwthOrwthOutCheckDigit > 99999
+											THEN CASE
+												-- upcE  =  6-Numeric Digits. "NOT" included the Check digit
+												-- ean8  =  8-Numeric Digits. "NOT" included the Check digit
+												-- plu   =  Less than or equal to 5 digits. "NOT" included the Check digit
+												-- upcA  =  12-Numeric Digits included the Check digit
+												-- ean13 =  13-Numeric Digits included the Check digit
+												-- gtin  =  GTINs may be 8, 12, 13 or 14 digits long. Check digit is included
+
+												-- UPC-A
+													WHEN LEN(dblUPCwthOrwthOutCheckDigit) = 6 THEN 'upcA'
+												WHEN dblUPCwthOrwthOutCheckDigit > 99999 AND dblUPCwthOrwthOutCheckDigit <= 999999999999
+													THEN 'upcA'
+																
+												-- EAN13
+												WHEN dblUPCwthOrwthOutCheckDigit > 999999999999 AND dblUPCwthOrwthOutCheckDigit <= 9999999999999
+													THEN 'ean13'
+
+												-- GTIN  
+												WHEN dblUPCwthOrwthOutCheckDigit > 9999999999999
+													THEN 'gtin'
+											END
+									ELSE ''
+							   END COLLATE Latin1_General_CI_AS AS strPosCodeFormat
+							FROM (
+								SELECT strLongUPCWOLeadingZero =  ISNULL(SUBSTRING(U.strLongUPCCode, PATINDEX('%[^0]%',U.strLongUPCCode), LEN(U.strLongUPCCode)), '0')
+									, strUPCwthOrwthOutCheckDigit = CASE WHEN LEN(ISNULL(SUBSTRING(U.strLongUPCCode, PATINDEX('%[^0]%',U.strLongUPCCode), LEN(U.strLongUPCCode)), '0')) = 6 -- (UPC-E) Convert to UPC-A
+																			THEN RIGHT('00000000000' + ISNULL(dbo.fnSTConvertUPCeToUPCa(ISNULL(SUBSTRING(U.strLongUPCCode, PATINDEX('%[^0]%',U.strLongUPCCode), LEN(U.strLongUPCCode)), '0')),''), 11) + CAST(dbo.fnSTGenerateCheckDigit(U.strLongUPCCode) AS NVARCHAR(1))
+																		WHEN CONVERT(NUMERIC(32, 0),CAST(ISNULL(SUBSTRING(U.strLongUPCCode, PATINDEX('%[^0]%',U.strLongUPCCode), LEN(U.strLongUPCCode)), '0') AS FLOAT)) <= 99999 -- (PLU) No Check digit
+																			THEN ISNULL(SUBSTRING(U.strLongUPCCode, PATINDEX('%[^0]%',U.strLongUPCCode), LEN(U.strLongUPCCode)), '0') 
+																		WHEN CONVERT(NUMERIC(32, 0),CAST(ISNULL(SUBSTRING(U.strLongUPCCode, PATINDEX('%[^0]%',U.strLongUPCCode), LEN(U.strLongUPCCode)), '0') AS FLOAT)) > 99999 -- (UPC-A, EAN13, GTIN) With Check Digit
+																			THEN ISNULL(SUBSTRING(U.strLongUPCCode, PATINDEX('%[^0]%',U.strLongUPCCode), LEN(U.strLongUPCCode)), '0')
+																				+ CAST(dbo.fnSTGenerateCheckDigit(ISNULL(SUBSTRING(U.strLongUPCCode, PATINDEX('%[^0]%',U.strLongUPCCode), LEN(U.strLongUPCCode)), 0)) AS NVARCHAR(1)) END
+									, dblUPCwthOrwthOutCheckDigit = CASE WHEN LEN(ISNULL(SUBSTRING(U.strLongUPCCode, PATINDEX('%[^0]%',U.strLongUPCCode), LEN(U.strLongUPCCode)), '0')) = 6
+																			THEN CONVERT(NUMERIC(32, 0),CAST(RIGHT('00000000000' + ISNULL(dbo.fnSTConvertUPCeToUPCa(ISNULL(SUBSTRING(U.strLongUPCCode, PATINDEX('%[^0]%',U.strLongUPCCode), LEN(U.strLongUPCCode)), '0')),''), 11) + CAST(dbo.fnSTGenerateCheckDigit(ISNULL(SUBSTRING(U.strLongUPCCode, PATINDEX('%[^0]%',U.strLongUPCCode), LEN(U.strLongUPCCode)), 0)) AS NVARCHAR(1)) AS FLOAT))
+																		WHEN CONVERT(NUMERIC(32, 0),CAST(ISNULL(SUBSTRING(U.strLongUPCCode, PATINDEX('%[^0]%',U.strLongUPCCode), LEN(U.strLongUPCCode)), '0') AS FLOAT)) <= 99999
+																			THEN CONVERT(NUMERIC(32, 0),CAST(ISNULL(SUBSTRING(U.strLongUPCCode, PATINDEX('%[^0]%',U.strLongUPCCode), LEN(U.strLongUPCCode)), '0') AS FLOAT))
+																		WHEN CONVERT(NUMERIC(32, 0),CAST(ISNULL(SUBSTRING(U.strLongUPCCode, PATINDEX('%[^0]%',U.strLongUPCCode), LEN(U.strLongUPCCode)), '0') AS FLOAT)) > 99999
+																			THEN CONVERT(NUMERIC(32, 0),CAST(ISNULL(SUBSTRING(U.strLongUPCCode, PATINDEX('%[^0]%',U.strLongUPCCode), LEN(U.strLongUPCCode)), '0') + CAST(dbo.fnSTGenerateCheckDigit(ISNULL(SUBSTRING(U.strLongUPCCode, PATINDEX('%[^0]%',U.strLongUPCCode), LEN(U.strLongUPCCode)), 0)) AS NVARCHAR(1)) AS FLOAT)) END
+									, ysnHasCheckDigit = CASE WHEN LEN(ISNULL(SUBSTRING(U.strLongUPCCode, PATINDEX('%[^0]%',U.strLongUPCCode), LEN(U.strLongUPCCode)), '0')) = 6
+																	THEN CAST(1 AS BIT)
+															WHEN CONVERT(NUMERIC(32, 0),CAST(ISNULL(SUBSTRING(U.strLongUPCCode, PATINDEX('%[^0]%',U.strLongUPCCode), LEN(U.strLongUPCCode)), '0') AS FLOAT)) <= 99999 -- (PLU) No Check digit
+																	THEN CAST(0 AS BIT)
+															WHEN CONVERT(NUMERIC(32, 0),CAST(ISNULL(SUBSTRING(U.strLongUPCCode, PATINDEX('%[^0]%',U.strLongUPCCode), LEN(U.strLongUPCCode)), '0') AS FLOAT)) > 99999 -- (UPC-A, EAN13, GTIN) With Check Digit
+																	THEN CAST(1 AS BIT) END
+									, U.*
+								FROM tblICItemUOM U
+							) tbl) AS IUOM ON IUOM.intItemId = item.intItemId 
+						--LEFT JOIN vyuSTItemUOMPosCodeFormat PCF
+						--	ON IUOM.intItemUOMId = PCF.intItemUOMId
 						INNER JOIN tblICUnitMeasure IUM 
 							ON IUM.intUnitMeasureId = IUOM.intUnitMeasureId 
 						INNER JOIN tblSTRegister	register 
@@ -449,9 +498,10 @@ BEGIN
 							ON IL.intDepositPLUId = uomDepositPlu.intItemUOMId
 						WHERE item.ysnFuelItem = CAST(0 AS BIT) 
 							AND ST.intStoreId = @intStoreId
-							AND IUOM.strLongUPCCode IS NOT NULL
-							AND IUOM.strLongUPCCode NOT LIKE '%[^0-9]%'
-							AND ISNULL(SUBSTRING(IUOM.strLongUPCCode, PATINDEX('%[^0]%',IUOM.strLongUPCCode), LEN(IUOM.strLongUPCCode)), 0) NOT IN ('')
+							AND ((IUOM.strLongUPCCode IS NOT NULL
+								AND IUOM.strLongUPCCode NOT LIKE '%[^0-9]%'
+								AND ISNULL(SUBSTRING(IUOM.strLongUPCCode, PATINDEX('%[^0]%',IUOM.strLongUPCCode), LEN(IUOM.strLongUPCCode)), 0) NOT IN (''))
+								OR (ISNULL(IUOM.strUpcCode , '') <> '' AND ISNULL(IUOM.strLongUPCCode, '') = ''))
 							AND (
 									(
 										(@ysnExportEntirePricebookFile = CAST(0 AS BIT)  AND  @strCategoryCode <> 'whitespaces')
@@ -477,7 +527,7 @@ BEGIN
 
 
 ----TEST 
-SELECT '@tblTempPassportITT', * FROM @tblTempPassportITT								
+SELECT '@tblTempPassportITT', * FROM @tblTempPassportITT	
 								
 
 								IF EXISTS(SELECT TOP 1 1 FROM @tblTempPassportITT)
@@ -667,7 +717,7 @@ SELECT '@tblTempPassportITT', * FROM @tblTempPassportITT
 												(
 													SELECT DISTINCT
 														CASE WHEN tmpItem.strActionType = 'Created' THEN 'ADD' ELSE 'CHG' END AS strActionType
-														, dbo.fnSTRemoveCheckDigit(ISNULL(IUOM.strUPCA, IUOM.strLongUPCCode)) AS strUpcCode
+														, ISNULL(dbo.fnSTRemoveCheckDigit(ISNULL(IUOM.strUPCA, IUOM.strLongUPCCode)), IUOM.strUpcCode) AS strUpcCode
 														, I.strDescription AS strDescription
 														, IUM.strUnitMeasure AS strUnitMeasure
 														, itemPricing.dblSalePrice AS dblSalePrice
@@ -709,9 +759,10 @@ SELECT '@tblTempPassportITT', * FROM @tblTempPassportITT
 														ON SplPrc.intItemId = I.intItemId
 													WHERE I.ysnFuelItem = CAST(0 AS BIT) 
 														AND ST.intStoreId = @intStoreId
-														AND IUOM.strLongUPCCode IS NOT NULL
-														AND IUOM.strLongUPCCode NOT LIKE '%[^0-9]%'
-														AND ISNULL(SUBSTRING(IUOM.strLongUPCCode, PATINDEX('%[^0]%',IUOM.strLongUPCCode), LEN(IUOM.strLongUPCCode)), 0) NOT IN ('') -- NOT IN ('0', '')
+														AND ((IUOM.strLongUPCCode IS NOT NULL
+															AND IUOM.strLongUPCCode NOT LIKE '%[^0-9]%'
+															AND ISNULL(SUBSTRING(IUOM.strLongUPCCode, PATINDEX('%[^0]%',IUOM.strLongUPCCode), LEN(IUOM.strLongUPCCode)), 0) NOT IN (''))
+															OR (ISNULL(IUOM.strUpcCode , '') <> '' AND ISNULL(IUOM.strLongUPCCode, '') = ''))
 												) as t
 										) t1
 										WHERE rn = 1
