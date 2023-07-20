@@ -22,6 +22,7 @@ SELECT CONTRACTS.*
 	 , strCompanyLocationName	= LOC.strLocationName
 	 , strSalespersonName		= SP.strName
 	 , strFreightTerm			= FT.strFreightTerm
+	 , strTaxGroup				= TG.strTaxGroup
 FROM (
 	SELECT intContractHeaderId		= CC.intContractHeaderId
 		 , intContractDetailId		= CC.intContractDetailId
@@ -76,6 +77,7 @@ FROM (
 		 , strCategoryDescription	= NULL
 		 , intEntitySalespersonId	= NULL
 		 , intFreightTermId			= CC.intFreightTermId
+		 , intTaxGroupId			= NULL
 	FROM vyuCTCustomerContract CC
 	OUTER APPLY (
 		SELECT TOP 1 intCurrencyId = ISNULL(SMC.intMainCurrencyId, SMC.intCurrencyID)
@@ -141,6 +143,7 @@ FROM (
 		 , strCategoryDescription	= NULL
 		 , intEntitySalespersonId	= ICC.intSalespersonId
 		 , intFreightTermId			= ICC.intFreightTermId
+		 , intTaxGroupId			= ICD.intTaxGroupId
 	FROM tblCTItemContractHeader ICC
 	INNER JOIN tblCTItemContractDetail ICD ON ICC.intItemContractHeaderId = ICD.intItemContractHeaderId
 	INNER JOIN tblICItem ITEM ON ICD.intItemId = ITEM.intItemId
@@ -203,6 +206,7 @@ FROM (
 		 , strCategoryDescription	= IC.strDescription
 		 , intEntitySalespersonId	= ICC.intSalespersonId
 		 , intFreightTermId			= ICC.intFreightTermId
+		 , intTaxGroupId			= NULL
 	FROM tblCTItemContractHeader ICC
 	INNER JOIN tblCTItemContractHeaderCategory ICHC ON ICC.intItemContractHeaderId = ICHC.intItemContractHeaderId
 	INNER JOIN tblICCategory IC ON IC.intCategoryId = ICHC.intCategoryId
@@ -213,3 +217,4 @@ LEFT OUTER JOIN tblSMTerm SMT ON CONTRACTS.intTermId = SMT.intTermID
 LEFT OUTER JOIN tblSMCompanyLocation LOC ON CONTRACTS.intCompanyLocationId = LOC.intCompanyLocationId
 LEFT OUTER JOIN tblSMFreightTerms FT ON CONTRACTS.intFreightTermId = FT.intFreightTermId
 LEFT OUTER JOIN tblEMEntity SP ON CONTRACTS.intEntitySalespersonId = SP.intEntityId
+LEFT JOIN tblSMTaxGroup TG ON CONTRACTS.intTaxGroupId = TG.intTaxGroupId
