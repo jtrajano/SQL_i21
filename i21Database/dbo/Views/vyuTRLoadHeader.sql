@@ -52,7 +52,10 @@ SELECT TL.intLoadHeaderId
 	, strSalesUnit = NULL
 	, strInvoiceType = NULL
 	, strSiteNumber = ''  
-	, IVX.strProductDescription AS strItemDescription  
+	, IVX.strProductDescription AS strItemDescription
+	, ICC.strCategoryCode
+	, Case When TR.strOrigin = 'Terminal' Then  SP.strState else Location.strStateProvince END strOriginState
+    , strDestinationState = NULL
 FROM tblTRLoadHeader TL
 LEFT JOIN tblTRLoadReceipt TR ON TL.intLoadHeaderId = TR.intLoadHeaderId
 LEFT JOIN vyuTRTerminal Terminal ON Terminal.[intEntityVendorId] = TR.intTerminalId
@@ -69,7 +72,8 @@ left join tblTRState e on e.intStateId = TL.intStateId
 left join tblSCTruckDriverReference dr on dr.intTruckDriverReferenceId = TL.intTruckDriverReferenceId
 left join tblSMShipViaTruck smtr on smtr.intEntityShipViaTruckId = TL.intTruckId
 LEFT JOIN tblLGDispatchOrder LGD ON LGD.intDispatchOrderId = TL.intDispatchOrderId
-LEFT JOIN tblICItemVendorXref IVX ON IVX.intItemVendorXrefId = TR.intItemVendorXrefId  
+LEFT JOIN tblICItemVendorXref IVX ON IVX.intItemVendorXrefId = TR.intItemVendorXrefId
+LEFT JOIN tblICCategory ICC ON ICC.intCategoryId = Item.intCategoryId  
 
 
 UNION ALL
@@ -120,6 +124,9 @@ SELECT TL.intLoadHeaderId
 	, strInvoiceType = Invoice.strType
 	, strSiteNumber = RIGHT('000' + CAST(site.intSiteNumber AS NVARCHAR(4)),4) COLLATE Latin1_General_CI_AS
 	, ICX.strProductDescription AS strItemDescription  
+	, ICC.strCategoryCode
+	, strOriginState = NULL    
+	, Case When DH.strDestination = 'Customer' Then EL.strState else SM.strStateProvince END strDestinationState
 FROM tblTRLoadHeader TL
 JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = TL.intLoadHeaderId
 LEFT JOIN tblTRLoadDistributionDetail DD ON DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
@@ -140,4 +147,5 @@ LEFT JOIN tblTMDispatch TMD ON TMD.intDispatchID = DD.intTMOId
 LEFT JOIN tblTMDispatchHistory TMH ON TMH.intDispatchId = DD.intTMOId
 LEFT JOIN tblLGDispatchOrder LGD ON LGD.intDispatchOrderId = TL.intDispatchOrderId
 LEFT JOIN tblTMSite site ON DD.intSiteId = site.intSiteID
-LEFT JOIN tblICItemCustomerXref ICX ON ICX.intItemCustomerXrefId = DD.intItemCustomerXrefId  
+LEFT JOIN tblICItemCustomerXref ICX ON ICX.intItemCustomerXrefId = DD.intItemCustomerXrefId
+LEFT JOIN tblICCategory ICC ON ICC.intCategoryId = Item.intCategoryId
