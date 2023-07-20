@@ -73,6 +73,7 @@ AS
 					, intSubLocationId					= 	CASE WHEN CD.intSubLocationId IS NULL THEN IL.intSubLocationId ELSE CD.intSubLocationId END
 					, strStorageLocation				=	SL.strName
 					, strSubLocation					=	UL.strSubLocationName
+					, intTaxGroupId						= 	CD.intTaxGroupId
     
 			FROM	tblCTContractDetail				CD
 			JOIN	tblCTContractHeader				CH	ON  CH.intContractHeaderId				=   CD.intContractHeaderId

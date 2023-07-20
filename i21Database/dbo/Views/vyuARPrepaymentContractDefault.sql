@@ -77,7 +77,7 @@ FROM (
 		 , strCategoryDescription	= NULL
 		 , intEntitySalespersonId	= NULL
 		 , intFreightTermId			= CC.intFreightTermId
-		 , intTaxGroupId			= NULL
+		 , intTaxGroupId			= CC.intTaxGroupId
 	FROM vyuCTCustomerContract CC
 	OUTER APPLY (
 		SELECT TOP 1 intCurrencyId = ISNULL(SMC.intMainCurrencyId, SMC.intCurrencyID)
