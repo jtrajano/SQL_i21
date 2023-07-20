@@ -28,6 +28,7 @@ DECLARE @dtmDateTo						DATETIME
 	  , @xmlDocumentId					INT
 	  , @filter							NVARCHAR(MAX) = ''
 	  , @fieldname						NVARCHAR(50)
+	  , @fieldnamecount					INT
 	  , @condition						NVARCHAR(20)
 	  , @id								INT 
 	  , @from							NVARCHAR(100)
@@ -108,6 +109,8 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM @temp_xml_table WHERE [fieldname] IN ('strC
 		FROM @temp_xml_table 
 		WHERE [fieldname] IN ('strCustomerName', 'strSalespersonName', 'strAccountStatusCode', 'strCompanyLocation', 'strDescription')
 
+		SET @fieldnamecount = (SELECT COUNT(1) FROM @temp_xml_table WHERE [fieldname] = @fieldname)
+
 		IF UPPER(@condition) = UPPER('Equal To')
 			BEGIN				
 				IF @fieldname = 'strCustomerName'
@@ -179,7 +182,8 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM @temp_xml_table WHERE [fieldname] IN ('strC
 						FROM (
 							SELECT DISTINCT CAST(intEntityCustomerId AS VARCHAR(200))  + ', '
 							FROM vyuARCustomerSearch 
-							WHERE strName <> @from
+							WHERE (@fieldnamecount = 1 AND strName <> @from)
+								OR (@fieldnamecount <> 1 AND strName NOT IN (SELECT [from] FROM @temp_xml_table WHERE [fieldname] = @fieldname))
 							FOR XML PATH ('')
 						) C (intEntityCustomerId)
 					END
@@ -189,7 +193,8 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM @temp_xml_table WHERE [fieldname] IN ('strC
 						FROM (
 							SELECT DISTINCT CAST(intEntityId AS VARCHAR(200))  + ', '
 							FROM vyuEMSalesperson 
-							WHERE strSalespersonName <> @from
+							WHERE (@fieldnamecount = 1 AND strName <> @from)
+								OR (@fieldnamecount <> 1 AND strSalespersonName NOT IN (SELECT [from] FROM @temp_xml_table WHERE [fieldname] = @fieldname))
 							FOR XML PATH ('')
 						) C (intEntityId)
 					END
