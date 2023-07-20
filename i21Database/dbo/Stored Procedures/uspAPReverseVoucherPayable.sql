@@ -21,7 +21,7 @@ BEGIN
 			USING (
 				SELECT P.*
 				FROM tblAPVoucherPayable P
-				INNER JOIN @voucherPayable VP ON VP.intLoadShipmentId = P.intLoadShipmentId AND VP.intLoadShipmentDetailId = P.intLoadShipmentDetailId AND VP.intLoadShipmentCostId = P.intLoadShipmentCostId
+				INNER JOIN @voucherPayable VP ON VP.intLoadShipmentId = P.intLoadShipmentId AND VP.intLoadShipmentCostId = P.intLoadShipmentCostId
 			) AS SourceData
 			ON (1 = 0)
 			WHEN NOT MATCHED THEN
@@ -411,7 +411,7 @@ BEGIN
 			USING (
 				SELECT P.*
 				FROM tblAPVoucherPayableReversed P
-				INNER JOIN @voucherPayable VP ON VP.intLoadShipmentId = P.intLoadShipmentId AND VP.intLoadShipmentDetailId = P.intLoadShipmentDetailId AND VP.intLoadShipmentCostId = P.intLoadShipmentCostId
+				INNER JOIN @voucherPayable VP ON VP.intLoadShipmentId = P.intLoadShipmentId AND VP.intLoadShipmentCostId = P.intLoadShipmentCostId
 			) AS SourceData
 			ON (1 = 0)
 			WHEN NOT MATCHED THEN
