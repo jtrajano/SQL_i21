@@ -9265,6 +9265,11 @@
     <Build Include="dbo\Tables\tblGRReversedSettlementsWithVoidedPayment.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentCurrentAvg.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentAvg.sql" />
+    <Build Include="dbo\Tables\tblGRStorageTypeAuditLogForAllowSettlement.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRDailyPositionRecordByRangeFirstPage.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRDailyPositionRecordByRangeSecondPage.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRDailyPositionRecordByRange.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRDPRSettledAndUnsettledCommodity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
