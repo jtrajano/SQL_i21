@@ -185,14 +185,7 @@ LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeade
 LEFT JOIN tblQMSample S ON S.intSampleId = A.intSampleId
 LEFT JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 LEFT JOIN tblEMEntity E1 ON E1.intEntityId = A.intSupplierId
-LEFT JOIN tblQMSaleYear Yr ON Yr.strSaleYear = A.intSalesYear
-LEFT JOIN tblQMCatalogueType CatType ON CatType.strCatalogueType = A.strTeaType
-LEFT JOIN tblICCommodityProductLine PL on PL.strDescription = A.strSustainability
-LEFT JOIN tblICBrand Brand on Brand.strBrandCode = A.strLeafSize
-LEFT JOIN tblICCommodityAttribute Leaf on Leaf.strDescription = A.strLeafManufacturingType
-LEFT JOIN tblICCommodityAttribute Grade on Grade.strDescription = A.strLeafGrade
-LEFT JOIN tblCTValuationGroup Style ON Style.strName = A.strLeafStyle
-LEFT JOIN tblCTBook Book ON Book.strBook = MU.strLocationName
+
 OUTER APPLY(
     SELECT TOP 1 intTINClearanceId, strTINNumber 
     FROM  tblQMTINClearance  
@@ -222,5 +215,37 @@ OUTER APPLY(
 )LOT
 OUTER APPLY(
     SELECT TOP 1 intBatchId, strBatchId FROM
-    tblMFBatch WHERE intParentBatchId  = A.intBatchId 
+    tblMFBatch WHERE intParentBatchId = A.intBatchId 
 )C
+OUTER APPLY(
+    SELECT TOP 1 intSaleYearId FROM
+    tblQMSaleYear WHERE strSaleYear = A.intSalesYear 
+)Yr
+OUTER APPLY(
+    SELECT TOP 1 intCatalogueTypeId FROM
+    tblQMCatalogueType WHERE strCatalogueType = A.strTeaType
+)CatType
+OUTER APPLY(
+    SELECT TOP 1 intCommodityProductLineId FROM
+    tblICCommodityProductLine WHERE strDescription = A.strSustainability 
+)PL
+OUTER APPLY(
+    SELECT TOP 1 intBrandId FROM
+    tblICBrand WHERE strBrandCode  = A.strLeafSize
+)Brand
+OUTER APPLY(
+    SELECT TOP 1 intCommodityAttributeId FROM
+    tblICCommodityAttribute WHERE strDescription = A.strLeafManufacturingType 
+)Leaf
+OUTER APPLY(
+    SELECT TOP 1 intCommodityAttributeId FROM
+    tblICCommodityAttribute WHERE strDescription = A.strLeafGrade 
+)Grade
+OUTER APPLY(
+    SELECT TOP 1 intValuationGroupId FROM
+    tblCTValuationGroup WHERE strName = A.strLeafStyle 
+)Style
+OUTER APPLY(
+    SELECT TOP 1 intBookId FROM
+    tblCTBook WHERE strBook = MU.strLocationName 
+)Book
