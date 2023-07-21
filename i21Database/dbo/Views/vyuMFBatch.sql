@@ -50,14 +50,14 @@ SELECT
     A.intFromPortId,
     A.dblGrossWeight, -- = dblTotalQuantity + dblTareWeight,
     A.dtmInitialBuy,
-    A.dblWeightPerUnit,
+    dblWeightPerUnit = CAST((Case When IsNULL(S.dblRepresentingQty ,0) > 0 Then S.dblSampleQty/S.dblRepresentingQty Else 1 End) AS NUMERIC(18, 2)),
     A.dblLandedPrice,
     A.strLeafCategory,
     A.strLeafManufacturingType,
     A.strLeafSize,
     A.strLeafStyle,
     A.intMixingUnitLocationId,
-    A.dblPackagesBought,
+    dblPackagesBought = ISNULL(A.dblPackagesBought,0),
     A.intItemUOMId,
 	A.intWeightUOMId,
     A.strTeaOrigin,
@@ -152,6 +152,17 @@ SELECT
     ,dblValue = ISNULL(S.dblSampleQty, 0) * ISNULL(S.dblB1Price, 0)
 	,strLastPrice = '0.0'
 	,S.dblSupplierValuationPrice
+    ,A.intSupplierId
+    ,Yr.intSaleYearId
+    ,CatType.intCatalogueTypeId
+    ,PL.intCommodityProductLineId
+    ,intManufacturingLeafTypeId = Leaf.intCommodityAttributeId
+    ,intGradeId = Grade.intCommodityAttributeId
+    ,Brand.intBrandId
+    ,Style.intValuationGroupId
+    ,A.intMarketZoneId
+    ,Book.intBookId
+
 FROM tblMFBatch A
 LEFT JOIN tblMFBatch B ON A.intParentBatchId = B.intBatchId
 LEFT JOIN tblQMGardenMark Garden ON Garden.intGardenMarkId = A.intGardenMarkId
@@ -174,6 +185,7 @@ LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeade
 LEFT JOIN tblQMSample S ON S.intSampleId = A.intSampleId
 LEFT JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 LEFT JOIN tblEMEntity E1 ON E1.intEntityId = A.intSupplierId
+
 OUTER APPLY(
     SELECT TOP 1 intTINClearanceId, strTINNumber 
     FROM  tblQMTINClearance  
@@ -203,5 +215,37 @@ OUTER APPLY(
 )LOT
 OUTER APPLY(
     SELECT TOP 1 intBatchId, strBatchId FROM
-    tblMFBatch WHERE intParentBatchId  = A.intBatchId 
+    tblMFBatch WHERE intParentBatchId = A.intBatchId 
 )C
+OUTER APPLY(
+    SELECT TOP 1 intSaleYearId FROM
+    tblQMSaleYear WHERE strSaleYear = A.intSalesYear 
+)Yr
+OUTER APPLY(
+    SELECT TOP 1 intCatalogueTypeId FROM
+    tblQMCatalogueType WHERE strCatalogueType = A.strTeaType
+)CatType
+OUTER APPLY(
+    SELECT TOP 1 intCommodityProductLineId FROM
+    tblICCommodityProductLine WHERE strDescription = A.strSustainability 
+)PL
+OUTER APPLY(
+    SELECT TOP 1 intBrandId FROM
+    tblICBrand WHERE strBrandCode  = A.strLeafSize
+)Brand
+OUTER APPLY(
+    SELECT TOP 1 intCommodityAttributeId FROM
+    tblICCommodityAttribute WHERE strDescription = A.strLeafManufacturingType 
+)Leaf
+OUTER APPLY(
+    SELECT TOP 1 intCommodityAttributeId FROM
+    tblICCommodityAttribute WHERE strDescription = A.strLeafGrade 
+)Grade
+OUTER APPLY(
+    SELECT TOP 1 intValuationGroupId FROM
+    tblCTValuationGroup WHERE strName = A.strLeafStyle 
+)Style
+OUTER APPLY(
+    SELECT TOP 1 intBookId FROM
+    tblCTBook WHERE strBook = MU.strLocationName 
+)Book
