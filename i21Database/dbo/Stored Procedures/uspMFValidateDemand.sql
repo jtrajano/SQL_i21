@@ -154,10 +154,10 @@ BEGIN TRY
 					END
 
 				/* Check if the Demand Name already exists. */
-				IF EXISTS (SELECT * FROM tblMFDemandHeader WHERE strDemandName = @strDemandName)
-					BEGIN
-						SELECT @strErrorMessage = @strErrorMessage + 'Demand Name already exists. '
-					END
+				--IF EXISTS (SELECT * FROM tblMFDemandHeader WHERE strDemandName = @strDemandName)
+				--	BEGIN
+				--		SELECT @strErrorMessage = @strErrorMessage + 'Demand Name already exists. '
+				--	END
 
 				SELECT @intBookId = intBookId
 				FROM tblCTBook
