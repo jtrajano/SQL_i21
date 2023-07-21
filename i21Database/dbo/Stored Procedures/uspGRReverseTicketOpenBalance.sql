@@ -265,6 +265,7 @@ BEGIN TRY
 				ON ID.intInvoiceId = SH.intInvoiceId
 					AND ID.intItemId = CS.intItemId
 			WHERE SH.intInvoiceId = @IntSourceKey
+				AND ID.intConcurrencyId <> 1
 		)
 			SET @ysnExists = 0
 		ELSE
