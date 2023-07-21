@@ -218,7 +218,7 @@ OUTER APPLY(
     tblMFBatch WHERE intParentBatchId = A.intBatchId 
 )C
 OUTER APPLY(
-    SELECT TOP 1 strSaleYear FROM
+    SELECT TOP 1 intSaleYearId FROM
     tblQMSaleYear WHERE strSaleYear = A.intSalesYear 
 )Yr
 OUTER APPLY(
