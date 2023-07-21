@@ -660,24 +660,24 @@ ORDER BY
 INSERT INTO @ReceiptOtherChargesTable(
 	intEntityVendorId
 	, strReceiptType
-	, intLocationId
-	, intShipViaId
-	, intShipFromId
-	, intCurrencyId
+	--, intLocationId
+	--, intShipViaId
+	--, intShipFromId
+	--, intCurrencyId
 	, intChargeId
 	, strCostMethod
 	, dblAmount
 )
 SELECT 
 	intEntityVendorId = @VendorId 
-	,strReceiptType = 'Direct'
-	,intLocationId = st.intLocationId 
-	,intShipViaId = v.intShipViaId 
-	,intShipFromId = el.intEntityLocationId
-	,intCurrencyId = v.intCurrencyId
-	,intChargeId = i.intItemId
-	,strCostMethod = 'Amount'
-	,dblAmount = c.Amount
+	, strReceiptType = 'Direct'
+	--,intLocationId = st.intLocationId 
+	--,intShipViaId = v.intShipViaId 
+	--,intShipFromId = el.intEntityLocationId
+	--,intCurrencyId = v.intCurrencyId
+	, intChargeId = i.intItemId
+	, strCostMethod = 'Amount'
+	, dblAmount = c.Amount
 FROM 
 	@Charges c INNER JOIN @ReceiptStore st	
 		ON c.FileIndex = st.FileIndex
@@ -685,25 +685,25 @@ FROM
 		ON inv.FileIndex = c.FileIndex
 	INNER JOIN tblICItem i 
 		ON i.strDescription = c.ItemDescription
-	CROSS APPLY (
-		SELECT TOP 1 
-			v.*
-		FROM 
-			vyuAPVendor v 
-		WHERE 			
-			v.intEntityId = @VendorId
-			OR (
-				SUBSTRING(v.strVendorAccountNum, PATINDEX('%[^0]%', v.strVendorAccountNum), LEN(v.strVendorAccountNum)) =
-				SUBSTRING(inv.VendorCode, PATINDEX('%[^0]%', inv.VendorCode), LEN(inv.VendorCode))
-				COLLATE SQL_Latin1_General_CP1_CS_AS
-				AND @VendorId IS NULL 
-			)
-	) v	
-	LEFT OUTER JOIN tblEMEntityLocation el 
-		ON el.intEntityId = v.intEntityId
-		AND el.ysnActive = 1
-		AND el.intEntityLocationId = v.intDefaultLocationId
-		AND ISNULL(c.Amount, 0) <> 0
+	--CROSS APPLY (
+	--	SELECT TOP 1 
+	--		v.*
+	--	FROM 
+	--		vyuAPVendor v 
+	--	WHERE 			
+	--		v.intEntityId = @VendorId
+	--		OR (
+	--			SUBSTRING(v.strVendorAccountNum, PATINDEX('%[^0]%', v.strVendorAccountNum), LEN(v.strVendorAccountNum)) =
+	--			SUBSTRING(inv.VendorCode, PATINDEX('%[^0]%', inv.VendorCode), LEN(inv.VendorCode))
+	--			COLLATE SQL_Latin1_General_CP1_CS_AS
+	--			AND @VendorId IS NULL 
+	--		)
+	--) v	
+	--LEFT OUTER JOIN tblEMEntityLocation el 
+	--	ON el.intEntityId = v.intEntityId
+	--	AND el.ysnActive = 1
+	--	AND el.intEntityLocationId = v.intDefaultLocationId
+	--	AND ISNULL(c.Amount, 0) <> 0
 IF EXISTS(SELECT * FROM @ReceiptStagingTable)
 BEGIN 
 	EXEC dbo.uspICAddItemReceipt 
