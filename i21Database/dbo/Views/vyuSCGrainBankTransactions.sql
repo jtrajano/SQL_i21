@@ -271,6 +271,7 @@
 			SELECT intGrainBankUnitMeasureId FROM tblGRCompanyPreference
 		) GR_COMPANY_PREFERENCE
 	WHERE HISTORY.intTransactionTypeId = 6
+		AND ISNULL(HISTORY.strPaidDescription,'') <> 'Generated Storage Invoice'
 		-- AND HISTORY.ysnPost = 1
 		/*
 		STORAGE.intEntityId = @ENTITY_ID
