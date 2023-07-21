@@ -8,8 +8,7 @@
          WHEN lr.strOrigin = 'Location' AND ldh.strDestination = 'Customer' THEN 'Location to Customer' 
 		 WHEN lr.strOrigin = 'Terminal' AND ldh.strDestination = 'Location' THEN 'Terminal to Location' 
          WHEN ISNULL(lr.strOrigin, ISNULL(ldd.strBillOfLading, '')) != '' AND ldh.strDestination = 'Customer' THEN 'Terminal to Customer'     
-         WHEN ISNULL(lr.strOrigin, ISNULL(ldd.strBillOfLading, '')) = '' AND ldh.strDestination = 'Customer' AND ldd.intLoadDistributionDetailId IS NOT NULL THEN 'Location to Customer'    
-         WHEN ISNULL(lr.strOrigin, ISNULL(ldd.strBillOfLading, '')) = '' AND ldh.strDestination = 'Customer' THEN 'Location to Customer'    
+         WHEN ISNULL(lr.strOrigin, ISNULL(ldd.strBillOfLading, '')) = '' AND ldh.strDestination = 'Customer' AND ldd.intLoadDistributionDetailId IS NOT NULL THEN 'Other Charge'     
          ELSE ''    
           END,    
     
@@ -18,9 +17,8 @@
    dtmLoadDateTime = lh.dtmLoadDateTime,    
    strMovement = CASE WHEN ISNULL(ldd.strBillOfLading, '') != '' THEN ldd.strBillOfLading ELSE ai.strInvoiceNumber END,    
    strVendor = CASE    
-        WHEN lr.strOrigin = 'Terminal' THEN v.strVendorId + '  ' + elr.strName     
-         + CHAR(13) + char(10) + eel.strLocationName + '  ' + tcn.strTerminalControlNumber    
-        WHEN lr.strOrigin = 'Location' THEN cl.strLocationName    
+				WHEN lr.strOrigin = 'Terminal' THEN ISNULL(v.strVendorId,'') + '  ' + ISNULL(elr.strName,'') + CHAR(13) + char(10) + ISNULL(eel.strLocationName,'') + '  ' + ISNULL(tcn.strTerminalControlNumber,'')
+				WHEN lr.strOrigin = 'Location' THEN cl.strLocationName    
        END,    
    strSupplyPoint = CASE    
          WHEN lr.strOrigin = 'Terminal' THEN CHAR(13) + char(10) + eel.strLocationName + CHAR(13) + char(10) + tcn.strTerminalControlNumber    
@@ -77,7 +75,7 @@
     
     
    where     
-   (ldh.intLoadDistributionHeaderId is not null AND ldh.strDestination = 'Customer') and  ldh.strDestination != 'Location' and
+   --(ldh.intLoadDistributionHeaderId is not null AND ldh.strDestination = 'Customer') and  ldh.strDestination != 'Location' and
     lh.ysnPosted = 1 --// must be added    
    and lh.intDriverId IS NOT NULL       
    and (ISNULL(ldd.dblFreightRate, 0) != 0     

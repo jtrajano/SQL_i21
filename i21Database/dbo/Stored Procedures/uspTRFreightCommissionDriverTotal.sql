@@ -69,18 +69,41 @@ BEGIN
 
 	SET @dblTotalBilledUnits += @curUnits
 
+	-- IF Terminal to Location (No Invoice)
+	IF(@curInvoiceId IS NULL OR @curInvoiceId = 0)
+	BEGIN
+		-- Item
+		SELECT @dblTotalCommission += (CONVERT(DECIMAL(18,6),((@dblFreightUnitCommissionPct/CONVERT(DECIMAL(18,6),100)) * (ldd.dblFreightUnit * ldd.dblFreightRate))) + 
+			(((@dblOtherUnitCommissionPct/CONVERT(DECIMAL(18,6),100)) * ((ldd.dblFreightUnit * ldd.dblFreightRate) * (dblDistSurcharge/100)))))
+		FROM tblTRLoadDistributionDetail ldd
+		WHERE intLoadDistributionDetailId = @curLoadDistributionDetailId
+			AND ISNULL(strReceiptLink, '') != ''
 
-	select
-		@dblTotalCommission += CONVERT(DECIMAL(18,6),CASE WHEN intItemId = @intFreightItemId THEN ((@dblFreightUnitCommissionPct/CONVERT(DECIMAL(18,6),100)) * dblTotal) ELSE ((@dblOtherUnitCommissionPct/CONVERT(DECIMAL(18,6),100)) * dblTotal) END)
+		-- Other Item
+		SELECT
+			@dblTotalCommission += ISNULL(ldd.dblPrice, 0)
+		FROM tblTRLoadDistributionDetail ldd
+		WHERE intLoadDistributionDetailId = @curLoadDistributionDetailId
+			AND ISNULL(strReceiptLink, '') = ''
+	END
 
-  
-	FROM vyuTRGetFreightCommissionFreight fcf
-	WHERE intInvoiceId = @curInvoiceId
-		AND (
-			(intItemId = @intFreightItemId AND intCategoryId = @intFreightCategoryId AND intLoadDistributionDetailId = @curLoadDistributionDetailId)
-			OR (intCategoryId = @intFreightCategoryId AND intItemId != @curItemId AND strBOLNumberDetail IS NULL AND intLoadDistributionDetailId = @curLoadDistributionDetailId)
-			OR (intCategoryId = @intFreightCategoryId AND intItemId != @curItemId AND intLoadDistributionDetailId = @curLoadDistributionDetailId)
-		)
+	ELSE
+	-- IF XX to Customer (Has Invoice)
+	BEGIN
+		select
+			@dblTotalCommission += CONVERT(DECIMAL(18,6),CASE WHEN intItemId = @intFreightItemId THEN ((@dblFreightUnitCommissionPct/CONVERT(DECIMAL(18,6),100)) * dblTotal) ELSE ((@dblOtherUnitCommissionPct/CONVERT(DECIMAL(18,6),100)) * dblTotal) END)
+
+		FROM vyuTRGetFreightCommissionFreight fcf
+		WHERE intInvoiceId = @curInvoiceId
+			AND (
+				(intItemId = @intFreightItemId AND intCategoryId = @intFreightCategoryId AND intLoadDistributionDetailId = @curLoadDistributionDetailId)
+				OR (intCategoryId = @intFreightCategoryId AND intItemId != @curItemId AND strBOLNumberDetail IS NULL AND intLoadDistributionDetailId = @curLoadDistributionDetailId)
+				OR (intCategoryId = @intFreightCategoryId AND intItemId != @curItemId AND intLoadDistributionDetailId = @curLoadDistributionDetailId)
+			)
+	END
+	
+
+	
 
 
 

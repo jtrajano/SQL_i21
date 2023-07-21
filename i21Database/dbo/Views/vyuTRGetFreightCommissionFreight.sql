@@ -1,4 +1,4 @@
-﻿create  view vyuTRGetFreightCommissionFreight    
+﻿create view vyuTRGetFreightCommissionFreight    
 as    
     
 select     
