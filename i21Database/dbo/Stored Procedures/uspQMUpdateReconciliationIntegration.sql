@@ -253,7 +253,7 @@ BEGIN TRY
 		 , dblSamplePrice						= S.dblB1Price		 
 		 , dblSampleQty							= ISNULL(S.dblSampleQty, 0)
 		 , dblRepresentingQty					= ISNULL(S.dblRepresentingQty, 0)
-		 , dblCatReconSampleQty					= ISNULL(CRD.dblPreInvoiceQuantity, 0)
+		 , dblCatReconSampleQty					= ISNULL(CRD.dblQuantity, 0)
 		 , dblCatReconRepQty					= ISNULL(dbo.fnCalculateQtyBetweenUoms(ITEM.strItemNo, SIUM.strUnitMeasure, RIUM.strUnitMeasure, CRD.dblPreInvoiceQuantity), 0)
 		 , strCatReconChopNo					= CRD.strPreInvoiceChopNo
 		 , strSampleChopNo						= S.strChopNumber
@@ -285,8 +285,8 @@ BEGIN TRY
 			SET dblB1Price					= ISNULL(SS.dblCatReconPrice, 0)
 			  , dblSupplierValuationPrice	= ISNULL(SS.dblCatReconPrice, 0)
 			  , dblSampleQty				= ISNULL(SS.dblCatReconSampleQty, 0)
-			  , dblRepresentingQty			= ISNULL(SS.dblCatReconRepQty, 0)
-			  , dblB1QtyBought				= ISNULL(SS.dblCatReconRepQty, 0)
+			--   , dblRepresentingQty			= ISNULL(SS.dblCatReconRepQty, 0)
+			--   , dblB1QtyBought				= ISNULL(SS.dblCatReconRepQty, 0)
 			  , strChopNumber				= SS.strCatReconChopNo
 			  , intGardenMarkId				= NULLIF(SS.intCatReconGardenMarkId, 0)
 			  , intGradeId					= NULLIF(SS.intCatReconGradeId, 0)
