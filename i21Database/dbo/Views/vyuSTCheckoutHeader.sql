@@ -229,6 +229,7 @@ SELECT
 	  ,chk.[dblCustomerChargeMOP]  
 	  ,ISNULL(Inv.strInvoiceNumber,'---') AS strInvoiceNumber
 	  ,ISNULL(InvConsCR.strInvoiceNumber,'---') AS strCreditMemoNumber
+	  ,(SELECT ysnConsEnableItemMovementsTab FROM tblSTCompanyPreference) AS ysnConsEnableItemMovementsTab
 FROM tblSTCheckoutHeader chk  
 INNER JOIN vyuSTStoreOnUserRole vst  
  ON chk.intStoreId = vst.intStoreId  
