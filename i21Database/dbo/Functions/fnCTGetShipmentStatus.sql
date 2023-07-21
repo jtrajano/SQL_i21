@@ -1,4 +1,4 @@
-﻿Create FUNCTION [dbo].[fnCTGetShipmentStatus]
+﻿CREATE FUNCTION [dbo].[fnCTGetShipmentStatus]
 (
 	@intContractDetailId	INT
 )
@@ -11,7 +11,6 @@ RETURNS table as return
 			,intContractDetailId = intPContractDetailId
 			,strShipmentStatus
 			,intPriorityId = CASE WHEN strShipmentStatus = 'Cancelled' THEN 2 ELSE 1 END
-			, dtmScheduledDate
 		FROM
 			vyuCTShipmentStatus
 		WHERE
@@ -25,7 +24,6 @@ RETURNS table as return
 			,intContractDetailId = intPContractDetailId
 			,strShipmentStatus
 			,intPriorityId = CASE WHEN strShipmentStatus = 'Cancelled' THEN 2 ELSE 1 END
-			, dtmScheduledDate
 		FROM
 			vyuCTShipmentStatus
 		WHERE
@@ -33,5 +31,4 @@ RETURNS table as return
 			AND ((intShipmentType = 2 AND strShipmentStatus <> 'Scheduled') OR intShipmentType = 1)
 	) tbl
 	WHERE intNumberId = 1
-	ORDER BY dtmScheduledDate Desc
-
+	ORDER BY intPriorityId ASC
