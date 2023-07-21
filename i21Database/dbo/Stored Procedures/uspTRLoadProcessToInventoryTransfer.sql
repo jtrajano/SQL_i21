@@ -17,6 +17,10 @@ DECLARE @ErrorSeverity INT;
 DECLARE @ErrorState INT;
 DECLARE @InventoryReceiptId AS INT; 
 DECLARE @ErrMsg NVARCHAR(MAX);
+DECLARE  @ysnAllowDifferentUnits BIT;
+
+SELECT TOP 1 @ysnAllowDifferentUnits = ISNULL(ysnAllowDifferentUnits, 0)
+FROM tblTRCompanyPreference
 
 IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddInventoryTransferResult'))
 BEGIN
@@ -140,7 +144,17 @@ BEGIN TRY
 		,[intItemId]                = MIN(TR.intItemId)
 		,[intLotId]                 = NULL
 		,[intItemUOMId]             = MIN(ItemUOM.intItemUOMId)
-		,[dblQuantityToTransfer]    = SUM(DD.dblUnits)
+
+		,[dblQuantityToTransfer] = CASE WHEN ISNULL(@ysnAllowDifferentUnits,1) = 1 THEN 
+									ISNULL(
+										CASE WHEN min(SP.strGrossOrNet) = 'Gross' THEN SUM(DD.dblDistributionGrossSalesUnits)
+										WHEN min(SP.strGrossOrNet) = 'Net' THEN SUM(DD.dblDistributionNetSalesUnits) 
+										END  
+										,0)
+									ELSE
+										SUM(DD.dblUnits) 
+									END
+
 		,[dblCost]					= MIN(TR.dblUnitCost)
 		,[strNewLotId]              = NULL
 		,[intFromSubLocationId]     = MIN(TR.intBulkStorageLocationId)
