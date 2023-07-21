@@ -50,7 +50,7 @@ SELECT
     A.intFromPortId,
     A.dblGrossWeight, -- = dblTotalQuantity + dblTareWeight,
     A.dtmInitialBuy,
-    A.dblWeightPerUnit,
+    dblWeightPerUnit = CAST((Case When IsNULL(S.dblRepresentingQty ,0) > 0 Then S.dblSampleQty/S.dblRepresentingQty Else 1 End) AS NUMERIC(18, 2)),
     A.dblLandedPrice,
     A.strLeafCategory,
     A.strLeafManufacturingType,
