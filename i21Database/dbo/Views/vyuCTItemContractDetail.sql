@@ -12,6 +12,12 @@ AS
 						CS.strContractStatus,
 						ysnIsUsed = CONVERT(BIT, CASE WHEN (SELECT TOP 1 1 FROM tblARInvoiceDetail WHERE intItemContractDetailId = CD.intItemContractDetailId) = 1 THEN 1
 						ELSE 0 END),
+						CH.intEntityId,
+						CH.intSalespersonId,
+						CH.dtmExpirationDate,
+						EY.strName     AS strEntityName,
+						SP.strName     AS strSalesperson, 
+						CD.dblBalance * CD.dblPrice AS dblBalanceTotal,
 						CD.*						
 
 					FROM	tblCTItemContractDetail				CD	
@@ -22,6 +28,8 @@ AS
 			LEFT	JOIN	tblICUnitMeasure					UM	ON	UM.intUnitMeasureId					=		IU.intUnitMeasureId
 			LEFT	JOIN	tblSMTaxGroup						TG	ON	TG.intTaxGroupId					=		CD.intTaxGroupId
 			LEFT	JOIN	tblCTContractStatus					CS	ON	CS.intContractStatusId				=		CD.intContractStatusId
+			LEFT	JOIN	tblEMEntity							EY  ON	EY.intEntityId						=		CH.intEntityId
+			LEFT    JOIN	tblEMEntity							SP	ON	SP.intEntityId						=       CH.intSalespersonId 
 			
 
 			) tblX
