@@ -467,7 +467,7 @@ BEGIN
 				--	END
 
 				-- Item Movement - Check if has null 'intItemUPCId'
-				IF EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutItemMovements WHERE intCheckoutId = @intCheckoutId AND intItemUPCId IS NULL)
+				IF EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutItemMovements WHERE intCheckoutId = @intCheckoutId AND intItemUPCId IS NULL) AND @ysnConsignmentStore = 0
 					BEGIN
 						SET @ysnUpdateCheckoutStatus = 0
 						SET @strStatusMsg = 'Click Ok to Review Item Movements'
@@ -1252,7 +1252,9 @@ BEGIN
 				---------------------------- ITEM MOVEMENTS --------------------------
 				----------------------------------------------------------------------
 				
-				IF EXISTS(SELECT * FROM tblSTCheckoutItemMovements WHERE intCheckoutId = @intCheckoutId)
+				IF @ysnConsignmentStore = 0
+				BEGIN
+					IF EXISTS(SELECT * FROM tblSTCheckoutItemMovements WHERE intCheckoutId = @intCheckoutId)
 					BEGIN																																																	
 							INSERT INTO @EntriesForInvoice(
 											 [strSourceTransaction]
@@ -1484,7 +1486,7 @@ BEGIN
 
 						-- No need to check ysnStockUnit because ItemMovements have intItemUomId setup for Item
 					END
-				
+				END
 				----------------------------------------------------------------------
 				---------------------------- ITEM MOVEMENTS --------------------------
 				----------------------------------------------------------------------
