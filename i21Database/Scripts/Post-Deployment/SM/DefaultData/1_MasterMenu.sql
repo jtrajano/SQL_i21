@@ -4125,7 +4125,7 @@ DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Currency Exposure' AND strModul
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'DPR Summary Log' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementMaintenanceParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Position Report' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementActivitiesParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Position Reconciliation Report' AND strModuleName = 'Risk Management' AND strCategory = 'Report' AND ysnVisible = 1
-DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Currency Pair' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementMaintenanceParentMenuId
+-- DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Currency Pair' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementMaintenanceParentMenuId
 
 --DELETE DUPLICATE DATA
 DECLARE @BrokerageAccountsCount INT
