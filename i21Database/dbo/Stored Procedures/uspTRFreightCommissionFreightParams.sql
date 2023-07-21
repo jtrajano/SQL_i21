@@ -20,7 +20,7 @@ SET ANSI_WARNINGS OFF
 
  IF(@intInvoiceId > 0)
 	 BEGIN
-		 -- Distribution Detail with Invoice (Delivered to Customer)
+		 -- Distribution Detail with Invoice (Delivered to Customer) Freight and Surcharge
 		SELECT     
 		  intItemId  = @intItemId  
 		, intTrueItemId = intItemId  
@@ -38,6 +38,27 @@ SET ANSI_WARNINGS OFF
 		  OR (intCategoryId = @intFreightCategoryId AND intItemId != @intItemId AND strBOLNumberDetail IS NULL AND intLoadDistributionDetailId = @intLoadDistributionDetailId)  
 		  OR (intCategoryId = @intFreightCategoryId AND intItemId != @intItemId AND intLoadDistributionDetailId = @intLoadDistributionDetailId)  
 		 )
+		 
+		 UNION ALL
+
+		 SELECT     
+		  intItemId  = @intItemId  
+		, intTrueItemId = intItemId  
+		, strItemDescription
+		, intInvoiceId    
+		, dblFreightRate    
+		, dblFreight = dblTotal  
+		, dblCommissionPct = @dblOtherUnitCommissionPct  
+		, dblTotalCommission =  ((@dblOtherUnitCommissionPct/CONVERT(DECIMAL(18,6),100)) * dblTotal)
+		FROM vyuTRGetFreightCommissionFreight fcf  
+		WHERE intInvoiceId = @intInvoiceId  
+		 AND 
+		  (intItemId != @intFreightItemId 
+			AND intCategoryId = @intFreightCategoryId 
+			AND intLoadDistributionDetailId = @intLoadDistributionDetailId) 
+		 AND ISNULL(distributionDetailRL,'') = ''
+
+
 
 	 END
  ELSE

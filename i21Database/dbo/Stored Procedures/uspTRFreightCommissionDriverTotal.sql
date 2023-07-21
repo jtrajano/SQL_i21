@@ -100,6 +100,20 @@ BEGIN
 				OR (intCategoryId = @intFreightCategoryId AND intItemId != @curItemId AND strBOLNumberDetail IS NULL AND intLoadDistributionDetailId = @curLoadDistributionDetailId)
 				OR (intCategoryId = @intFreightCategoryId AND intItemId != @curItemId AND intLoadDistributionDetailId = @curLoadDistributionDetailId)
 			)
+
+
+	-- For Other Item Total
+		select
+			@dblTotalCommission += CONVERT(DECIMAL(18,6),((@dblOtherUnitCommissionPct/CONVERT(DECIMAL(18,6),100)) * dblTotal))
+
+		FROM vyuTRGetFreightCommissionFreight fcf
+		WHERE intInvoiceId = @curInvoiceId
+			AND (
+					(intItemId != @intFreightItemId 
+						AND intCategoryId = @intFreightCategoryId 
+						AND intLoadDistributionDetailId = @curLoadDistributionDetailId)
+				)
+			AND ISNULL(distributionDetailRL,'') = '' 
 	END
 	
 
@@ -126,3 +140,5 @@ END;
 		dblTotalCommission = @dblTotalCommission,
 		strDriverName = @strDriverName
 END
+
+

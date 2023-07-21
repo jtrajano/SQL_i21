@@ -11,7 +11,8 @@ select
  aid.dblQtyShipped,  
  dblFreightRate = CASE WHEN ldd.intLoadDistributionDetailId IS NULL THEN ISNULL(aid.dblBasePrice, 0) ELSE ISNULL(ldd.dblFreightRate, 0) END,  
  aid.dblTotal,  
- lh.dtmLoadDateTime  
+ lh.dtmLoadDateTime,
+ distributionDetailRL = ldd.strReceiptLink
   
 from tblARInvoiceDetail aid    
  left join tblARInvoice ai on ai.intInvoiceId = aid.intInvoiceId  
