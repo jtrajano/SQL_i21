@@ -2765,8 +2765,9 @@ BEGIN TRY
 																								@LocationId,
 																								a.intItemId,
 																								coalesce(@intShipFrom, EM.intEntityLocationId),
-																								CASE WHEN @shipFromEntityId != @EntityId THEN COALESCE(@intShipFromFreightId, EM.intFreightTermId) ELSE EM.intFreightTermId END, 																								
+																								CASE WHEN @intShipFrom IS NOT NULL THEN COALESCE(@intShipFromFreightId, EM.intFreightTermId) ELSE EM.intFreightTermId END , 																								
 																								default
+																								
 																							)
 														ELSE RI.intTaxGroupId
 													END
