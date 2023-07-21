@@ -3226,6 +3226,18 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Workers C
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 11, strCommand = 'Reporting.view.ReportManager?group=Payroll&report=WorkersCompensation&direct=true' WHERE strMenuName = 'Workers Comp' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollReportParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Employee Details' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollReportParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Employee Details', N'Payroll', @PayrollReportParentMenuId, N'Employee Details', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Payroll&report=EmployeeDetails&direct=true', N'small-menu-report', 1, 0, 0, 1, 12, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 12, strCommand = 'Reporting.view.ReportManager?group=Payroll&report=EmployeeDetails&direct=true' WHERE strMenuName = 'Employee Details' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollReportParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = '401K' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollReportParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'401K', N'Payroll', @PayrollReportParentMenuId, N'401K', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Payroll&report=Employee401K&direct=true', N'small-menu-report', 1, 0, 0, 1, 13, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 13, strCommand = 'Reporting.view.ReportManager?group=Payroll&report=Employee401K&direct=true' WHERE strMenuName = '401K' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollReportParentMenuId
+
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Paycheck Calculator' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollUtilitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
 	VALUES (N'Paycheck Calculator', N'Payroll', @PayrollUtilitiesParentMenuId, N'Paycheck Calculator', N'Utility', N'Screen', N'Payroll.view.PaycheckCalculator', N'small-menu-utility', 1, 1, 0, 1, 0, 0)
