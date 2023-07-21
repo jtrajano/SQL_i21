@@ -42,7 +42,71 @@
 			,intOpenTickets = (select count(*) from ticketStatus e where e.intProjectId = d.intProjectId and e.intPriority = a.intPriority and e.strStatus <> 'Closed')
 			,intCompletedTickets = (select count(*) from ticketStatus e where e.intProjectId = d.intProjectId and e.intPriority = a.intPriority and e.strStatus = 'Closed')
 			,intTotalTickets = (select count(*) from ticketStatus e where e.intProjectId = d.intProjectId and e.intPriority = a.intPriority)
-			,dblPercentComplete = ((select convert(numeric(18,6),count(*)) from ticketStatus e where e.intProjectId = d.intProjectId and e.intPriority = a.intPriority and e.strStatus = 'Closed')/(select convert(numeric(18,6),count(*)) from ticketStatus e where e.intProjectId = d.intProjectId and e.intPriority = a.intPriority)) * 100.00
+			,dblPercentComplete = (
+    CASE
+        WHEN (
+            SELECT COUNT(*)
+            FROM ticketStatus e
+            WHERE e.intProjectId = d.intProjectId
+                AND e.intPriority = a.intPriority
+                AND e.strStatus = 'Closed'
+        ) = 0 OR (
+            SELECT COUNT(*)
+            FROM ticketStatus e
+            WHERE e.intProjectId = d.intProjectId
+                AND e.intPriority = a.intPriority
+        ) = 0 THEN 0 
+        ELSE ROUND(
+            (
+                (
+                    SELECT CONVERT(NUMERIC, COUNT(*))
+                    FROM ticketStatus e
+                    WHERE e.intProjectId = d.intProjectId
+                        AND e.intPriority = a.intPriority
+                        AND e.strStatus = 'Closed'
+                ) / (
+                    SELECT CONVERT(NUMERIC, COUNT(*))
+                    FROM ticketStatus e
+                    WHERE e.intProjectId = d.intProjectId
+                        AND e.intPriority = a.intPriority
+                )
+            ) * 100.0
+        , 0) 
+    END
+)
+			,strPercentComplete = (
+				CASE
+					WHEN (
+						SELECT COUNT(*)
+						FROM ticketStatus e
+						WHERE e.intProjectId = d.intProjectId
+							AND e.intPriority = a.intPriority
+							AND e.strStatus = 'Closed'
+					) = 0 OR (
+						SELECT COUNT(*)
+						FROM ticketStatus e
+						WHERE e.intProjectId = d.intProjectId
+							AND e.intPriority = a.intPriority
+					) = 0 THEN '0%' 
+					ELSE CONCAT(
+						CONVERT(NVARCHAR(50), CONVERT(NUMERIC, ROUND(
+							(
+								(
+									SELECT CONVERT(NUMERIC, COUNT(*))
+									FROM ticketStatus e
+									WHERE e.intProjectId = d.intProjectId
+										AND e.intPriority = a.intPriority
+										AND e.strStatus = 'Closed'
+								) / (
+									SELECT CONVERT(NUMERIC, COUNT(*))
+									FROM ticketStatus e
+									WHERE e.intProjectId = d.intProjectId
+										AND e.intPriority = a.intPriority
+								)
+							) * 100.0
+						, 0))), '%')
+				END
+			)
 			--,dblQuotedHours = isnull(sum(b.dblQuotedHours),0.00)
 			,dblQuotedHours = isnull((select estimatedHours.dblEstimatedHours from estimatedHours where estimatedHours.intMilestoneId = a.intMilestoneId and estimatedHours.intProjectId = d.intProjectId), 0.00)
 			,dblActualHours = isnull((select actualHours.dblActualHours from actualHours where actualHours.intMilestoneId = a.intMilestoneId and actualHours.intProjectId = d.intProjectId), 0.00)
