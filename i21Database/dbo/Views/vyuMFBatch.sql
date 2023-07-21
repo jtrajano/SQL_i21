@@ -57,7 +57,7 @@ SELECT
     A.strLeafSize,
     A.strLeafStyle,
     A.intMixingUnitLocationId,
-    A.dblPackagesBought,
+    dblPackagesBought = ISNULL(A.dblPackagesBought,0),
     A.intItemUOMId,
 	A.intWeightUOMId,
     A.strTeaOrigin,
@@ -152,6 +152,17 @@ SELECT
     ,dblValue = ISNULL(S.dblSampleQty, 0) * ISNULL(S.dblB1Price, 0)
 	,strLastPrice = '0.0'
 	,S.dblSupplierValuationPrice
+    ,A.intSupplierId
+    ,Yr.intSaleYearId
+    ,CatType.intCatalogueTypeId
+    ,PL.intCommodityProductLineId
+    ,intManufacturingLeafTypeId = Leaf.intCommodityAttributeId
+    ,intGradeId = Grade.intCommodityAttributeId
+    ,Brand.intBrandId
+    ,Style.intValuationGroupId
+    ,A.intMarketZoneId
+    ,Book.intBookId
+
 FROM tblMFBatch A
 LEFT JOIN tblMFBatch B ON A.intParentBatchId = B.intBatchId
 LEFT JOIN tblQMGardenMark Garden ON Garden.intGardenMarkId = A.intGardenMarkId
@@ -174,6 +185,14 @@ LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeade
 LEFT JOIN tblQMSample S ON S.intSampleId = A.intSampleId
 LEFT JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 LEFT JOIN tblEMEntity E1 ON E1.intEntityId = A.intSupplierId
+LEFT JOIN tblQMSaleYear Yr ON Yr.strSaleYear = A.intSalesYear
+LEFT JOIN tblQMCatalogueType CatType ON CatType.strCatalogueType = A.strTeaType
+LEFT JOIN tblICCommodityProductLine PL on PL.strDescription = A.strSustainability
+LEFT JOIN tblICBrand Brand on Brand.strBrandCode = A.strLeafSize
+LEFT JOIN tblICCommodityAttribute Leaf on Leaf.strDescription = A.strLeafManufacturingType
+LEFT JOIN tblICCommodityAttribute Grade on Grade.strDescription = A.strLeafGrade
+LEFT JOIN tblCTValuationGroup Style ON Style.strName = A.strLeafStyle
+LEFT JOIN tblCTBook Book ON Book.strBook = MU.strLocationName
 OUTER APPLY(
     SELECT TOP 1 intTINClearanceId, strTINNumber 
     FROM  tblQMTINClearance  
