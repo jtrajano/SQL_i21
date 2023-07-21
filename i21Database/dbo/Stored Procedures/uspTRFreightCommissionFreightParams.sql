@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE uspTRFreightCommissionFreightParams    
+﻿CREATE PROCEDURE uspTRFreightCommissionFreightParams    
 @intItemId INT,    
 @intInvoiceId INT,  
 @intFreightItemId INT,  
@@ -39,7 +38,6 @@ SET ANSI_WARNINGS OFF
 		  OR (intCategoryId = @intFreightCategoryId AND intItemId != @intItemId AND strBOLNumberDetail IS NULL AND intLoadDistributionDetailId = @intLoadDistributionDetailId)  
 		  OR (intCategoryId = @intFreightCategoryId AND intItemId != @intItemId AND intLoadDistributionDetailId = @intLoadDistributionDetailId)  
 		 )
-		 AND @intInvoiceId IS NOT NULL
 
 	 END
  ELSE
@@ -58,7 +56,7 @@ SET ANSI_WARNINGS OFF
 		FROM tblTRLoadDistributionDetail ldd
 			left join tblICItem ii ON ii.intItemId = ldd.intItemId
 		WHERE intLoadDistributionDetailId = @intLoadDistributionDetailId
-			--AND @intInvoiceId IS NULL
+			AND ISNULL(ldd.strReceiptLink,'') != ''
 
 		UNION ALL
 
@@ -69,14 +67,30 @@ SET ANSI_WARNINGS OFF
 		, strItemDescription  = 'Surcharge'
 		, intInvoiceId = 0
 		, dblFreightRate    
-		, dblFreight = (dblFreightUnit * dblFreightRate) * dblDistSurcharge
+		, dblFreight = (dblFreightUnit * dblFreightRate) * (dblDistSurcharge/100)
 		, dblCommissionPct = @dblOtherUnitCommissionPct  
-		, dblTotalCommission =  ((@dblOtherUnitCommissionPct/CONVERT(DECIMAL(18,6),100)) * ((dblFreightUnit * dblFreightRate) * dblDistSurcharge))  
+		, dblTotalCommission =  ((@dblOtherUnitCommissionPct/CONVERT(DECIMAL(18,6),100)) * ((dblFreightUnit * dblFreightRate) * (dblDistSurcharge/100)))  
 		FROM tblTRLoadDistributionDetail ldd
 			left join tblICItem ii ON ii.intItemId = ldd.intItemId
 		WHERE intLoadDistributionDetailId = @intLoadDistributionDetailId
-			--AND @intInvoiceId IS NULL
+			AND ISNULL(ldd.strReceiptLink,'') != ''
+
+
+		UNION ALL
+
+		-- FOR LDD Other Item
+		SELECT     
+		  intItemId  = @intItemId  
+		, intTrueItemId = @intItemId  
+		, strItemDescription  = ii.strDescription
+		, intInvoiceId = 0
+		, dblFreightRate
+		, dblFreight = 0
+		, dblCommissionPct = @dblOtherUnitCommissionPct  
+		, dblTotalCommission =  ((@dblOtherUnitCommissionPct/CONVERT(DECIMAL(18,6),100)) * dblPrice) 
+		FROM tblTRLoadDistributionDetail ldd
+			left join tblICItem ii ON ii.intItemId = ldd.intItemId
+		WHERE intLoadDistributionDetailId = @intLoadDistributionDetailId
+			AND ISNULL(ldd.strReceiptLink,'') = ''
 	
 	END
-
-
