@@ -1,4 +1,4 @@
-CREATE [dbo].[uspApiSchemaTransformRecipeItem] (
+CREATE PROCEDURE [dbo].[uspApiSchemaTransformRecipeItem] (
     @guiApiUniqueId UNIQUEIDENTIFIER,
     @guiLogId UNIQUEIDENTIFIER
 )
