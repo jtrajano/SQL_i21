@@ -15,27 +15,6 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS ON
 
 BEGIN TRY
-
-	--------------------------------------------------------------------------------------------  
-	-- Create Save Point.  
-	--------------------------------------------------------------------------------------------    
-	-- Create a unique transaction name. 
-	DECLARE @SavedPointTransaction AS VARCHAR(500) = 'MarkUpMarkDownPosting' + CAST(NEWID() AS NVARCHAR(100)); 
-	DECLARE @intTransactionCount INT = @@TRANCOUNT;
-
-	IF(@intTransactionCount = 0)
-		BEGIN
-			BEGIN TRAN @SavedPointTransaction
-		END
-	ELSE
-		BEGIN
-			SAVE TRAN @SavedPointTransaction --> Save point
-		END
-	--------------------------------------------------------------------------------------------  
-	-- END Create Save Point.  
-	-------------------------------------------------------------------------------------------- 
-
-
 	DECLARE @GLEntries AS RecapTableType 
 
 	SET @strStatusMsg = ''
@@ -93,151 +72,58 @@ BEGIN TRY
 	DECLARE @intCategoryAdjustmentType AS INT
 	DECLARE @strItemNo AS NVARCHAR(1000) = ''
 	DECLARE @intCommaCount AS INT
-
-
-
-	-- VALIDATE @isRequiredGLEntries = true
-	--DECLARE @tblTempItemCheck TABLE 
-	--(
-	--	[intCategoryId] int NULL,
-	--	[strCategoryCode] nvarchar(150) COLLATE Latin1_General_CI_AS NULL,
-	--	[ysnHasItem] BIT
-	--)
-
-	--DECLARE @tblTempItemValuationCheck TABLE 
-	--(
-	--	[intCategoryId] int NULL,
-	--	[strCategoryCode] nvarchar(150) COLLATE Latin1_General_CI_AS NULL,
-	--	[ysnHasItemValuation] BIT,
-	--	[ysnHasItemCosting] BIT,
-	--	[intLocationId] INT
-	--)
-	--SELECT DISTINCT @strItemNo = COALESCE(@strItemNo + ',', '') +  CONVERT(VARCHAR(50),Item.strItemNo)
-	--FROM tblSTMarkUpDownDetail MUD
-	--INNER JOIN tblSTMarkUpDown MU 
-	--	ON MU.intMarkUpDownId = MUD.intMarkUpDownId	
-	--JOIN tblICCategory Category
-	--	ON MUD.intCategoryId = Category.intCategoryId
-	--INNER JOIN tblICItem Item
-	--	ON MUD.intItemId = Item.intItemId
-	--INNER JOIN tblICItemUOM ItemUOM
-	--	ON Item.intItemId = ItemUOM.intItemId
-	--INNER JOIN tblICItemLocation ItemLocation
-	--	ON ItemLocation.intItemId = Item.intItemId 
-	--	AND ItemLocation.intLocationId = @intLocationId 
-	--	AND ItemLocation.intCostingMethod != 6
-	--WHERE MU.intMarkUpDownId = @intMarkUpDownId
 		
-	----Validate if items to be updated have a Category on Costing Method
-	--IF (@strItemNo != '')
-	--	BEGIN
-	--		IF (XACT_STATE() = 1 OR (@intTransactionCount = 0 AND XACT_STATE() <> 0))  
-	--			BEGIN 
-	--				SET @strItemNo = RIGHT(@strItemNo, LEN(@strItemNo) - 1)
-	--				SET @intCommaCount = len(@strItemNo) - LEN(REPLACE(@strItemNo,',',''))
-					
-	--				IF (@intCommaCount > 0)
-	--					BEGIN
-	--						SET @strStatusMsg = 'Item #: ' + @strItemNo + ' have no Category Costing Method on its Location Setup'
-	--						GOTO With_Rollback_Exit
-	--					END
-	--				ELSE
-	--					SET @strStatusMsg = 'Item #: ' + @strItemNo + ' has no Category Costing Method on its Location Setup'
-	--					GOTO With_Rollback_Exit
-	--			END
-	--	END
+	-- Validations --
+	SELECT TOP 1 i.strItemNo
+		, CL.strLocationName
+	INTO #ValidIssueUOM
+	FROM tblSTMarkUpDownDetail MUD
+	INNER JOIN tblSTMarkUpDown MU ON MU.intMarkUpDownId = MUD.intMarkUpDownId
+	LEFT JOIN (
+		tblICItem i INNER JOIN tblICItemLocation il
+			ON i.intItemId = il.intItemId AND il.intLocationId = @intLocationId
+		INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = il.intLocationId
+	) ON i.intItemId = MUD.intItemId
+	WHERE strAdjustmentType = @AdjustmentType_WriteOff
+		AND MU.intMarkUpDownId = @intMarkUpDownId
+		AND ISNULL(il.intIssueUOMId, 0) = 0
 
-	--IF(@isRequiredGLEntries = CAST(1 AS BIT))
-	--	BEGIN
-	--		IF(@strType = 'Department Level')
-	--			BEGIN
-	--				INSERT INTO @tblTempItemCheck
-	--				(
-	--					intCategoryId,
-	--					strCategoryCode,
-	--					ysnHasItem
-	--				)
-	--				SELECT DISTINCT
-	--					MD.intCategoryId,
-	--					C.strCategoryCode,
-	--					CASE
-	--						WHEN I.intItemId IS NOT NULL THEN CAST(1 AS BIT) 
-	--						ELSE CAST(0 AS BIT) 
-	--					END as strResult
-	--				FROM tblSTMarkUpDownDetail MD
-	--				JOIN tblICCategory C ON MD.intCategoryId = C.intCategoryId
-	--				JOIN tblICItem I ON MD.intCategoryId = I.intCategoryId
-	--				JOIN tblICItemLocation IL ON I.intItemId = IL.intItemId
-	--				WHERE intMarkUpDownId = @intMarkUpDownId
-	--				AND IL.intCostingMethod = 6
-	--				AND IL.intIssueUOMId IS NOT NULL
-	--				AND IL.intLocationId = @intLocationId
+	IF EXISTS (SELECT TOP 1 1 FROM #ValidIssueUOM)
+	BEGIN
+		DECLARE @Msg NVARCHAR(1000)
+		SELECT TOP 1 @Msg = 'Sale UOM is required from item ' + strItemNo + ', location ' + strLocationName + '.'
+		FROM #ValidIssueUOM
 
-	--				IF NOT EXISTS(SELECT * FROM @tblTempItemCheck)
-	--					BEGIN
-	--						PRINT 'NO Item with same Category or No Item that has Category Costing Method and has Sale UOM.'
+		DROP TABLE #ValidIssueUOM
 
-	--						SELECT @strCategoryCode = @strCategoryCode + C.strCategoryCode + ', '
-	--						FROM tblSTMarkUpDownDetail MD
-	--						JOIN tblICCategory C ON MD.intCategoryId = C.intCategoryId
-	--						WHERE MD.intMarkUpDownId = @intMarkUpDownId
+		SELECT @ysnIsPosted = 0, @strStatusMsg = @Msg
 
-	--						ROLLBACK TRAN @TransactionName
-	--						COMMIT TRAN @TransactionName
-	--						SET @strStatusMsg = 'Category ' + @strCategoryCode + ' has no Item or no Category Costing Method and Sale UOM.'
-	--						RETURN
-	--					END
-	--				ELSE IF EXISTS(SELECT * FROM @tblTempItemCheck)
-	--					BEGIN
-	--						PRINT 'Has Item with same Category and Has Item that has Category Costing Method and has Sale UOM.'
+		GOTO With_Rollback_Exit;
+	END
+	ELSE 
+	BEGIN
+		DROP TABLE #ValidIssueUOM
+	END
+	-----------------
 
-	--						INSERT INTO @tblTempItemValuationCheck
-	--						(
-	--							intCategoryId,
-	--							strCategoryCode,
-	--							ysnHasItemValuation,
-	--							ysnHasItemCosting,
-	--							intLocationId
-	--						)
-	--						SELECT DISTINCT
-	--							MD.intCategoryId,
-	--							C.strCategoryCode,
-	--							CASE
-	--								WHEN IV.intCategoryId IS NOT NULL THEN CAST(1 AS BIT) 
-	--								ELSE CAST(0 AS BIT) 
-	--							END as ysnHasItemValuation,
-	--							CASE
-	--								WHEN IV.dblEndingCost > 0 THEN CAST(1 AS BIT) 
-	--								ELSE CAST(0 AS BIT) 
-	--							END as ysnHasItemCosting,
-	--						IV.intLocationId
-	--						FROM tblSTMarkUpDownDetail MD
-	--						JOIN tblICCategory C ON MD.intCategoryId = C.intCategoryId
-	--						JOIN tblICRetailValuation IV ON MD.intCategoryId = IV.intCategoryId
-	--						WHERE intMarkUpDownId = @intMarkUpDownId
-	--						AND IV.intLocationId = @intLocationId
+	--------------------------------------------------------------------------------------------  
+	-- Create Save Point.  
+	--------------------------------------------------------------------------------------------    
+	-- Create a unique transaction name. 
+	DECLARE @SavedPointTransaction AS VARCHAR(500) = 'MarkUpMarkDownPosting' + CAST(NEWID() AS NVARCHAR(100)); 
+	DECLARE @intTransactionCount INT = @@TRANCOUNT;
 
-	--						IF NOT EXISTS(SELECT * FROM @tblTempItemValuationCheck)
-	--							BEGIN
-	--								PRINT 'NO Item Valuation or No Item Costing.'
-
-	--								SELECT @strCategoryCode = @strCategoryCode + C.strCategoryCode + ', '
-	--								FROM tblSTMarkUpDownDetail MD
-	--								JOIN tblICCategory C ON MD.intCategoryId = C.intCategoryId
-	--								WHERE MD.intMarkUpDownId = @intMarkUpDownId
-
-	--								ROLLBACK TRAN @TransactionName
-	--								COMMIT TRAN @TransactionName
-	--								SET @strStatusMsg = 'Category ' + @strCategoryCode + ' has no Item Valuation or No Item Costing.'
-	--								RETURN
-	--							END
-	--					END
-	--				END
-	--			END		
-	---- END VALIDATE @isRequiredGLEntries = true
-
-
-	-- Check if Post or UnPost
+	IF(@intTransactionCount = 0)
+		BEGIN
+			BEGIN TRAN @SavedPointTransaction
+		END
+	ELSE
+		BEGIN
+			SAVE TRAN @SavedPointTransaction --> Save point
+		END
+	--------------------------------------------------------------------------------------------  
+	-- END Create Save Point.  
+	-------------------------------------------------------------------------------------------- 
 
 
 	IF(@ysnPost = CAST(1 AS BIT))
