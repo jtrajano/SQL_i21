@@ -12,7 +12,7 @@ SELECT strInvPlngReportName		AS [Plan Name]
 	 , dtmDemandDate			AS [Date]
 	 , strAttributeName			AS [Plan Detail]
 	 , strItemNo				AS [Item No]
-	 , CASE WHEN intReportAttributeID = 1 THEN PivotData.OpeningInv
+	 , CASE WHEN intReportAttributeID = 2 THEN PivotData.OpeningInv
 		    ELSE ''
 	   END						AS [On-Hand Inventory]
 	 , CASE WHEN intReportAttributeID = 4 OR intReportAttributeID = 14 OR intReportAttributeID = 13 THEN PivotData.PastDue
