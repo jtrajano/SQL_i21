@@ -46,6 +46,7 @@ SELECT DISTINCT
     ,CAP.intChargeAndPremiumId
 	,CAP.strChargeAndPremiumId
     ,ysnDPLoadOut = [dbo].[fnGRCheckStorageIfFromLoadOut](CS.intCustomerStorageId)
+    ,ST.ysnAllowSettlement
 FROM tblGRCustomerStorage CS  
 JOIN tblGRStorageType ST 
     ON ST.intStorageScheduleTypeId = CS.intStorageTypeId  
