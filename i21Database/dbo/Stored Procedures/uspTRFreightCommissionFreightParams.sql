@@ -1,7 +1,7 @@
 ﻿
 CREATE PROCEDURE uspTRFreightCommissionFreightParams    
 @intItemId INT,    
-@intInvoiceId INT NULL,  
+@intInvoiceId INT,  
 @intFreightItemId INT,  
 @intSurchargeItemId INT,  
 @intFreightCategoryId INT,  
