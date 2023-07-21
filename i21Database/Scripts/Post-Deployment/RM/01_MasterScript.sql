@@ -52,12 +52,6 @@ BEGIN
 END
 GO
 
-IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = N'vyuRKGetSequenceMonth')
-BEGIN
-	EXEC ('DROP VIEW vyuRKGetSequenceMonth')
-END
-GO
-
 PRINT ('/*******************  START Syncing Commodity Attributes to RM *******************/')
 GO
 EXEC uspRKSyncCommodityMarketAttribute -- saving to an RM table with constraint to disallow deletion of commodity attributes in IC

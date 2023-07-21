@@ -124,8 +124,8 @@ BEGIN
 				, adjustment.intContractHeaderId
 			)
 			,intTicketId = t.intTicketId -- v.intTicketId
-			,intCommodityId =  i.intCommodityId --v.intCommodityId
-			,intCommodityUOMId = commodityUOM.intCommodityUnitMeasureId
+			,intCommodityId =  v.intCommodityId
+			,intCommodityUOMId = cuomDefault.intCommodityUnitMeasureId
 			,intItemId = t.intItemId
 			,intBookId = NULL
 			,intSubBookId = NULL
@@ -133,8 +133,8 @@ BEGIN
 			,intFutureMarketId = NULL
 			,intFutureMonthId = NULL
 			,dblNoOfLots = NULL
-			,dblQty = ISNULL(dbo.fnCalculateQtyBetweenUOM(t.intItemUOMId, stockUOM.intItemUOMId, t.dblQty), 0) --t.dblQty
-			,dblPrice = ISNULL(dbo.fnCalculateCostBetweenUOM(t.intItemUOMId, stockUOM.intItemUOMId, t.dblCost), 0) --t.dblCost
+			,dblQty = ISNULL(dbo.fnCalculateQtyBetweenUOM (t.intItemUOMId, iuomCDefault.intItemUOMId, t.dblQty), 0.00)
+			,dblPrice = ISNULL(dbo.fnCalculateCostBetweenUOM(t.intItemUOMId, iuomCDefault.intItemUOMId, t.dblCost), 0) --t.dblCost
 			,intEntityId = t.intSourceEntityId --v.intEntityId
 			,ysnDelete = 0
 			,intUserId = @intEntityUserSecurityId
@@ -182,28 +182,14 @@ BEGIN
 						NULL
 				 END 
 		FROM	
-			tblICInventoryTransaction t 
-			
-			INNER JOIN tblICItem i 
-				ON t.intItemId = i.intItemId			
-
-			INNER JOIN tblICItemUOM stockUOM 		
-				ON stockUOM.intItemId = i.intItemId
-				AND stockUOM.ysnStockUnit = 1 
-
-			INNER JOIN tblICUnitMeasure stockUnitMeasure
-				ON stockUnitMeasure.intUnitMeasureId = stockUOM.intUnitMeasureId 
-
-			CROSS APPLY (
-				SELECT TOP 1 
-					commodityUOM.* 
-				FROM 
-					tblICCommodityUnitMeasure commodityUOM
-				WHERE 
-					commodityUOM.intCommodityId = i.intCommodityId 
-					AND commodityUOM.intUnitMeasureId = stockUnitMeasure.intUnitMeasureId
-			) commodityUOM
-
+			tblICInventoryTransaction t inner join vyuICGetInventoryValuation v 
+				ON t.intInventoryTransactionId = v.intInventoryTransactionId			
+			INNER JOIN tblICCommodityUnitMeasure cuomDefault
+				ON cuomDefault.intCommodityId = v.intCommodityId
+				AND cuomDefault.ysnDefault = 1 AND cuomDefault.ysnStockUOM = 1
+			INNER JOIN tblICItemUOM iuomCDefault
+				ON iuomCDefault.intItemId = t.intItemId
+				AND iuomCDefault.intUnitMeasureId = cuomDefault.intUnitMeasureId
 			LEFT JOIN tblICInventoryTransactionType transType 
 				ON transType.intTransactionTypeId = t.intTransactionTypeId
 

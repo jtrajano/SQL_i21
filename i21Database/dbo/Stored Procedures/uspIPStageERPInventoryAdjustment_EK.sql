@@ -27,6 +27,7 @@ BEGIN TRY
 			,'Stock Transfer'
 			)
 		AND intStatusId IS NULL
+	ORDER BY intIDOCXMLStageId
 
 	SELECT @intRowNo = MIN(intIDOCXMLStageId)
 	FROM @tblIPIDOCXMLStage
@@ -134,13 +135,13 @@ BEGIN TRY
 							CASE 
 								WHEN TransactionType = 8
 									THEN - Convert(NUMERIC(18, 6), Quantity)
-								WHEN TransactionType = 20
+								WHEN TransactionType IN (10, 20)
 									THEN Convert(NUMERIC(18, 6), NetWeight)
 								ELSE Convert(NUMERIC(18, 6), Quantity)
 								END
 							)
 					END
-				,CASE WHEN TransactionType = 20 THEN NetWeightUOM ELSE QuantityUOM END
+				,CASE WHEN TransactionType IN (10,20) THEN NetWeightUOM ELSE QuantityUOM END
 				,CASE 
 					WHEN NetWeight = ''
 						THEN NULL

@@ -3,6 +3,7 @@ AS
 SELECT intSampleId					= S.intSampleId
 	 , strSaleNumber				= S.strSaleNumber
 	 , strCompanyLocationName		= CompanyLocation.strLocationName
+	 , strFilterSaleNumber			= S.strSaleNumber + ' - ' + CompanyLocation.strLocationName
 	 , strSampleNote				= S.strSampleNote
 	 , strBrokerName				= E.strName
 	 , strAuctionPrice				= CAST(CAST(ISNULL(AUCPRICE.dblMinPrice, 0) AS DECIMAL(18,2)) AS NVARCHAR(100)) + ' - ' + CAST(CAST(ISNULL(AUCPRICE.dblMaxPrice, 0) AS DECIMAL(18,2)) AS NVARCHAR(100))
@@ -61,6 +62,6 @@ OUTER APPLY (
 	FROM tblQMSample A
 	WHERE A.intGardenMarkId=S.intGardenMarkId 
 		and A.intGradeId =S.intGradeId 
-	  AND A.dtmSaleDate IN (Select MAX(B.dtmSaleDate) from tblQMSample B Where B.dtmSaleDate<= S.dtmSaleDate) 
+	  AND A.dtmSaleDate IN (Select MAX(B.dtmSaleDate) from tblQMSample B Where B.dtmSaleDate<= S.dtmSaleDate)
 ) AUCPRICE
 WHERE S.strSaleNumber IS NOT NULL

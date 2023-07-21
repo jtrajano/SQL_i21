@@ -78,6 +78,7 @@
 	[strResolutionSOPLink]			  [nvarchar](1000) COLLATE Latin1_General_CI_AS NULL,
 	[dtmStartDate]					  [datetime] NULL,
 	[strNote]						  [nvarchar](250) COLLATE Latin1_General_CI_AS NULL,
+	[strFixedInBuild] [nvarchar](255) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblHDTicket] PRIMARY KEY CLUSTERED ([intTicketId] ASC),
 	CONSTRAINT [UNQ_tblHDTicketNumber] UNIQUE ([strTicketNumber]),

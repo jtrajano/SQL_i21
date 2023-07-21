@@ -1776,6 +1776,10 @@
     <Build Include="dbo\Stored Procedures\uspSTCSSetDefaultDepartmentSetup.sql" />
     <Build Include="dbo\Views\vyuAPVoucherIdWithDM.sql" />
     <None Include="Scripts\Post-Deployment\ST\57_TagDepartmentCategoriesForFuel.sql" />
+    <Build Include="dbo\Views\vyuGLCOAiPayables.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLCorrigaCOAiPayables.sql" />
+    <None Include="Scripts\Post-Deployment\MF\15_DemandForecastFix.sql" />
+    <Build Include="dbo\Views\vyuRKGetSequenceMonth.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -2709,6 +2713,7 @@
     <Build Include="dbo\Stored Procedures\uspFRDValidateDesign.sql" />
     <Build Include="dbo\Views\vyuAPRptPurchase.sql" />
     <Build Include="dbo\Tables\tblGLImportError.sql" />
+    <Build Include="dbo\Tables\tblGLGridSelectedRow.sql" />
     <Build Include="dbo\Functions\fnCreateTableFromDelimitedValues.sql" />
     <Build Include="dbo\Stored Procedures\uspGLCreateRecurringJournal.sql" />
     <Build Include="dbo\Stored Procedures\uspGLMergeSegmentAccount.sql" />
@@ -12173,6 +12178,8 @@
     <Build Include="dbo\Tables\tblGLREMaskAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspQMUpdateLoadShipmentDetail.sql" />
     <Build Include="dbo\Functions\fnCTGetSampleDetailAllocation.sql" />
+    <Build Include="dbo\Tables\tblARCustomerInquiryStagingTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspARMainCustomerInquiryReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

@@ -268,12 +268,12 @@ BEGIN TRY
 			)
 		BEGIN
 			SELECT @strDetail = @strDetail + '<tr>' + 
-					 '<td>&nbsp;' + ISNULL(t.strCompanyLocation, '') + '</td>' + 
+					 '<td>&nbsp;' + ISNULL(t.strCompanyLocation, '') + ' - '+ISNULL(strLocationName,'')+ '</td>' + 
 				   '<td>&nbsp;' + CASE 
 						WHEN t.intTransactionTypeId in (8,-8,0)
 							THEN 'Stock Consumption'
 						WHEN t.intTransactionTypeId = 10
-							THEN 'Stock Adjustment'
+							THEN 'Stock Quantity Adjustment'
 						WHEN t.intTransactionTypeId = 12
 							THEN 'Stock Transfer'
 						WHEN t.intTransactionTypeId = 16
@@ -291,6 +291,7 @@ BEGIN TRY
 				   '<td>&nbsp;' + ISNULL(t.strErrorMessage, '') + '</td>' + 
 			'</tr>'
 			FROM tblIPInventoryAdjustmentError t WITH (NOLOCK)
+			JOIN tblSMCompanyLocation L on L.strVendorRefNoPrefix=t.strCompanyLocation AND L.strLocationType='Plant'
 			WHERE ISNULL(t.ysnMailSent, 0) = 0
 
 			UPDATE t

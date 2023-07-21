@@ -187,7 +187,7 @@ BEGIN TRY
 			SET @dblCommission = 0;
 		END
 
-		IF ISNULL(@Cost, 0) = 0 OR ISNULL(@Cost, 0) < @dblPriceMargin
+		IF ISNULL(@Cost, 0) = 0
 		BEGIN
 			SET @ysnStopProcessing = 1;
 			SET @ysnStopProcessingFinal = 1;

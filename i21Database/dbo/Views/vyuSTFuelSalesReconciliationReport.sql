@@ -45,7 +45,9 @@ WHEN ST.ysnConsMeterReadingsForDollars = 0 THEN (SELECT dbo.fnSTGetDepartmentTot
 WHEN ST.ysnConsMeterReadingsForDollars = 1 AND ST.ysnConsAddOutsideFuelDiscounts = 1 THEN (ISNULL(CH.dblEditableOutsideFuelDiscount,0))
 WHEN ST.ysnConsMeterReadingsForDollars = 1 AND ST.ysnConsAddOutsideFuelDiscounts = 0 THEN 0
 WHEN ST.ysnConsMeterReadingsForDollars = 0 AND ST.ysnConsAddOutsideFuelDiscounts = 0 THEN 0 END) AS dblFuelDiscount,
-((SELECT dbo.fnSTTotalAmountOfDepositablePaymentMethods(CH.intCheckoutId)) - (SELECT dbo.fnSTGetGrossFuelSalesByCheckoutId(CH.intCheckoutId))) AS dblSubTotal
+((SELECT dbo.fnSTTotalAmountOfDepositablePaymentMethods(CH.intCheckoutId)) - (SELECT dbo.fnSTGetGrossFuelSalesByCheckoutId(CH.intCheckoutId))) AS dblSubTotal,
+REG.strRegisterClass,
+(CASE WHEN REG.strRegisterClass = 'PASSPORT' AND ST.ysnConsMeterReadingsForDollars = 0 THEN '**Outside Fuel Discounts have been excluded from the value shown in Department Totals for Fuel' END) AS strPassportDepartmentTotalsLegend
 FROM dbo.tblSTStore ST
 JOIN tblSMCompanyLocation SMCL
 	ON ST.intCompanyLocationId = SMCL.intCompanyLocationId
@@ -59,3 +61,5 @@ JOIN tblICItemUOM UOM
 	ON FSBGPP.intItemUOMId = UOM.intItemUOMId
 JOIN tblICItem I
 	ON UOM.intItemId = I.intItemId
+JOIN tblSTRegister REG
+	ON ST.intRegisterId = REG.intRegisterId
