@@ -228,7 +228,7 @@ FROM (
   INNER JOIN dbo.tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId      
   INNER JOIN dbo.tblAPBill C ON ISNULL(B.intBillId,B.intOrigBillId) = C.intBillId      
  --  LEFT JOIN dbo.fnAPGetVoucherAverageRate() avgRate ON C.intBillId = avgRate.intBillId --handled payment for origin old payment import      
-  INNER JOIN dbo.tblAPBillDetail C2 ON C.intBillId = C2.intBillId      
+  LEFT JOIN dbo.tblAPBillDetail C2 ON C.intBillId = C2.intBillId      
   LEFT JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityId] = D2.intEntityId)      
    ON A.[intEntityVendorId] = D.[intEntityId]      
  LEFT JOIN dbo.tblGLAccount F ON  B.intAccountId = F.intAccountId        
