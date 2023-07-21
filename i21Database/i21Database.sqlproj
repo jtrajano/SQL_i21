@@ -1433,6 +1433,7 @@
     <Build Include="dbo\Stored Procedures\uspTRFreightCommissionParams.sql" />
     <Build Include="dbo\Views\vyuTRGetFreightCommissionFreight.sql" />
     <Build Include="dbo\Views\vyuTRGetFreightCommissionLine.sql" />
+    <Build Include="dbo\Views\vyuSTPromotionItemListDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
