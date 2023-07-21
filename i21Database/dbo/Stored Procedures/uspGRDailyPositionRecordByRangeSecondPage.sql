@@ -66,7 +66,13 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 		,[endgroup] NVARCHAR(50)
 		,[datatype] NVARCHAR(50)
 	)
-
+		DECLARE @CompanyOwnedData AS TABLE (
+		id int,
+		dtmDate DATETIME
+		,dblIncrease DECIMAL(18,6) DEFAULT 0
+		,dblDecrease DECIMAL(18,6) DEFAULT 0
+		,strType NVARCHAR(40) COLLATE Latin1_General_CI_AS
+	)
 	DECLARE @ReportData TABLE
 	(
 		id [INT]					IDENTITY(1,1) NOT NULL
@@ -235,8 +241,15 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 	JOIN tblGRStorageType ST 
 		ON ST.strStorageTypeDescription = offsite.strDistributionType 			
 			AND ysnCustomerStorage = 1			
-	WHERE offsite.intCommodityId = @intCommodityId	 and offsite.intLocationId = @intLocationId
+	WHERE offsite.intCommodityId = @intCommodityId	 and offsite.intLocationId = @intLocationId and dtmTransactionDate <=@dtmLastDayMonthYear
 	and intTicketId is not null
+
+	/*Settled and Unsettled Company Owned*/
+	insert into @CompanyOwnedData	
+	EXEC dbo.uspGRDPRSettledAndUnsettledCommodity  @intCommodityId, @intLocationId, @dtmLastDayMonthYear
+	
+
+
 
 	while (@intMonth = MONTH(@dtmMonthYear))
 	begin 		
@@ -255,23 +268,20 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 
 		/*Unsettled Company owned*/
 		SELECT 			
-			@dblUnsettledIncrease = SUM(dblIn) ,
-			@dblUnsettledDecrease = SUM(dblOut)
-		FROM #OwnershipALL C
+			@dblUnsettledIncrease = SUM(dblIncrease) ,
+			@dblUnsettledDecrease = SUM(dblDecrease)
+		FROM @CompanyOwnedData C
 		WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) = CONVERT(DATETIME, @dtmMonthYear)
-		and strTransactionType <> 'Inventory Adjustment' 
-		and strOwnedPhysicalStock = 'Company'
-		 and  	C.intLocationId = @intLocationId and isnull(ysnSettled,0) = 0
+		and strType = 'Unpaid' 
+		 
 
 		/*Settled Company owned*/
 		SELECT 			
-			@dblSettledIncrease = SUM(dblIn) ,
-			@dblSettledDecrease = SUM(dblOut)
-		FROM #OwnershipALL C
+			@dblSettledIncrease = SUM(dblIncrease) ,
+			@dblSettledDecrease = SUM(dblDecrease)
+		FROM @CompanyOwnedData C
 		WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) = CONVERT(DATETIME, @dtmMonthYear)
-		and strTransactionType <> 'Inventory Adjustment' and  not (strStorageTypeCode = 'WH' and ysnReceiptedStorage = 1)
-		and strOwnedPhysicalStock = 'Company'
-		 and  	C.intLocationId = @intLocationId and isnull(ysnSettled,0) = 1
+		and strType = 'Paid' 
 
 		SELECT 			
 			@dblWHRIssued = SUM(dblIn) ,
@@ -311,21 +321,17 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 
 			/*Unsettled Company owned*/
 			SELECT 			
-				@dblUnsettledBalance = SUM(dblIn) - SUM(dblOut)
-			FROM #OwnershipALL C
+				@dblUnsettledBalance = SUM(dblIncrease) - SUM(dblDecrease)
+			FROM @CompanyOwnedData C
 			WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) < CONVERT(DATETIME, @dtmMonthYear)
-			and strTransactionType <> 'Inventory Adjustment' 
-			and strOwnedPhysicalStock = 'Company'
-			and  	C.intLocationId = @intLocationId and isnull(ysnSettled,0) = 0
+			and strType = 'Unpaid' 
 
 			/*Settled Company owned*/
 			SELECT 			
-				@dblSettledBalance = SUM(dblIn) - SUM(dblOut)
-			FROM #OwnershipALL C
+				@dblSettledBalance = SUM(dblIncrease) - SUM(dblDecrease)
+			FROM @CompanyOwnedData C
 			WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) < CONVERT(DATETIME, @dtmMonthYear)
-			and strTransactionType <> 'Inventory Adjustment' and  not (strStorageTypeCode = 'WH' and ysnReceiptedStorage = 1)
-			and strOwnedPhysicalStock = 'Company'
-			and C.intLocationId = @intLocationId and isnull(ysnSettled,0) = 1
+			and strType = 'Paid' 
 
 			SELECT 			
 			@dblWHROutstanding = SUM(dblIn) - SUM(dblOut)
