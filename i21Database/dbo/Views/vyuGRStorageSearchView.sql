@@ -112,6 +112,7 @@ SELECT
 	,intTransferPricingTypeId = ISNULL(CH_Transfer.intPricingTypeId, -98)
 	,CAP.intChargeAndPremiumId
 	,CAP.strChargeAndPremiumId
+	,ST.ysnAllowSettlement
 FROM tblGRCustomerStorage CS  
 JOIN tblSMCompanyLocation LOC
 	ON LOC.intCompanyLocationId = CS.intCompanyLocationId  
