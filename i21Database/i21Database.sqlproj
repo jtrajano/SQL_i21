@@ -9287,6 +9287,7 @@
     <Build Include="dbo\Views\vyuSCDirectAPClearingGLAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentCurrentAvg.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentAvg.sql" />
+    <Build Include="dbo\Tables\tblGRStorageTypeAuditLogForAllowSettlement.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
