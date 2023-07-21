@@ -9280,6 +9280,7 @@
     <Build Include="dbo\Stored Procedures\uspGRDailyPositionRecordByRangeSecondPage.sql" />
     <Build Include="dbo\Stored Procedures\uspGRDailyPositionRecordByRange.sql" />
     <Build Include="dbo\Stored Procedures\uspGRDPRSettledAndUnsettledCommodity.sql" />
+    <Build Include="dbo\Tables\tblGRStorageTypeAuditLogForAllowSettlement.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
