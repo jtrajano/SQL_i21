@@ -35,7 +35,7 @@ SET
 	, r.dblTotalLotQty = ISNULL(lots.totalLotQty, 0)	
 	, r.dblTotalLotTare = ISNULL(lots.totalLotTare,0)
 	, r.dblTotalNet =  ISNULL(items.totalNet,0)
-	, r.dblGrandTotal =  ISNULL(items.subTotal,0) + ISNULL(charges.totalCharges, 0) + ISNULL(items.totalTax, 0) + ISNULL(charges.totalChargesTax,0)
+	, r.dblGrandTotal =  ISNULL(items.subTotal,0) + ISNULL(charges.totalCharges, 0) + ISNULL(items.totalTax, 0) + ISNULL(charges.totalChargesTax,0) + ISNULL(receiptTax.totalReceipTax, 0) 
 	, r.dblAvgTarePerQty = CASE WHEN ISNULL(lots.totalLotQty, 0) <> 0 THEN ISNULL(lots.totalLotTare,0) / ISNULL(lots.totalLotQty, 0) ELSE 0 END 	
 FROM 
 	tblICInventoryReceipt r 
@@ -98,6 +98,8 @@ FROM
 			ReceiptTax.intInventoryReceiptId = r.intInventoryReceiptId
 	) receiptTax
 WHERE 
-	(r.intInventoryReceiptId = @ReceiptId OR @ReceiptId IS NULL) 
-	AND (@ForceRecalc = 1 OR (r.dtmLastCalculateTotals IS NULL OR r.dtmDateModified > r.dtmLastCalculateTotals))
+	--(r.intInventoryReceiptId = @ReceiptId OR @ReceiptId IS NULL)
+	--AND (@ForceRecalc = 1 OR (r.dtmLastCalculateTotals IS NULL OR r.dtmDateModified > r.dtmLastCalculateTotals))
+	r.intInventoryReceiptId = @ReceiptId OR @ForceRecalc = 1
+	
 	
