@@ -361,20 +361,23 @@ BEGIN TRY
 		, dblConversionFactor = dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId, CM.intItemUOMId, 1)
 		, strUOM = dbo.[fnCTGetSeqDisplayField](CD.intItemUOMId, 'tblICItemUOM')
 		, dblAppliedQty = CASE WHEN CH.ysnLoad = 1 THEN ISNULL(CD.intNoOfLoad, 0) - ISNULL(CD.dblBalanceLoad, 0) ELSE ISNULL(CD.dblQuantity, 0) - ISNULL(CD.dblBalance, 0) END
-		, dblAppliedLoadQty =  	CASE
-									WHEN CH.ysnLoad = 1
-									THEN (ISNULL(CD.intNoOfLoad, 0) - ISNULL(CD.dblBalanceLoad, 0)) * CD.dblQuantityPerLoad
+		/*
+		, dblAppliedLoadQty = CASE WHEN Shipment.dblQuantity > 0 THEN Shipment.dblDestinationQuantity
+									WHEN Bill.dblQuantity > 0 THEN Bill.dblQuantity
+									ELSE CASE WHEN CT.ysnLoad = 1 THEN ISNULL(CD.intNoOfLoad, 0) - ISNULL(CD.dblBalanceLoad, 0)
+											ELSE ISNULL(CD.dblQuantity, 0) - ISNULL(CD.dblBalance, 0) END * CD.dblQuantityPerLoad END
+		*/
+		  , dblAppliedLoadQty =  	CASE
+									WHEN Shipment.dblQuantity > 0 THEN Shipment.dblDestinationQuantity + ISNULL(Invoice.dblQuantity,0)
+									WHEN Bill.dblQuantity > 0 THEN Bill.dblQuantity
+									WHEN Invoice.dblQuantity > 0  THEN Invoice.dblQuantity
 									ELSE
-										case
-											when Shipment.dblQuantity > 0
-											then Shipment.dblDestinationQuantity + ISNULL(Invoice.dblQuantity,0)
-											when Bill.dblQuantity > 0
-											then Bill.dblQuantity
-											when Invoice.dblQuantity > 0
-											then Invoice.dblQuantity
-											else ISNULL(CD.dblQuantity, 0) - ISNULL(CD.dblBalance, 0)
-										end
-								END
+										CASE
+										WHEN CH.ysnLoad = 1 THEN ISNULL(CD.intNoOfLoad, 0) - ISNULL(CD.dblBalanceLoad, 0)
+										ELSE ISNULL(CD.dblQuantity, 0) - ISNULL(CD.dblBalance, 0)
+										END
+										* CD.dblQuantityPerLoad
+									END
 		, dblExchangeRate = dbo.fnCTGetCurrencyExchangeRate(CD.intContractDetailId, 0)
 		, IM.intProductTypeId
 		, ysnItemUOMIdExist = CAST(1 AS BIT)
