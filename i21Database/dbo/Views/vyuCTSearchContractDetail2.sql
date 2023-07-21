@@ -120,7 +120,7 @@ SELECT a.intContractDetailId
 	, a.dtmStartDate
 	, a.dtmEndDate
 	, dblDetailQuantity = a.dblQuantity
-	, dblDetailApplied = a.dblQuantity - a.dblBalance
+	, dblDetailApplied = case when b.ysnLoad = 1 then dbo.fnCTAppliedQuantity(a.intContractDetailId,a.intUnitMeasureId,a.intItemUOMId,a.intItemId,b.intContractTypeId) else a.dblQuantity - a.dblBalance end
 	, dblAvailableQty = a.dblBalance - ISNULL(a.dblScheduleQty, 0)
 	, a.dblFutures
 	, a.dblBasis
@@ -192,9 +192,14 @@ SELECT a.intContractDetailId
 	, af.intCommodityId
 	, af.strCommodityCode
 	, strCommodityDescription = af.strDescription
-	, dblTotalAppliedQty = (CASE WHEN ISNULL(ah.dblUnitQty, 0) = 0 OR ISNULL(ai.dblUnitQty, 0) = 0 THEN NULL
-								WHEN ISNULL(ah.dblUnitQty, 0) = ISNULL(ai.dblUnitQty, 0) THEN(a.dblQuantity - a.dblBalance)
-								ELSE((a.dblQuantity - a.dblBalance) * ISNULL(ah.dblUnitQty, 0)) / ISNULL(ai.dblUnitQty, 0) END)
+	, dblTotalAppliedQty = case when b.ysnLoad = 1
+								then
+									dbo.fnCTAppliedQuantity(a.intContractDetailId,a.intUnitMeasureId,a.intItemUOMId,a.intItemId,b.intContractTypeId)
+								else
+									(CASE WHEN ISNULL(ah.dblUnitQty, 0) = 0 OR ISNULL(ai.dblUnitQty, 0) = 0 THEN NULL
+									WHEN ISNULL(ah.dblUnitQty, 0) = ISNULL(ai.dblUnitQty, 0) THEN(a.dblQuantity - a.dblBalance)
+									ELSE((a.dblQuantity - a.dblBalance) * ISNULL(ah.dblUnitQty, 0)) / ISNULL(ai.dblUnitQty, 0) END)
+								end
 	, dblTotalBallance = (CASE WHEN ISNULL(ah.dblUnitQty, 0) = 0 OR ISNULL(ai.dblUnitQty, 0) = 0 THEN NULL
 								WHEN ISNULL(ah.dblUnitQty, 0) = ISNULL(ai.dblUnitQty, 0) THEN a.dblBalance
 								ELSE(a.dblBalance * ISNULL(ah.dblUnitQty, 0)) / ISNULL(ai.dblUnitQty, 0) END)

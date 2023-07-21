@@ -92,7 +92,7 @@ AS
 		SELECT 
 			HV.intContractHeaderId,
 			dblTotalBalance = SUM(F.dblBalance),
-			dblTotalAppliedQty = SUM(F.dblAppliedQuantity)
+			dblTotalAppliedQty = case when HV.ysnLoad = 1 then sum(dbo.fnCTAppliedQuantity(CD.intContractDetailId,CD.intUnitMeasureId,CD.intItemUOMId,CD.intItemId,HV.intContractTypeId)) else SUM(F.dblAppliedQuantity) end
 		FROM tblCTContractHeader HV WITH (NOLOCK)
 			LEFT JOIN tblICCommodityUnitMeasure UM WITH (NOLOCK)
 				ON UM.intCommodityUnitMeasureId = HV.intCommodityUOMId 
@@ -101,7 +101,7 @@ AS
 		CROSS APPLY (
 			SELECT * FROM [dbo].[fnCTConvertQuantityToTargetItemUOM2](CD.intItemId,CD.intUnitMeasureId,UM.intUnitMeasureId, CD.dblBalance,ISNULL(CD.intNoOfLoad,0),ISNULL(CD.dblQuantity,0),HV.ysnLoad)
 		) F
- GROUP BY HV.intContractHeaderId
+ GROUP BY HV.intContractHeaderId, HV.ysnLoad
  )BL ON  BL.intContractHeaderId = CH.intContractHeaderId
  OUTER APPLY
  (
