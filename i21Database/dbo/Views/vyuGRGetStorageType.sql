@@ -24,6 +24,7 @@ SELECT DISTINCT
                                         END
                                 END AS BIT
                             )
+,ST.ysnAllowSettlement
 FROM tblGRCustomerStorage CS
 JOIN tblGRStorageType ST 
     ON ST.intStorageScheduleTypeId = CS.intStorageTypeId 
