@@ -36,8 +36,8 @@ BEGIN
 						@dtmDateFrom,
 						CASE
 							WHEN dbo.fnTMIsConsumptionSiteAtAStore(a.intSiteID) = 1
-							THEN dbo.fnTMGetFuelTankReadingStartOrEndVolume(@dtmDateFrom, a.intSiteID, 1, 1)
-							ELSE dbo.fnTMGetFuelTankReadingStartOrEndVolume(@dtmDateFrom, a.intSiteID, 0, 1)
+							THEN dbo.fnTMGetFuelTankReadingStartOrEndVolume(@dtmDateFrom, a.intSiteID, 1, 1, 0)
+							ELSE dbo.fnTMGetFuelTankReadingStartOrEndVolume(@dtmDateFrom, a.intSiteID, 0, 1, 0)
 							END AS dtmStartVolume,
 						dbo.fnTMGetDeliveries(@dtmDateFrom, a.intSiteID, 0) as dblDeliveries,
 						CASE
@@ -45,11 +45,7 @@ BEGIN
 							THEN dbo.fnTMGetSalesFromStoreEOD(@dtmDateFrom, a.intSiteID)
 							ELSE dbo.fnTMGetSalesFromIC(@dtmDateFrom, a.intSiteID)
 							END as dblSales,
-						CASE
-							WHEN dbo.fnTMIsConsumptionSiteAtAStore(a.intSiteID) = 1
-							THEN dbo.fnTMGetFuelTankReadingStartOrEndVolume(@dtmDateFrom, a.intSiteID, 1, 0)
-							ELSE dbo.fnTMGetFuelTankReadingStartOrEndVolume(@dtmDateFrom, a.intSiteID, 0, 0)
-							END AS dtmEndVolume,
+						dbo.fnTMGetFuelTankReadingStartOrEndVolume(@dtmDateFrom, a.intSiteID, 0, 0, 0) AS dtmEndVolume,
 						1 as ysnIncluded
 			FROM		tblTMSite a
 			LEFT JOIN	tblTMSiteDevice b
@@ -106,8 +102,8 @@ BEGIN
 							END as dblSales,
 						CASE
 							WHEN dbo.fnTMIsConsumptionSiteAtAStore(a.intSiteID) = 1
-							THEN dbo.fnTMGetFuelTankReadingStartOrEndVolume(@dtmDateFrom, a.intSiteID, 1, 0)
-							ELSE dbo.fnTMGetFuelTankReadingStartOrEndVolume(@dtmDateFrom, a.intSiteID, 0, 0)
+							THEN dbo.fnTMGetFuelTankReadingStartOrEndVolume(@dtmDateFrom, a.intSiteID, 1, 0, 0)
+							ELSE dbo.fnTMGetFuelTankReadingStartOrEndVolume(@dtmDateFrom, a.intSiteID, 0, 0, 0)
 							END AS dtmEndVolume,
 						1 as ysnIncluded
 			FROM		tblTMSite a
@@ -165,8 +161,8 @@ BEGIN
 							END as dblSales,
 						CASE
 							WHEN dbo.fnTMIsConsumptionSiteAtAStore(a.intSiteID) = 1
-							THEN dbo.fnTMGetFuelTankReadingStartOrEndVolume(@dtmDateFrom, a.intSiteID, 1, 0)
-							ELSE dbo.fnTMGetFuelTankReadingStartOrEndVolume(@dtmDateFrom, a.intSiteID, 0, 0)
+							THEN dbo.fnTMGetFuelTankReadingStartOrEndVolume(@dtmDateFrom, a.intSiteID, 1, 0, 1)
+							ELSE dbo.fnTMGetFuelTankReadingStartOrEndVolume(@dtmDateFrom, a.intSiteID, 0, 0, 1)
 							END AS dtmEndVolume,
 						1 as ysnIncluded
 			FROM		tblTMSite a
