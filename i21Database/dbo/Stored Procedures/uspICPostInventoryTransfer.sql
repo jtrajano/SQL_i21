@@ -1008,6 +1008,49 @@ BEGIN
 					,[intSourceEntityId]
 					,[intCommodityId]
 			)
+			EXEC @intReturnValue = dbo.uspICCreateGLEntries 
+				@strBatchId
+				,NULL 
+				,@intEntityUserSecurityId
+				,@strGLDescription
+			IF @intReturnValue < 0 GOTO With_Rollback_Exit
+
+			INSERT INTO @GLEntries (
+					[dtmDate] 
+					,[strBatchId]
+					,[intAccountId]
+					,[dblDebit]
+					,[dblCredit]
+					,[dblDebitUnit]
+					,[dblCreditUnit]
+					,[strDescription]
+					,[strCode]
+					,[strReference]
+					,[intCurrencyId]
+					,[dblExchangeRate]
+					,[dtmDateEntered]
+					,[dtmTransactionDate]
+					,[strJournalLineDescription]
+					,[intJournalLineNo]
+					,[ysnIsUnposted]
+					,[intUserId]
+					,[intEntityId]
+					,[strTransactionId]
+					,[intTransactionId]
+					,[strTransactionType]
+					,[strTransactionForm]
+					,[strModuleName]
+					,[intConcurrencyId]
+					,[dblDebitForeign]	
+					,[dblDebitReport]	
+					,[dblCreditForeign]	
+					,[dblCreditReport]	
+					,[dblReportingRate]	
+					,[dblForeignRate]
+					,[strRateType]
+					,[intSourceEntityId]
+					,[intCommodityId]
+			)
 			EXEC @intReturnValue = dbo.uspICCreateGLEntriesForInTransitCosting 
 				@strBatchId
 				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
