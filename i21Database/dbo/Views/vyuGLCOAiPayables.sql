@@ -9,6 +9,7 @@ WITH COA (
 	strDescription
 ) AS (
 	SELECT DISTINCT
+	TOP 100 PERCENT
 		'01' AS strRecordCode,
 		'C0000549' AS strCustomerId,
 		'D1' AS strType,
@@ -17,18 +18,25 @@ WITH COA (
 	FROM vyuGLAccountDetail A
 	INNER JOIN tblGLAccountSegment B ON A.strCode = B.strCode
 	--INNER JOIN vyuGLAccountSegmentPartition B ON A.strCode = B.strPrimary AND A.strLocationSegmentId = B.strLocation
+	ORDER BY A.strCode
 	UNION ALL
-	SELECT DISTINCT
-		'01' AS strRecordCode,
-		'C0000549' AS strCustomerId,
-		'D2' AS strType,
-		A.strLocationSegmentId AS strValue,
+	SELECT TOP 100 PERCENT
+		locSegment.*,
 		B.strDescription
-	FROM vyuGLAccountDetail A
-	INNER JOIN tblGLAccountSegment B ON A.strCode = B.strCode
+	FROM (
+		SELECT DISTINCT
+			'01' AS strRecordCode,
+			'C0000549' AS strCustomerId,
+			'D2' AS strType,
+			A.strLocationSegmentId AS strValue
+		FROM vyuGLAccountDetail A
+	) locSegment
+	INNER JOIN tblGLAccountSegment B ON locSegment.strValue = B.strCode
+	ORDER BY locSegment.strValue
 	--INNER JOIN vyuGLAccountSegmentPartition B ON A.strCode = B.strPrimary AND A.strLocationSegmentId = B.strLocation
 	UNION ALL
 	SELECT DISTINCT
+	TOP 100 PERCENT
 		'01' AS strRecordCode,
 		'C0000549' AS strCustomerId,
 		'D3' AS strType,
@@ -51,15 +59,21 @@ WITH COA (
 	) B
 	ON
 		A.intAccountId = B.intAccountId
+	ORDER BY strValue
 	UNION ALL
-	SELECT DISTINCT
-		'01' AS strRecordCode,
-		'C0000549' AS strCustomerId,
-		'D4' AS strType,
-		A.strCompanySegmentId AS strValue,
-		B.strDescription
-	FROM vyuGLAccountDetail A
-	INNER JOIN tblGLAccountSegment B ON A.strCode = B.strCode
+	SELECT TOP 100 PERCENT
+		 comp.*,
+		 B.strDescription
+	FROM (
+		SELECT DISTINCT
+			'01' AS strRecordCode,
+			'C0000549' AS strCustomerId,
+			'D4' AS strType,
+			A.strCompanySegmentId AS strValue
+		FROM vyuGLAccountDetail A
+	) comp
+	INNER JOIN tblGLAccountSegment B ON comp.strValue = B.strCode
+	ORDER BY comp.strValue
 ),
 
 csvData (
@@ -73,7 +87,7 @@ csvData (
 		'H11' + '|' + strLocationNumber + '|' + strLocationName + '|' AS strData
 	FROM tblSMCompanyLocation
 	UNION ALL
-	SELECT 
+	SELECT TOP 100 PERCENT
 		strRecordCode, strCustomerId,
 		+ strType + '|' 
 		+ strValue + '|' 
