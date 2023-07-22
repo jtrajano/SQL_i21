@@ -106,7 +106,7 @@ BEGIN
 									,NULL						--,@ItemId
 									,@intShipFromId	--,@VendorLocationId
 									,@intFreightTermId	--,@FreightTermId
-									,NULL
+									,DEFAULT
 								)
 
 
