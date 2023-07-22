@@ -218,7 +218,7 @@ BEGIN
 			END		
 		END	
 
-		EXEC dbo.uspSTCalculateTankVariance @intCheckoutId, @ysnFromEdit
+		EXEC dbo.uspSTCalculateTankVariance @intCheckoutId, 1
 
 		SET @strMessage = 'Success'
 		SET @ysnSuccess = 1
