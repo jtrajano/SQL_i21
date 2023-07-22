@@ -8,10 +8,11 @@ SELECT intPromoItemListDetailId,
 	strUpcDescription,
 	intUpcModifier,
 	strUpcCode,
-    strLongUPCCode,
-    strUnitMeasure,
-	dblSalePrice AS dblRetailPrice
-	
+    	strLongUPCCode,
+    	strUnitMeasure,
+	dblSalePrice AS dblRetailPrice,
+	tblSTPromotionItemListDetail.intConcurrencyId
+	--vyuSTItemHierarchyPricing.intItemLocationId
 	FROM tblSTPromotionItemListDetail
 		
 	JOIN tblSTPromotionItemList ON 
@@ -30,5 +31,3 @@ SELECT intPromoItemListDetailId,
 	LEFT JOIN tblICUnitMeasure ON tblICItemUOM.intUnitMeasureId = tblICUnitMeasure.intUnitMeasureId;
 
 GO
-
-
