@@ -18,6 +18,8 @@ FROM tblICCompanyPreference
 
 DECLARE @strSubLocationDefault NVARCHAR(50);
 DECLARE @strStorageUnitDefault NVARCHAR(50);
+DECLARE @dblAverageCost AS NUMERIC(30, 20); 
+DECLARE @intCostingMethod AS INT; 
 
 DECLARE @tblInventoryTransaction TABLE(
 	intItemId INT,
@@ -65,6 +67,12 @@ DECLARE
 
 	SELECT @ysnSeparateStockForUOMs = ISNULL(i.ysnSeparateStockForUOMs,0) FROM tblICItem i WHERE i.intItemId = @intItemId 
 	SELECT TOP 1 @intStockUOMId = iu.intItemUOMId FROM tblICItemUOM iu WHERE iu.intItemId = @intItemId AND iu.ysnStockUnit = 1
+	SELECT 
+		@intCostingMethod = dbo.fnGetCostingMethod(il.intItemId, il.intItemLocationId)
+	FROM tblICItemLocation il 
+	WHERE
+		il.intItemId = @intItemId
+		AND il.intLocationId = @intLocationId
 
 -- Get the stock quantities from the inventory transactions. 
 INSERT INTO @tblInventoryTransaction
@@ -98,7 +106,7 @@ SELECT
 			ELSE Lot.intStorageLocationId 
 		END
 	,Lot.intLotId
-	,intCostingMethod	= dbo.fnGetCostingMethod(t.intItemId, t.intItemLocationId)
+	,intCostingMethod	= @intCostingMethod
 	,dtmDate			= dbo.fnRemoveTimeOnDate(dtmDate)
 	,dblQty				= t.dblQty
 	,dblUnitStorage		= CAST(0 AS NUMERIC(38, 20))
@@ -139,7 +147,7 @@ SELECT
 			WHEN Lot.intLotId IS NULL THEN t.intStorageLocationId 
 			ELSE Lot.intStorageLocationId 
 		END	, Lot.intLotId
-	,intCostingMethod	= dbo.fnGetCostingMethod(t.intItemId, t.intItemLocationId)
+	,intCostingMethod	= @intCostingMethod
 	,dtmDate			= dbo.fnRemoveTimeOnDate(dtmDate)
 	,dblQty				= CAST(0 AS NUMERIC(38, 20))
 	,dblUnitStorage		= t.dblQty
@@ -329,6 +337,33 @@ BEGIN
 		i.intItemId = @intItemId 
 END
 
+-- Get the current average cost 
+SELECT @dblAverageCost = 
+	p.dblAverageCost
+FROM 
+	tblICItemLocation il INNER JOIN tblICItemPricing p
+		ON il.intItemId = p.intItemId
+		AND il.intItemLocationId = p.intItemLocationId
+WHERE
+	il.intItemId = @intItemId
+	AND il.intLocationId = @intLocationId
+
+-- If item costing is AVG and @dtmDate is not the current date, recompute the average cost. 
+IF @intCostingMethod = 1 AND dbo.fnRemoveTimeOnDate(@dtmDate) <> dbo.fnRemoveTimeOnDate(GETDATE()) 
+BEGIN
+	SELECT @dblAverageCost = 
+		dbo.[fnICGetMovingAverageCost](
+			il.intItemId
+			, il.intItemLocationId
+			, @intLastInventoryTransactionId
+		)
+	FROM 
+		tblICItemLocation il 
+	WHERE
+		il.intItemId = @intItemId
+		AND il.intLocationId = @intLocationId
+END 
+
 -- Return the result back to the caller. 
 SELECT
 	intKey	= CAST(ROW_NUMBER() OVER(ORDER BY i.intItemId, ItemLocation.intLocationId) AS INT)
@@ -361,14 +396,10 @@ SELECT
 					CASE 
 						-- Get the average cost. 
 						WHEN CostMethod.intCostingMethodId = 1 THEN 				
-							dbo.fnCalculateCostBetweenUOM(
+							dbo.fnCalculateCostBetweenUOM (
 								@intStockUOMId
 								, ItemUOM.intItemUOMId
-								, COALESCE(EffectivePricing.dblCost, dbo.[fnICGetMovingAverageCost](
-									t.intItemId
-									, t.intItemLocationId
-									, @intLastInventoryTransactionId
-								))
+								, COALESCE(EffectivePricing.dblCost, @dblAverageCost)
 							)
 						-- Otherwise, get the last cost 
 						ELSE 
