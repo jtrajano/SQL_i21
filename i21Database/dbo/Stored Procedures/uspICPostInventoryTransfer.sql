@@ -1059,6 +1059,7 @@ BEGIN
 					,[dblCreditReport]	
 					,[dblReportingRate]	
 					,[dblForeignRate]
+					,[strRateType]
 					,[intSourceEntityId]
 					,[intCommodityId]
 			)
