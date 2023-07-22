@@ -311,10 +311,10 @@ BEGIN TRY
 			, CASE WHEN DEPT.ysnTobacco = 1   
 					AND ISNULL(TMM.strTrlMatchLineTrlMatchName, TR.strTrlMatchLineTrlMatchName) IS NOT NULL 
 					AND ISNULL(TMM.strTrlMatchLineTrlPromotionIDPromoType, TR.strTrlMatchLineTrlPromotionIDPromoType) = 'mixAndMatchOffer'
-					AND (TR.dblTrlQty >= 2 OR (SELECT SUM(dblTrlQty) FROM tblSTTranslogRebates where intTermMsgSN = TR.intTermMsgSN and dtmDate = TR.dtmDate and intStoreId = TR.intStoreId and strTrlMatchLineTrlPromotionID = ISNULL(TMM.strTrlMatchLineTrlPromotionID, TR.strTrlMatchLineTrlPromotionID) GROUP BY intTermMsgSN, dtmDate ,intStoreId , strTrlMatchLineTrlPromotionID) >= 2) -- 2 Can Deal
+					AND (TR.dblTrlQty >= 2 OR (SELECT SUM(dblTrlQty) FROM tblSTTranslogRebates where intTermMsgSN = TR.intTermMsgSN and dtmDate = TR.dtmDate and intStoreId = TR.intStoreId GROUP BY intTermMsgSN, dtmDate ,intStoreId) >= 2) -- 2 Can Deal
 				THEN (TR.dblTrlUnitPrice - (ISNULL(TMM.dblTrlMatchLineTrlPromoAmount, TR.dblTrlMatchLineTrlPromoAmount) / TR.dblTrlQty)) * TR.dblTrlQty
 					WHEN ISNULL(TMM.strTrlMatchLineTrlPromotionIDPromoType, TR.strTrlMatchLineTrlPromotionIDPromoType) IN ('mixAndMatchOffer', 'combinationOffer') 
-					AND (TR.dblTrlQty >= 2 OR (SELECT SUM(dblTrlQty) FROM tblSTTranslogRebates where intTermMsgSN = TR.intTermMsgSN and dtmDate = TR.dtmDate and intStoreId = TR.intStoreId and strTrlMatchLineTrlPromotionID = ISNULL(TMM.strTrlMatchLineTrlPromotionID, TR.strTrlMatchLineTrlPromotionID) GROUP BY intTermMsgSN, dtmDate ,intStoreId , strTrlMatchLineTrlPromotionID) >= 2) -- 2 Can Deal
+					AND (TR.dblTrlQty >= 2 OR (SELECT SUM(dblTrlQty) FROM tblSTTranslogRebates where intTermMsgSN = TR.intTermMsgSN and dtmDate = TR.dtmDate and intStoreId = TR.intStoreId GROUP BY intTermMsgSN, dtmDate ,intStoreId) >= 2) -- 2 Can Deal
 				THEN (TR.dblTrlUnitPrice - (ISNULL(TMM.dblTrlMatchLineTrlPromoAmount, TR.dblTrlMatchLineTrlPromoAmount) / TR.dblTrlQty)) * TR.dblTrlQty
 					WHEN TR.strTrpPaycode IN ('COUPONS')
 				THEN (TR.dblTrlUnitPrice - (TR.dblTrpAmt))
