@@ -460,7 +460,7 @@ WHEN MATCHED AND @ysnAllowOverwrite = 1 THEN
    CASE WHEN ISNULL(source.strLotTracking, 'No') = 'No' THEN           
     CASE WHEN source.strType IN ('Inventory', 'Raw Material', 'Finished Good') THEN 'Item Level' ELSE 'None' END           
    ELSE 'Lot Level' END          
-  , strDescription = source.strDescription          
+  , strDescription = CASE WHEN LEN(source.strDescription) > 250 THEN LEFT(source.strDescription, 250) ELSE source.strDescription END     
   , strStatus = source.strStatus          
   , intLifeTime = source.intLifeTime          
   , strShortName = source.strShortName          
@@ -573,7 +573,7 @@ WHEN NOT MATCHED THEN
   , CASE WHEN ISNULL(strLotTracking, 'No') = 'No' THEN          
     CASE WHEN strType IN ('Inventory', 'Raw Material', 'Finished Good') THEN 'Item Level' ELSE 'None' END          
    ELSE 'Lot Level' END          
-  , strDescription          
+  , CASE WHEN LEN(strDescription) > 250 THEN LEFT(strDescription, 250) ELSE strDescription END        
   , strStatus          
   , intLifeTime          
   , strShortName          
