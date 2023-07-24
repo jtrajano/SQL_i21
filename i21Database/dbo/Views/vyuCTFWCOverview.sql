@@ -94,6 +94,8 @@ AS
 			LEFT JOIN tblSMCity					DP	 WITH (NOLOCK) ON DP.intCityId			  =	CTD.intDestinationPortId
 			LEFT JOIN tblMFLocationLeadTime		MFL	 WITH (NOLOCK) ON CTD.intLoadingPortId    = MFL.intPortOfDispatchId AND  CTD.intDestinationPortId = MFL.intPortOfArrivalId		
 			AND (SELECT  dbo.[fnCTGetSeqDisplayField](CTD.intContractDetailId, 'Origin')) = MFL.strOrigin
+			AND MFL.intChannelId = CTD.intMarketZoneId
+			AND MFL.strReceivingStorageLocation = dbo.[fnCTGetSeqDisplayField](CTD.intSubLocationId, 'tblSMCompanyLocationSubLocation')
 			LEFT JOIN tblSMPurchasingGroup		PG	 WITH (NOLOCK) ON PG.intPurchasingGroupId = CTD.intPurchasingGroupId
 			LEFT JOIN tblARMarketZone			MZ   WITH (NOLOCK) ON MZ.intMarketZoneId	  = CTD.intMarketZoneId
 			--OUTER APPLY dbo.fnCTGetSampleDetailAllocation(CTD.intContractDetailId) QA
