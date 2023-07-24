@@ -42,7 +42,7 @@ AS
 		ON C.intCustomerNumber = D.intEntityId
 	INNER JOIN tblICItem E
 		ON B.intProduct = E.intItemId
-	INNER JOIN tblTMRoute RU
+	LEFT JOIN tblTMRoute RU
 			ON B.intRouteId = RU.intRouteId
 	LEFT JOIN tblICItem F
 		ON A.intSubstituteProductID = F.intItemId
