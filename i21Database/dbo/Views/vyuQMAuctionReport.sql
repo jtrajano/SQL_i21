@@ -65,3 +65,4 @@ OUTER APPLY (
 	  AND A.dtmSaleDate IN (Select MAX(B.dtmSaleDate) from tblQMSample B Where B.dtmSaleDate<= S.dtmSaleDate)
 ) AUCPRICE
 WHERE S.strSaleNumber IS NOT NULL
+AND MZ.strMarketZoneCode = 'AUC'
