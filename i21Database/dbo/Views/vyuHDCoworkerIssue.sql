@@ -5,7 +5,7 @@ SELECT intCoworkerIssueId = CI.intCoworkerIssueId,
            intTimeEntryPeriodDetailId = CI.intTimeEntryPeriodDetailId,
            intEntityId = CI.intEntityId,
            strAgentName = CI.strAgentName,
-           dblHours = CONVERT(DECIMAL(18, 2), TimeEntry.dblTotalHours),
+           dblHours = ISNULL(CONVERT(DECIMAL(18, 2), TimeEntry.dblTotalHours),0),
            strRemarks = CASE
                             WHEN TimeEntry.dblTotalHours >= 1 AND TimeEntry.dblTotalHours < TimeEntry.intRequiredHours 
 							THEN CONCAT('Insufficient Time Entry. ',CONVERT(DECIMAL (18,2), TimeEntry.intRequiredHours - TimeEntry.dblTotalHours), ' hours short. ', 
