@@ -193,7 +193,7 @@ BEGIN
 				  OR
 				  (@strReportByDate <> 'Create Date' 
 					AND isnull(c.ysnNegate,0) = CASE WHEN CONVERT(DATE, @dtmDate) = CONVERT(DATE, GETDATE()) THEN  0  
-												ELSE CASE WHEN  c.dtmCreatedDate < DATEADD(MI,(DATEDIFF(MI, SYSDATETIME(),SYSUTCDATETIME())), DATEADD(MI,1439,CONVERT(DATETIME, @dtmDate))) THEN 0 ELSE  isnull(c.ysnNegate,0) END 
+												ELSE CASE WHEN CAST(DATEADD(MINUTE, @intServerTimeZoneOffset, c.dtmCreatedDate) AS DATE) < @dtmDate THEN 0 ELSE  isnull(c.ysnNegate,0) END 
 										END)
 				)
 
@@ -203,5 +203,3 @@ BEGIN
 
 RETURN
 END
-
-
