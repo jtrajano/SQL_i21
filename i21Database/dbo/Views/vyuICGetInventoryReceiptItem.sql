@@ -104,7 +104,7 @@ SELECT ReceiptItem.intInventoryReceiptId
 	, ReceiptItem.dblBasis
 	, ReceiptItem.dblFutures
 	, ReceiptItem.strFuturesMonth
-	, vendorXRef.strVendorProduct
+	,vendorXRef.strVendorProduct
 FROM tblICInventoryReceiptItem ReceiptItem
 	LEFT JOIN vyuICGetInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 	LEFT JOIN vyuICGetReceiptItemSource ReceiptItemSource ON ReceiptItemSource.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
@@ -141,4 +141,4 @@ FROM tblICInventoryReceiptItem ReceiptItem
 		WHERE Receipt.dtmReceiptDate BETWEEN fp.dtmStartDate AND fp.dtmEndDate
 	) fiscal
 	LEFT JOIN tblICItemVendorXref vendorXRef 
-		ON vendorXRef.intItemVendorXrefId = ReceiptItem.intItemVendorXrefId
+		ON vendorXRef.intItemVendorXrefId =ReceiptItem.intItemVendorXrefId
