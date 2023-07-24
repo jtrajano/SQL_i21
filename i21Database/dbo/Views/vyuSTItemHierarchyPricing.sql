@@ -35,7 +35,7 @@ LEFT JOIN
 	) AS tblSTItemOnFirstLocation WHERE intRowNum = 1
 ) AS effectivePrice
 	ON ip.intItemId = effectivePrice.intItemId
-	AND ip.intItemLocationId = effectivePrice.intItemLocationId
+	--AND ip.intItemLocationId = effectivePrice.intItemLocationId
 	AND UM.intItemUOMId = effectivePrice.intItemUOMId
 LEFT JOIN 
 (
