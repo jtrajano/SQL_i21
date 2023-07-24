@@ -45,7 +45,7 @@ BEGIN
 		 strName			= SMA.strName
 		,strFileType		= SMA.strFileType
 		,strFileIdentifier	= SMA.strFileIdentifier
-		,strScreen			= 'GlobalComponentEngine.view.ActivityEmail'
+		,strScreen			= 'SystemManager.view.ActivityEmail'
 		,strRecordNo		= CAST(@intActivityId AS NVARCHAR(50))
 		,dtmDateModified	= GETDATE()
 		,intSize			= SMA.intSize
