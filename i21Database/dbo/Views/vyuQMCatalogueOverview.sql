@@ -41,7 +41,7 @@ SELECT S.intSampleId
 	, strLeafSize = Size.strBrandCode
 	, strCluster = certification.strCertificationName
 	, strStyle = VG.strName
-	, strTasterRemark = S.strComment
+	, strTasterRemark = S.strComments2
 	, S.dblSupplierValuationPrice
 	, strLastPrice = '0.0'
 	, S.intCompanyLocationId
