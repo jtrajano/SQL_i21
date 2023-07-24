@@ -19,9 +19,9 @@ BEGIN
 
 	DECLARE @intCommodityUnitMeasureId AS INT
 	,@strUOM NVARCHAR(20)
-	,@dblVoidedPayment DECIMAL(18,6)
-	,@dblVoidedPaymentOldVoucher DECIMAL(18,6)
-	,@dblVoidedPaymentOldVoucherAddInBeginning DECIMAL(18,6)	
+	--,@dblVoidedPayment DECIMAL(18,6)
+	--,@dblVoidedPaymentOldVoucher DECIMAL(18,6)
+	--,@dblVoidedPaymentOldVoucherAddInBeginning DECIMAL(18,6)	
 
 		/*******START******COMPANY OWNERSHIP (UNPAID)*************/
 	BEGIN
@@ -42,88 +42,90 @@ BEGIN
 			dblVoidedPayment = SUM(dblQty1)
 			,dblVoidedPaymentOldVoucher =sum(dblQty2)
 			,dtmDate = dtmDatePaid
-			FROM (
-			
-				SELECT  
-				dblQty1 = CASE WHEN PYMT.dtmDatePaid = PYMT2.dtmDatePaid  THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(SS.intCommodityStockUomId,@intCommodityUnitMeasureId,BD.dblQtyReceived) ELSE 0 END
+			FROM (			
+				SELECT dblQty1 = CASE WHEN PYMT.dtmDatePaid = PYMT2.dtmDatePaid  THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(SS.intCommodityStockUomId,@intCommodityUnitMeasureId,BD.dblQtyReceived) ELSE 0 END
 				,dblQty2 = CASE WHEN PYMT.dtmDatePaid <> PYMT2.dtmDatePaid  THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(SS.intCommodityStockUomId,@intCommodityUnitMeasureId,BD.dblQtyReceived) ELSE 0 END
 				,PYMT.dtmDatePaid
-				FROM tblAPBillDetail BD
-				INNER JOIN tblAPBill AP
-					ON AP.intBillId = BD.intBillId
-				INNER JOIN tblICItem IC
-					ON IC.intItemId = BD.intItemId
-						AND IC.strType = 'Inventory'
-				INNER JOIN tblGRSettleStorageBillDetail SBD
-					ON SBD.intBillId = BD.intBillId
-				INNER JOIN tblGRSettleStorage SS
-					ON SS.intSettleStorageId = SBD.intSettleStorageId
-				INNER JOIN tblSMCompanyLocation CL
-					ON CL.intCompanyLocationId = AP.intShipToId
-						AND CL.ysnLicensed = 1
-				INNER JOIN (
-					tblAPPaymentDetail PD
-					INNER JOIN tblAPPayment PYMT
-						ON PYMT.intPaymentId = PD.intPaymentId
-				) ON PD.intOrigBillId = AP.intBillId
-				LEFT JOIN (
-					tblAPPaymentDetail PD2
-					INNER JOIN tblAPPayment PYMT2
-						ON PYMT2.intPaymentId = PD2.intPaymentId
-				) ON PD.intOrigBillId = AP.intBillId
-				WHERE ISNULL(PYMT.strPaymentInfo,'') <> ''
-					AND IC.intCommodityId = @intCommodityId
-					and CL.intCompanyLocationId = @intLocationId
-					AND dbo.fnRemoveTimeOnDate(PYMT.dtmDatePaid) <= @dtmDate
-				--GROUP BY IC.intCommodityId
-				--	,SS.intCommodityStockUomId
-				UNION ALL
-				SELECT 
-				dblQty1 = CASE WHEN PYMT.dtmDatePaid = PYMT2.dtmDatePaid  THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(UM_REF.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,BD.dblQtyReceived) ELSE 0 END
-				,dblQty2 = CASE WHEN PYMT.dtmDatePaid <> PYMT2.dtmDatePaid  THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(UM_REF.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,BD.dblQtyReceived) ELSE 0 END
+			FROM tblAPBillDetail BD
+			INNER JOIN tblAPBill AP
+				ON AP.intBillId = BD.intBillId
+			INNER JOIN tblICItem IC
+				ON IC.intItemId = BD.intItemId
+					AND IC.strType = 'Inventory'
+			INNER JOIN tblGRSettleStorageBillDetail SBD
+				ON SBD.intBillId = BD.intBillId
+			INNER JOIN tblGRSettleStorage SS
+				ON SS.intSettleStorageId = SBD.intSettleStorageId
+			INNER JOIN tblSMCompanyLocation CL
+				ON CL.intCompanyLocationId = AP.intShipToId
+					AND CL.ysnLicensed = 1
+			INNER JOIN (
+				tblAPPaymentDetail PD
+				INNER JOIN tblAPPayment PYMT
+					ON PYMT.intPaymentId = PD.intPaymentId
+			) ON PD.intOrigBillId = AP.intBillId
+				AND PYMT.strPaymentRecordNum LIKE '%V'
+			LEFT JOIN (
+				tblAPPaymentDetail PD2
+				INNER JOIN tblAPPayment PYMT2
+					ON PYMT2.intPaymentId = PD2.intPaymentId
+			) ON PD.intOrigBillId = AP.intBillId
+				AND PYMT2.strPaymentRecordNum = LEFT(PYMT.strPaymentRecordNum,LEN(PYMT.strPaymentRecordNum)-1)
+				AND PD2.intOrigBillId = PD.intOrigBillId
+			WHERE ISNULL(PYMT.strPaymentInfo,'') <> ''
+				AND IC.intCommodityId = @intCommodityId
+				AND dbo.fnRemoveTimeOnDate(PYMT.dtmDatePaid) <= @dtmDate
+				and CL.intCompanyLocationId = @intLocationId
+			--GROUP BY IC.intCommodityId
+			--	,SS.intCommodityStockUomId
+			UNION ALL
+			SELECT dblQty1 = CASE WHEN PYMT.dtmDatePaid = PYMT2.dtmDatePaid  THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(UM_REF.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,BD.dblQtyReceived) ELSE 0 END
+				,dblQty2 = CASE WHEN PYMT.dtmDatePaid <> PYMT2.dtmDatePaid   THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(UM_REF.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,BD.dblQtyReceived) ELSE 0 END
 				,PYMT.dtmDatePaid
-				FROM tblAPBillDetail BD
-				INNER JOIN tblAPBill AP
-					ON AP.intBillId = BD.intBillId
-				INNER JOIN tblSMCompanyLocation CL
-					ON CL.intCompanyLocationId = AP.intShipToId
-						AND CL.ysnLicensed = 1
-				INNER JOIN tblICItem IC
-					ON IC.intItemId = BD.intItemId
-						AND IC.strType = 'Inventory'
-				INNER JOIN tblICItemUOM UOM	
-					ON (UOM.intItemUOMId = BD.intUnitOfMeasureId
-						OR (UOM.intItemId = IC.intItemId
-							AND UOM.ysnStockUnit = 1)
-						)
-				OUTER APPLY (
-					SELECT TOP 1 intCommodityUnitMeasureId
-					FROM tblICCommodityUnitMeasure
-					WHERE intCommodityId = IC.intCommodityId
-						AND intUnitMeasureId = ISNULL(UOM.intUnitMeasureId,@intCommodityUnitMeasureId)
-				) UM_REF
-				LEFT JOIN tblICInventoryReceiptItem IR
-					ON IR.intInventoryReceiptItemId = BD.intInventoryReceiptItemId
-				INNER JOIN (
-					tblAPPaymentDetail PD
-					INNER JOIN tblAPPayment PYMT
-						ON PYMT.intPaymentId = PD.intPaymentId
-				) ON PD.intOrigBillId = AP.intBillId
-					AND PYMT.strPaymentRecordNum LIKE '%V'		
-				LEFT JOIN (
-					tblAPPaymentDetail PD2
-					INNER JOIN tblAPPayment PYMT2
-						ON PYMT2.intPaymentId = PD2.intPaymentId
-				) ON PD.intOrigBillId = AP.intBillId
-				WHERE ISNULL(PYMT.strPaymentInfo,'') <> ''
-					AND IC.intCommodityId = @intCommodityId
-					and CL.intCompanyLocationId = @intLocationId
-					AND dbo.fnRemoveTimeOnDate(PYMT.dtmDatePaid) <= @dtmDate
-					AND AP.intTransactionType = 1
-					AND ((BD.intSettleStorageId IS NULL AND BD.intCustomerStorageId IS NULL AND BD.intInventoryReceiptItemId IS NULL AND BD.intContractDetailId IS NULL)
-							OR (BD.intSettleStorageId IS NULL AND BD.intCustomerStorageId IS NULL AND BD.intInventoryReceiptItemId IS NOT NULL AND IR.intOwnershipType = 1)
-						)
-					AND PYMT.strPaymentRecordNum LIKE '%V'
+			FROM tblAPBillDetail BD
+			INNER JOIN tblAPBill AP
+				ON AP.intBillId = BD.intBillId
+			INNER JOIN tblSMCompanyLocation CL
+				ON CL.intCompanyLocationId = AP.intShipToId
+					AND CL.ysnLicensed = 1
+			INNER JOIN tblICItem IC
+				ON IC.intItemId = BD.intItemId
+					AND IC.strType = 'Inventory'
+			INNER JOIN tblICItemUOM UOM	
+				ON (UOM.intItemUOMId = BD.intUnitOfMeasureId
+					OR (UOM.intItemId = IC.intItemId
+						AND UOM.ysnStockUnit = 1)
+					)
+			OUTER APPLY (
+				SELECT TOP 1 intCommodityUnitMeasureId
+				FROM tblICCommodityUnitMeasure
+				WHERE intCommodityId = IC.intCommodityId
+					AND intUnitMeasureId = ISNULL(UOM.intUnitMeasureId,@intCommodityUnitMeasureId)
+			) UM_REF
+			LEFT JOIN tblICInventoryReceiptItem IR
+				ON IR.intInventoryReceiptItemId = BD.intInventoryReceiptItemId
+			INNER JOIN (
+				tblAPPaymentDetail PD
+				INNER JOIN tblAPPayment PYMT
+					ON PYMT.intPaymentId = PD.intPaymentId
+			) ON PD.intOrigBillId = AP.intBillId
+				AND PYMT.strPaymentRecordNum LIKE '%V'
+			LEFT JOIN (
+				tblAPPaymentDetail PD2
+				INNER JOIN tblAPPayment PYMT2
+					ON PYMT2.intPaymentId = PD2.intPaymentId
+			) ON PD.intOrigBillId = AP.intBillId
+				AND PYMT2.strPaymentRecordNum = LEFT(PYMT.strPaymentRecordNum,LEN(PYMT.strPaymentRecordNum)-1)
+				AND PD2.intOrigBillId = PD.intOrigBillId
+			WHERE ISNULL(PYMT.strPaymentInfo,'') <> ''
+				AND IC.intCommodityId = @intCommodityId
+				AND dbo.fnRemoveTimeOnDate(PYMT.dtmDatePaid) <= @dtmDate
+				and CL.intCompanyLocationId = @intLocationId
+				AND AP.intTransactionType = 1
+				AND ((BD.intSettleStorageId IS NULL AND BD.intCustomerStorageId IS NULL AND BD.intInventoryReceiptItemId IS NULL AND BD.intContractDetailId IS NULL)
+						OR (BD.intSettleStorageId IS NULL AND BD.intCustomerStorageId IS NULL AND BD.intInventoryReceiptItemId IS NOT NULL AND IR.intOwnershipType = 1)
+					)
+				AND PYMT.strPaymentRecordNum LIKE '%V'
 
 				--union all
 				--SELECT dblTotal /*dblReversedSettlementsWithVoidedPayment*/ = SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityStockUOMId,@intCommodityUnitMeasureId,dblUnits))
