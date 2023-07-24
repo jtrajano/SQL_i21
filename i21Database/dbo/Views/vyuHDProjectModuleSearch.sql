@@ -17,10 +17,10 @@ SELECT  intProjectModuleId			= ProjectModule.intProjectModuleId
 	   ,dblHoursOverShort			= ISNULL(ProjectTickets.dblQuotedHours,0) - ISNULL(ProjectTickets.dblActualHours,0)
 	   ,intCustomerId				= Project.intCustomerId
 	   ,strCustomerName				= Customer.strName
-	   ,strPercentComplete			= CASE WHEN ProjectTicketsCount.intClosedTickets  IS NOT NULL AND intTotalTickets > 0
-											THEN CONVERT(NVARCHAR(10), CONVERT(DECIMAL(5,2),(ProjectTicketsCount.intClosedTickets  * 100/ ProjectTicketsCount.intTotalTickets))) + '%'
-											ELSE '0.00%'
-									END
+	   ,strPercentComplete = CASE WHEN ProjectTicketsCount.intClosedTickets IS NOT NULL AND intTotalTickets > 0
+        THEN CONVERT(NVARCHAR(10), CONVERT(DECIMAL(10, 0), ROUND(CONVERT(DECIMAL, ProjectTicketsCount.intClosedTickets) * 100 / CONVERT(DECIMAL, ProjectTicketsCount.intTotalTickets), 0))) + '%'
+    ELSE '0%'
+END
 	   ,strPhase					= ProjectModule.strPhase
 	   ,strComment					= ProjectModule.strComment
 	   ,dtmStartDate				= ProjectTicketStartDate.dtmStartDate

@@ -3214,9 +3214,9 @@ ELSE
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = '401K' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'401K', N'Payroll', @PayrollReportParentMenuId, N'401K', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Payroll&report=401K&direct=true', N'small-menu-report', 1, 0, 0, 1, 13, 1)
+	VALUES (N'401K', N'Payroll', @PayrollReportParentMenuId, N'401K', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Payroll&report=Employee401K&direct=true', N'small-menu-report', 1, 0, 0, 1, 13, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET intSort = 13, strCommand = 'Reporting.view.ReportManager?group=Payroll&report=401K&direct=true' WHERE strMenuName = '401K' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollReportParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 13, strCommand = 'Reporting.view.ReportManager?group=Payroll&report=Employee401K&direct=true' WHERE strMenuName = '401K' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollReportParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Paycheck Calculator' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollUtilitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
@@ -4125,7 +4125,7 @@ DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Currency Exposure' AND strModul
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'DPR Summary Log' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementMaintenanceParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Position Report' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementActivitiesParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Position Reconciliation Report' AND strModuleName = 'Risk Management' AND strCategory = 'Report' AND ysnVisible = 1
-DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Currency Pair' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementMaintenanceParentMenuId
+-- DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Currency Pair' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementMaintenanceParentMenuId
 
 --DELETE DUPLICATE DATA
 DECLARE @BrokerageAccountsCount INT

@@ -276,7 +276,22 @@ BEGIN
 			ON TransferStorageSplit.intTransferStorageId = SourceStorage.intTransferStorageId
 		WHERE SourceStorage.intTransferStorageId = @intTransferStorageId
 
-		--SELECT * FROM @CustomerStorageStagingTable
+		UPDATE @CustomerStorageStagingTable 
+		SET dblQuantity = CASE 
+							WHEN CAST(dblQuantity AS nvarchar(50)) LIKE '%.0000%' OR CAST(dblQuantity AS nvarchar(50)) LIKE '%.9999%'
+								THEN ROUND(dblQuantity,2)
+							ELSE dblQuantity
+						END
+			,dblUnitQty = CASE 
+							WHEN CAST(dblUnitQty AS nvarchar(50)) LIKE '%.0000%' OR CAST(dblUnitQty AS nvarchar(50)) LIKE '%.9999%'
+								THEN ROUND(dblUnitQty,2)
+							ELSE dblUnitQty
+						END
+			,dblGrossQuantity = CASE 
+							WHEN CAST(dblGrossQuantity AS nvarchar(50)) LIKE '%.0000%' OR CAST(dblGrossQuantity AS nvarchar(50)) LIKE '%.9999%'
+								THEN ROUND(dblGrossQuantity,2)
+							ELSE dblGrossQuantity
+						END
 
 		MERGE INTO tblGRCustomerStorage AS destination
 		USING

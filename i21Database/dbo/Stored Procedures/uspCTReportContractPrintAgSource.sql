@@ -113,14 +113,14 @@ BEGIN TRY
 			END		AS	strD,
 			CH.strSalesperson,
 			--(SELECT TOP 1 Sig.blbDetail FROM tblSMSignature Sig  WITH (NOLOCK) WHERE Sig.intEntityId=CH.intSalespersonId) SalespersonSignature,
-			(SELECT TOP 1 Sig.blbFile FROM tblSMUpload Sig  WITH (NOLOCK) WHERE Sig.intAttachmentId=CH.intAttachmentSignatureId) SalespersonSignature,
+			ISNULL((SELECT TOP 1 Sig.blbFile FROM tblSMUpload Sig  WITH (NOLOCK) WHERE Sig.intAttachmentId=CH.intAttachmentSignatureId), CAST('' as VarBinary)) SalespersonSignature,
 			ISNULL(TX.strText,'') strText ,
 			ISNULL(CH.strContractBasis,'') +
 			ISNULL(', '+CASE WHEN LTRIM(RTRIM(CH.strINCOLocation)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strINCOLocation)) END,'') + 
 			ISNULL(', '+CASE WHEN LTRIM(RTRIM(CH.strCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strCountry)) END,'') strContractBasis ,
 			ISNULL(CH.strWeight,'') strWeight,
 			ISNULL(CH.strGrade, '') strGrade,
-			dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo,
+			ISNULL(dbo.fnSMGetCompanyLogo('Header'), CAST('' as Varbinary)) AS blbHeaderLogo,
 			'Remarks : '+ strRemark as strPrintableRemarks,
 			CH.strTerm
 		   ,lblCustomerContract					=	CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor Ref' ELSE 'Customer Ref' END
