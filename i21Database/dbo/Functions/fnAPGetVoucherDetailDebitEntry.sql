@@ -29,7 +29,7 @@ RETURNS TABLE AS RETURN
 									ELSE B.dblTotal
 									END
 								WHEN B.intInventoryReceiptItemId IS NULL THEN (
-									CASE WHEN B.intLoadShipmentCostId > 0 OR B.intLoadDetailId > 0
+									CAST(CASE WHEN B.intLoadShipmentCostId > 0 OR B.intLoadDetailId > 0
 										THEN 
 											CASE WHEN B.intComputeTotalOption = 0 AND B.intWeightUOMId IS NOT NULL AND B.intWeightClaimDetailId IS NULL
 												THEN B.dblNetWeight * B.dblWeightUnitQty
@@ -43,7 +43,7 @@ RETURNS TABLE AS RETURN
 													END
 											AS FLOAT) / ISNULL(B.dblCostUnitQty, 1)
 										ELSE B.dblTotal 
-									END
+									END AS DECIMAL(18,2))
 								)
 								ELSE 
 									CASE	WHEN B.dblOldCost IS NOT NULL THEN  																				
