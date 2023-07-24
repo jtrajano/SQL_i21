@@ -45,6 +45,8 @@ RETURNS @returntable TABLE
 )
 AS
 BEGIN
+	DECLARE @intServerTimeZoneOffset INT = DATEDIFF(MINUTE,  GETUTCDATE(), GETDATE())
+
 	; WITH MatchDerivatives (
 		intTransactionRecordId
 		, intOrigUOMId
@@ -61,7 +63,7 @@ BEGIN
 			, sl.intFutureMarketId
 		FROM vyuRKGetSummaryLog sl
 		WHERE strTransactionType = 'Match Derivatives'
-			AND dtmCreatedDate <= DATEADD(MI,(DATEDIFF(MI, SYSDATETIME(),SYSUTCDATETIME())), DATEADD(MI,1439,CONVERT(DATETIME, @dtmDate)))
+			AND CAST(DATEADD(MINUTE, @intServerTimeZoneOffset, dtmCreatedDate) AS DATE) <= @dtmDate
 			AND CAST(FLOOR(CAST(dtmTransactionDate AS FLOAT)) AS DATETIME) <= @dtmDate
 			AND ISNULL(sl.intCommodityId,0) = ISNULL(@intCommodityId, ISNULL(sl.intCommodityId, 0)) 
 			AND ISNULL(intEntityId, 0) = ISNULL(@intVendorId, ISNULL(intEntityId, 0))
@@ -86,7 +88,7 @@ BEGIN
 			, sl.intFutureMarketId
 		FROM vyuRKGetSummaryLog sl
 		WHERE strTransactionType = 'Options Lifecycle'
-			AND dtmCreatedDate <= DATEADD(MI,(DATEDIFF(MI, SYSDATETIME(),SYSUTCDATETIME())), DATEADD(MI,1439,CONVERT(DATETIME, @dtmDate)))  
+			AND CAST(DATEADD(MINUTE, @intServerTimeZoneOffset, dtmCreatedDate) AS DATE) <= @dtmDate
 			AND CAST(FLOOR(CAST(dtmTransactionDate AS FLOAT)) AS DATETIME) <= @dtmDate
 			AND ISNULL(sl.intCommodityId,0) = ISNULL(@intCommodityId, ISNULL(sl.intCommodityId, 0)) 
 			AND ISNULL(intEntityId, 0) = ISNULL(@intVendorId, ISNULL(intEntityId, 0))
@@ -175,19 +177,16 @@ BEGIN
 		FROM vyuRKGetSummaryLog c
 		LEFT JOIN MatchDerivatives md ON md.intTransactionRecordId = c.intTransactionRecordId and md.strDistributionType = c.strDistributionType and md.intFutureMarketId = c.intFutureMarketId
 		WHERE strTransactionType IN ('Derivative Entry')
-			AND c.dtmCreatedDate <= DATEADD(MI,(DATEDIFF(MI, SYSDATETIME(),SYSUTCDATETIME())), DATEADD(MI,1439,CONVERT(DATETIME, @dtmDate)))  
+			AND CAST(DATEADD(MINUTE, @intServerTimeZoneOffset, c.dtmCreatedDate) AS DATE) <= @dtmDate
 			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), c.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmDate)
 			AND ISNULL(c.intCommodityId,0) = ISNULL(@intCommodityId, ISNULL(c.intCommodityId, 0)) 
 			AND ISNULL(intEntityId, 0) = ISNULL(@intVendorId, ISNULL(intEntityId, 0))
 			AND intFutOptTransactionId NOT IN (SELECT intTransactionRecordId FROM OptionsLifecycle)
 			AND isnull(c.ysnNegate,0) = CASE WHEN CONVERT(DATE, @dtmDate) = CONVERT(DATE, GETDATE()) THEN  0  
-												ELSE CASE WHEN  c.dtmCreatedDate < DATEADD(MI,(DATEDIFF(MI, SYSDATETIME(),SYSUTCDATETIME())), DATEADD(MI,1439,CONVERT(DATETIME, @dtmDate))) THEN 0 ELSE  isnull(c.ysnNegate,0) END 
+												ELSE CASE WHEN CAST(DATEADD(MINUTE, @intServerTimeZoneOffset, c.dtmCreatedDate) AS DATE) < @dtmDate THEN 0 ELSE  isnull(c.ysnNegate,0) END 
 										END
 
 	) t WHERE intRowNum = 1
 
 RETURN
-
 END
-
-
