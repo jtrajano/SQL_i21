@@ -12,9 +12,11 @@ BEGIN
 	SELECT TOP 1 @intEntityUserSecurityId = intEntityId FROM tblSMUserSecurity WHERE ysnAdmin = 1
 
 	/* Get Dispatch Schedule Status */
-	SELECT @intSourceType = intSourceType 
-		,@intDispatchStatus = intDispatchStatus
-	FROM tblLGDispatchOrder WHERE intDispatchOrderId = @intDispatchOrderId 
+	SELECT @intSourceType = COALESCE(DO.intSourceType, CP.intDefaultLeastCostSourceType, 2) 
+		,@intDispatchStatus = DO.intDispatchStatus
+	FROM tblLGDispatchOrder DO
+	OUTER APPLY (SELECT TOP 1 intDefaultLeastCostSourceType FROM tblLGCompanyPreference) CP
+	WHERE intDispatchOrderId = @intDispatchOrderId 
 
 	/* Check for associated Transport Load */
 	SELECT TOP 1 
