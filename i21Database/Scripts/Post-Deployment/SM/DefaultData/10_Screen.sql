@@ -7,7 +7,7 @@ GO
 			BEGIN
 				INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
 				VALUES (N'Activity', N'Activity', N'SystemManager.view.Activity', N'System Manager', N'tblSMActivity', 0, N'Account')
-			
+			END
 		END
 
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'GeneralLedger.view.GeneralJournal') 
