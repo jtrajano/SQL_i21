@@ -27,7 +27,7 @@ BEGIN
 			FROM dbo.tblMFWorkOrderInputLot WI
 			JOIN dbo.tblICLot L ON L.intLotId = WI.intLotId
 			WHERE WI.intWorkOrderId = @intWorkOrderId
-				AND WI.dblQuantity > L.dblWeight
+				AND WI.dblIssuedQuantity >  Round(L.dblQty,0)
 			)
 	BEGIN
 		RAISERROR (
