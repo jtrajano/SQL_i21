@@ -326,6 +326,7 @@ BEGIN TRY
 				,@strDispatcher = NULL
 				,@strPosition = NULL
 				,@strSourceType = NULL
+				,@intSourceType = NULL
 				,@strCurrency = NULL
 				,@strFreightTerm = NULL
 				,@strBook = NULL
@@ -1199,7 +1200,7 @@ BEGIN TRY
 					,CASE 
 						WHEN @strTransactionType = 'Drop Shipment'
 							THEN 4
-						ELSE @intSourceType
+						ELSE ISNULL(@intSourceType, 2)
 						END
 					,@intPositionId
 					,@intWeightUnitMeasureId
@@ -1527,7 +1528,7 @@ BEGIN TRY
 						CASE 
 							WHEN @strTransactionType = 'Drop Shipment'
 								THEN 4
-							ELSE x.intSourceType
+							ELSE ISNULL(x.intSourceType, 2)
 							END
 						)
 					,intPositionId = @intPositionId
