@@ -1706,7 +1706,7 @@ BEGIN
 	SELECT 
 		MIN(A.[dtmDate]),
 		A.[strBatchId]  ,
-		@GainLossAccount,
+		OVERRIDESEGMENT.intOverrideAccount,
 		SUM(dblCredit - dblDebit),
 		0,
 		0,
