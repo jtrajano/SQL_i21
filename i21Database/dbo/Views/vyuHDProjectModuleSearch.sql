@@ -18,7 +18,7 @@ SELECT  intProjectModuleId			= ProjectModule.intProjectModuleId
 	   ,intCustomerId				= Project.intCustomerId
 	   ,strCustomerName				= Customer.strName
 	   ,strPercentComplete = CASE WHEN ProjectTicketsCount.intClosedTickets IS NOT NULL AND intTotalTickets > 0
-        THEN CONVERT(NVARCHAR(10), ROUND(CONVERT(DECIMAL, (ProjectTicketsCount.intClosedTickets * 100 / ProjectTicketsCount.intTotalTickets)), 0)) + '%'
+        THEN CONVERT(NVARCHAR(10), CONVERT(DECIMAL(10, 0), ROUND(CONVERT(DECIMAL, ProjectTicketsCount.intClosedTickets) * 100 / CONVERT(DECIMAL, ProjectTicketsCount.intTotalTickets), 0))) + '%'
     ELSE '0%'
 END
 	   ,strPhase					= ProjectModule.strPhase
