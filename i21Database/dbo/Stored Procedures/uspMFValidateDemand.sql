@@ -156,14 +156,14 @@ BEGIN TRY
 			SELECT @strErrorMessage = @strErrorMessage + 'Demand Name cannot be empty. '
 		END
 
-		IF EXISTS (
-				SELECT *
-				FROM tblMFDemandHeader
-				WHERE strDemandName = @strDemandName
-				)
-		BEGIN
-			SELECT @strErrorMessage = @strErrorMessage + 'Demand Name already exists. '
-		END
+		--IF EXISTS (
+		--		SELECT *
+		--		FROM tblMFDemandHeader
+		--		WHERE strDemandName = @strDemandName
+		--		)
+		--BEGIN
+		--	SELECT @strErrorMessage = @strErrorMessage + 'Demand Name already exists. '
+		--END
 
 		SELECT @intBookId = intBookId
 		FROM tblCTBook
