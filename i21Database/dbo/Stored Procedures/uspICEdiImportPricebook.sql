@@ -328,12 +328,34 @@ SELECT @LogId
 	 , p.intRecordNumber
 	 , 'Selling UPC Number'		
 	 , strSellingUpcNumber
-	 , 'Invalid UPC Format or Value.'
+	 , 'UPC Number has no value.'
 	 , 'Imported'			
 	 , 'Record is imported.'
 	 , 1
 FROM tblICEdiPricebook p
 WHERE NULLIF(dbo.fnSTConvertUPCaToUPCe(strSellingUpcNumber),'') IS NULL AND NULLIF(strSellingUpcNumber,'') IS NULL;
+
+/* Additional logging if upc number is less than 10 digits */
+INSERT INTO tblICImportLogDetail(intImportLogId
+							   , strType
+							   , intRecordNo
+							   , strField
+							   , strValue
+							   , strMessage
+							   , strStatus
+							   , strAction
+							   , intConcurrencyId)
+SELECT @LogId
+	 , 'Warning'
+	 , p.intRecordNumber
+	 , 'Selling UPC Number'		
+	 , strSellingUpcNumber
+	 , 'UPC Number is less than 10 digits.'
+	 , 'Imported'			
+	 , 'Record is imported.'
+	 , 1
+FROM tblICEdiPricebook p
+WHERE NULLIF(dbo.fnSTConvertUPCaToUPCe(strSellingUpcNumber),'') IS NULL AND LEN(strSellingUpcNumber) < 10;
 
 /* Log the records with invalid Order Case UPC */
 
@@ -351,13 +373,34 @@ SELECT @LogId
 	 , p.intRecordNumber
 	 , 'Order Case UPC Number'
 	 ,  strOrderCaseUpcNumber
-	 , 'Invalid UPC Format or Value.'
+	 , 'Order Case UPC Number has no value.'
 	 , 'Imported'			
 	 , 'Record is imported.'
 	 , 1
 FROM tblICEdiPricebook p
 WHERE NULLIF(dbo.fnSTConvertUPCaToUPCe(strSellingUpcNumber),'') IS NULL AND NULLIF(strOrderCaseUpcNumber,'') IS NULL;
 
+
+INSERT INTO tblICImportLogDetail(intImportLogId
+							   , strType
+							   , intRecordNo
+							   , strField
+							   , strValue
+							   , strMessage
+							   , strStatus
+							   , strAction
+							   , intConcurrencyId)
+SELECT @LogId
+	 , 'Warning'
+	 , p.intRecordNumber
+	 , 'Order Case UPC Number'
+	 ,  strOrderCaseUpcNumber
+	 , 'Order Case UPC Number is less than 10 digits.'
+	 , 'Imported'			
+	 , 'Record is imported.'
+	 , 1
+FROM tblICEdiPricebook p
+WHERE NULLIF(dbo.fnSTConvertUPCaToUPCe(strSellingUpcNumber),'') IS NULL AND LEN(strOrderCaseUpcNumber) < 10;
 
 -- Log the records with duplicate records
 --INSERT INTO tblICImportLogDetail(
