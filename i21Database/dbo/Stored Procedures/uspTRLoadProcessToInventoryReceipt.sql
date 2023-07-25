@@ -196,6 +196,7 @@ END
 						ELSE
 							SUM(DD.dblUnits) 
 						END
+						 + SUM(BID.dblQuantity)
 		,dblCost					= min(TR.dblUnitCost)  
 		,intCurrencyId				= @defaultCurrency 
 		,dblExchangeRate   = 1 -- Need to check this  
@@ -218,6 +219,7 @@ END
 											ELSE
 												SUM(DD.dblUnits) 
 											END
+											 + SUM(BID.dblQuantity)
 		,dblNet						= CASE WHEN ISNULL(@ysnAllowDifferentUnits,1) = 1 THEN 
 												ISNULL(
 													CASE WHEN min(SP.strGrossOrNet) = 'Gross' THEN SUM(DD.dblDistributionGrossSalesUnits)
@@ -227,6 +229,7 @@ END
 											ELSE
 												SUM(DD.dblUnits) 
 											END
+											 + SUM(BID.dblQuantity)
 		,intInventoryReceiptId		= min(TR.intInventoryReceiptId)
 		,dblSurcharge				= min(TR.dblPurSurcharge)
 		,ysnFreightInPrice			= CAST(MIN(CAST(TR.ysnFreightInPrice AS INT)) AS BIT)
@@ -261,7 +264,7 @@ END
 			AND TR.strOrigin = 'Terminal'
 			AND IC.strType != 'Non-Inventory'
 			AND (TR.dblUnitCost != 0 or TR.dblFreightRate != 0 or TR.dblPurSurcharge != 0)
-			AND DD.intLoadDistributionDetailId IS NOT NULL
+			AND (DD.intLoadDistributionDetailId IS NOT NULL OR (intLoadDistributionDetailId IS NULL AND BID.intLoadHeaderId IS NOT NULL))
     group by TR.intLoadReceiptId,DH.strDestination,  DH.intCompanyLocationId,DD.intLoadDistributionDetailId
 	ORDER BY intEntityVendorId
 		,strBillOfLadding
