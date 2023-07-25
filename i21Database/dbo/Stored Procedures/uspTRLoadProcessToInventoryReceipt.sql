@@ -132,7 +132,7 @@ END
 							END  
 						,0)
 						ELSE
-							SUM(DD.dblUnits) 
+							ISNULL(SUM(DD.dblUnits) ,0)
 						END
 		,dblCost					= min(TR.dblUnitCost)  
 		,intCurrencyId				= @defaultCurrency 
@@ -154,7 +154,7 @@ END
 														END  
 													,0)
 											ELSE
-												SUM(DD.dblUnits) 
+												ISNULL(SUM(DD.dblUnits) ,0)
 											END
 		,dblNet						= CASE WHEN ISNULL(@ysnAllowDifferentUnits,1) = 1 THEN 
 												ISNULL(
@@ -163,7 +163,7 @@ END
 														END  
 													,0)
 											ELSE
-												SUM(DD.dblUnits) 
+												ISNULL(SUM(DD.dblUnits) ,0)
 											END
 		,intInventoryReceiptId		= min(TR.intInventoryReceiptId)
 		,dblSurcharge				= min(TR.dblPurSurcharge)
