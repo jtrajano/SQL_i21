@@ -7,7 +7,7 @@ GO
 			BEGIN
 				INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
 				VALUES (N'Activity', N'Activity', N'SystemManager.view.Activity', N'System Manager', N'tblSMActivity', 0, N'Account')
-			
+			END
 		END
 
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'GeneralLedger.view.GeneralJournal') 
@@ -473,7 +473,7 @@ GO
 		VALUES (N'', N'Delivery Metrics', N'EnergyTrac.view.Report', N'Energy Trac', N'', 0, N'Energy Trac')
 	ELSE
 		UPDATE tblSMScreen SET strScreenName = N'Delivery Metrics', strModule = N'Energy Trac', strGroupName = N'Energy Trac' WHERE strNamespace = 'EnergyTrac.view.Report'
-	END
+
 GO
 	
 	--Manufacturing
