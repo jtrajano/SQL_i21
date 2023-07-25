@@ -191,6 +191,12 @@ BEGIN TRY
 									,@intUserId = @intUserId
 									,@intFeedPriceItemUOMId = @intPriceItemUOMId
 									,@intFeedPriceCurrencyId = @intCurrencyId
+
+									UPDATE tblMFBatch
+									SET dblLandedPrice = @dblLandedPrice
+										,dblSellingPrice = @dblSalePrice
+										,intConcurrencyId = intConcurrencyId + 1
+									WHERE intContractDetailId = @intContractDetailId
 							END TRY
 
 							BEGIN CATCH
