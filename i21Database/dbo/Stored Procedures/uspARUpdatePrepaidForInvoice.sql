@@ -304,6 +304,9 @@ BEGIN TRY
 			 , intInvoiceDetailId	= NULL
 		FROM #OPENCREDITMEMO OM
 	) I
+	 GROUP BY
+         I.intInvoiceId
+        ,I.intInvoiceDetailId
 	
 	-- DELETE PC
 	-- FROM tblARPrepaidAndCredit PC
