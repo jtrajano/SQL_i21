@@ -473,7 +473,7 @@ GO
 		VALUES (N'', N'Delivery Metrics', N'EnergyTrac.view.Report', N'Energy Trac', N'', 0, N'Energy Trac')
 	ELSE
 		UPDATE tblSMScreen SET strScreenName = N'Delivery Metrics', strModule = N'Energy Trac', strGroupName = N'Energy Trac' WHERE strNamespace = 'EnergyTrac.view.Report'
-
+	END
 GO
 	
 	--Manufacturing
