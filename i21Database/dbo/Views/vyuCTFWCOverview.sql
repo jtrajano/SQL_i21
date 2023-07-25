@@ -59,7 +59,7 @@ AS
 				strCatalogueType = MFB.strTeaType,
 				strSAPSupplierCode = APV.strVendorAccountNum,
 				strSampleType = MZ.strMarketZoneCode,
-				strLotNo = LOT.strVendorLotNumber, 
+				strLotNo = LOT.strVendorLotNumber, --CT-9197  
 				strTimeStamp =  CONVERT(VARCHAR(20),getdate(), 100),
 				dtmManufacturingDate = MFB.dtmProductionBatch,
 				dblNetWeight = CTD.dblNetWeight,
