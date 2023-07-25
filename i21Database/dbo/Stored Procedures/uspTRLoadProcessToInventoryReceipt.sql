@@ -194,7 +194,7 @@ END
 								END  
 								,0)
 						ELSE
-							SUM(DD.dblUnits) 
+							ISNULL(SUM(DD.dblUnits) ,0)
 						END
 						  + ISNULL(SUM(BID.dblQuantity),0)
 		,dblCost					= min(TR.dblUnitCost)  
@@ -217,7 +217,7 @@ END
 														END  
 													,0)
 											ELSE
-												SUM(DD.dblUnits) 
+												ISNULL(SUM(DD.dblUnits) ,0)
 											END
 											 + ISNULL(SUM(BID.dblQuantity),0)
 		,dblNet						= CASE WHEN ISNULL(@ysnAllowDifferentUnits,1) = 1 THEN 
@@ -227,7 +227,7 @@ END
 														END  
 													,0)
 											ELSE
-												SUM(DD.dblUnits) 
+												ISNULL(SUM(DD.dblUnits) ,0)
 											END
 											  + ISNULL(SUM(BID.dblQuantity),0)
 		,intInventoryReceiptId		= min(TR.intInventoryReceiptId)
