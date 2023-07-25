@@ -56,8 +56,8 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Bank File
 		--VALUES (15, N'Zip Codes', N'System Manager', 13, N'Zip Codes', N'Maintenance', N'Screen', N'SystemManager.view.ZipCode', N'small-menu-maintenance', 0, 0, 0, 1, 1, 1)
 		INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
 		VALUES (16, N'Currencies', N'System Manager', 13, N'Currencies', N'Activity', N'Screen', N'SystemManager.view.Currency', N'small-menu-activity', 0, 0, 0, 1, 2, 1)
-		INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-		VALUES (17, N'Ship Via', N'System Manager', 13, N'Ship Via', N'Maintenance', N'Screen', N'SystemManager.view.ShipVia', N'small-menu-maintenance', 0, 0, 0, 1, 3, 1)
+		-- INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+		-- VALUES (17, N'Ship Via', N'System Manager', 13, N'Ship Via', N'Maintenance', N'Screen', N'SystemManager.view.ShipVia', N'small-menu-maintenance', 0, 0, 0, 1, 3, 1)
 		INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
 		VALUES (18, N'Payment Methods', N'System Manager', 13, N'Payment Methods', N'Maintenance', N'Screen', N'SystemManager.view.PaymentMethod', N'small-menu-maintenance', 0, 0, 0, 1, 4, 1)
 		INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
@@ -222,8 +222,8 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Bank File
 		VALUES (131, N'Sales (A/R)', N'Accounts Receivable', 0, N'Sales (A/R)', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 10, 1)
 		INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
 		VALUES (134, N'Customers', N'Accounts Receivable', 131, N'Customers', N'Maintenance', N'Screen', N'EntityManagement.view.Entity?showSearch=true&searchCommand=searchEntityCustomer', N'small-menu-maintenance', 0, 0, 0, 1, NULL, 1)
-		INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-		VALUES (136, N'Sales Reps', N'System Manager', 131, N'Sales Reps', N'Maintenance', N'Screen', N'AccountsReceivable.view.EntitySalesperson?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, NULL, 1)
+		-- INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+		-- VALUES (136, N'Sales Reps', N'System Manager', 131, N'Sales Reps', N'Maintenance', N'Screen', N'AccountsReceivable.view.EntitySalesperson?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, NULL, 1)
 		INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
 		VALUES (137, N'Market Zone', N'System Manager', 131, N'Market Zone', N'Maintenance', N'Screen', N'AccountsReceivable.view.MarketZone', N'small-menu-maintenance', 0, 0, 0, 1, NULL, 1)
 		/* WILL BE RENAME FROM Statement Footer Messages TO COMMENT MAINTENANCE */
@@ -435,7 +435,7 @@ UPDATE tblSMMasterMenu SET strMenuName = N'Email History' WHERE strMenuName = 'E
 UPDATE tblSMMasterMenu SET strMenuName = 'Announcements' WHERE strMenuName = 'Maintenance' AND strModuleName = 'System Manager' AND intParentMenuID = @AnnouncementsParentMenuId
 UPDATE tblSMMasterMenu SET strMenuName = 'Imports and Conversions', strDescription = 'Imports and Conversions' WHERE strMenuName = N'Origin Conversions' AND strModuleName = N'System Manager' AND intParentMenuID = @UtilitiesParentMenuId
 UPDATE tblSMMasterMenu SET strMenuName = 'Intercompany Transaction Configuration', strDescription = 'Intercompany Transaction Configuration' WHERE strMenuName = 'Inter-Company Transaction Configuration' AND strModuleName = 'System Manager' AND intParentMenuID = @UtilitiesParentMenuId
-UPDATE tblSMMasterMenu SET strMenuName = 'Email Log', strDescription = 'Email Log' WHERE strMenuName = 'Email History' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerActivitiesParentMenuId
+-- UPDATE tblSMMasterMenu SET strMenuName = 'Email Log', strDescription = 'Email Log' WHERE strMenuName = 'Email History' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerActivitiesParentMenuId
 /* END OF RENAMING  */
 
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Users' AND strModuleName = N'System Manager' AND intParentMenuID = @SystemManagerActivitiesParentMenuId)
@@ -641,17 +641,35 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Maintenan
 ELSE
 	UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = 1, intRow = 0 WHERE strMenuName = 'Maintenance' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Entities' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intRow], [intConcurrencyId])
+	VALUES (N'Entities', N'System Manager', @CommonInfoParentMenuId, N'Entities', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 2, 0, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = 2, intRow = 0 WHERE strMenuName = 'Entities' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Power BI' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intRow], [intConcurrencyId])
+	VALUES (N'Power BI', N'System Manager', @CommonInfoParentMenuId, N'Power BI', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 3, 0, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = 3, intRow = 0 WHERE strMenuName = 'Power BI' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoParentMenuId
+
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Approvals' AND strModuleName = 'System Manager' AND strType = N'Folder' AND intParentMenuID = @CommonInfoParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intRow], [intConcurrencyId])
-	VALUES (N'Approvals', N'System Manager', @CommonInfoParentMenuId, N'Approvals', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 2, 0, 1)
+	VALUES (N'Approvals', N'System Manager', @CommonInfoParentMenuId, N'Approvals', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 0, 1, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = 2, intRow = 0 WHERE strMenuName = 'Approvals' AND strModuleName = 'System Manager' AND strType = N'Folder'  AND intParentMenuID = @CommonInfoParentMenuId
+	UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = 0, intRow = 1 WHERE strMenuName = 'Approvals' AND strModuleName = 'System Manager' AND strType = N'Folder'  AND intParentMenuID = @CommonInfoParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Logs' AND strModuleName = 'System Manager' AND strType = N'Folder' AND intParentMenuID = @CommonInfoParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intRow], [intConcurrencyId])
+	VALUES (N'Logs', N'System Manager', @CommonInfoParentMenuId, N'Logs', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 1, 1, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = 1, intRow = 1 WHERE strMenuName = 'Logs' AND strModuleName = 'System Manager' AND strType = N'Folder'  AND intParentMenuID = @CommonInfoParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Tax Setup' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intRow], [intConcurrencyId])
-	VALUES (N'Tax Setup', N'System Manager', @CommonInfoParentMenuId, N'Tax Setup', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 3, 0, 1)
+	VALUES (N'Tax Setup', N'System Manager', @CommonInfoParentMenuId, N'Tax Setup', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 2, 1, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = 3, intRow = 0 WHERE strMenuName = 'Tax Setup' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoParentMenuId
+	UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = 2, intRow = 1 WHERE strMenuName = 'Tax Setup' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoParentMenuId
 
 DECLARE @CommonInfoActivitiesParentMenuId INT
 SELECT @CommonInfoActivitiesParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoParentMenuId
@@ -664,6 +682,15 @@ SELECT @CommonInfoApprovalsParentMenuId = intMenuID FROM tblSMMasterMenu WHERE s
 
 DECLARE @CommonInfoTaxSetupParentMenuId INT
 SELECT @CommonInfoTaxSetupParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Tax Setup' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoParentMenuId
+
+DECLARE @CommonInfoEntitiesParentMenuId INT
+SELECT @CommonInfoEntitiesParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Entities' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoParentMenuId
+
+DECLARE @CommonInfoPowerBIParentMenuId INT
+SELECT @CommonInfoPowerBIParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Power BI' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoParentMenuId
+
+DECLARE @CommonInfoLogsParentMenuId INT
+SELECT @CommonInfoLogsParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Logs' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoParentMenuId
 
 /* CHANGE SCREEN TYPE 1730 */
 UPDATE tblSMMasterMenu SET strCategory = 'Activity', strIcon = 'small-menu-activity' WHERE strMenuName = N'Company Locations' AND strModuleName = N'System Manager'
@@ -725,8 +752,8 @@ UPDATE tblSMMasterMenu SET strMenuName = 'Currency Exchange Rate Types', strDesc
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Document Maintenance' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId)
 UPDATE tblSMMasterMenu SET strMenuName = N'Document Messages', strDescription = N'Document Messages' WHERE strMenuName = 'Document Maintenance' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId
 
-IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Email Result' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId)
-UPDATE tblSMMasterMenu SET strMenuName = N'Email Log', strDescription = N'Email Log' WHERE strMenuName = 'Email Result' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId
+-- IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Email Result' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId)
+-- UPDATE tblSMMasterMenu SET strMenuName = N'Email Log', strDescription = N'Email Log' WHERE strMenuName = 'Email Result' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId
 
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Document Messages' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId)
 UPDATE tblSMMasterMenu SET strMenuName = N'Report Messages', strDescription = N'Report Messages' WHERE strMenuName = 'Document Messages' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId
@@ -739,8 +766,8 @@ UPDATE tblSMMasterMenu SET intParentMenuID = @CommonInfoMaintenanceParentMenuId,
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Market Zone' AND strModuleName = N'Accounts Receivable' AND intParentMenuID = 131)
 UPDATE tblSMMasterMenu SET intParentMenuID = @CommonInfoMaintenanceParentMenuId, intSort = 6 WHERE strMenuName = N'Market Zone' AND strModuleName = N'Accounts Receivable' AND intParentMenuID = 131
 
-IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Sales Reps' AND strModuleName = N'Accounts Receivable' AND intParentMenuID = 131)
-UPDATE tblSMMasterMenu SET intParentMenuID = @CommonInfoMaintenanceParentMenuId, intSort = 11 WHERE strMenuName = N'Sales Reps' AND strModuleName = N'Accounts Receivable' AND intParentMenuID = 131
+-- IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Sales Reps' AND strModuleName = N'Accounts Receivable' AND intParentMenuID = 131)
+-- UPDATE tblSMMasterMenu SET intParentMenuID = @CommonInfoMaintenanceParentMenuId, intSort = 11 WHERE strMenuName = N'Sales Reps' AND strModuleName = N'Accounts Receivable' AND intParentMenuID = 131
 
 IF EXISTS(SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = 131)
 BEGIN
@@ -748,15 +775,15 @@ BEGIN
 	UPDATE tblSMMasterMenu SET intParentMenuID = @CommonInfoMaintenanceParentMenuId, intSort = 6,  strModuleName = N'System Manager'
 	WHERE strMenuName = N'Market Zone' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = 131)
 
-	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Sales Reps' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = 131))
-	UPDATE tblSMMasterMenu SET intParentMenuID = @CommonInfoMaintenanceParentMenuId, intSort = 11, strModuleName = N'System Manager'
-	WHERE strMenuName = N'Sales Reps'  AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = 131)
+	-- IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Sales Reps' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = 131))
+	-- UPDATE tblSMMasterMenu SET intParentMenuID = @CommonInfoMaintenanceParentMenuId, intSort = 11, strModuleName = N'System Manager'
+	-- WHERE strMenuName = N'Sales Reps'  AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = 131)
 END
 /* End Move */
 
 /* Start Remodule */
 UPDATE tblSMMasterMenu SET strModuleName = 'System Manager' WHERE strMenuName = N'Market Zone' AND strModuleName = N'Accounts Receivable' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId
-UPDATE tblSMMasterMenu SET strModuleName = 'System Manager' WHERE strMenuName = N'Sales Reps' AND strModuleName = N'Accounts Receivable' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId
+-- UPDATE tblSMMasterMenu SET strModuleName = 'System Manager' WHERE strMenuName = N'Sales Reps' AND strModuleName = N'Accounts Receivable' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId
 /* End Remodule */
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Company Locations' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoActivitiesParentMenuId)
@@ -798,12 +825,6 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Currency 
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = 'SystemManager.view.CurrencyExchangeRateType', intSort = 6 WHERE strMenuName = 'Currency Exchange Rate Types' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoActivitiesParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Audit Log' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId)
-	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Audit Log', N'System Manager', @CommonInfoMaintenanceParentMenuId, N'Audit Log', N'Maintenance', N'Screen', N'SystemManager.view.AuditLogHistory', N'small-menu-maintenance', 0, 0, 0, 1, 0, 1)
-ELSE
-	UPDATE tblSMMasterMenu SET strCommand = 'SystemManager.view.AuditLogHistory', intSort = 0 WHERE strMenuName = 'Audit Log' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId
-
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Cities' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
 	VALUES (N'Cities', N'System Manager', @CommonInfoMaintenanceParentMenuId, N'Cities', N'Maintenance', N'Screen', N'SystemManager.view.City?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 1, 1)
@@ -813,23 +834,11 @@ ELSE
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Countries' AND strModuleName = N'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId)
 UPDATE tblSMMasterMenu SET strCommand = N'SystemManager.view.Country?showSearch=true', intSort = 2 WHERE strMenuName = N'Countries' AND strModuleName = N'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Entity Group' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId)
-	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Entity Group', N'System Manager', @CommonInfoMaintenanceParentMenuId, N'Entity Group', N'Maintenance', N'Screen', N'EntityManagement.view.EntityGroup?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 4, 1)
-ELSE
-	UPDATE tblSMMasterMenu SET strCommand = N'EntityManagement.view.EntityGroup?showSearch=true', intSort = 4 WHERE strMenuName = 'Entity Group' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId
-
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Freight Terms' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
 	VALUES (N'Freight Terms', N'System Manager', @CommonInfoMaintenanceParentMenuId, N'Freight Terms', N'Maintenance', N'Screen', N'SystemManager.view.FreightTerm?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 5, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = 'SystemManager.view.FreightTerm?showSearch=true', intSort = 5 WHERE strMenuName = 'Freight Terms' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId
-
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Export Log' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId)
-    INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-    VALUES (N'Export Log', N'System Manager', @CommonInfoMaintenanceParentMenuId, N'Export Log', N'Maintenance', N'Screen', N'SystemManager.view.ExportLog', N'small-menu-maintenance', 0, 0, 0, 1, 6, 1)
-ELSE
-    UPDATE tblSMMasterMenu SET strCommand = N'SystemManager.view.ExportLog', intSort = 6 WHERE strMenuName = 'Export Log' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Lines of Business' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
@@ -858,11 +867,11 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Report Me
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = N'SystemManager.view.DocumentMaintenance?showSearch=true', intSort = 12 WHERE strMenuName = 'Report Messages' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId
 
-IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Sales Reps' AND strModuleName = N'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId)
-UPDATE tblSMMasterMenu SET strCommand = 'AccountsReceivable.view.EntitySalesperson?showSearch=true', intSort = 13 WHERE strMenuName = N'Sales Reps' AND strModuleName = N'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId
+-- IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Sales Reps' AND strModuleName = N'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId)
+-- UPDATE tblSMMasterMenu SET strCommand = 'AccountsReceivable.view.EntitySalesperson?showSearch=true', intSort = 13 WHERE strMenuName = N'Sales Reps' AND strModuleName = N'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId
 
-IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Ship Via' AND strModuleName = N'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId)
-UPDATE tblSMMasterMenu SET strCommand = N'SystemManager.view.EntityShipVia?showSearch=true', intSort = 14 WHERE strMenuName = N'Ship Via' AND strModuleName = N'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId
+-- IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Ship Via' AND strModuleName = N'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId)
+-- UPDATE tblSMMasterMenu SET strCommand = N'SystemManager.view.EntityShipVia?showSearch=true', intSort = 14 WHERE strMenuName = N'Ship Via' AND strModuleName = N'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId
 
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Terms' AND strModuleName = N'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId)
 UPDATE tblSMMasterMenu SET strCommand = N'SystemManager.view.Term?showSearch=true', intSort = 15 WHERE strMenuName = N'Terms' AND strModuleName = N'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId
@@ -873,15 +882,9 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Trucks' A
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = N'SystemManager.view.Truck?showSearch=true', intSort = 16 WHERE strMenuName = 'Trucks' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Veterinary' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId)
-	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Veterinary', N'System Manager', @CommonInfoMaintenanceParentMenuId, N'Veterinary', N'Maintenance', N'Screen', N'EntityManagement.view.EntityVeterinary?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 17, 1)
-ELSE
-	UPDATE tblSMMasterMenu SET strCommand = N'EntityManagement.view.EntityVeterinary?showSearch=true', intSort = 17 WHERE strMenuName = 'Veterinary' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId
-
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Geographical Zone' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Geographical Zone', N'System Manager', @CommonInfoMaintenanceParentMenuId, N'Veterinary', N'Maintenance', N'Screen', N'SystemManager.view.GeographicalZone', N'small-menu-maintenance', 0, 0, 0, 1, 18, 1)
+	VALUES (N'Geographical Zone', N'System Manager', @CommonInfoMaintenanceParentMenuId, N'Geographical Zone', N'Maintenance', N'Screen', N'SystemManager.view.GeographicalZone', N'small-menu-maintenance', 0, 0, 0, 1, 18, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = N'SystemManager.view.GeographicalZone', intSort = 18 WHERE strMenuName = 'Geographical Zone' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId
 
@@ -957,29 +960,65 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Online Us
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = 'SystemManager.view.OnlineUsers', intSort = 8 WHERE strMenuName = 'Online Users' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoActivitiesParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Email Log' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Entity Group' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoEntitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Email Log', N'System Manager', @CommonInfoMaintenanceParentMenuId, N'Email Log', N'Maintenance', N'Screen', N'SystemManager.view.EmailHistory?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 17, 1)
+	VALUES (N'Entity Group', N'System Manager', @CommonInfoEntitiesParentMenuId, N'Entity Group', N'Maintenance', N'Screen', N'EntityManagement.view.EntityGroup?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 0, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET strCommand = N'SystemManager.view.EmailHistory?showSearch=true', intSort = 17 WHERE strMenuName = 'Email Log' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = N'EntityManagement.view.EntityGroup?showSearch=true', intSort = 0 WHERE strMenuName = 'Entity Group' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoEntitiesParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Power BI Reports' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Sales Reps' AND intParentMenuID = @CommonInfoEntitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Power BI Reports', N'System Manager', @CommonInfoMaintenanceParentMenuId, N'Power BI Reports', N'Maintenance', N'Screen', N'SystemManager.view.PowerBIReport?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 18, 1)
+	VALUES (N'Sales Reps', N'System Manager', @CommonInfoEntitiesParentMenuId, N'Sales Reps', N'Maintenance', N'Screen', N'AccountsReceivable.view.EntitySalesperson?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 1, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET strCommand = N'SystemManager.view.PowerBIReport?showSearch=true', intSort = 18 WHERE strMenuName = 'Power BI Reports' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = N'AccountsReceivable.view.EntitySalesperson?showSearch=true', intSort = 1 WHERE strMenuName = N'Sales Reps'  AND intParentMenuID = @CommonInfoEntitiesParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Power BI Profile' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Ship Via' AND intParentMenuID = @CommonInfoEntitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Power BI Profile', N'System Manager', @CommonInfoMaintenanceParentMenuId, N'Power BI Profile', N'Maintenance', N'Screen', N'i21.view.PowerBIProfile', N'small-menu-maintenance', 0, 0, 0, 1, 19, 1)
+	VALUES (N'Ship Via', N'System Manager', @CommonInfoEntitiesParentMenuId, N'Ship Via', N'Maintenance', N'Screen', N'SystemManager.view.EntityShipVia?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 2, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET strCommand = N'i21.view.PowerBIProfile', intSort = 19 WHERE strMenuName = 'Power BI Profile' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = N'SystemManager.view.EntityShipVia?showSearch=true', intSort = 2 WHERE strMenuName = N'Ship Via'  AND intParentMenuID = @CommonInfoEntitiesParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Power BI Distribution' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Veterinary' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoEntitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Power BI Distribution', N'System Manager', @CommonInfoMaintenanceParentMenuId, N'Power BI Distribution', N'Maintenance', N'Screen', N'i21.view.PowerBIDistribution?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 20, 1)
+	VALUES (N'Veterinary', N'System Manager', @CommonInfoEntitiesParentMenuId, N'Veterinary', N'Maintenance', N'Screen', N'EntityManagement.view.EntityVeterinary?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 3, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET strCommand = N'i21.view.PowerBIDistribution?showSearch=true', intSort = 20 WHERE strMenuName = 'Power BI Distribution' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = N'EntityManagement.view.EntityVeterinary?showSearch=true', intSort = 3 WHERE strMenuName = 'Veterinary' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoEntitiesParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Power BI Distribution' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoPowerBIParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Power BI Distribution', N'System Manager', @CommonInfoPowerBIParentMenuId, N'Power BI Distribution', N'Maintenance', N'Screen', N'i21.view.PowerBIDistribution?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 0, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = N'i21.view.PowerBIDistribution?showSearch=true', intSort = 0 WHERE strMenuName = 'Power BI Distribution' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoPowerBIParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Power BI Profile' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoPowerBIParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Power BI Profile', N'System Manager', @CommonInfoPowerBIParentMenuId, N'Power BI Profile', N'Maintenance', N'Screen', N'i21.view.PowerBIProfile', N'small-menu-maintenance', 0, 0, 0, 1, 1, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = N'i21.view.PowerBIProfile', intSort = 1 WHERE strMenuName = 'Power BI Profile' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoPowerBIParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Power BI Reports' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoPowerBIParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Power BI Reports', N'System Manager', @CommonInfoPowerBIParentMenuId, N'Power BI Reports', N'Maintenance', N'Screen', N'SystemManager.view.PowerBIReport?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 2, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = N'SystemManager.view.PowerBIReport?showSearch=true', intSort = 2 WHERE strMenuName = 'Power BI Reports' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoPowerBIParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Audit Log' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoLogsParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Audit Log', N'System Manager', @CommonInfoLogsParentMenuId, N'Audit Log', N'Maintenance', N'Screen', N'SystemManager.view.AuditLogHistory', N'small-menu-maintenance', 0, 0, 0, 1, 0, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = 'SystemManager.view.AuditLogHistory', intSort = 0 WHERE strMenuName = 'Audit Log' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoLogsParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Email Log' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoLogsParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Email Log', N'System Manager', @CommonInfoLogsParentMenuId, N'Email Log', N'Maintenance', N'Screen', N'SystemManager.view.EmailHistory?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 1, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = N'SystemManager.view.EmailHistory?showSearch=true', intSort = 1 WHERE strMenuName = 'Email Log' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoLogsParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Export Log' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoLogsParentMenuId)
+    INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+    VALUES (N'Export Log', N'System Manager', @CommonInfoLogsParentMenuId, N'Export Log', N'Maintenance', N'Screen', N'SystemManager.view.ExportLog', N'small-menu-maintenance', 0, 0, 0, 1, 2, 1)
+ELSE
+    UPDATE tblSMMasterMenu SET strCommand = N'SystemManager.view.ExportLog', intSort = 2 WHERE strMenuName = 'Export Log' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoLogsParentMenuId
 
 
 /* Start Delete */
@@ -992,6 +1031,16 @@ DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Tax Type' AND strModuleName = N
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Motor Fuel Tax Cycle' AND strModuleName = N'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Motor Fuel Tax Cycle' AND strModuleName = N'System Manager' AND intParentMenuID = @SystemManagerMaintenanceParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Region' AND strModuleName = N'System Manager' AND intParentMenuID = @SystemManagerMaintenanceParentMenuId
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Entity Group' AND strModuleName = N'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Sales Reps' AND strModuleName = N'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Ship Via' AND strModuleName = N'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Veterinary' AND strModuleName = N'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Power BI Distribution' AND strModuleName = N'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Power BI Profile' AND strModuleName = N'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Power BI Reports' AND strModuleName = N'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Audit Log' AND strModuleName = N'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Email Log' AND strModuleName = N'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Export Log' AND strModuleName = N'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId
 
 /* END OF DELETING */
 
