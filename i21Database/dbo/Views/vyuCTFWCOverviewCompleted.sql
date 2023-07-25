@@ -59,7 +59,7 @@ AS
 				strCatalogueType = MFB.strTeaType,
 				strSAPSupplierCode = APV.strVendorAccountNum,
 				strSampleType = MZ.strMarketZoneCode,
-				strLotNo = CTD.strVendorLotID, 
+				strLotNo = LOT.strVendorLotNumber, --CT-9197 
 				strTimeStamp =  CONVERT(VARCHAR(20),getdate(), 100),
 				dtmManufacturingDate = MFB.dtmProductionBatch,
 				dblNetWeight = CTD.dblNetWeight,
@@ -104,6 +104,12 @@ AS
 				INNER JOIN tblQMSample QS ON QS.strSampleNumber = MB.strSampleNumber  
 				WHERE QS.intTypeId = 1    AND CTD.intContractDetailId =  QS.intContractDetailId 
 			) QA
+			OUTER APPLY(
+				SELECT  MB.strVendorLotNumber
+				FROM vyuMFBatch MB
+				WHERE QS.intTypeId = 1    AND CTD.intContractDetailId =  QS.intContractDetailId 
+				AND QS.strSampleNumber = MB.strSampleNumber
+			)LOT
 			WHERE CTD.intContractStatusId IN ( 5) --Open, Unconfirmed,Re-Open
 
 			
