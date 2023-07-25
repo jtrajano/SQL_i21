@@ -145,15 +145,19 @@ BEGIN TRY
 		,[intLotId]                 = NULL
 		,[intItemUOMId]             = MIN(ItemUOM.intItemUOMId)
 
-		,[dblQuantityToTransfer] = CASE WHEN ISNULL(@ysnAllowDifferentUnits,1) = 1 THEN 
-									ISNULL(
-										CASE WHEN min(SP.strGrossOrNet) = 'Gross' THEN SUM(DD.dblDistributionGrossSalesUnits)
-										WHEN min(SP.strGrossOrNet) = 'Net' THEN SUM(DD.dblDistributionNetSalesUnits) 
-										END  
-										,0)
-									ELSE
-										SUM(DD.dblUnits) 
-									END
+		,[dblQuantityToTransfer] = CASE WHEN MIN(TR.strOrigin) = 'Location'
+										THEN SUM(DD.dblUnits) 
+										ELSE
+											CASE WHEN ISNULL(@ysnAllowDifferentUnits,1) = 1 THEN 
+											ISNULL(
+												CASE WHEN min(SP.strGrossOrNet) = 'Gross' THEN SUM(DD.dblDistributionGrossSalesUnits)
+												WHEN min(SP.strGrossOrNet) = 'Net' THEN SUM(DD.dblDistributionNetSalesUnits) 
+												END  
+												,0)
+											ELSE
+												SUM(DD.dblUnits) 
+											END
+										END
 
 		,[dblCost]					= MIN(TR.dblUnitCost)
 		,[strNewLotId]              = NULL
