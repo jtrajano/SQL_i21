@@ -214,7 +214,7 @@
 [ysnTaxLocationOverride] BIT NULL,
 
 [intUserLoc] INT NULL,
-
+[intLastDetailNumber] INT NULL,
 [intMarketZoneId] INT NULL,
 
 CONSTRAINT [PK_tblLGLoad] PRIMARY KEY ([intLoadId]), 

@@ -258,6 +258,7 @@ SELECT
     ,ysnTaxPointOverride = L.ysnTaxPointOverride
     ,ysnTaxLocationOverride = L.ysnTaxLocationOverride
     ,L.intUserLoc
+    ,L.intLastDetailNumber
     ,MZ.intMarketZoneId
     ,MZ.strMarketZoneCode
 FROM tblLGLoad L
