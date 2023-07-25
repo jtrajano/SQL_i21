@@ -129,7 +129,7 @@ SELECT
 	,strLocationName					= CLOC.strLocationName
 	,strSalespersonName					= SPER.strName
 	,strContactName						= INVCON.strName
-	,strApplicatorName					= APER.strEntityNo
+	,strApplicatorName					= APER.strName
 	,strApplicatorType					= APER.strType
 	,strShipVia							= SHIPVIA.strShipVia
 	,strAccountId						= ACCT.strAccountId
