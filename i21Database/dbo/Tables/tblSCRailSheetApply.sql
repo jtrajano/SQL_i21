@@ -4,6 +4,7 @@
 	,intRailSheetId int not null
 	,intApplyType int not null
 	,intContractDetailId int null
+	,intTicketId int null 
 	,dblUnits numeric(38, 20)
 	,dblBasis numeric(38, 20)
 	,dblFutures numeric(38, 20)
@@ -12,4 +13,5 @@
 
 	,constraint fk_tblSCRailSheetApply_tblSCRailSheet_intRailSheetId foreign key (intRailSheetId) references tblSCRailSheet(intRailSheetId)
 	,constraint fk_tblSCRailSheetApply_tblCTContractDetail_intContractDetailId foreign key (intContractDetailId) references tblCTContractDetail(intContractDetailId)
+	,constraint fk_tblSCRailSheetApply_tblSCTicket_intTicketId foreign key (intTicketId) references tblSCTicket(intTicketId)
 )

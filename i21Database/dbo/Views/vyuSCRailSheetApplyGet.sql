@@ -29,10 +29,10 @@
 			on RailSheetApply.intRailSheetId = RailSheet.intRailSheetId
 		LEFT JOIN tblSCRailSheetTicketApply RailSheetTicketApply
 			ON RailSheetApply.intRailSheetApplyId = RailSheetTicketApply.intRailSheetApplyId
-		LEFT JOIN tblSCRailSheetTicket RailSheetTicket
-			ON RailSheetTicketApply.intRailSheetTicketId = RailSheetTicket.intRailSheetTicketId
+		-- LEFT JOIN tblSCRailSheetTicket RailSheetTicket
+		-- 	ON RailSheetTicketApply.intRailSheetTicketId = RailSheetTicket.intRailSheetTicketId
 		LEFT JOIN tblSCTicket Ticket
-			ON RailSheetTicket.intTicketId = Ticket.intTicketId
+			ON RailSheetApply.intTicketId = Ticket.intTicketId
 		left join tblCTContractDetail ContractDetail
 			on RailSheetApply.intContractDetailId = ContractDetail.intContractDetailId
 		left join tblCTContractHeader ContractHeader
