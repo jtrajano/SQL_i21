@@ -14,6 +14,10 @@
     CONSTRAINT [FK_tblGLCOACrossReference_tblGLAccount] FOREIGN KEY ([inti21Id]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]) ON DELETE CASCADE
 );
 GO
+CREATE NONCLUSTERED INDEX IDX_tblGLCOACrossReference_inti21ID
+ON [dbo].[tblGLCOACrossReference] ([inti21Id])
+
+GO
 EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Table Primary Key' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLCOACrossReference', @level2type=N'COLUMN',@level2name=N'intCrossReferenceId' 
 GO
 EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'i21 Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLCOACrossReference', @level2type=N'COLUMN',@level2name=N'inti21Id' 
