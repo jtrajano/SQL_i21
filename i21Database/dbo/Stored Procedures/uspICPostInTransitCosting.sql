@@ -71,6 +71,7 @@ DECLARE @intId AS INT
 		,@intTicketId AS INT 
 		,@dblValue NUMERIC(38, 20)
 		,@intOtherChargeItemId AS INT
+		,@strActualCostId AS NVARCHAR(50) 
 
 -- Declare the costing methods
 DECLARE @AVERAGECOST AS INT = 1
@@ -685,90 +686,180 @@ IF @intReturnValue < 0 RETURN @intReturnValue;
 -- Make sure valuation is zero if stock is going to be zero. 
 ---------------------------------------------------------------------------------------
 BEGIN 
-	DECLARE @ItemsWithZeroStock AS ItemCostingZeroStockTableType
-			,@currentItemValue AS NUMERIC(38, 20)
 
-	-- Get the qualified items for auto-negative. 
-	INSERT INTO @ItemsWithZeroStock (
-			intItemId
-			,intItemLocationId
+	DECLARE @ItemsWithZeroQty AS TABLE (
+		intId INT IDENTITY(1, 1) 
+		,intItemId INT NULL
+		,intItemLocationId INT NULL
+		,intInTransitSourceLocationId INT NULL 
+		,dblQty NUMERIC(38, 20) NULL
+		,dblValue NUMERIC(38, 20) NULL
+		,dblValueForex NUMERIC(38, 20) NULL
+		,intCurrencyId INT NULL
+		,intForexRateTypeId INT NULL 
+		,dblForexRate NUMERIC(38, 20) NULL
+		,strActualCostId NVARCHAR(50) NULL 
 	)
-	SELECT	DISTINCT 
-			i2p.intItemId
-			,i2p.intItemLocationId
-	FROM	@StockToPost i2p 
-	WHERE	ISNULL(dbo.fnGetCostingMethod(i2p.intItemId, i2p.intItemLocationId), 0) <> @AVERAGECOST
 
-	DELETE	ZeroList
-	FROM	@ItemsWithZeroStock ZeroList
-			OUTER APPLY (
-				SELECT	dblQty = SUM(ROUND(t.dblQty, 6)) 
-				FROM	tblICInventoryTransaction t
-				WHERE	t.intItemId = ZeroList.intItemId
-						AND t.intItemLocationId = ZeroList.intItemLocationId
-			) currentValuation	
-	WHERE	ISNULL(currentValuation.dblQty, 0) <> 0 
+	-- Get the in-transit with zero qty. 
+	INSERT INTO @ItemsWithZeroQty (
+		intItemId 
+		,intItemLocationId 
+		,intInTransitSourceLocationId 
+		,dblQty 
+		,dblValue 
+		,dblValueForex 
+		,intCurrencyId 
+		,intForexRateTypeId
+		,dblForexRate 
+		,strActualCostId
+	)
+	SELECT 
+		intItemId = s.intItemId
+		,intItemLocationId = s.intItemLocationId
+		,intInTransitSourceLocationId = s.intInTransitSourceLocationId
+		,dblQty = currentValuation.dblQty
+		,dblValue = currentValuation.dblValue
+		,dblValueForex  = currentValuation.dblValueForex
+		,intCurrencyId = currentValuation.intCurrencyId
+		,intForexRateTypeId = currentValuation.intForexRateTypeId
+		,dblForexRate = currentValuation.dblForexRate
+		,strActualCostId = s.strSourceTransactionId
+	FROM
+		(
+			SELECT DISTINCT 
+				intItemId
+				,intItemLocationId
+				,intInTransitSourceLocationId
+				,strSourceTransactionId
+				,intLotId
+			FROM @StockToPost
+		) s
+		OUTER APPLY (
+			SELECT	dblQty = SUM(ROUND(ISNULL(cb.dblStockIn, 0) - ISNULL(cb.dblStockOut, 0), 6))
+			FROM	tblICInventoryLot cb 
+			WHERE
+					cb.strTransactionId = s.strSourceTransactionId						
+					AND cb.intItemId = s.intItemId
+					AND cb.intItemLocationId = s.intItemLocationId
+					AND cb.intLotId = s.intLotId
+					AND s.intLotId IS NOT NULL 
+		) cbLot 
+		OUTER APPLY (
+			SELECT	dblQty = SUM(ROUND(ISNULL(cb.dblStockIn, 0) - ISNULL(cb.dblStockOut, 0), 6))
+			FROM	tblICInventoryActualCost cb 
+			WHERE
+					cb.strActualCostId = s.strSourceTransactionId						
+					AND cb.intItemId = s.intItemId
+					AND cb.intItemLocationId = s.intItemLocationId					
+					AND s.intLotId IS NULL 
+		) cbActualCost 
+		OUTER APPLY 
+		(
+			SELECT 
+				dblQty = SUM(ISNULL(t.dblQty, 0))
+				,dblValue = SUM(ROUND(ISNULL(t.dblQty, 0) * ISNULL(t.dblCost, 0) + ISNULL(t.dblValue, 0), 2)) 
+				,dblValueForex = SUM(ROUND(ISNULL(t.dblQty, 0) * ISNULL(t.dblForexCost, 0) + ISNULL(t.dblForexValue, 0), 2)) 
+				,intCurrencyId
+				,intForexRateTypeId
+				,dblForexRate
+			FROM 
+				tblICInventoryTransaction t 
+			WHERE
+				t.intItemId = s.intItemId
+				AND t.intItemLocationId = s.intItemLocationId 
+				AND t.strActualCostId = s.strSourceTransactionId
+				AND (
+					t.intLotId = s.intLotId
+					OR (t.intLotId IS NULL AND s.intLotId IS NULL) 
+				)
+				AND t.dblQty <> 0 
+			GROUP BY 
+				intCurrencyId
+				,intForexRateTypeId
+				,dblForexRate
+		) currentValuation 
+	WHERE
+		(ISNULL(cbLot.dblQty, 0) = 0 OR ISNULL(cbActualCost.dblQty, 0) = 0)
+		AND currentValuation.dblValue <> 0	
 
 	SELECT	TOP 1 
 			@dtmDate					= i2p.dtmDate
 			,@intTransactionId			= i2p.intTransactionId
 			,@strTransactionId			= i2p.strTransactionId
-			,@intCurrencyId				= i2p.intCurrencyId
+			--,@intCurrencyId				= i2p.intCurrencyId
 	FROM	@StockToPost i2p 
 
 	DECLARE 
 		@dblAutoVariance AS NUMERIC(18, 6) 
+		,@dblAutoVarianceForex AS NUMERIC(18, 6) 
 		,@strAutoVarianceDescription NVARCHAR(255) 
 		,@InventoryTransactionIdentityId AS INT 
 
-	WHILE EXISTS (SELECT TOP 1 1 FROM @ItemsWithZeroStock) 
+	WHILE EXISTS (SELECT TOP 1 1 FROM @ItemsWithZeroQty) 
 	BEGIN 
-		SELECT TOP 1 
-			@intItemId = intItemId
-			,@intItemLocationId = intItemLocationId
-		FROM @ItemsWithZeroStock
-
+		
+		SET @intId = NULL
 		SET @dblAutoVariance = NULL		
 		SET @strAutoVarianceDescription = NULL 
 		SET @InventoryTransactionIdentityId = NULL 
+		SET @intItemId = NULL 
+		SET @intItemLocationId = NULL 
+		SET @dblAutoVariance = NULL 
+		SET @dblAutoVarianceForex = NULL 
+		SET @intCurrencyId = NULL 
+		SET @intForexRateTypeId = NULL 
+		SET @dblForexRate = NULL 
+		SET @strActualCostId = NULL 
+
+		SELECT TOP 1 
+			@intId = intId
+			,@intItemId = intItemId
+			,@intItemLocationId = intItemLocationId
+			,@intInTransitSourceLocationId = intInTransitSourceLocationId
+			,@dblAutoVariance = -dblValue
+			,@dblAutoVarianceForex = -dblValueForex
+			,@intCurrencyId = intCurrencyId
+			,@intForexRateTypeId = intForexRateTypeId
+			,@dblForexRate = dblForexRate
+			,@strActualCostId = strActualCostId
+		FROM 
+			@ItemsWithZeroQty
+
+		--PRINT '@ItemsWithZeroQty'
+		--PRINT @dblAutoVariance
+		--PRINT @dblAutoVarianceForex
+		--PRINT @intCurrencyId
+		--PRINT @intForexRateTypeId
+		--PRINT @dblForexRate
+		--PRINT @strActualCostId
 
 		SELECT	
-				
-				@dblAutoVariance = -currentValuation.floatingValue
-				,@strAutoVarianceDescription = 
-					-- Stock quantity is now zero on {Item} in {Location}. Auto variance is posted to zero out its inventory valuation.
-					dbo.fnFormatMessage(
-							dbo.fnICGetErrorMessage(80093) 
-							, i.strItemNo
-							, CAST(il.strDescription AS NVARCHAR(100)) 
-							, DEFAULT
-							, DEFAULT
-							, DEFAULT
-							, DEFAULT
-							, DEFAULT
-							, DEFAULT
-							, DEFAULT
-							, DEFAULT
-					)
-		FROM	@ItemsWithZeroStock iWithZeroStock INNER JOIN tblICItem i
+			@strAutoVarianceDescription = 
+				-- Stock quantity is now zero on {Item} in {Location}. Auto variance is posted to zero out its inventory valuation.
+				dbo.fnFormatMessage(
+						dbo.fnICGetErrorMessage(80093) 
+						, i.strItemNo
+						, CAST(il.strDescription AS NVARCHAR(100)) 
+						, DEFAULT
+						, DEFAULT
+						, DEFAULT
+						, DEFAULT
+						, DEFAULT
+						, DEFAULT
+						, DEFAULT
+						, DEFAULT
+				)
+		FROM	@ItemsWithZeroQty iWithZeroStock INNER JOIN tblICItem i
 					ON i.intItemId = iWithZeroStock.intItemId
 				INNER JOIN tblICItemLocation il
 					ON il.intItemId = iWithZeroStock.intItemId
 					AND il.intItemLocationId = iWithZeroStock.intItemLocationId
 				CROSS APPLY [dbo].[fnICGetCompanyLocation](iWithZeroStock.intItemLocationId, iWithZeroStock.intItemLocationId) [location]
-				OUTER APPLY (
-					SELECT	floatingValue = SUM(
-								ROUND(t.dblQty * t.dblCost + t.dblValue, 2)
-							)
-							,dblQty = SUM(ROUND(t.dblQty, 6)) 
-					FROM	tblICInventoryTransaction t
-					WHERE	t.intItemId = iWithZeroStock.intItemId
-							AND t.intItemLocationId = iWithZeroStock.intItemLocationId
-				) currentValuation
-		WHERE	ISNULL(currentValuation.floatingValue, 0) <> 0
-				AND ISNULL(currentValuation.dblQty, 0) = 0 
+		WHERE
+			ISNULL(@dblAutoVariance, 0) <> 0 OR ISNULL(@dblAutoVarianceForex, 0) <> 0 
 
-		IF @dblAutoVariance IS NOT NULL 
+		IF ISNULL(@dblAutoVariance, 0) <> 0 OR ISNULL(@dblAutoVarianceForex, 0) <> 0 
 		BEGIN 
 			EXEC [dbo].[uspICPostInventoryTransaction]
 				@intItemId = @intItemId
@@ -777,13 +868,13 @@ BEGIN
 				,@intSubLocationId = NULL
 				,@intStorageLocationId = NULL 
 				,@dtmDate = @dtmDate
-				,@dblQty  = @dblQty
+				,@dblQty  = 0
 				,@dblUOMQty = 0
 				,@dblCost = 0
 				,@dblForexCost = 0
 				,@dblValue = @dblAutoVariance
 				,@dblSalesPrice = 0
-				,@intCurrencyId = NULL 
+				,@intCurrencyId = @intCurrencyId 
 				,@intTransactionId = @intTransactionId
 				,@intTransactionDetailId = @intTransactionDetailId
 				,@strTransactionId = @strTransactionId
@@ -798,16 +889,18 @@ BEGIN
 				,@intCostingMethod = @ACTUALCOST
 				,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT
 				,@intFobPointId = NULL 
-				,@intForexRateTypeId = NULL
-				,@dblForexRate = 1
+				,@intForexRateTypeId = @intForexRateTypeId
+				,@dblForexRate = 1 --@dblForexRate
 				,@strDescription = @strAutoVarianceDescription 
 				,@intSourceEntityId = @intSourceEntityId
+				,@strActualCostId = @strActualCostId
+				,@dblForexValue = @dblAutoVarianceForex
+				,@intInTransitSourceLocationId = @intInTransitSourceLocationId
 		END 
 
-		DELETE FROM @ItemsWithZeroStock
+		DELETE FROM @ItemsWithZeroQty
 		WHERE
-			@intItemId = intItemId
-			AND @intItemLocationId = intItemLocationId
+			@intId = intId
 	END 
 END 
 

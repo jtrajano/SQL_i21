@@ -220,6 +220,39 @@ BEGIN
 		r.intInventoryReceiptId = @intInventoryReceiptId
 		AND (rc.dblAmount - a.dblTotal) <> 0 
 		AND (rc.dblAmount - a.dblTotal) BETWEEN -1 AND 1 -- Limit the fix on decimal discrepancies. 
+
+	UPDATE	fixDiscrepancy
+	SET
+		fixDiscrepancy.dblOriginalAmount += (rc.dblOriginalAmount - a.dblOriginalAmount) 
+	FROM	
+		tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptCharge rc
+			ON r.intInventoryReceiptId = rc.intInventoryReceiptId	
+		CROSS APPLY (
+			SELECT 
+				dblOriginalAmount = SUM(a.dblOriginalAmount)
+			FROM
+				tblICInventoryReceiptItemAllocatedCharge a
+			WHERE 
+				r.intInventoryReceiptId = a.intInventoryReceiptId
+				AND a.intInventoryReceiptChargeId = rc.intInventoryReceiptChargeId
+		) a
+		CROSS APPLY (
+			SELECT TOP 1 
+				discrepancy.intInventoryReceiptItemAllocatedChargeId
+			FROM
+				tblICInventoryReceiptItemAllocatedCharge discrepancy
+			WHERE 
+				discrepancy.intInventoryReceiptId = r.intInventoryReceiptId
+				AND discrepancy.intInventoryReceiptChargeId = rc.intInventoryReceiptChargeId	
+			ORDER BY 
+				discrepancy.intInventoryReceiptItemId DESC
+		) findDiscrepancy
+		INNER JOIN tblICInventoryReceiptItemAllocatedCharge fixDiscrepancy
+			ON fixDiscrepancy.intInventoryReceiptItemAllocatedChargeId = findDiscrepancy.intInventoryReceiptItemAllocatedChargeId
+	WHERE 
+		r.intInventoryReceiptId = @intInventoryReceiptId
+		AND (rc.dblOriginalAmount - a.dblOriginalAmount) <> 0 
+		AND (rc.dblOriginalAmount - a.dblOriginalAmount) BETWEEN -1 AND 1 -- Limit the fix on decimal discrepancies. 
 END 
 
 _Exit:

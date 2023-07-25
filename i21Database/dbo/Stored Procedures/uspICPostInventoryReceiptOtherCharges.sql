@@ -599,7 +599,6 @@ BEGIN
 	;
 
 	DECLARE @ChargesGLEntries AS RecapTableType;
-
 	----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	---- REVERSAL: Generate the G/L Entries for Cost Charges with Inventory impact. 
 	----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -638,7 +637,7 @@ BEGIN
 	AS 
 	(
 		SELECT	dtmDate = Receipt.dtmReceiptDate
-				,ReceiptItem.intItemId
+				,AllocatedOtherCharges.intItemId
 				,intChargeId = ReceiptCharges.intChargeId
 				,ItemLocation.intItemLocationId
 				,intChargeItemLocation = ChargeItemLocation.intItemLocationId
@@ -647,20 +646,20 @@ BEGIN
 				,dblCost = 
 					CASE 
 						WHEN Receipt.strReceiptType = 'Inventory Return' 
-							THEN -AllocatedOtherCharges.dblOriginalAmount /*Negate the other charge if it is an Inventory Return*/
+							THEN -ReceiptCharges.dblOriginalAmount /*Negate the other charge if it is an Inventory Return*/
 						ELSE 
-							AllocatedOtherCharges.dblOriginalAmount 
+							ReceiptCharges.dblOriginalAmount 
 					END					
 				,intTransactionTypeId  = @intTransactionTypeId
 				,intCurrencyId = ReceiptCharges.intOriginalCurrencyId 
 				,dblExchangeRate = ISNULL(ReceiptCharges.dblOriginalForexRate, 1)
-				,ReceiptItem.intInventoryReceiptItemId
-				,AllocatedOtherCharges.intInventoryReceiptChargeId
+				,AllocatedOtherCharges.intInventoryReceiptItemId
+				,ReceiptCharges.intInventoryReceiptChargeId
 				,strInventoryTransactionTypeName = TransType.strName
 				,strTransactionForm = @strTransactionForm
-				,AllocatedOtherCharges.ysnAccrue
-				,AllocatedOtherCharges.ysnPrice
-				,AllocatedOtherCharges.ysnInventoryCost
+				,ReceiptCharges.ysnAccrue
+				,ReceiptCharges.ysnPrice
+				,ReceiptCharges.ysnInventoryCost
 				,dblForexRate = ISNULL(ReceiptCharges.dblOriginalForexRate, 1) 
 				,strRateType = currencyRateType.strCurrencyExchangeRateType
 				,strCharge = Charge.strItemNo
@@ -671,21 +670,79 @@ BEGIN
 				,intItemCommodityId = Item.intCommodityId 
 				,intChargeCommodityId = Charge.intCommodityId
 				,intItemCurrencyId = Receipt.intCurrencyId
-				,dblOriginalItemForexRate = ISNULL(ReceiptItem.dblOriginalForexRate, 1)
+				,dblOriginalItemForexRate = ISNULL(AllocatedOtherCharges.dblOriginalForexRate, 1)
 				,ysnAllowVoucher = ISNULL(ReceiptCharges.ysnAllowVoucher, 1) 
-		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
-					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
-				INNER JOIN dbo.tblICInventoryReceiptItemAllocatedCharge AllocatedOtherCharges
-					ON AllocatedOtherCharges.intInventoryReceiptId = Receipt.intInventoryReceiptId
-					AND AllocatedOtherCharges.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
+		--FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
+		--			ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId				
+		--		CROSS APPLY (
+		--			SELECT 
+		--				intInventoryReceiptChargeId
+		--				,ysnAccrue
+		--				,ysnPrice
+		--				,ysnInventoryCost
+		--				,dblOriginalAmount = SUM(AllocatedOtherCharges.dblOriginalAmount)
+		--			FROM 
+		--				tblICInventoryReceiptItemAllocatedCharge AllocatedOtherCharges
+		--			WHERE
+		--				AllocatedOtherCharges.intInventoryReceiptId = Receipt.intInventoryReceiptId
+		--				AND AllocatedOtherCharges.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
+		--			GROUP BY
+		--				intInventoryReceiptChargeId
+		--				,ysnAccrue
+		--				,ysnPrice
+		--				,ysnInventoryCost
+		--		) AllocatedOtherCharges
+		--		INNER JOIN dbo.tblICInventoryReceiptCharge ReceiptCharges
+		--			ON ReceiptCharges.intInventoryReceiptChargeId = AllocatedOtherCharges.intInventoryReceiptChargeId								
+		--		LEFT JOIN tblICItem Charge
+		--			ON Charge.intItemId = ReceiptCharges.intChargeId
+		--		LEFT JOIN tblICItem Item 
+		--			ON Item.intItemId = ReceiptItem.intItemId 
+		--		LEFT JOIN dbo.tblICItemLocation ItemLocation
+		--			ON ItemLocation.intItemId = ReceiptItem.intItemId
+		--			AND ItemLocation.intLocationId = Receipt.intLocationId
+		--		LEFT JOIN dbo.tblICItemLocation ChargeItemLocation
+		--			ON ChargeItemLocation.intItemId = ReceiptCharges.intChargeId
+		--			AND ChargeItemLocation.intLocationId = Receipt.intLocationId
+		--		LEFT JOIN dbo.tblICInventoryTransactionType TransType
+		--			ON TransType.intTransactionTypeId = @intTransactionTypeId
+		--		LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
+		--			ON currencyRateType.intCurrencyExchangeRateTypeId = ReceiptCharges.intForexRateTypeId
+		--WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
+		--		AND ReceiptItem.intItemId = 
+		--				CASE 
+		--					WHEN @intRebuildItemId < 0 THEN ReceiptItem.intItemId
+		--					ELSE ISNULL(@intRebuildItemId, ReceiptItem.intItemId)
+		--				END
+		--		AND ISNULL(ReceiptCharges.ysnWithGLReversal, 0) = 1
+		--		AND Receipt.intSourceType IN (@SOURCE_TYPE_InboundShipment)
+		--		AND ReceiptCharges.intLoadShipmentCostId IS NOT NULL 
+		--		AND ReceiptCharges.ysnInventoryCost = 1
+
+		FROM	dbo.tblICInventoryReceipt Receipt 
 				INNER JOIN dbo.tblICInventoryReceiptCharge ReceiptCharges
-					ON ReceiptCharges.intInventoryReceiptChargeId = AllocatedOtherCharges.intInventoryReceiptChargeId
+					ON ReceiptCharges.intInventoryReceiptId = Receipt.intInventoryReceiptId								
+				CROSS APPLY (
+					SELECT TOP 1 
+						AllocatedOtherCharges.intInventoryReceiptChargeId
+						,ri.intInventoryReceiptItemId
+						,ri.intItemId 
+						,ri.dblOriginalForexRate
+					FROM 
+						tblICInventoryReceiptItemAllocatedCharge AllocatedOtherCharges INNER JOIN tblICInventoryReceiptItem ri
+							ON AllocatedOtherCharges.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
+					WHERE
+						AllocatedOtherCharges.intInventoryReceiptId = Receipt.intInventoryReceiptId					
+				) AllocatedOtherCharges
+				
 				LEFT JOIN tblICItem Charge
 					ON Charge.intItemId = ReceiptCharges.intChargeId
+				
+
 				LEFT JOIN tblICItem Item 
-					ON Item.intItemId = ReceiptItem.intItemId 
+					ON Item.intItemId = AllocatedOtherCharges.intItemId 
 				LEFT JOIN dbo.tblICItemLocation ItemLocation
-					ON ItemLocation.intItemId = ReceiptItem.intItemId
+					ON ItemLocation.intItemId = AllocatedOtherCharges.intItemId
 					AND ItemLocation.intLocationId = Receipt.intLocationId
 				LEFT JOIN dbo.tblICItemLocation ChargeItemLocation
 					ON ChargeItemLocation.intItemId = ReceiptCharges.intChargeId
@@ -695,10 +752,10 @@ BEGIN
 				LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
 					ON currencyRateType.intCurrencyExchangeRateTypeId = ReceiptCharges.intForexRateTypeId
 		WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
-				AND ReceiptItem.intItemId = 
+				AND Item.intItemId = 
 						CASE 
-							WHEN @intRebuildItemId < 0 THEN ReceiptItem.intItemId
-							ELSE ISNULL(@intRebuildItemId, ReceiptItem.intItemId)
+							WHEN @intRebuildItemId < 0 THEN Item.intItemId
+							ELSE ISNULL(@intRebuildItemId, Item.intItemId)
 						END
 				AND ISNULL(ReceiptCharges.ysnWithGLReversal, 0) = 1
 				AND Receipt.intSourceType IN (@SOURCE_TYPE_InboundShipment)
@@ -1381,9 +1438,24 @@ BEGIN
 				,ReceiptCharges.intLoadShipmentCostId
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
 					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
-				INNER JOIN dbo.tblICInventoryReceiptItemAllocatedCharge AllocatedOtherCharges
-					ON AllocatedOtherCharges.intInventoryReceiptId = Receipt.intInventoryReceiptId
-					AND AllocatedOtherCharges.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
+				CROSS APPLY (
+					SELECT 
+						intInventoryReceiptChargeId
+						,ysnAccrue
+						,ysnPrice
+						,ysnInventoryCost
+						,dblAmount = SUM(AllocatedOtherCharges.dblAmount)
+					FROM 
+						tblICInventoryReceiptItemAllocatedCharge AllocatedOtherCharges
+					WHERE
+						AllocatedOtherCharges.intInventoryReceiptId = Receipt.intInventoryReceiptId
+						AND AllocatedOtherCharges.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
+					GROUP BY
+						intInventoryReceiptChargeId
+						,ysnAccrue
+						,ysnPrice
+						,ysnInventoryCost
+				) AllocatedOtherCharges
 				INNER JOIN dbo.tblICInventoryReceiptCharge ReceiptCharges
 					ON ReceiptCharges.intInventoryReceiptChargeId = AllocatedOtherCharges.intInventoryReceiptChargeId
 				LEFT JOIN tblICItem Charge
