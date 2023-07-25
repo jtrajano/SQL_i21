@@ -15,6 +15,8 @@ SELECT	intInventoryValuationKeyId =
 		,strStorageLocationName		= strgLoc.strName
 		,dtmDate					= t.dtmDate 
 		,c.intCategoryId
+		,t.strSourceType				
+		,t.strSourceNumber			
 		,strCategory				= c.strCategoryCode
 		,commodity.intCommodityId
 		,strCommodity				= commodity.strCommodityCode 

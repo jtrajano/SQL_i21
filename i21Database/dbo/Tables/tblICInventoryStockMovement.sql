@@ -40,6 +40,8 @@
 	[intLocationId]	INT	NULL,
 	[intSourceEntityId]	INT	NULL,
 	[intTransactionItemUOMId] INT NULL,
+	[strSourceType] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	[strSourceNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	CONSTRAINT [PK_tblICInventoryStockMovement] PRIMARY KEY NONCLUSTERED([intInventoryStockMovementId]),
 	CONSTRAINT [FK_tblICInventoryStockMovement_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
 	CONSTRAINT [FK_tblICInventoryStockMovement_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId]),

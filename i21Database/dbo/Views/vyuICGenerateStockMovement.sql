@@ -42,6 +42,8 @@ SELECT *
 				,t.intCategoryId
 				,t.intLocationId 
 				,t.intSourceEntityId
+				,t.strSourceNumber
+				,t.strSourceType
 		FROM	tblICItem i
 				LEFT JOIN (
 					SELECT	
@@ -72,7 +74,9 @@ SELECT *
 						,t.intItemUOMId
 						,t.intLotId 
 						,t.intSubLocationId
-						,t.intStorageLocationId				
+						,t.intStorageLocationId	
+						,t.strSourceNumber
+						,t.strSourceType
 				) groupedQty
 					ON i.intItemId = groupedQty.intItemId
 				OUTER APPLY (
@@ -142,6 +146,8 @@ SELECT *
 				,t.intCategoryId
 				,t.intLocationId 
 				,t.intSourceEntityId
+				,t.strSourceNumber
+				,t.strSourceType
 		FROM	(
 					SELECT	
 						dblQty = SUM(t.dblQty)

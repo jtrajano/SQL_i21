@@ -91,6 +91,9 @@ WHEN NOT MATCHED THEN
 		,intLocationId
 		,intSourceEntityId
 		,intTransactionItemUOMId
+		,strSourceNumber
+		,strSourceType
+		
 	) VALUES (
 		t.intItemId
 		,t.intItemLocationId
@@ -131,6 +134,8 @@ WHEN NOT MATCHED THEN
 		,t.intLocationId 
 		,t.intSourceEntityId
 		,t.intTransactionItemUOMId
+		,t.strSourceNumber
+		,t.strSourceType
 	)
 ;
 -- Get the stock movement id. 
