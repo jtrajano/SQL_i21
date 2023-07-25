@@ -526,20 +526,21 @@ SELECT '@tblTempPassportITT', * FROM @tblTempPassportITT
 																		ITTData.intITTDataPriceMethodCode			AS [PriceMethodCode],
 																		ITTData.strITTDataReceiptDescription		AS [ReceiptDescription],
 																		ITTData.ysnITTDataFoodStampableFlg			AS [FoodStampableFlg],
-																		ITTData.ysnITTDataQuantityRequiredFlg		AS [QuantityRequiredFlg],
-																		(
-																			SELECT
-																				ItemTransactionLimit.dblTransactionQtyLimit		AS [TransactionLimit]
-																			FROM 
-																			(
-																				SELECT DISTINCT
-																					[strICPOSCode],
-																					[dblTransactionQtyLimit]
-																				FROM @tblTempPassportITT
-																			) ItemTransactionLimit
-																			WHERE ItemTransactionLimit.strICPOSCode = ITTDetail.strICPOSCode
-																			FOR XML PATH('SalesRestriction'), TYPE
-																		)
+																		ITTData.ysnITTDataQuantityRequiredFlg		AS [QuantityRequiredFlg]
+																		--(
+																		--	SELECT
+																		--		ItemTransactionLimit.dblTransactionQtyLimit		AS [TransactionLimit]
+																		--	FROM 
+																		--	(
+																		--		SELECT DISTINCT
+																		--			[strICPOSCode],
+																		--			[strICPOSCodeModifier],
+																		--			[dblTransactionQtyLimit]
+																		--		FROM @tblTempPassportITT
+																		--	) ItemTransactionLimit
+																		--	WHERE ItemTransactionLimit.strICPOSCode = ITTDetail.strICPOSCode AND ItemTransactionLimit.strICPOSCodeModifier = ITTDetail.strICPOSCodeModifier
+																		--	FOR XML PATH('SalesRestriction'), TYPE
+																		--)
 																	FROM 
 																	(
 																		SELECT DISTINCT
@@ -556,8 +557,8 @@ SELECT '@tblTempPassportITT', * FROM @tblTempPassportITT
 																			[intITTDataPriceMethodCode],
 																			[strITTDataReceiptDescription],
 																			[ysnITTDataFoodStampableFlg],
-																			[ysnITTDataQuantityRequiredFlg],
-																			[dblTransactionQtyLimit]
+																			[ysnITTDataQuantityRequiredFlg]
+																			--[dblTransactionQtyLimit]
 																		FROM @tblTempPassportITT
 																	) ITTData
 																	WHERE ITTData.strICPOSCode = ITTDetail.strICPOSCode
