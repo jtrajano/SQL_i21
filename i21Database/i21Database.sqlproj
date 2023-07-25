@@ -1848,6 +1848,9 @@
     <Build Include="dbo\Stored Procedures\uspICCreateGLEntriesOnInTransitValueAdjustment.sql" />
     <Build Include="dbo\Tables\tblICInventoryValueAdjustmentLog.sql" />
     <Build Include="dbo\Functions\fnCreateInTransitValueAdjDescription.sql" />
+    <Build Include="dbo\Tables\tblTMFeeType.sql" />
+    <Build Include="dbo\Tables\tblTMSiteFee.sql" />
+    <Build Include="dbo\Tables\tblTMFee.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
