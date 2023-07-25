@@ -142,7 +142,7 @@ BEGIN
 		BEGIN
 			/* Load Delivered */
 			INSERT INTO @ordersToUpdate (
-				intDispatchID
+				intDispatchId
 				,strWillCallStatus )
 			SELECT 
 				TMD.intDispatchID
@@ -167,7 +167,7 @@ BEGIN
 		BEGIN
 			/* Load Dispatched */
 			INSERT INTO @ordersToUpdate (
-				intDispatchID
+				intDispatchId
 				,strWillCallStatus )
 			SELECT 
 				TMD.intDispatchID
@@ -196,7 +196,7 @@ BEGIN
 		BEGIN
 			/* Load Cancelled */
 			INSERT INTO @ordersToUpdate (
-				intDispatchID
+				intDispatchId
 				,strWillCallStatus )
 			SELECT 
 				TMD.intDispatchID
