@@ -57,7 +57,7 @@ SELECT lh.intLoadHeaderId
 	, dd.dblStickStartReading
 	, dd.dblStickEndReading
 	, dd.dblWaterInches
-	, dd.dblPrice
+	, dblPrice = case when isnull(tm.ysnLockPrice,0) = 1 then tm.dblPrice else  dd.dblPrice end
 	, dd.dblDeliveredQty
 	, dd.dblPercentFull
 	, dd.ysnDelivered
