@@ -975,7 +975,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				ptcus_country = (CASE WHEN LEN(Loc.strCountry) = 10 THEN Loc.strCountry ELSE '''' END),
 				--Contact
 				ptcus_contact = SUBSTRING((Con.strName),1,20),
-				ptcus_phone = REPLACE(REPLACE(REPLACE(REPLACE(ISNULL ((CASE WHEN CHARINDEX('x', P.strPhone) > 0 THEN SUBSTRING(SUBSTRING(P.strPhone,1,15), 0, CHARINDEX('x',P.strPhone)) ELSE SUBSTRING(P.strPhone,1,15)END), '') , '(', ''), ')', ''), ' ', ''),'-', ''),
+				ptcus_phone = REPLACE(REPLACE(REPLACE(REPLACE(ISNULL ((CASE WHEN CHARINDEX(''x'', P.strPhone) > 0 THEN SUBSTRING(SUBSTRING(P.strPhone,1,15), 0, CHARINDEX(''x'',P.strPhone)) ELSE SUBSTRING(P.strPhone,1,15)END), '''') , ''('', ''''), '')'', ''''), '' '', ''''),''-'', ''''),
 				ptcus_phone_ext = (CASE WHEN CHARINDEX(''x'', P.strPhone) > 0 THEN SUBSTRING(SUBSTRING(P.strPhone,1,30),CHARINDEX(''x'',P.strPhone) + 1, LEN(P.strPhone))END),
 				ptcus_phone2 = (CASE WHEN CHARINDEX(''x'', M.strPhone) > 0 THEN SUBSTRING(SUBSTRING(M.strPhone,1,15), 0, CHARINDEX(''x'',M.strPhone)) ELSE SUBSTRING(M.strPhone,1,15)END),
 				ptcus_phone_ext2 = (CASE WHEN CHARINDEX(''x'', M.strPhone) > 0 THEN SUBSTRING(SUBSTRING(M.strPhone,1,30),CHARINDEX(''x'',M.strPhone) + 1, LEN(M.strPhone))END),
