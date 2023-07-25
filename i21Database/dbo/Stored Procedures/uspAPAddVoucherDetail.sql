@@ -658,7 +658,7 @@ FROM tblAPBillDetail A
 INNER JOIN @voucherDetailsInfo B
 	ON A.intBillDetailId = B.intBillDetailId
 LEFT JOIN tblAPBillDetailTax C ON A.intBillDetailId = C.intBillDetailId
-WHERE A.ysnStage = 0 OR C.intBillDetailTaxId IS NULL
+WHERE (A.ysnStage = 0 OR C.intBillDetailTaxId IS NULL) OR (A.intLoadShipmentCostId IS NOT NULL AND intInventoryReceiptChargeId IS NULL)
 
 EXEC uspAPUpdateVoucherDetailTax @idetailIds
 
