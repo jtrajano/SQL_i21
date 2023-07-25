@@ -14,8 +14,6 @@ SELECT	intInventoryValuationKeyId =
 		,t.intStorageLocationId
 		,strStorageLocationName		= strgLoc.strName
 		,dtmDate					= t.dtmDate 
-		,strSourceType				= tr.strSourceType 										
-		,strSourceNumber			= tr.strSourceNumber
 		,c.intCategoryId
 		,strCategory				= c.strCategoryCode
 		,commodity.intCommodityId
@@ -97,8 +95,6 @@ FROM 	tblICItem i
 			ON commodity.intCommodityId = t.intCommodityId
 		LEFT JOIN tblICInventoryTransactionType ty 
 			ON ty.intTransactionTypeId = t.intTransactionTypeId
-		LEFT JOIN tblICInventoryTransaction tr
-			ON tr.intItemId = t.intItemId
 		LEFT JOIN (SELECT	intStorageLocationId
 							,strName
 							,strStorageUnitSorter = CASE WHEN PATINDEX('%[0-9]%', strName) > 1 THEN LEFT(strName, PATINDEX('%[0-9]%', strName) - 1) ELSE strName END
