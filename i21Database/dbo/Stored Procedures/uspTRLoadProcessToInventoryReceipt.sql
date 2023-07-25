@@ -129,12 +129,12 @@ END
 								WHEN min(SP.strGrossOrNet) = 'Net' THEN SUM(DD.dblDistributionNetSalesUnits) 
 								--ELSE
 								--SUM(DD.dblDistributionNetSalesUnits) 
-							END  
-						,0)
+								END  
+								,0)
 						ELSE
 							ISNULL(SUM(DD.dblUnits) ,0)
 						END
-						 + SUM(BID.dblQuantity)
+						  + ISNULL(SUM(BID.dblQuantity),0)
 		,dblCost					= min(TR.dblUnitCost)  
 		,intCurrencyId				= @defaultCurrency 
 		,dblExchangeRate   = 1 -- Need to check this  
@@ -157,7 +157,7 @@ END
 											ELSE
 												ISNULL(SUM(DD.dblUnits) ,0)
 											END
-											 + SUM(BID.dblQuantity)
+											 + ISNULL(SUM(BID.dblQuantity),0)
 		,dblNet						= CASE WHEN ISNULL(@ysnAllowDifferentUnits,1) = 1 THEN 
 												ISNULL(
 													CASE WHEN min(SP.strGrossOrNet) = 'Gross' THEN SUM(DD.dblDistributionGrossSalesUnits)
@@ -167,7 +167,7 @@ END
 											ELSE
 												ISNULL(SUM(DD.dblUnits) ,0)
 											END
-											 + SUM(BID.dblQuantity)
+											  + ISNULL(SUM(BID.dblQuantity),0)
 		,intInventoryReceiptId		= min(TR.intInventoryReceiptId)
 		,dblSurcharge				= min(TR.dblPurSurcharge)
 		,ysnFreightInPrice			= CAST(MIN(CAST(TR.ysnFreightInPrice AS INT)) AS BIT)
