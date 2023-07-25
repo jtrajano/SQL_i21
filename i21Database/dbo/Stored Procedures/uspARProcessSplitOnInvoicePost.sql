@@ -13,10 +13,14 @@ SET ANSI_WARNINGS OFF
 SET XACT_ABORT ON  
 
 BEGIN TRY
-	DECLARE @InvoiceEntries		AS InvoiceStagingTable
-	DECLARE @LineItemTaxEntries	AS LineItemTaxDetailStagingTable
-	DECLARE @InvoiceIds			AS InvoiceId
-	DECLARE @intLogId			INT = NULL
+	DECLARE @InvoiceEntries					AS InvoiceStagingTable
+	DECLARE @LineItemTaxEntries				AS LineItemTaxDetailStagingTable
+	DECLARE @InvoiceIds						AS InvoiceId
+	DECLARE @intLogId						INT = NULL
+	DECLARE @ysnRetainSplitItemContractQty	BIT = 0
+
+	SELECT TOP 1 @ysnRetainSplitItemContractQty = ysnRetainSplitItemContractQty
+	FROM tblARCompanyPreference
 
 	IF(OBJECT_ID('tempdb..#SPLITINVOICEDETAILS') IS NOT NULL) DROP TABLE #SPLITINVOICEDETAILS	
 	CREATE TABLE #SPLITINVOICEDETAILS (
@@ -37,6 +41,12 @@ BEGIN TRY
 		, dtmDate				DATETIME NULL
 		, dblSplitPercent		NUMERIC(18,6) NULL DEFAULT 0
 		, strTransactionType	NVARCHAR(25) NULL
+	)
+	IF(OBJECT_ID('tempdb..#SPLITITEMCONTRACT') IS NOT NULL) DROP TABLE #SPLITITEMCONTRACT
+	CREATE TABLE #SPLITITEMCONTRACT (
+		  intInvoiceDetailId		INT NOT NULL		
+		, intItemContractDetailId	INT NOT NULL
+		, dblQty					NUMERIC(18,6) NULL DEFAULT 0
 	)
 
 	SET @ysnPost = 1	
@@ -190,11 +200,7 @@ BEGIN TRY
 	  , intBillToLocationId		= SPLITENTITY.intBillToId
 	  , intEntityContactId		= SPLITENTITY.intEntityContactId
 	  , intEntitySalespersonId	= SPLITENTITY.intSalespersonId
-	  , dtmDueDate              = dbo.fnGetDueDateBasedOnTerm(I.dtmDate, I.intTermId)
-	  , dblAmountDue			= dblAmountDue * II.dblSplitPercent	  
-	  , dblInvoiceSubtotal		= dblInvoiceSubtotal * II.dblSplitPercent
-	  , dblInvoiceTotal			= dblInvoiceTotal * II.dblSplitPercent
-	  , dblTax					= dblTax * II.dblSplitPercent
+	  , dtmDueDate              = dbo.fnGetDueDateBasedOnTerm(I.dtmDate, I.intTermId)	
 	  , dblSplitPercent			= II.dblSplitPercent
 	  , strShipToLocationName	= SPLITENTITY.strShipToLocationName
 	  , strShipToAddress		= SPLITENTITY.strShipToAddress
@@ -240,6 +246,7 @@ BEGIN TRY
 	FROM tblARInvoiceDetail ID
 	INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
 	INNER JOIN #EXCLUDEDSPLIT II ON I.intInvoiceId = II.intInvoiceId
+	WHERE (ID.intItemContractDetailId IS NOT NULL AND @ysnRetainSplitItemContractQty = 0) OR ID.intItemContractDetailId IS NULL
 	
 	--UPDATE CURRENT INVOICE DETAIL TAX FROM #EXCLUDEDSPLIT			
 	UPDATE IDT 
@@ -249,6 +256,46 @@ BEGIN TRY
 	INNER JOIN tblARInvoiceDetail ID ON IDT.intInvoiceDetailId = ID.intInvoiceDetailId
 	INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
 	INNER JOIN #EXCLUDEDSPLIT II ON I.intInvoiceId = II.intInvoiceId
+	WHERE (ID.intItemContractDetailId IS NOT NULL AND @ysnRetainSplitItemContractQty = 0) OR ID.intItemContractDetailId IS NULL
+
+	IF @ysnRetainSplitItemContractQty = 0
+		BEGIN
+			INSERT INTO #SPLITITEMCONTRACT (
+				  intItemContractDetailId
+				, intInvoiceDetailId
+				, dblQty
+			)
+			SELECT intItemContractDetailId	= ID.intItemContractDetailId
+				 , intInvoiceDetailId		= ID.intInvoiceDetailId
+				 , dblQty					= ICH.dblNewScheduled - ID.dblQtyShipped
+			FROM tblARInvoiceDetail ID
+			INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
+			INNER JOIN #EXCLUDEDSPLIT II ON I.intInvoiceId = II.intInvoiceId
+			INNER JOIN tblCTItemContractHistory ICH ON ID.intItemContractDetailId = ICH.intItemContractDetailId AND I.strInvoiceNumber = ICH.strTransactionId AND I.intInvoiceId = ICH.intTransactionId AND ID.intInvoiceDetailId = ICH.intTransactionDetailId
+			WHERE ID.intItemContractDetailId IS NOT NULL
+
+			WHILE EXISTS (SELECT TOP 1 1 FROM #SPLITITEMCONTRACT)
+				BEGIN 
+					DECLARE @intInvoiceDetailId			INT = NULL
+						  , @intItemContractDetailId	INT = NULL
+						  , @dblQty						NUMERIC(18, 6) = 0
+
+					SELECT TOP 1 @intInvoiceDetailId		= intInvoiceDetailId
+							  , @intItemContractDetailId	= intItemContractDetailId
+							  , @dblQty						= -dblQty
+					FROM #SPLITITEMCONTRACT
+
+					EXEC dbo.uspCTItemContractUpdateScheduleQuantity @intItemContractDetailId	= @intItemContractDetailId
+													               , @dblQuantityToUpdate		= @dblQty
+													               , @intUserId					= @intUserId
+													               , @intTransactionDetailId	= @intInvoiceDetailId
+													               , @strScreenName				= 'Invoice'
+
+					DELETE FROM #SPLITITEMCONTRACT WHERE intInvoiceDetailId = @intInvoiceDetailId
+
+				
+				END
+		END
 
 	--DELETE UPDATED INVOICE FROM CURRENT POSTING DETAILS AND HEADER
 	DELETE IH
