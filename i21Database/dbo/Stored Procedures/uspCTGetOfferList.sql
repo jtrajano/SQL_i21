@@ -2634,7 +2634,7 @@ BEGIN
 		GROUP BY intInventoryReceiptId,dblOrderQty,LGL.dblQuantity
 	) TQ
 	OUTER APPLY(
-		SELECT SUM(dblAllocatedQuantity) + SUM(dblReservedQuantity) as dblTotalAllocatedQuantity 
+		SELECT  SUM(ISNULL(dblAllocatedQuantity,0)) + SUM(ISNULL(dblReservedQuantity,0)) as dblTotalAllocatedQuantity 
 		from vyuLGAllocationStatus 
 		where strPurchaseContractNumber = CH.strContractNumber
 	) TAQ

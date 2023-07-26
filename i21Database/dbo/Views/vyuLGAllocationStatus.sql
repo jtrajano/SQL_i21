@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuLGAllocationStatus]
 AS
-	SELECT 
+	SELECT DISTINCT
 		V.intAllocationHeaderId,
 		strAllocationStatus = CASE 
 								WHEN dblPContractAllocatedQty = dblPDetailQuantity THEN 'Allocated'
