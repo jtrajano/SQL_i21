@@ -526,21 +526,21 @@ SELECT '@tblTempPassportITT', * FROM @tblTempPassportITT
 																		ITTData.intITTDataPriceMethodCode			AS [PriceMethodCode],
 																		ITTData.strITTDataReceiptDescription		AS [ReceiptDescription],
 																		ITTData.ysnITTDataFoodStampableFlg			AS [FoodStampableFlg],
-																		ITTData.ysnITTDataQuantityRequiredFlg		AS [QuantityRequiredFlg]
-																		--(
-																		--	SELECT
-																		--		ItemTransactionLimit.dblTransactionQtyLimit		AS [TransactionLimit]
-																		--	FROM 
-																		--	(
-																		--		SELECT DISTINCT
-																		--			[strICPOSCode],
-																		--			[strICPOSCodeModifier],
-																		--			[dblTransactionQtyLimit]
-																		--		FROM @tblTempPassportITT
-																		--	) ItemTransactionLimit
-																		--	WHERE ItemTransactionLimit.strICPOSCode = ITTDetail.strICPOSCode AND ItemTransactionLimit.strICPOSCodeModifier = ITTDetail.strICPOSCodeModifier
-																		--	FOR XML PATH('SalesRestriction'), TYPE
-																		--)
+																		ITTData.ysnITTDataQuantityRequiredFlg		AS [QuantityRequiredFlg],
+																		(
+																			SELECT
+																				ItemTransactionLimit.dblTransactionQtyLimit		AS [TransactionLimit]
+																			FROM 
+																			(
+																				SELECT DISTINCT
+																					[strICPOSCode],
+																					[strICPOSCodeModifier],
+																					[dblTransactionQtyLimit]
+																				FROM @tblTempPassportITT
+																			) ItemTransactionLimit
+																			WHERE ItemTransactionLimit.strICPOSCode = ITTDetail.strICPOSCode AND ItemTransactionLimit.strICPOSCodeModifier = ITTDetail.strICPOSCodeModifier
+																			FOR XML PATH('SalesRestriction'), TYPE
+																		)
 																	FROM 
 																	(
 																		SELECT DISTINCT
@@ -558,8 +558,8 @@ SELECT '@tblTempPassportITT', * FROM @tblTempPassportITT
 																			[intITTDataPriceMethodCode],
 																			[strITTDataReceiptDescription],
 																			[ysnITTDataFoodStampableFlg],
-																			[ysnITTDataQuantityRequiredFlg]
-																			--[dblTransactionQtyLimit]
+																			[ysnITTDataQuantityRequiredFlg],
+																			[dblTransactionQtyLimit]
 																		FROM @tblTempPassportITT
 																	) ITTData
 																	WHERE ITTData.strICPOSCode = ITTDetail.strICPOSCode AND ITTData.strICPOSCodeModifier = ITTDetail.strICPOSCodeModifier
@@ -631,6 +631,7 @@ SELECT '@tblTempPassportITT', * FROM @tblTempPassportITT
 											strUpcCode = t1.strUpcCode,
 											strDescription = t1.strDescription,
 											strUnitMeasure = t1.strUnitMeasure,
+											--rev (from 22.1ProdDev)
 											dblSalePrice = CASE
 																	WHEN (GETDATE() BETWEEN t1.dtmBeginDate AND t1.dtmEndDate)
 																		THEN t1.dblUnitAfterDiscount 
@@ -640,10 +641,17 @@ SELECT '@tblTempPassportITT', * FROM @tblTempPassportITT
 																								ORDER BY dtmEffectiveRetailPriceDate ASC))
 																		THEN (SELECT TOP 1 dblRetailPrice FROM tblICEffectiveItemPrice EIP 
 																								WHERE EIP.intItemLocationId = t1.intItemLocationId
+																								-- rev
+																								AND EIP.intItemId = t1.intItemId 	
+																								AND EIP.intItemUOMId = t1.intItemUOMId 
+																								-- rev
 																								AND GETDATE() >= dtmEffectiveRetailPriceDate
 																								ORDER BY dtmEffectiveRetailPriceDate ASC) --Effective Retail Price
 																	ELSE t1.dblSalePrice
 																END,
+											--dblSalePrice = t1.dblSalePrice,
+
+											--rev (from 22.1ProdDev)
 
 											ysnSalesTaxed = t1.ysnSalesTaxed,
 											ysnIdRequiredLiquor = t1.ysnIdRequiredLiquor,
@@ -664,6 +672,7 @@ SELECT '@tblTempPassportITT', * FROM @tblTempPassportITT
 														, IUM.strUnitMeasure AS strUnitMeasure
 														, itemPricing.dblSalePrice AS dblSalePrice
 														, IL.intItemLocationId AS intItemLocationId
+														, IUOM.intItemUOMId		-- rev
 														, IL.ysnTaxFlag1 AS ysnSalesTaxed
 														, IL.ysnIdRequiredLiquor AS ysnIdRequiredLiquor
 														, IL.ysnIdRequiredCigarette AS ysnIdRequiredCigarette
