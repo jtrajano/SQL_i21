@@ -2,6 +2,8 @@ CREATE VIEW vyuLGLoadOpenContracts
 AS
 SELECT CD.intContractDetailId
 	,CD.intContractHeaderId
+	,strCertificate = PCC.strCertificates
+	,strSCertificate = SCC.strCertificates
 	,CD.intContractSeq
 	,CD.intItemId
 	,Item.strDescription strItemDescription
@@ -188,6 +190,8 @@ OUTER APPLY (
 	ORDER BY S.dtmTestingEndDate DESC, S.intSampleId DESC) S 
 CROSS APPLY tblLGCompanyPreference CP
 OUTER APPLY (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference) DC
+OUTER APPLY dbo.fnLGGetDelimitedContractCertificates(CD.intContractDetailId) PCC
+OUTER APPLY dbo.fnLGGetDelimitedContractCertificates(CD.intContractDetailId) SCC
 OUTER APPLY (
 	SELECT dblQualityPremium = SUM(ISNULL(dblAmount, 0))
 	FROM tblCTContractQuality
