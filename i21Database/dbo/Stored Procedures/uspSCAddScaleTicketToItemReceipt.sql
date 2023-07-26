@@ -104,10 +104,10 @@ WHERE SC.intTicketId = @intTicketId
 
 
 
-IF @splitDistribution = 'SPL' AND @intTicketEntityId != @intTicketId
+IF @splitDistribution = 'SPL' AND @intTicketEntityId != @intEntityId
 BEGIN
 	SET @ysnChangeTaxGroup = 1
-
+	/*
 	SELECT	@intMainEntityTaxGroupId = taxGroup.intTaxGroupId
 						FROM	tblSMTaxGroup taxGroup
 						WHERE	taxGroup.intTaxGroupId = dbo.fnGetTaxGroupIdForVendor (
@@ -119,7 +119,7 @@ BEGIN
 									,DEFAULT
 								)
 
-
+	*/
 END
 IF @ticketStatus = 'C'
 BEGIN
@@ -309,8 +309,13 @@ SELECT
 		,[intLoadShipmentId] 		= NULL
 		,[intLoadShipmentDetailId] 	= CASE WHEN LI.strSourceTransactionId = 'LOD' THEN LI.intSourceTransactionId ELSE NULL END
 		,intTaxGroupId				= CASE WHEN @ysnChangeTaxGroup =1 THEN
-											@intMainEntityTaxGroupId
-										ELSE 
+											dbo.fnGetTaxGroupIdForVendor (
+													SC.intEntityId	-- @VendorId
+													,SC.intProcessingLocationId		--,@CompanyLocationId
+													,NULL						--,@ItemId
+													,COALESCE(SC.intFarmFieldId, VND.intShipFromId, VNDL.intEntityLocationId)	--,@VendorLocationId
+													,COALESCE(CNT.intFreightTermId,FRM.intFreightTermId,VNDSF.intFreightTermId,VNDL.intFreightTermId)	--,@FreightTermId
+												) 										ELSE 
 										CASE WHEN StorageType.ysnDPOwnedType = 1 THEN -1 
 											ELSE 
 												CASE WHEN ISNULL(CNT.intPricingTypeId,0) = 2 OR ISNULL(CNT.intPricingTypeId,0) = 3 
