@@ -1434,6 +1434,7 @@
     <Build Include="dbo\Views\vyuTRGetFreightCommissionFreight.sql" />
     <Build Include="dbo\Views\vyuTRGetFreightCommissionLine.sql" />
     <Build Include="dbo\Views\vyuSTPromotionItemListDetail.sql" />
+    <Build Include="dbo\Functions\fnRKIsDerivativeLocked.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
