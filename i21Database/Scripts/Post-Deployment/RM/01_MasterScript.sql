@@ -211,7 +211,7 @@ BEGIN
 		UNION ALL SELECT 71, 'Undistribute Direct In', 'Undistribute Direct In.'
 		UNION ALL SELECT 72, 'Undistribute Direct Out', 'Undistribute Direct Out.'
 		UNION ALL SELECT 73, 'Updated Invoice', 'Updated Invoice.'
-
+		UNION ALL SELECT 74, 'Customer owned to Customer owned Storage', 'Transfer from Customer owned to Customer owned Storage.'
 	) tbl
 	WHERE intActionId NOT IN (SELECT intLogActionId FROM tblRKLogAction)
 
