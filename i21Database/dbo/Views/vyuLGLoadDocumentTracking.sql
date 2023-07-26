@@ -217,10 +217,11 @@ LEFT JOIN tblEMEntity EP WITH(NOLOCK) ON EP.intEntityId = CD.intShipperId
 LEFT JOIN  (
 	SELECT
 	strContractNumber
+	,intContractSeq
 	,strOrigin
 	,strERPPONumber
 	,strDestinationPoint
 	,strShipper
 	,strCertificationName
-	FROM vyuCTDashboardJDE) AS CDJ on CDJ.strContractNumber = CH.strContractNumber
+	FROM vyuCTDashboardJDE) AS CDJ ON CDJ.strContractNumber = CH.strContractNumber AND CDJ.intContractSeq = CD.intContractSeq
 WHERE L.intShipmentType = 1
