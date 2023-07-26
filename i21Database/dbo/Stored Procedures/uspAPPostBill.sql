@@ -911,6 +911,7 @@ AND (LD.intPriceCurrencyId <> LC.intCurrencyId OR BD.dblOldCost IS NOT NULL)
 AND B.ysnCancelledPayable != 1
 AND ISNULL(B.ysnFinalVoucher, 0) = 0
 AND ISNULL(B.ysnConvertedToDebitMemo, 0) = 0
+AND B.intTransactionType NOT IN (16)
 
 --INVENTORY COST DECREASE TRANSIT
 UNION ALL
@@ -956,6 +957,7 @@ AND (LD.intPriceCurrencyId <> LC.intCurrencyId OR BD.dblOldCost IS NOT NULL)
 AND B.ysnCancelledPayable != 1
 AND ISNULL(B.ysnFinalVoucher, 0) = 0
 AND ISNULL(B.ysnConvertedToDebitMemo, 0) = 0
+AND B.intTransactionType NOT IN (16)
 
 --INVENTORY GOODS INCREASE TRANSIT
 UNION ALL
@@ -998,6 +1000,7 @@ AND BD.dblOldCost IS NOT NULL
 AND B.ysnCancelledPayable != 1
 AND ISNULL(B.ysnFinalVoucher, 0) = 0
 AND ISNULL(B.ysnConvertedToDebitMemo, 0) = 0
+AND B.intTransactionType NOT IN (16)
 
 --INVENTORY COST DECREASE TRANSIT
 UNION ALL
@@ -1054,6 +1057,7 @@ AND BD.dblOldCost IS NOT NULL
 AND B.ysnCancelledPayable != 1
 AND ISNULL(B.ysnFinalVoucher, 0) = 0
 AND ISNULL(B.ysnConvertedToDebitMemo, 0) = 0
+AND B.intTransactionType NOT IN (16)
 
 /* FINAL VOUCHER */
 UNION ALL

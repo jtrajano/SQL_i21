@@ -96,72 +96,15 @@ RETURNS TABLE AS RETURN
 		B.intBillDetailId
 		,D.intBillDetailTaxId
 		,B.strMiscDescription
-		,CAST((
-					(CASE WHEN A.intTransactionType = 16 THEN D.dblTax * (A.dblProvisionalPercentage / 100)  
-							ELSE D.dblTax * ((100 - A.dblProvisionalPercentage) / 100)  END)  * ISNULL(NULLIF(B.dblRate,0),1)) 
+		,CAST(ROUND(
+					(CASE WHEN A.intTransactionType = 16 THEN 
+							D.dblTax * (A.dblProvisionalPercentage / 100) 
+						ELSE D.dblTax * ((100 - A.dblProvisionalPercentage) / 100)  END),2) * ISNULL(NULLIF(B.dblRate,0),1) 
 			AS DECIMAL(18,2)) AS dblTotal
-		,CAST((CASE WHEN A.intTransactionType = 16 THEN  D.dblTax * (A.dblProvisionalPercentage / 100)  ELSE D.dblTax * ((100 - A.dblProvisionalPercentage) / 100)  END)
-			AS DECIMAL(18,2)) AS dblForeignTotal
-		,0 as dblTotalUnits
-		,CASE WHEN (
-					(B.intInventoryReceiptItemId IS NOT NULL AND receiptItem.intTaxGroupId > 0 AND receiptTax.intInventoryReceiptItemTaxId IS NOT NULL) --has tax details
-					OR (B.intInventoryReceiptChargeId IS NOT NULL AND chargeTax.intInventoryReceiptChargeId IS NOT NULL) 
-					OR (B.intInventoryShipmentChargeId IS NOT NULL AND shipmentChargeTax.intInventoryShipmentChargeId IS NOT NULL)
-				 )
-				 AND A.intTransactionType <> 15
-				 AND receiptItem.intTaxGroupId > 0
-				 AND B.intTaxGroupId = receiptItem.intTaxGroupId
-			THEN  dbo.[fnGetItemGLAccount](F.intItemId, ISNULL(detailloc.intItemLocationId, loc.intItemLocationId), 'AP Clearing')
-			ELSE D.intAccountId
-		END AS intAccountId
-		,G.intCurrencyExchangeRateTypeId
-		,G.strCurrencyExchangeRateType
-		,ISNULL(NULLIF(B.dblRate,0),1) AS dblRate
-		,dbo.[fnGetItemGLAccount](F.intItemId, loc.intItemLocationId, 'Other Charge Expense') intExpenseAccountId
-	FROM tblAPBill A
-	INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
-	INNER JOIN tblAPBillDetailTax D
-		ON B.intBillDetailId = D.intBillDetailId
-	LEFT JOIN tblICInventoryReceiptItem receiptItem
-		ON B.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
-	LEFT JOIN tblICInventoryReceiptCharge charges
-		ON B.intInventoryReceiptChargeId = charges.intInventoryReceiptChargeId
-	LEFT JOIN tblICInventoryReceipt receipts
-		ON charges.intInventoryReceiptId = receipts.intInventoryReceiptId
-	LEFT JOIN dbo.tblSMCurrencyExchangeRateType G
-		ON G.intCurrencyExchangeRateTypeId = B.intCurrencyExchangeRateTypeId
-	LEFT JOIN tblICItem B2
-		ON B.intItemId = B2.intItemId
-	LEFT JOIN tblICItemLocation loc
-		ON loc.intItemId = B.intItemId AND loc.intLocationId = A.intShipToId
-	LEFT JOIN tblICItemLocation detailloc
-		ON detailloc.intItemId = B.intItemId AND detailloc.intLocationId = B.intLocationId
-	LEFT JOIN tblICItem F
-		ON B.intItemId = F.intItemId
-	OUTER APPLY (
-		SELECT TOP 1 intInventoryReceiptItemTaxId FROM tblICInventoryReceiptItemTax receiptTax
-		WHERE receiptTax.intInventoryReceiptItemId = B.intInventoryReceiptItemId
-	) receiptTax
-	OUTER APPLY (
-		SELECT TOP 1 intInventoryReceiptChargeId FROM tblICInventoryReceiptChargeTax receiptChargeTax
-		WHERE receiptChargeTax.intInventoryReceiptChargeId = B.intInventoryReceiptChargeId
-	) chargeTax
-	OUTER APPLY (
-		SELECT TOP 1 intInventoryShipmentChargeId FROM tblICInventoryShipmentChargeTax shipmentChargeTax
-		WHERE shipmentChargeTax.intInventoryShipmentChargeId = B.intInventoryShipmentChargeId
-	) shipmentChargeTax
-	WHERE A.intBillId = @billId
-	AND A.intTransactionType = 16
-	UNION ALL
-	SELECT
-		B.intBillDetailId
-		,D.intBillDetailTaxId
-		,B.strMiscDescription
-		,CAST((
-					(CASE WHEN A.intTransactionType = 16 THEN D.dblTax * (A.dblProvisionalPercentage / 100)  
-							ELSE D.dblTax * ((100 - A.dblProvisionalPercentage) / 100)  END)  * ISNULL(NULLIF(B.dblRate,0),1)) 
-			AS DECIMAL(18,2)) AS dblTotal
-		,CAST((CASE WHEN A.intTransactionType = 16 THEN  D.dblTax * (A.dblProvisionalPercentage / 100)  ELSE D.dblTax * ((100 - A.dblProvisionalPercentage) / 100)  END)
+		,CAST((CASE WHEN A.intTransactionType = 16 THEN 
+							D.dblTax * (A.dblProvisionalPercentage / 100)  
+						ELSE D.dblTax * ((100 - A.dblProvisionalPercentage) / 100)  
+					END)
 			AS DECIMAL(18,2)) AS dblForeignTotal
 		,0 as dblTotalUnits
 		,CASE WHEN ((B.intInventoryReceiptItemId IS NOT NULL 
@@ -212,6 +155,8 @@ RETURNS TABLE AS RETURN
 		WHERE shipmentChargeTax.intInventoryShipmentChargeId = B.intInventoryShipmentChargeId
 	) shipmentChargeTax
 	WHERE A.intBillId = @billId
-	AND (A.intTransactionType = 1 AND A.ysnFinalVoucher = 1)
-	-- OR (ISNULL(ysnConvertedToDebitMemo,0) = 1)
+	AND 1 = (CASE WHEN A.ysnFinalVoucher = 1 THEN 1
+						WHEN A.intTransactionType = 16 THEN 1
+						ELSE 0
+					END)
 )

@@ -1486,6 +1486,7 @@ BEGIN
 		-- 										* (CASE WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END),
 		[dblDebit]						=	CAST((SUM(ISNULL(D.dblAdjustedTax, D.dblTax)) - SUM(D.dblTax)) * ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2))
 														* (CASE WHEN A.ysnFinalVoucher = 1 THEN (100 - A.dblProvisionalPercentage) / 100
+															WHEN A.intTransactionType = 16 THEN (A.dblProvisionalPercentage / 100)
 															WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END),
 		[dblCredit]						=	0,
 		[dblDebitUnit]					=	0,
@@ -1509,7 +1510,9 @@ BEGIN
 		[strTransactionForm]			=	@SCREEN_NAME,
 		[strModuleName]					=	@MODULE_NAME,
 		[dblDebitForeign]				=	CAST(SUM(ISNULL(D.dblAdjustedTax, D.dblTax)) - SUM(D.dblTax) AS DECIMAL(18,2))
-															* (CASE WHEN A.ysnFinalVoucher = 1 THEN (100 - A.dblProvisionalPercentage) / 100 ELSE 1 END),
+															* (CASE WHEN A.ysnFinalVoucher = 1 THEN (100 - A.dblProvisionalPercentage) / 100 
+																	WHEN A.intTransactionType = 16 THEN (A.dblProvisionalPercentage / 100)
+																 ELSE 1 END),
 		-- [dblDebitForeign]				=	CASE WHEN charges.intInventoryReceiptChargeId > 0 
 		-- 											THEN  (CASE 
 		-- 													--IF CHARGE IS THE ITEM FOR ysnPrice, REVERSE THE TAX SIGN
@@ -1564,7 +1567,7 @@ BEGIN
 			LEFT JOIN tblICItem F
 				ON B.intItemId = F.intItemId
 	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
-		  AND A.intTransactionType IN (1,3)
+		  AND A.intTransactionType IN (1,3,16)
 		  AND A.intTransactionType <> 15
 		  AND D.ysnTaxAdjusted = 1
 			AND ISNULL(B.ysnPrepaidOtherCharge,0) = 0
@@ -1922,7 +1925,7 @@ BEGIN
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	A.intAccountId,
 		[dblDebit]						=	0,
-		[dblCredit]						=	 CAST(Details.dblTotal * (A.dblProvisionalPercentage / 100)  * ISNULL(NULLIF(Details.dblRate,0),1) AS DECIMAL(18,2)),
+		[dblCredit]						=	 CAST(ROUND(Details.dblTotal * (A.dblProvisionalPercentage / 100),2)  * ISNULL(NULLIF(Details.dblRate,0),1) AS DECIMAL(18,2)),
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	ISNULL(Details.dblUnits  * (A.dblProvisionalPercentage / 100),0),
 		[strDescription]				=	'',
