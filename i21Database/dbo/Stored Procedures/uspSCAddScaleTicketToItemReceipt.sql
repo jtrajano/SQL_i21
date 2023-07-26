@@ -302,6 +302,7 @@ SELECT
 													,NULL						--,@ItemId
 													,COALESCE(SC.intFarmFieldId, VND.intShipFromId, VNDL.intEntityLocationId)	--,@VendorLocationId
 													,COALESCE(CNT.intFreightTermId,FRM.intFreightTermId,VNDSF.intFreightTermId,VNDL.intFreightTermId)	--,@FreightTermId
+													,DEFAULT
 												) 										ELSE 
 										CASE WHEN StorageType.ysnDPOwnedType = 1 THEN -1 
 											ELSE 
