@@ -1023,6 +1023,7 @@
     <Build Include="dbo\Stored Procedures\uspLGGetOpenOrdersForDispatch.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetCreditLineCurrencyRate.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutCreateDepositToBankAccount.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTReportSalesTax.sql" />
     <Build Include="dbo\Stored Procedures\uspTRBestBuy.sql" />
     <Build Include="dbo\Views\vyuAPReserve.sql" />
     <Build Include="dbo\Views\vyuAPReserveDetailTemp.sql" />
