@@ -1335,6 +1335,7 @@ BEGIN
       ,dblTeaMouthFeelPinpoint
       ,dblTeaAppearancePinpoint
       ,intSupplierId
+      ,intCountryId
 
       ,dblOriginalTeaTaste
       ,dblOriginalTeaHue
@@ -1472,6 +1473,7 @@ BEGIN
       ,dblTeaMouthFeelPinpoint = MOUTH_FEEL.dblPinpointValue
       ,dblTeaAppearancePinpoint = APPEARANCE.dblPinpointValue
       ,intSupplierId = S.intEntityId
+      ,intCountryId = ORIGIN.intCountryID
 
       ,dblOriginalTeaTaste = ISNULL(BT.dblTeaTaste, TASTE.dblPinpointValue)
       ,dblOriginalTeaHue = ISNULL(BT.dblTeaHue, HUE.dblPinpointValue)
@@ -1485,6 +1487,7 @@ BEGIN
 		LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId  = S.intContractDetailId
     LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
     LEFT JOIN tblICCommodityAttribute REGION ON REGION.intCommodityAttributeId = I.intRegionId
+    LEFT JOIN tblICCommodityAttribute ORIGIN ON ORIGIN.intCommodityAttributeId = S.intCountryID
     LEFT JOIN tblCTBook B ON B.intBookId = S.intBookId
     LEFT JOIN tblSMCompanyLocation MU ON MU.strLocationName = B.strBook
     LEFT JOIN tblSMCompanyLocation TBO ON TBO.intCompanyLocationId = S.intLocationId AND (TBO.intCompanyLocationId <> ISNULL(MU.intCompanyLocationId, 0))
@@ -1597,7 +1600,7 @@ BEGIN
     -- Weight Item UOM
     LEFT JOIN tblICItemUOM WIUOM ON WIUOM.intItemId = S.intItemId AND WIUOM.intUnitMeasureId = S.intSampleUOMId
     -- Qty Item UOM
-    LEFT JOIN tblICItemUOM QIUOM ON QIUOM.intItemId = S.intItemId AND QIUOM.intUnitMeasureId = S.intB1QtyUOMId
+    LEFT JOIN tblICItemUOM QIUOM ON QIUOM.intItemId = S.intItemId AND QIUOM.intUnitMeasureId = S.intRepresentingUOMId
     WHERE S.intSampleId = @intSampleId
     AND (
       (BT.intBatchId IS NOT NULL AND BT.intLocationId = S.intCompanyLocationId)
