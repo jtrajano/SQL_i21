@@ -54,7 +54,7 @@ BEGIN TRY
       
 		SELECT CY.intCurrencyID, CD.intContractDetailId,  
 		  ISNULL(CAST(dbo.fnRemoveTrailingZeroes(dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,LP.intWeightUOMId,CD.dblQuantity)) AS NVARCHAR(100)) collate Latin1_General_CI_AS,'') Quantity,  
-		  ISNULL(CAST(dbo.fnRemoveTrailingZeroes(CAST(CD.dblBasis / (CASE WHEN CY.ysnSubCurrency = cast(1 as bit) THEN CY.intCent ELSE 2 END) AS NUMERIC(18, 6)))  + ' ' + MC.strCurrency + ' Per ' + QUM.strUnitMeasure AS NVARCHAR(100) ) collate Latin1_General_CI_AS,'') [Basis],  
+		  ISNULL(CAST(dbo.fnRemoveTrailingZeroes(CAST(CD.dblBasis / (CASE WHEN CY.ysnSubCurrency = cast(1 as bit) THEN CY.intCent ELSE 1 END) AS NUMERIC(18, 6)))  + ' ' + MC.strCurrency + ' Per ' + QUM.strUnitMeasure AS NVARCHAR(100) ) collate Latin1_General_CI_AS,'') [Basis],  
 		  ISNULL(CAST(dbo.fnRemoveTrailingZeroes(CF.dblHedgeNoOfLots) + '/' + dbo.fnRemoveTrailingZeroes(CF.dblNoOfLots - CF.dblHedgeNoOfLots) AS NVARCHAR(100)) collate Latin1_General_CI_AS,'') AS [Fixed/Unfixed],  
 		  ISNULL(CAST(dbo.fnRemoveTrailingZeroes(CF.dblHedgeNoOfLots) + '/' + dbo.fnRemoveTrailingZeroes(CF.dblNoOfLots - CF.dblHedgeNoOfLots) AS NVARCHAR(100)) collate Latin1_General_CI_AS,'') AS [Hedge/Not Hedge],  
 		  ISNULL(CAST(dbo.fnRemoveTrailingZeroes(CAST(ISNULL(CD.dblCashPrice,CF.dblHedgePrice) AS NUMERIC(18, 6)))  + ' ' + CY.strCurrency + ' Per ' + PM.strUnitMeasure AS NVARCHAR(100)) collate Latin1_General_CI_AS,'') [Final Price]  
