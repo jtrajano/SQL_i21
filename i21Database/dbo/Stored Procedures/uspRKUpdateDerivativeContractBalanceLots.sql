@@ -16,7 +16,8 @@ BEGIN
 
 	DECLARE @ysnLocked BIT
 
-	SELECT  @ysnLocked = ISNULL(ysnLocked,0) FROM vyuRKFutOptTranForNotMapping WHERE intFutOptTransactionId = @intFutOptTransactionId
+	SELECT  @ysnLocked = dbo.fnRKIsDerivativeLocked(@intFutOptTransactionId, 'Assign Derivatives')
+		--ISNULL(ysnLocked,0) FROM vyuRKFutOptTranForNotMapping WHERE intFutOptTransactionId = @intFutOptTransactionId
 
 	IF @ysnLocked = 0
 	BEGIN
