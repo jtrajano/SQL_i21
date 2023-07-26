@@ -32,10 +32,21 @@ BEGIN
 			  LOCAL STATIC READ_ONLY FORWARD_ONLY
 			FOR 
 
+			--Get only employees that have a time off request within this period
 			SELECT intEntityEmployeeId 
 			FROM vyuPRTimeOffRequest TimeOffRequest
-			WHERE TimeOffRequest.dtmDateFrom <= @dtmDateTo AND 
-				  TimeOffRequest.dtmDateFrom >= @dtmDateFrom
+			WHERE ( 
+					TimeOffRequest.dtmDateFrom <= @dtmDateTo AND 
+					TimeOffRequest.dtmDateFrom >= @dtmDateFrom 
+				  ) OR 
+				  ( 
+					TimeOffRequest.dtmDateTo <= @dtmDateTo AND 
+					TimeOffRequest.dtmDateTo >= @dtmDateFrom 
+				  ) OR
+				  ( 
+					TimeOffRequest.dtmDateFrom < @dtmDateFrom AND 
+					TimeOffRequest.dtmDateTo > @dtmDateTo 
+				  )
 			GROUP BY intEntityEmployeeId
 
 			OPEN EmployeeLoop
