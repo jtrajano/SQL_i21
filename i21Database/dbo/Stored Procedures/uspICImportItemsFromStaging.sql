@@ -14,7 +14,7 @@ CREATE TABLE #tmp_validRecords (
  , strDescription NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL          
  , strStatus NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL          
  , intLifeTime INT NULL          
- , strShortName NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL          
+ , strShortName NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL          
  , strLotTracking NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL          
  , ysnUseWeighScales BIT NULL          
  , strBarcodePrint NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL          
@@ -463,7 +463,7 @@ WHEN MATCHED AND @ysnAllowOverwrite = 1 THEN
   , strDescription = CASE WHEN LEN(source.strDescription) > 250 THEN LEFT(source.strDescription, 250) ELSE source.strDescription END     
   , strStatus = source.strStatus          
   , intLifeTime = source.intLifeTime          
-  , strShortName = source.strShortName          
+  , strShortName = CASE WHEN LEN(source.strShortName) > 50 THEN LEFT(source.strShortName, 50) ELSE source.strShortName END
   , ysnUseWeighScales = source.ysnUseWeighScales          
   , strBarcodePrint = source.strBarcodePrint          
   , intManufacturerId = source.intManufacturerId            
@@ -576,7 +576,7 @@ WHEN NOT MATCHED THEN
   , CASE WHEN LEN(strDescription) > 250 THEN LEFT(strDescription, 250) ELSE strDescription END        
   , strStatus          
   , intLifeTime          
-  , strShortName          
+  , CASE WHEN LEN(strShortName) > 50 THEN LEFT(strShortName, 50) ELSE strShortName END
   , strLotTracking          
   , ysnUseWeighScales          
   , strBarcodePrint          
