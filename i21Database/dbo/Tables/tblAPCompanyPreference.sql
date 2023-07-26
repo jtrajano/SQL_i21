@@ -33,6 +33,7 @@
 	[ysnAllowIntraLocationEntries]	BIT NOT NULL DEFAULT(0),
 	[ysnAllowSingleLocationEntries]	BIT NOT NULL DEFAULT(0),
 	[intDueToAccountId]				INT NULL DEFAULT(0), 
+    [ysnRetrieveBillByLocationVendorCurrency] BIT NOT NULL DEFAULT(0),
     [intDueFromAccountId]			INT NULL DEFAULT(0),
     [intFreightTermId]              INT NULL,
     [ysnOverrideCompanySegment]		    BIT NOT NULL DEFAULT(0),
