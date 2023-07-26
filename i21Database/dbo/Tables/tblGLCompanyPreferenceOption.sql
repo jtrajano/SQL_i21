@@ -21,6 +21,7 @@
 	[ysnRevalOverrideLocation] BIT NULL, --Revaluation
 	[ysnRevalOverrideLOB] BIT NULL,
 	[ysnRevalOverrideCompany] BIT NULL,
+	[ysnRevalOverride] BIT NULL,
 	[ysnISOverrideLocation] BIT NULL,
 	[ysnISOverrideLOB] BIT NULL,
 	[ysnISOverrideCompany] BIT NULL,
