@@ -24,6 +24,9 @@ BEGIN TRY
 	EXEC sp_xml_preparedocument @idoc OUTPUT, @strXml
 	
 	BEGIN TRANSACTION
+
+	SELECT @ysnAllowDerivativeAssignToMultipleContracts = ISNULL(ysnAllowDerivativeAssignToMultipleContracts, 0)
+	FROM tblRKCompanyPreference
 	
 	------------------------- Delete Matched ---------------------
 	DECLARE @tblMatchedDelete TABLE (intAssignFuturesToContractSummaryId INT
@@ -139,7 +142,6 @@ BEGIN TRY
 		,@dblQuantityPerLot NUMERIC(16, 10)
 		,@dblQuantityToPrice  NUMERIC(16, 10)
 		,@ysnAutoPrice BIT
-		
 
 	WHILE EXISTS (SELECT TOP 1 * FROM #tempAssignFuturesToContractSummary)
 	BEGIN
