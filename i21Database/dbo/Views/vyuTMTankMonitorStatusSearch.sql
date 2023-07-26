@@ -33,8 +33,9 @@ LEFT JOIN	(	SELECT		dtmDateTime,
 							strSerialNumber
 				FROM		tblTMTankReading
 				WHERE		intTankReadingId IN (	SELECT		MAX(intTankReadingId)
-													FROM		tblTMTankReading
-													GROUP BY	strSerialNumber)) c
+													FROM		tblTMTankReading ctr
+													WHERE		ctr.intReadingSource = 1
+													GROUP BY	ctr.strSerialNumber)) c
 ON			a.strSerialNumber = c.strSerialNumber
 LEFT JOIN	(
 				SELECT		a.intDeviceId, 
