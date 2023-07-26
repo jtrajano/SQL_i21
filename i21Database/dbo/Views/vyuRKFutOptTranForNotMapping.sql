@@ -41,17 +41,17 @@ SELECT DE.intFutOptTransactionId
 	, Bank.strBankName
 	, BankAcct.strBankAccountNo
 	, dblUsedContract = ISNULL(DE.dblNoOfContract - GOC.dblMaxOpenContract, 0.00)
-	, ysnLocked = CAST(ISNULL((SELECT TOP 1 1 FROM tblRKFutOptTransaction 
-								WHERE (intFutOptTransactionId IN (SELECT intLFutOptTransactionId FROM tblRKMatchFuturesPSDetail)
-										OR intFutOptTransactionId IN (SELECT intSFutOptTransactionId FROM tblRKMatchFuturesPSDetail)
-										OR intFutOptTransactionId IN (SELECT intLFutOptTransactionId FROM tblRKOptionsMatchPnS)
-										OR intFutOptTransactionId IN (SELECT intSFutOptTransactionId FROM tblRKOptionsMatchPnS)
-										OR intFutOptTransactionId IN (SELECT intFutOptTransactionId FROM tblRKAssignFuturesToContractSummary WHERE (ISNULL(dblAssignedLotsToSContract,0) <> 0 OR ISNULL(dblAssignedLotsToPContract,0) <>  0))
-										OR intFutOptTransactionId IN (SELECT DISTINCT intOrigSliceTradeId FROM tblRKFutOptTransaction WHERE intOrigSliceTradeId is not null)
-										OR ysnPosted = 1
-										OR intFutOptTransactionId IN (SELECT intFutOptTransactionId FROM tblRKAssignFuturesToContractSummary WHERE (ISNULL(dblAssignedLots,0) <> 0 OR ISNULL(dblHedgedLots,0) <>  0))
-										OR intFutOptTransactionId IN (SELECT DISTINCT intFutOptTransactionId FROM tblCTPriceFixationDetail WHERE intFutOptTransactionId is not null))
-									AND intFutOptTransactionId = DE.intFutOptTransactionId), 0) AS BIT)
+	, ysnLocked = dbo.fnRKIsDerivativeLocked(DE.intFutOptTransactionId, 'Derivative Entry') -- Moved Conditions Below into this Function to Centralize Across Risk Screens.
+					--CAST(ISNULL((SELECT TOP 1 1 FROM tblRKFutOptTransaction 
+					--			WHERE (intFutOptTransactionId IN (SELECT intLFutOptTransactionId FROM tblRKMatchFuturesPSDetail)
+					--					OR intFutOptTransactionId IN (SELECT intSFutOptTransactionId FROM tblRKMatchFuturesPSDetail)
+					--					OR intFutOptTransactionId IN (SELECT intLFutOptTransactionId FROM tblRKOptionsMatchPnS)
+					--					OR intFutOptTransactionId IN (SELECT intSFutOptTransactionId FROM tblRKOptionsMatchPnS)
+					--					OR intFutOptTransactionId IN (SELECT intFutOptTransactionId FROM tblRKAssignFuturesToContractSummary WHERE (ISNULL(dblAssignedLotsToSContract,0) <> 0 OR ISNULL(dblAssignedLotsToPContract,0) <>  0))
+					--					OR intFutOptTransactionId IN (SELECT DISTINCT intOrigSliceTradeId FROM tblRKFutOptTransaction WHERE intOrigSliceTradeId is not null)
+					--					OR intFutOptTransactionId IN (SELECT intFutOptTransactionId FROM tblRKAssignFuturesToContractSummary WHERE (ISNULL(dblAssignedLots,0) <> 0 OR ISNULL(dblHedgedLots,0) <>  0))
+					--					OR intFutOptTransactionId IN (SELECT DISTINCT intFutOptTransactionId FROM tblCTPriceFixationDetail WHERE intFutOptTransactionId is not null))
+					--				AND intFutOptTransactionId = DE.intFutOptTransactionId), 0) AS BIT) 
 	, dblAvailableContract = ISNULL(DE.dblPContractBalanceLots, 0.00)
 	, ysnSlicedTrade = ISNULL(DE.ysnSlicedTrade, CAST(0 AS BIT))
 	, DE.intOrigSliceTradeId
