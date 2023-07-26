@@ -196,7 +196,7 @@ END
 						ELSE
 							ISNULL(SUM(DD.dblUnits) ,0)
 						END
-						  + ISNULL(SUM(BID.dblQuantity),0)
+						  + ISNULL((select SUM(dblQuantity) FROM vyuTRGetLoadReceiptToBlendIngredient BLEND WHERE BLEND.intLoadReceiptId = TR.intLoadReceiptId and BLEND.intLoadHeaderId = MIN(TL.intLoadHeaderId) AND DD.intLoadDistributionDetailId IS NULL),0)
 		,dblCost					= min(TR.dblUnitCost)  
 		,intCurrencyId				= @defaultCurrency 
 		,dblExchangeRate   = 1 -- Need to check this  
