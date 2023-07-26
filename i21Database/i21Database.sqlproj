@@ -10296,7 +10296,7 @@
     <Build Include="dbo\Stored Procedures\uspGRSaveVoidedPayments.sql" />
     <Build Include="dbo\Tables\tblGRReversedSettlementsWithVoidedPayment.sql" />
     <Build Include="dbo\Views\vyuSCDirectAPClearingGLAccount.sql" />
-    <Build Include="dbo\Tables\tblGRStorageTypeAuditLogForAllowSettlement.sql" />
+    
     <Build Include="dbo\Stored Procedures\uspGRDailyPositionRecordByRangeFirstPage.sql" />
     <Build Include="dbo\Stored Procedures\uspGRDailyPositionRecordByRangeSecondPage.sql" />
     <Build Include="dbo\Stored Procedures\uspGRDailyPositionRecordByRange.sql" />
