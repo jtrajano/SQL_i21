@@ -568,7 +568,8 @@ SELECT '@tblTempPassportITT', * FROM @tblTempPassportITT
 															(
 																SELECT DISTINCT
 																	[strITTDetailRecordActionType],
-																	[strICPOSCode]
+																	[strICPOSCode],
+																	[strICPOSCodeModifier]
 																FROM @tblTempPassportITT
 															) ITTDetail
 															ORDER BY ITTDetail.strICPOSCode ASC
