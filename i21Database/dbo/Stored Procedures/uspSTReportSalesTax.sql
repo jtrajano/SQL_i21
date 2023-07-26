@@ -387,7 +387,7 @@ BEGIN
 				INSERT INTO @MerchandiseDetails
 				SELECT  intStoreId
 					, intStoreNo
-					, strStoreName
+					, strDescription
 					, intCategoryId
 					, strDescription
 					, SUM(dblTotalSalesAmountRaw) AS dblTotalSalesAmountRaw
@@ -447,7 +447,7 @@ BEGIN
 				INSERT INTO @MerchandiseDetails
 				SELECT  intStoreId
 					, intStoreNo
-					, strStoreName
+					, strDescription
 					, intCategoryId
 					, strDescription
 					, SUM(dblTotalSalesAmountRaw) AS dblTotalSalesAmountRaw
@@ -514,7 +514,7 @@ BEGIN
 				INSERT INTO @MerchandiseDetails
 				SELECT  intStoreId
 					, intStoreNo
-					, strStoreName
+					, strDescription
 					, intCategoryId
 					, strDescription
 					, SUM(dblTotalSalesAmountRaw) AS dblTotalSalesAmountRaw
@@ -575,7 +575,7 @@ BEGIN
 				INSERT INTO @MerchandiseDetails
 				SELECT  intStoreId
 					, intStoreNo
-					, strStoreName
+					, strDescription
 					, intCategoryId
 					, strDescription
 					, SUM(dblTotalSalesAmountRaw) AS dblTotalSalesAmountRaw
