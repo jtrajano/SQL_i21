@@ -29,6 +29,7 @@
 	[ysnPromptPastDue]                		BIT NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnPromptPastDue] DEFAULT ((1)),
 	[ysnChargeonCharge]						BIT	NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnChargeonCharge] DEFAULT ((1)),
 	[ysnPrintInvoicePaymentDetail]			BIT	NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnPrintInvoicePaymentDetail] DEFAULT ((0)),	
+	[ysnPrintInvoiceNotEmailed]				BIT	NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnPrintInvoiceNotEmailed] DEFAULT ((0)),	
 	[ysnStretchLogo]						BIT	NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnStretchLogo] DEFAULT ((0)),
 	[ysnPOSBatchProcess]					BIT NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnPOSBatchProcess] DEFAULT ((1)),
 	[ysnIncludeInvoiceAttachments]			BIT	NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnIncludeInvoiceAttachments] DEFAULT ((0)),
