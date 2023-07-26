@@ -7,5 +7,5 @@
 	,dtmDate datetime default(getdate())
 	,intConcurrencyId int default(1)
 	
-	,constraint fk_tblSCRailSheetTicketLog_tblSCRailSheetTicket_intRailSheetTicketId foreign key (intRailSheetTicketId) references tblSCRailSheetTicket(intRailSheetTicketId)  ON DELETE CASCADE
+	,constraint fk_tblSCRailSheetTicketLog_tblSCRailSheetTicket_intRailSheetTicketId foreign key (intRailSheetTicketId) references tblSCRailSheetTicket(intRailSheetTicketId)
 )

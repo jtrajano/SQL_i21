@@ -11,7 +11,7 @@
 	,intSort int not null default(1)
 	,intConcurrencyId int default(1)
 
-	,constraint fk_tblSCRailSheetApply_tblSCRailSheet_intRailSheetId foreign key (intRailSheetId) references tblSCRailSheet(intRailSheetId) ON DELETE CASCADE
+	,constraint fk_tblSCRailSheetApply_tblSCRailSheet_intRailSheetId foreign key (intRailSheetId) references tblSCRailSheet(intRailSheetId)
 	,constraint fk_tblSCRailSheetApply_tblCTContractDetail_intContractDetailId foreign key (intContractDetailId) references tblCTContractDetail(intContractDetailId)
 	,constraint fk_tblSCRailSheetApply_tblSCTicket_intTicketId foreign key (intTicketId) references tblSCTicket(intTicketId)
 )
