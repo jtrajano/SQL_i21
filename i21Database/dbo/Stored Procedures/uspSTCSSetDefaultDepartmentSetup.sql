@@ -8,7 +8,7 @@ BEGIN
 
 	IF @strRegisterClass = 'PASSPORT'
 	BEGIN
-		UPDATE tblSTStore SET strDepartmentOrCategory='D', strCategoriesOrSubcategories='C' WHERE intStoreId=1
+		UPDATE tblSTStore SET strDepartmentOrCategory='D', strCategoriesOrSubcategories='C' WHERE intStoreId=@intStoreId
 	END
 
 	SET @strRegisterClassOut = @strRegisterClass;
