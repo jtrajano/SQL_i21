@@ -7,7 +7,7 @@ WITH params AS (
 
     SELECT 
     intTotalDuplicateUnposted=(SELECT TOP 1 COUNT(*) AS intTotalDuplicateUnposted FROM tblCFTransaction  WHERE  ISNULL(ysnDuplicate,0) = 1 AND ISNULL(ysnPosted,0) = 0 ), 
-    intTotalTransactionWithPotentialIssue= (SELECT COUNT(1) as intCount FROM vyuCFTransactionAmountPotentialIssue) + (SELECT COUNT(1) as intCount FROM vyuCFTransactionItemCostPotentialIssue )
+    intTotalTransactionWithPotentialIssue= (SELECT COUNT(1) as intCount FROM vyuCFTransactionAmountPotentialIssue) --+ (SELECT COUNT(1) as intCount FROM vyuCFTransactionItemCostPotentialIssue )
 	
 )
 
