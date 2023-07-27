@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTPurgePromotions]
 	@XML varchar(max)
-	
+	, @strResultMsg NVARCHAR(1000) OUTPUT
 AS
 BEGIN TRY
 	DECLARE @ErrMsg				       NVARCHAR(MAX),
@@ -11,8 +11,10 @@ BEGIN TRY
 			@PromoMixMatchysn          NVARCHAR(1),
 			@PromoComboysn             NVARCHAR(1),
 			@PromoItemListysn          NVARCHAR(1),
-			@Previewysn                NVARCHAR(1) 
+			@Previewysn                NVARCHAR(1),
+			@intCurrentEntityUserId	   INT
 
+	SET @strResultMsg = 'success'
 	                  
 	EXEC sp_xml_preparedocument @idoc OUTPUT, @XML 
 	
@@ -23,8 +25,8 @@ BEGIN TRY
 			@PromoMixMatchysn         = MixMatchysn,
 			@PromoComboysn            = Comboysn,
 			@PromoItemListysn         = ItemListysn, 
-			@Previewysn               = Previewysn 
-
+			@Previewysn               = Previewysn, 
+			@intCurrentEntityUserId   = currentUserId
 		
 	FROM	OPENXML(@idoc, 'root',2)
 	WITH
@@ -35,9 +37,12 @@ BEGIN TRY
             MixMatchysn             NVARCHAR(1),
 			Comboysn                NVARCHAR(1), 
 			ItemListysn             NVARCHAR(1),
-			Previewysn              NVARCHAR(1)
+			Previewysn              NVARCHAR(1),
+			currentUserId			INT
+	)
 	
-	)  
+			INSERT INTO tblSTMassUpdateAudit (strScreenName,strXML, strStatus,dtmDateGenerated,intCurrentUserId)
+				VALUES ('Purge Promotions',@XML,@strResultMsg,GETDATE(),@intCurrentEntityUserId);
 	
 	  DECLARE @MiXMatchCount INT 
 	  DECLARE @ComboCount INT
@@ -242,7 +247,12 @@ BEGIN TRY
 END TRY
 
 BEGIN CATCH       
- SET @ErrMsg = ERROR_MESSAGE()      
- IF @idoc <> 0 EXEC sp_xml_removedocument @idoc      
- RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')      
+ SET @ErrMsg = ERROR_MESSAGE() 
+ SET @strResultMsg = 'Error Message: ' + ERROR_MESSAGE()
+	IF @idoc <> 0 EXEC sp_xml_removedocument @idoc 
+
+		 INSERT INTO tblSTMassUpdateAudit (strScreenName,strXML, strStatus,dtmDateGenerated,intCurrentUserId)
+		VALUES ('Purge Promotions',@XML,@strResultMsg,GETDATE(),@intCurrentEntityUserId);
+
+	RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')      
 END CATCH

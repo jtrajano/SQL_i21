@@ -35,7 +35,7 @@ BEGIN TRY
 			@DiscAmountUnit         DECIMAL (18,6),
 			@ysnPreview             NVARCHAR(1),
 			@currentUserId			INT
-		
+	Set @strResultMsg ='success'
 	                  
 	EXEC sp_xml_preparedocument @idoc OUTPUT, @XML 
 	
@@ -833,11 +833,15 @@ END CATCH
 
 
 ExitWithCommit:
+	INSERT INTO tblSTMassUpdateAudit (strScreenName,strXML, strStatus,dtmDateGenerated,intCurrentUserId)
+		VALUES ('Update Rebate/Discount',@XML,@strResultMsg,GETDATE(),@intCurrentEntityUserId);
 	COMMIT TRANSACTION
 	GOTO ExitPost
 	
 
 ExitWithRollback:
+	INSERT INTO tblSTMassUpdateAudit (strScreenName,strXML, strStatus,dtmDateGenerated,intCurrentUserId)
+		VALUES ('Update Rebate/Discount',@XML,@strResultMsg,GETDATE(),@intCurrentEntityUserId);
 	IF @@TRANCOUNT > 0
 		BEGIN
 			ROLLBACK TRANSACTION 
