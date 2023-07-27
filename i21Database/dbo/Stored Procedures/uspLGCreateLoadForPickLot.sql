@@ -128,7 +128,6 @@ BEGIN TRY
 		,strLoadNumber
 		,intBookId
 		,intSubBookId
-		,ysnPosted
 		)
 	SELECT GETDATE()
 		,1
@@ -146,7 +145,6 @@ BEGIN TRY
 		,@strLoadNumber
 		,@intBookId
 		,@intSubBookId
-		,0
 
 	SELECT @intLoadId = SCOPE_IDENTITY()
 
