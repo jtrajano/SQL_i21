@@ -8,6 +8,7 @@ SELECT intImportDtnId
 	, dtmImportDate
 	, strSeller
 	, strBillOfLading
+	, strInvoiceNo
 	, strTransaction
 	, strReceiptNumber
 	, dblDocumentTotal
@@ -25,6 +26,7 @@ FROM (
 		, h.dtmImportDate
 		, strSeller = ISNULL(em.strName, d.strSeller)
 		, d.strBillOfLading
+		, d.strInvoiceNo
 		, lh.strTransaction
 		, ir.strReceiptNumber
 		, dblDocumentTotal = d.dblInvoiceAmount
