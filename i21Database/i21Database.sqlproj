@@ -1337,6 +1337,7 @@
     <None Include="Scripts\Post-Deployment\ST\55_FileFieldMapping_Passport_FGML.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCSSetDefaultDepartmentSetup.sql" />
     <Build Include="dbo\Views\vyuAPVoucherIdWithDM.sql" />
+    <Build Include="dbo\Views\vyuSTPromotionItemListDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

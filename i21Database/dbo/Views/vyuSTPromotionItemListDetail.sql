@@ -12,6 +12,7 @@ SELECT intPromoItemListDetailId,
     	strUnitMeasure,
 	dblSalePrice AS dblRetailPrice,
 	tblSTPromotionItemListDetail.intConcurrencyId
+	--vyuSTItemHierarchyPricing.intItemLocationId
 	FROM tblSTPromotionItemListDetail
 		
 	JOIN tblSTPromotionItemList ON 
