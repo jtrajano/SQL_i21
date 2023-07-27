@@ -5,4 +5,5 @@
     ,ysnOldValue BIT
     ,ysnNewValue BIT
     ,dtmDateUpdated DATETIME DEFAULT(GETDATE())
+    ,intUserId INT
 )
