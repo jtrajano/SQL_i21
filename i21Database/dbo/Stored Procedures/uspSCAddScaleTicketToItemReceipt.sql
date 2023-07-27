@@ -41,7 +41,13 @@ DECLARE @intScaleStationId AS INT
 		,@currencyDecimal AS INT
 		,@ysnRequireProducerQty AS BIT
 		,@intDeliverySheetId INT
-		,@intFreightItemId INT;
+		,@intFreightItemId INT
+		,@intTicketEntityId INT
+		,@intShipFromId INT
+		,@intLocationId INT
+		,@intFreightTermId INT
+		,@intMainEntityTaxGroupId INT
+		,@ysnChangeTaxGroup BIT = 0;
 
 DECLARE @REFERENCE_ONLY BIT
 DECLARE @BATCH_ID NVARCHAR(50) 
@@ -75,12 +81,46 @@ SELECT @intFreightItemId = CASE WHEN @COMPANY_PREFERENCE_OVERRIDE_FREIGHT_ITEM_I
 	, @intContractCostId = SC.intContractCostId
 	, @intDeliverySheetId = SC.intDeliverySheetId
 	, @REFERENCE_ONLY = CASE WHEN SC.intStorageScheduleTypeId = -9 THEN 1 ELSE 0 END
+	, @intTicketEntityId = SC.intEntityId
+	, @intLocationId = SC.intProcessingLocationId
+	, @intShipFromId = COALESCE(SC.intFarmFieldId, VND.intShipFromId, VNDL.intEntityLocationId)
+	-- THIS VALUE SHOULD ONLY BE USED IN SPLIT TICKET
+	-- IF intFreightTermId will consider contract, please add the below freight term checking
+	-- CNT.intFreightTermId,
+	, @intFreightTermId = COALESCE(FRM.intFreightTermId,VNDSF.intFreightTermId,VNDL.intFreightTermId)
 FROM tblSCTicket SC 
 INNER JOIN tblSCScaleSetup SCSetup ON SCSetup.intScaleSetupId = SC.intScaleSetupId 
+LEFT JOIN tblEMEntityLocation FRM
+	ON SC.intFarmFieldId = FRM.intEntityLocationId
+LEFT JOIN tblAPVendor VND
+	ON SC.intEntityId = VND.intEntityId
+LEFT JOIN tblEMEntityLocation VNDL
+	ON VND.intEntityId = VNDL.intEntityId
+		AND VNDL.ysnDefaultLocation = 1
+LEFT JOIN tblEMEntityLocation VNDSF
+	ON VND.intShipFromId = VNDSF.intEntityLocationId
+
 WHERE SC.intTicketId = @intTicketId
 
 
 
+IF @splitDistribution = 'SPL' AND @intTicketEntityId != @intEntityId
+BEGIN
+	SET @ysnChangeTaxGroup = 1
+	/*
+	SELECT	@intMainEntityTaxGroupId = taxGroup.intTaxGroupId
+						FROM	tblSMTaxGroup taxGroup
+						WHERE	taxGroup.intTaxGroupId = dbo.fnGetTaxGroupIdForVendor (
+									@intTicketEntityId	-- @VendorId
+									,@intLocationId		--,@CompanyLocationId
+									,NULL						--,@ItemId
+									,@intShipFromId	--,@VendorLocationId
+									,@intFreightTermId	--,@FreightTermId
+									,DEFAULT
+								)
+
+	*/
+END
 IF @ticketStatus = 'C'
 BEGIN
 	 --Raise the error:
@@ -268,12 +308,22 @@ SELECT
 		,intShipFromEntityId		= SC.intEntityId
 		,[intLoadShipmentId] 		= NULL
 		,[intLoadShipmentDetailId] 	= CASE WHEN LI.strSourceTransactionId = 'LOD' THEN LI.intSourceTransactionId ELSE NULL END
-		,intTaxGroupId				= CASE WHEN StorageType.ysnDPOwnedType = 1 THEN -1 
-										ELSE 
-											CASE WHEN ISNULL(CNT.intPricingTypeId,0) = 2 OR ISNULL(CNT.intPricingTypeId,0) = 3 
-											THEN -1
-											ELSE NULL
-											END 
+		,intTaxGroupId				= CASE WHEN @ysnChangeTaxGroup =1 THEN
+											dbo.fnGetTaxGroupIdForVendor (
+													SC.intEntityId	-- @VendorId
+													,SC.intProcessingLocationId		--,@CompanyLocationId
+													,NULL						--,@ItemId
+													,COALESCE(SC.intFarmFieldId, VND.intShipFromId, VNDL.intEntityLocationId)	--,@VendorLocationId
+													,COALESCE(CNT.intFreightTermId,FRM.intFreightTermId,VNDSF.intFreightTermId,VNDL.intFreightTermId)	--,@FreightTermId
+													,DEFAULT
+												) 										ELSE 
+										CASE WHEN StorageType.ysnDPOwnedType = 1 THEN -1 
+											ELSE 
+												CASE WHEN ISNULL(CNT.intPricingTypeId,0) = 2 OR ISNULL(CNT.intPricingTypeId,0) = 3 
+												THEN -1
+												ELSE NULL
+												END 
+											END
 										END
 		,ysnAddPayable				= CASE WHEN ISNULL(CNT.intPricingTypeId,0) = 2 OR ISNULL(CNT.intPricingTypeId,0) = 3 OR ISNULL(CNT.intPricingTypeId,0) = 5 
 										THEN 0

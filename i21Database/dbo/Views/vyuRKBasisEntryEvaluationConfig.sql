@@ -2,7 +2,7 @@ CREATE VIEW [dbo].[vyuRKBasisEntryEvaluationConfig]
 AS
 SELECT TOP 1 
 	  intCompanyPreferenceId = rk.intCompanyPreferenceId
-	--, ysnIncludeProductInformation = rk.ysnIncludeProductInformation
+	, ysnIncludeProductInformation = rk.ysnIncludeProductInformation
 	, ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell = rk.ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell
 	, ysnEnterForwardCurveForMarketBasisDifferential = rk.ysnEnterForwardCurveForMarketBasisDifferential
 	, strEvaluationBy = rk.strEvaluationBy
@@ -13,10 +13,10 @@ SELECT TOP 1
 	, ysnEvaluationByCropYear = rk.ysnEvaluationByCropYear
 	, ysnEvaluationByStorageLocation = rk.ysnEvaluationByStorageLocation
 	, ysnEvaluationByStorageUnit = rk.ysnEvaluationByStorageUnit
-	--, ysnEnableMTMPoint = ct.ysnEnableMTMPoint 
+	, ysnEnableMTMPoint = ct.ysnEnableMTMPoint 
 FROM tblRKCompanyPreference rk
---OUTER APPLY (
---	SELECT TOP 1 
---		ysnEnableMTMPoint
---	FROM tblCTCompanyPreference
---) ct
+OUTER APPLY (
+	SELECT TOP 1 
+		ysnEnableMTMPoint
+	FROM tblCTCompanyPreference
+) ct

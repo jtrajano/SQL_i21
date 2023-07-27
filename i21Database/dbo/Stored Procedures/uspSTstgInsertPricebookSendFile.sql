@@ -628,7 +628,27 @@ SELECT '@tblTempPassportITT', * FROM @tblTempPassportITT
 											strUpcCode = t1.strUpcCode,
 											strDescription = t1.strDescription,
 											strUnitMeasure = t1.strUnitMeasure,
-											dblSalePrice = t1.dblSalePrice,
+											--rev (from 22.1ProdDev)
+											dblSalePrice = CASE
+																	WHEN (GETDATE() BETWEEN t1.dtmBeginDate AND t1.dtmEndDate)
+																		THEN t1.dblUnitAfterDiscount 
+																	WHEN (GETDATE() > (SELECT TOP 1 dtmEffectiveRetailPriceDate FROM tblICEffectiveItemPrice EIP 
+																								WHERE EIP.intItemLocationId = t1.intItemLocationId
+																								AND GETDATE() >= dtmEffectiveRetailPriceDate
+																								ORDER BY dtmEffectiveRetailPriceDate ASC))
+																		THEN (SELECT TOP 1 dblRetailPrice FROM tblICEffectiveItemPrice EIP 
+																								WHERE EIP.intItemLocationId = t1.intItemLocationId
+																								-- rev
+																								AND EIP.intItemId = t1.intItemId 	
+																								AND EIP.intItemUOMId = t1.intItemUOMId 
+																								-- rev
+																								AND GETDATE() >= dtmEffectiveRetailPriceDate
+																								ORDER BY dtmEffectiveRetailPriceDate ASC) --Effective Retail Price
+																	ELSE t1.dblSalePrice
+																END,
+											--dblSalePrice = t1.dblSalePrice,
+
+											--rev (from 22.1ProdDev)
 
 											ysnSalesTaxed = t1.ysnSalesTaxed,
 											ysnIdRequiredLiquor = t1.ysnIdRequiredLiquor,
@@ -649,6 +669,7 @@ SELECT '@tblTempPassportITT', * FROM @tblTempPassportITT
 														, IUM.strUnitMeasure AS strUnitMeasure
 														, itemPricing.dblSalePrice AS dblSalePrice
 														, IL.intItemLocationId AS intItemLocationId
+														, IUOM.intItemUOMId		-- rev
 														, IL.ysnTaxFlag1 AS ysnSalesTaxed
 														, IL.ysnIdRequiredLiquor AS ysnIdRequiredLiquor
 														, IL.ysnIdRequiredCigarette AS ysnIdRequiredCigarette

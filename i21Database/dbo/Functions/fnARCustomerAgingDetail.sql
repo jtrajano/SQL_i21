@@ -376,6 +376,7 @@ BEGIN
 	LEFT JOIN (
 		SELECT intTransactionId, dtmDate, strTransactionType
 		FROM dbo.tblARNSFStagingTableDetail
+		WHERE ysnProcessed = 1
 		GROUP BY intTransactionId, dtmDate, strTransactionType
 	) NSF ON P.intPaymentId = NSF.intTransactionId AND NSF.strTransactionType = 'Payment'
 	WHERE P.ysnPosted = 1
@@ -577,8 +578,8 @@ BEGIN
 	)
 	SELECT intOriginalInvoiceId	= I.intOriginalInvoiceId
 		 , strDocumentNumber	= ID.strDocumentNumber
-		 , dblRefundTotal		= SUM(ID.dblTotal)
-		 , dblBaseRefundTotal	= SUM(ID.dblBaseTotal)
+		 , dblRefundTotal		= SUM(I.dblPayment)
+		 , dblBaseRefundTotal	= SUM(I.dblBasePayment)
 	FROM tblARInvoiceDetail ID
 	INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
 	INNER JOIN @ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId

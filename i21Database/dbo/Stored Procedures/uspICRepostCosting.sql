@@ -47,6 +47,7 @@ DECLARE @intId AS INT
 		,@strBOLNumber AS NVARCHAR(100)
 		,@intTicketId AS INT 
 		,@intCompanyLocationId AS INT 
+		,@dblForexCost AS NUMERIC(38, 20)
 
 DECLARE @CostingMethod AS INT 
 		,@strTransactionForm AS NVARCHAR(255)
@@ -96,6 +97,7 @@ BEGIN
 		,[dblQty] 
 		,[dblUOMQty] 
 		,[dblCost] 
+		,[dblForexCost]
 		,[dblValue] 
 		,[dblSalesPrice] 
 		,[intCurrencyId] 
@@ -127,7 +129,6 @@ BEGIN
 		,[strSourceType]
 		,[strSourceNumber]
 	)
-	
 	SELECT 
 		[intItemId] 
 		,[intItemLocationId] 
@@ -136,6 +137,7 @@ BEGIN
 		,[dblQty]
 		,[dblUOMQty] 
 		,[dblCost] = ISNULL(NULLIF(tpCost.dblCost, 0), lastCost.dblLastCost) 
+		,[dblForexCost] = 0 
 		,[dblValue] 
 		,[dblSalesPrice] 
 		,[intCurrencyId] 
@@ -175,6 +177,7 @@ BEGIN
 				,[dblQty] = SUM([dblQty]) 
 				,[dblUOMQty] 
 				,[dblCost] = 0 
+				,[dblForexCost] = 0 
 				,[dblValue] 
 				,[dblSalesPrice] 
 				,[intCurrencyId] 
@@ -314,6 +317,7 @@ BEGIN
 		,[dblQty] 
 		,[dblUOMQty] 
 		,[dblCost] 
+		,[dblForexCost]
 		,[dblValue] 
 		,[dblSalesPrice] 
 		,[intCurrencyId] 
@@ -353,6 +357,7 @@ BEGIN
 		,SUM([dblQty]) 
 		,[dblUOMQty] 
 		,[dblCost]
+		,[dblForexCost]
 		,[dblValue] 
 		,[dblSalesPrice] 
 		,[intCurrencyId] 
@@ -392,6 +397,7 @@ BEGIN
 		,[dtmDate] 
 		,[dblUOMQty] 
 		,[dblCost]
+		,[dblForexCost]
 		,[dblValue] 
 		,[dblSalesPrice] 
 		,[intCurrencyId] 
@@ -433,6 +439,7 @@ BEGIN
 		,[dblQty] 
 		,[dblUOMQty] 
 		,[dblCost] 
+		,[dblForexCost]
 		,[dblValue] 
 		,[dblSalesPrice] 
 		,[intCurrencyId] 
@@ -472,6 +479,7 @@ BEGIN
 		,[dblQty]
 		,[dblUOMQty] 
 		,[dblCost]
+		,[dblForexCost]
 		,[dblValue] 
 		,[dblSalesPrice] 
 		,[intCurrencyId] 
@@ -532,6 +540,7 @@ SELECT  intId
 		,dblQty
 		,dblUOMQty
 		,dblCost
+		,dblForexCost
 		,dblSalesPrice
 		,intCurrencyId
 		,intTransactionId
@@ -568,6 +577,7 @@ FETCH NEXT FROM loopItems INTO
 	,@dblQty
 	,@dblUOMQty
 	,@dblCost
+	,@dblForexCost
 	,@dblSalesPrice
 	,@intCurrencyId
 	,@intTransactionId
@@ -675,6 +685,7 @@ BEGIN
 			,@dblQty
 			,@dblUOMQty
 			,@dblCost
+			,@dblForexCost
 			,@dblSalesPrice
 			,@intCurrencyId
 			,@intTransactionId
@@ -710,6 +721,7 @@ BEGIN
 			,@dblQty
 			,@dblUOMQty
 			,@dblCost
+			,@dblForexCost
 			,@dblSalesPrice
 			,@intCurrencyId
 			,@intTransactionId
@@ -744,6 +756,7 @@ BEGIN
 			,@dblQty
 			,@dblUOMQty
 			,@dblCost
+			,@dblForexCost
 			,@dblSalesPrice
 			,@intCurrencyId
 			,@intTransactionId
@@ -779,6 +792,7 @@ BEGIN
 			,@dblQty
 			,@dblUOMQty
 			,@dblCost
+			,@dblForexCost
 			,@dblSalesPrice
 			,@intCurrencyId
 			,@intTransactionId
@@ -814,6 +828,7 @@ BEGIN
 			,@dblQty
 			,@dblUOMQty
 			,@dblCost
+			,@dblForexCost
 			,@dblUnitRetail
 			,@dblSalesPrice
 			,@intCurrencyId
@@ -867,6 +882,7 @@ BEGIN
 					,@dblQty
 					,@dblUOMQty
 					,@dblCost
+					,@dblForexCost
 					,@dblSalesPrice
 					,@intCurrencyId
 					,@intTransactionId
@@ -901,6 +917,7 @@ BEGIN
 					,@dblQty
 					,@dblUOMQty
 					,@dblCost
+					,@dblForexCost
 					,@dblSalesPrice
 					,@intCurrencyId
 					,@intTransactionId
@@ -934,6 +951,7 @@ BEGIN
 					,@dblQty
 					,@dblUOMQty
 					,@dblCost
+					,@dblForexCost
 					,@dblSalesPrice
 					,@intCurrencyId
 					,@intTransactionId
@@ -968,6 +986,7 @@ BEGIN
 					,@dblQty
 					,@dblUOMQty
 					,@dblCost
+					,@dblForexCost
 					,@dblSalesPrice
 					,@intCurrencyId
 					,@intTransactionId
@@ -1002,6 +1021,7 @@ BEGIN
 					,@dblQty
 					,@dblUOMQty
 					,@dblCost
+					,@dblForexCost
 					,@dblUnitRetail
 					,@dblSalesPrice
 					,@intCurrencyId
@@ -1037,7 +1057,8 @@ BEGIN
 				,@dtmDate 
 				,@dblQty 
 				,@dblUOMQty 
-				,@dblCost 
+				,@dblCost
+				,@dblForexCost
 				,@dblSalesPrice 
 				,@intCurrencyId 
 				,@intTransactionId 
@@ -1185,6 +1206,7 @@ BEGIN
 		,@dblQty
 		,@dblUOMQty
 		,@dblCost
+		,@dblForexCost
 		,@dblSalesPrice
 		,@intCurrencyId
 		,@intTransactionId
@@ -1308,6 +1330,7 @@ BEGIN
 			,intTransactionId
 			,strTransactionId
 			,intTransactionTypeId
+			,intSourceEntityId
 	)
 	SELECT 
 			tp.intItemId
@@ -1321,6 +1344,7 @@ BEGIN
 			,tp.intTransactionId
 			,tp.strTransactionId
 			,tp.intTransactionTypeId
+			,tp.intSourceEntityId
 	FROM	@ItemsToPostRaw tp INNER JOIN #tmpAutoVarianceBatchesForAVGCosting tmp 
 				ON tp.intItemId = tmp.intItemId
 				AND tp.intItemLocationId = tmp.intItemLocationId
@@ -1392,6 +1416,7 @@ BEGIN
 				,@dblQty  = 0
 				,@dblUOMQty = 0
 				,@dblCost = 0
+				,@dblForexCost = 0
 				,@dblValue = @dblAutoVariance
 				,@dblSalesPrice = 0
 				,@intCurrencyId = NULL 
@@ -1408,6 +1433,7 @@ BEGIN
 				,@intEntityUserSecurityId = @intEntityUserSecurityId
 				,@intCostingMethod = @AVERAGECOST
 				,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT
+				,@intFobPointId = NULL
 				,@intForexRateTypeId = NULL
 				,@dblForexRate = 1
 				,@strDescription = @strAutoVarianceDescription 
@@ -1634,7 +1660,7 @@ BEGIN
 				,@strRelatedTransactionId = NULL 
 				,@strTransactionForm = @strTransactionForm
 				,@intEntityUserSecurityId = @intEntityUserSecurityId
-				,@intCostingMethod = @AVERAGECOST
+				,@intCostingMethod = @LOTCOST
 				,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT
 				,@intForexRateTypeId = NULL
 				,@dblForexRate = 1
@@ -1816,6 +1842,7 @@ BEGIN
 							, DEFAULT
 							, DEFAULT
 						)
+				,@intCostingMethod = dbo.fnGetCostingMethod(@intItemId, @intItemLocationId)
 		FROM	@ItemsWithZeroStock iWithZeroStock INNER JOIN tblICItemStock iStock
 					ON iWithZeroStock.intItemId = iStock.intItemId
 					AND iWithZeroStock.intItemLocationId = iStock.intItemLocationId
@@ -1851,6 +1878,7 @@ BEGIN
 				,@dblQty  = 0
 				,@dblUOMQty = 0
 				,@dblCost = 0
+				,@dblForexCost = 0
 				,@dblValue = @dblAutoVariance
 				,@dblSalesPrice = 0
 				,@intCurrencyId = NULL 
@@ -1865,8 +1893,9 @@ BEGIN
 				,@strRelatedTransactionId = NULL 
 				,@strTransactionForm = @strTransactionForm
 				,@intEntityUserSecurityId = @intEntityUserSecurityId
-				,@intCostingMethod = @AVERAGECOST
+				,@intCostingMethod = @intCostingMethod
 				,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT
+				,@intFobPointId = NULL
 				,@intForexRateTypeId = NULL
 				,@dblForexRate = 1
 				,@strDescription = @strAutoVarianceDescription 
@@ -1979,4 +2008,3 @@ BEGIN
 
 	END 
 END 
-

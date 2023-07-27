@@ -148,6 +148,9 @@ BEGIN
 			FROM tblAPBillDetail BD
 			INNER JOIN tblAPBill AP
 				ON AP.intBillId = BD.intBillId
+			INNER JOIN tblSMCompanyLocation CL
+				ON CL.intCompanyLocationId = AP.intShipToId
+					AND CL.ysnLicensed = 1
 			INNER JOIN tblICItem IC
 				ON IC.intItemId = BD.intItemId
 					AND IC.strType = 'Inventory'
@@ -234,6 +237,9 @@ BEGIN
 			FROM tblAPBillDetail BD
 			INNER JOIN tblAPBill AP
 				ON AP.intBillId = BD.intBillId
+			INNER JOIN tblSMCompanyLocation CL
+				ON CL.intCompanyLocationId = AP.intShipToId
+					AND CL.ysnLicensed = 1
 			INNER JOIN tblICItem IC
 				ON IC.intItemId = BD.intItemId
 					AND IC.strType = 'Inventory'
@@ -264,6 +270,8 @@ BEGIN
 				,UM_REF.intCommodityUnitMeasureId
 		) A
 
+		
+
 		DECLARE @dblReversedSettlementsWithNoPayment DECIMAL(18,6)
 		DECLARE @dblDPReversedSettlementsWithPayment DECIMAL(18,6)
 		DECLARE @dblSettlementsWithDeletedPayment DECIMAL(18,6)
@@ -275,11 +283,13 @@ BEGIN
 			,@dblSettlementsWithDeletedPaymentSameDay = SUM(dblPaid3) --must be added only on the unpaid decrease if reversal was done on the same day that the settlement was processed
 			,@dblSettlementReversedOnDiffDay = SUM(dblPaid4) --add on the unpaid beginning when a settlement is reversed on a different day
 		FROM (
-			SELECT dblUnpaid = CASE WHEN AP.intBillId IS NULL AND SH.strType = 'Reverse Settlement' THEN SUM(ISNULL(SH.dblUnits,0)) ELSE 0 END
+			SELECT dblUnpaid = CASE WHEN AP.intBillId IS NULL AND SH.strType = 'Reverse Settlement' AND dbo.fnRemoveTimeOnDate(SH.dtmHistoryDate) = @dtmReportDate THEN SUM(ISNULL(SH.dblUnits,0)) ELSE 0 END
 				,dblPaid = CASE WHEN AP.intBillId IS NOT NULL AND SH.strType = 'Reverse Settlement' THEN SUM(ISNULL(SH.dblUnits,0)) ELSE 0 END
-				,dblPaid2 = CASE WHEN AP.intBillId IS NOT NULL AND SH.strType = 'Settlement' THEN SUM(ISNULL(SH.dblUnits,0)) ELSE 0 END
+				,dblPaid2 = CASE WHEN AP.intBillId IS NOT NULL AND SH.strType = 'Settlement' AND dbo.fnRemoveTimeOnDate(SH_2.dtmHistoryDate) <> dbo.fnRemoveTimeOnDate(SH.dtmHistoryDate) THEN SUM(ISNULL(SH.dblUnits,0)) ELSE 0 END
 				,dblPaid3 = CASE WHEN AP.intBillId IS NOT NULL AND dbo.fnRemoveTimeOnDate(SH_2.dtmHistoryDate) = dbo.fnRemoveTimeOnDate(SH.dtmHistoryDate) AND SH.strType = 'Reverse Settlement' THEN SUM(ISNULL(SH.dblUnits,0)) ELSE 0 END
-				,dblPaid4 = CASE WHEN AP.intBillId IS NULL AND dbo.fnRemoveTimeOnDate(SH_2.dtmHistoryDate) < dbo.fnRemoveTimeOnDate(SH.dtmHistoryDate) AND SH.strType = 'Reverse Settlement' THEN SUM(ISNULL(SH.dblUnits,0)) ELSE 0 END
+				,dblPaid4 = CASE WHEN AP.intBillId IS NULL AND (
+					dbo.fnRemoveTimeOnDate(SH_2.dtmHistoryDate) < dbo.fnRemoveTimeOnDate(SH.dtmHistoryDate) 
+						AND dbo.fnRemoveTimeOnDate(SH.dtmHistoryDate) >= @dtmReportDate AND dbo.fnRemoveTimeOnDate(SH_2.dtmHistoryDate) < @dtmReportDate) AND SH.strType = 'Reverse Settlement' THEN SUM(ISNULL(SH.dblUnits,0)) ELSE 0 END
 			FROM tblGRStorageHistory SH
 			INNER JOIN tblGRCustomerStorage CS
 				ON CS.intCustomerStorageId = SH.intCustomerStorageId
@@ -289,6 +299,7 @@ BEGIN
 				ON IC.intCommodityId = CS.intCommodityId
 			INNER JOIN tblSMCompanyLocation CL
 				ON CL.intCompanyLocationId = CS.intCompanyLocationId
+					AND CL.ysnLicensed = 1
 			INNER JOIN tblICItemUOM UOM
 				ON UOM.intItemUOMId = CS.intItemUOMId
 			INNER JOIN tblICUnitMeasure UM
@@ -301,10 +312,12 @@ BEGIN
 					AND SH_2.strType = 'Settlement'
 			WHERE ((SH.strType = 'Reverse Settlement' AND SH.intSettleStorageId IS NULL) OR (SH.strType = 'Settlement' AND SH.intSettleStorageId IS NOT NULL))
 				AND CS.intCommodityId = @intCommodityId
-				AND dbo.fnRemoveTimeOnDate(SH.dtmHistoryDate) = @dtmReportDate
+				AND dbo.fnRemoveTimeOnDate(SH.dtmHistoryDate) >= @dtmReportDate
 				AND SH.strSettleTicket NOT IN (SELECT strSettleStorageTicket FROM tblGRReversedSettlementsWithVoidedPayments)
 			GROUP BY AP.intBillId, SH.strType, SH_2.dtmHistoryDate,SH.dtmHistoryDate
 		) A
+
+		--select '@dblSettlementReversedOnDiffDay'=ISNULL(@dblSettlementReversedOnDiffDay,0),'@dblVoidedPaymentOldVoucherAddInBeginning'=ISNULL(@dblVoidedPaymentOldVoucherAddInBeginning,0) ,'@dblVoidedPaymentOldVoucher'=ISNULL(@dblVoidedPaymentOldVoucher,0)
 
 		/****BEGINNING****/
 		INSERT INTO @CompanyOwnedData
@@ -377,6 +390,9 @@ BEGIN
 			FROM tblAPBillDetail BD
 			INNER JOIN tblAPBill AP
 				ON AP.intBillId = BD.intBillId
+			INNER JOIN tblSMCompanyLocation CL
+				ON CL.intCompanyLocationId = AP.intShipToId
+					AND CL.ysnLicensed = 1
 			INNER JOIN tblICItem IC
 				ON IC.intItemId = BD.intItemId
 					AND IC.strType = 'Inventory'
@@ -631,6 +647,9 @@ BEGIN
 				ON ST_TO.intStorageScheduleTypeId = TS.intToStorageTypeId
 			INNER JOIN tblGRCustomerStorage CS
 				ON CS.intCustomerStorageId = TS.intFromCustomerStorageId
+			INNER JOIN tblSMCompanyLocation CL
+				ON CL.intCompanyLocationId = CS.intCompanyLocationId
+					AND CL.ysnLicensed = 1
 			INNER JOIN tblICItemUOM UOM
 				ON UOM.intItemUOMId = CS.intItemUOMId
 			INNER JOIN tblICUnitMeasure UM
@@ -660,7 +679,7 @@ BEGIN
 		SET @dblInternalTransfersShipped = NULL
 		SET @dblInternalTransfersDiff = NULL
 
-		SELECT @dblShipped = SUM(ISNULL(dblShipped,0))
+		SELECT @dblShipped = SUM(ISNULL(dblShipped,0) - ISNULL(dblShippedCustomerOwned,0))
 			,@dblInternalTransfersReceived = SUM(ISNULL(dblInternalTransfersReceived,0))
 			,@dblInternalTransfersShipped = SUM(ISNULL(dblInternalTransfersShipped,0))
 		FROM tblGRGIIPhysicalInventory 
@@ -756,6 +775,9 @@ BEGIN
 	FROM tblAPBillDetail BD
 	INNER JOIN tblAPBill AP
 		ON AP.intBillId = BD.intBillId
+	INNER JOIN tblSMCompanyLocation CL
+		ON CL.intCompanyLocationId = AP.intShipToId
+			AND CL.ysnLicensed = 1
 	INNER JOIN tblICItem IC
 		ON IC.intItemId = BD.intItemId
 			AND IC.strType = 'Inventory'
@@ -782,7 +804,6 @@ BEGIN
 		AND ((BD.intSettleStorageId IS NULL AND BD.intCustomerStorageId IS NULL AND BD.intInventoryReceiptItemId IS NULL AND BD.intContractDetailId IS NULL)
 				OR (BD.intSettleStorageId IS NULL AND BD.intCustomerStorageId IS NULL AND BD.intInventoryReceiptItemId IS NOT NULL AND IR.intOwnershipType = 1)
 			)
-
 
 	UPDATE C
 	--SET dblTotalIncrease = ISNULL(@dblSODecrease,0) + ISNULL(@dblIACustomerOwned,0) + ISNULL(DP.total,0) + ISNULL(RS.dblUnits,0)
@@ -816,6 +837,9 @@ BEGIN
 			ON ST_TO.intStorageScheduleTypeId = TS.intToStorageTypeId
 		INNER JOIN tblGRCustomerStorage CS
 			ON CS.intCustomerStorageId = TS.intFromCustomerStorageId
+		INNER JOIN tblSMCompanyLocation CL
+			ON CL.intCompanyLocationId = CS.intCompanyLocationId
+				AND CL.ysnLicensed = 1
 		INNER JOIN tblICItemUOM UOM
 			ON UOM.intItemUOMId = CS.intItemUOMId
 		INNER JOIN tblICUnitMeasure UM

@@ -14,6 +14,7 @@
 	[strType]				NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strUniqueId]			NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL,
     [intConcurrencyId]		INT CONSTRAINT [DF_tblSMLicense_intConcurrencyId] DEFAULT ((0)) NOT NULL,
+	[intMaxAttachmentStorage]	INT NOT NULL DEFAULT(100),
 
     CONSTRAINT [PK_tblSMLicense] PRIMARY KEY CLUSTERED ([intLicenseId] ASC)
 )

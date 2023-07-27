@@ -53,10 +53,13 @@ BEGIN TRY
   ,@ysnMultipleContractSeq BIT  
  DECLARE @intOrgSampleTypeId INT  
   ,@intOrgItemId INT  
+  ,@intOrginalSampleItemId INT  
   ,@intOrgCountryID INT  
   ,@intOrgCompanyLocationSubLocationId INT  
   ,@intRelatedSampleId INT  
   ,@intCurrentRelatedSampleId INT  
+
+ DECLARE @intDefaultItemId INT
 
  DECLARE @intCountryID INT
   
@@ -123,6 +126,10 @@ DECLARE @ysnSuccess BIT
     ,1  
     )  
  END  
+
+ SELECT @intOrginalSampleItemId = intItemId
+ FROM tblQMSample
+ WHERE intSampleId = @intSampleId
   
  -- Quantity Check  
  IF ISNULL(@intSampleUOMId, 0) > 0  
@@ -1149,6 +1156,27 @@ DECLARE @ysnSuccess BIT
 IF EXISTS (SELECT 1 FROM tblQMCompanyPreference WHERE ysnCreateBatchOnSampleSave = 1)
 -- AND EXISTS (SELECT 1 FROM tblQMSample WHERE intSampleId = @intSampleId AND ((ISNULL(dblB1QtyBought, 0) <> 0 AND ISNULL(dblB1Price, 0) <> 0) OR ISNULL(intContractDetailId, 0) <> 0))
 BEGIN
+
+-- if it is AUC then trigger BUYER1 validation
+  IF EXISTS (
+          SELECT 1 
+          FROM tblQMSample S
+          INNER JOIN tblARMarketZone MZ ON MZ.intMarketZoneId = S.intMarketZoneId
+          WHERE ISNULL(intContractDetailId, 0) = 0 AND MZ.strMarketZoneCode = 'AUC'
+          AND S.intSampleId = @intSampleId
+  )
+  BEGIN  
+      IF EXISTS (SELECT 1 FROM tblQMSample S WHERE S.intSampleId = @intSampleId AND S.dblB1QtyBought > S.dblRepresentingQty)
+      BEGIN  
+          RAISERROR ('Buyer 1 Qty cannot be greater than Quantity. ', 16, 1)  
+      END  
+  
+      IF EXISTS (SELECT 1 FROM tblQMSample S WHERE S.intSampleId = @intSampleId AND S.intB1QtyUOMId <> S.intRepresentingUOMId)
+      BEGIN  
+          RAISERROR ('Buyer 1 Qty UOM should be the same as Quantity UOM. ', 16, 1)  
+      END 
+  END
+
   IF EXISTS(
     SELECT 1
     FROM tblQMSample S
@@ -1307,6 +1335,7 @@ BEGIN
       ,dblTeaMouthFeelPinpoint
       ,dblTeaAppearancePinpoint
       ,intSupplierId
+      ,intCountryId
 
       ,dblOriginalTeaTaste
       ,dblOriginalTeaHue
@@ -1336,11 +1365,11 @@ BEGIN
       ,strAWBSampleReference = S.strAWBSampleReference
       ,dblBasePrice = CASE WHEN CD.intContractDetailId IS NULL THEN S.dblB1Price ELSE CD.dblCashPrice END
       ,ysnBoughtAsReserved = S.ysnBoughtAsReserve
-      ,dblBoughtPrice = CASE WHEN CD.intContractDetailId IS NULL THEN S.dblB1Price ELSE CD.dblCashPrice END
+      ,dblBoughtPrice = ISNULL(CASE WHEN CD.intContractDetailId IS NULL THEN S.dblB1Price ELSE CD.dblCashPrice END, BT.dblBoughtPrice)
       ,dblBulkDensity = BT.dblBulkDensity
       ,strBuyingOrderNumber = CASE WHEN CD.intContractDetailId IS NULL THEN S.strBuyingOrderNo ELSE CH.strExternalContractNumber END
       ,intSubBookId = S.intSubBookId
-      ,strContainerNumber = S.strContainerNumber
+      ,strContainerNumber = BT.strContainerNumber
       ,intCurrencyId = S.intCurrencyId
       ,dtmProductionBatch = S.dtmManufacturingDate
       ,dtmTeaAvailableFrom = BT.dtmTeaAvailableFrom
@@ -1444,6 +1473,7 @@ BEGIN
       ,dblTeaMouthFeelPinpoint = MOUTH_FEEL.dblPinpointValue
       ,dblTeaAppearancePinpoint = APPEARANCE.dblPinpointValue
       ,intSupplierId = S.intEntityId
+      ,intCountryId = ORIGIN.intCountryID
 
       ,dblOriginalTeaTaste = ISNULL(BT.dblTeaTaste, TASTE.dblPinpointValue)
       ,dblOriginalTeaHue = ISNULL(BT.dblTeaHue, HUE.dblPinpointValue)
@@ -1457,6 +1487,7 @@ BEGIN
 		LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId  = S.intContractDetailId
     LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
     LEFT JOIN tblICCommodityAttribute REGION ON REGION.intCommodityAttributeId = I.intRegionId
+    LEFT JOIN tblICCommodityAttribute ORIGIN ON ORIGIN.intCommodityAttributeId = S.intCountryID
     LEFT JOIN tblCTBook B ON B.intBookId = S.intBookId
     LEFT JOIN tblSMCompanyLocation MU ON MU.strLocationName = B.strBook
     LEFT JOIN tblSMCompanyLocation TBO ON TBO.intCompanyLocationId = S.intLocationId AND (TBO.intCompanyLocationId <> ISNULL(MU.intCompanyLocationId, 0))
@@ -1569,7 +1600,7 @@ BEGIN
     -- Weight Item UOM
     LEFT JOIN tblICItemUOM WIUOM ON WIUOM.intItemId = S.intItemId AND WIUOM.intUnitMeasureId = S.intSampleUOMId
     -- Qty Item UOM
-    LEFT JOIN tblICItemUOM QIUOM ON QIUOM.intItemId = S.intItemId AND QIUOM.intUnitMeasureId = S.intB1QtyUOMId
+    LEFT JOIN tblICItemUOM QIUOM ON QIUOM.intItemId = S.intItemId AND QIUOM.intUnitMeasureId = S.intRepresentingUOMId
     WHERE S.intSampleId = @intSampleId
     AND (
       (BT.intBatchId IS NOT NULL AND BT.intLocationId = S.intCompanyLocationId)
@@ -1665,6 +1696,30 @@ BEGIN
 								,@intUserId = @intLastModifiedUserId
 								,@intOriginalItemId = @intOriginalItemId
 								,@intItemId = @intItemId
+
+        SELECT TOP 1 @intDefaultItemId = intDefaultItemId FROM tblQMCatalogueImportDefaults
+
+        IF @intItemId <> @intOrginalSampleItemId AND @intItemId <> @intDefaultItemId AND @intOrginalSampleItemId <> @intDefaultItemId
+          AND EXISTS(SELECT 1 FROM tblICLot WHERE strLotNumber=@strBatchId and intItemId <> @intItemId)
+        BEGIN
+          DECLARE
+            @dtmCurrentDate DATETIME
+            ,@strNewLotNumber	nvarchar(50)
+
+          SELECT @dtmCurrentDate = Convert(CHAR, GETDATE(), 101)
+          SELECT @intLotId=NULL
+          SELECT @intLotId=intLotId FROM tblICLot WHERE strLotNumber=@strBatchId
+          EXEC dbo.uspMFLotItemChange @intLotId =@intLotId
+                  ,@intNewItemId = @intItemId
+                  ,@intUserId = @intLastModifiedUserId
+                  ,@strNewLotNumber  = @strNewLotNumber OUTPUT
+                  ,@dtmDate =@dtmCurrentDate
+                  ,@strReasonCode  = NULL
+                  ,@strNotes  = NULL
+                  ,@ysnBulkChange  = 0
+                  ,@ysnProducedItemChange  = 0
+                  ,@dblPhysicalCount  = NULL
+        END
 			END			
     END
   END

@@ -1831,6 +1831,28 @@
     <Build Include="dbo\Stored Procedures\uspCTGetItemPriceByLevel.sql" />
     <Build Include="dbo\Functions\fnMFGetErrorMessage.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetErrorMessage.sql" />
+    <None Include="Scripts\Post-Deployment\ST\56_FileFieldMapping_Passport_FGMT.sql" />
+    <None Include="Scripts\Post-Deployment\ST\55_FileFieldMapping_Passport_FGML.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageSAPStock_DA.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessSAPStock_DA.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetScheduleWorkOrder.sql" />
+    <Build Include="dbo\Views\vyuMFScheduleRule.sql" />
+    <Build Include="dbo\Views\vyuMFYield.sql" />
+    <Build Include="dbo\Views\vyuAPVoucherIdWithDM.sql" />
+    <Build Include="dbo\Functions\fnRKGetM2MValuationAverageCost.sql" />
+    <Build Include="dbo\Functions\fnGetItemCostingOnPostInTransitAdjustmentErrors.sql" />
+    <Build Include="dbo\Views\vyuGLCOAiPayables.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLCorrigaCOAiPayables.sql" />
+    <None Include="Scripts\Post-Deployment\MF\14_ImportTypeDefaultValue.sql" />
+    <None Include="Scripts\Post-Deployment\MF\15_DemandForecastFix.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreateGLEntriesOnInTransitValueAdjustment.sql" />
+    <Build Include="dbo\Tables\tblICInventoryValueAdjustmentLog.sql" />
+    <Build Include="dbo\Functions\fnCreateInTransitValueAdjDescription.sql" />
+    <Build Include="dbo\Tables\tblTMFeeType.sql" />
+    <Build Include="dbo\Tables\tblTMSiteFee.sql" />
+    <Build Include="dbo\Tables\tblTMFee.sql" />
+    <Build Include="dbo\Functions\fnRKIsDerivativeLocked.sql" />
+    <Build Include="dbo\Views\vyuTMFeeSearch.sql" />
     <None Include="Scripts\Post-Deployment\Azure-Preparation\Azure-Preparation.sql" />
   </ItemGroup>
   <ItemGroup>
@@ -2774,6 +2796,7 @@
     <Build Include="dbo\Stored Procedures\uspFRDValidateDesign.sql" />
     <Build Include="dbo\Views\vyuAPRptPurchase.sql" />
     <Build Include="dbo\Tables\tblGLImportError.sql" />
+    <Build Include="dbo\Tables\tblGLGridSelectedRow.sql" />
     <Build Include="dbo\Functions\fnCreateTableFromDelimitedValues.sql" />
     <Build Include="dbo\Stored Procedures\uspGLCreateRecurringJournal.sql" />
     <Build Include="dbo\Stored Procedures\uspGLMergeSegmentAccount.sql" />
@@ -9410,6 +9433,7 @@
     <Build Include="dbo\Tables\tblCFImportDriverPinResult.sql" />
     <None Include="Scripts\Post-Deployment\ST\25_DataFix.sql" />
     <Build Include="dbo\Functions\fnICGeneratePayables.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPReverseVoucherPayable.sql" />
     <Build Include="dbo\Stored Procedures\uspICProcessPayables.sql" />
     <Build Include="dbo\Views\vyuSTItemUOMPosCodeFormat.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateInventoryPhysicalCount.sql" />
@@ -9869,8 +9893,6 @@
     <Build Include="dbo\Views\vyuRKGetFuturesVsUnfixedSaleContract.sql" />
     <Build Include="dbo\Functions\fCTConvertUOMtoUnit.sql" />
     <Build Include="dbo\Functions\fnCMGetReconGridResult.sql" />
-    <Build Include="dbo\Stored Procedures\uspCMGridClear.sql" />
-    <Build Include="dbo\Stored Procedures\uspCMGridSelect.sql" />
     <Build Include="dbo\Tables\tblCMGridSelectedRow.sql" />
     <Build Include="dbo\Stored Procedures\uspCMGetBankReconDebitCreditValues.sql" />
     <Build Include="dbo\Stored Procedures\uspLGContractVsMarketDifferentialAnalysis.sql" />
@@ -11770,6 +11792,7 @@
     <Build Include="dbo\Functions\fnGRCreateGLEntriesForPercentDiscounts.sql" />
     <Build Include="dbo\Functions\fnGRGetPercentDiscounts.sql" />
     <Build Include="dbo\Stored Procedures\uspMFProductionReport.sql" />
+    <Build Include="dbo\Views\vyuSCDirectAPClearingGLAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspGRSaveVoidedPayments.sql" />
     <Build Include="dbo\Tables\tblGRReversedSettlementsWithVoidedPayment.sql" />
   </ItemGroup>
@@ -12262,6 +12285,13 @@
     <Build Include="dbo\Views\vyuCTAmendmentTab.sql" />
     <None Include="Scripts\Post-Deployment\MBIL\InsertDefaultMobileCompanyPref.sql" />
     <Build Include="dbo\Stored Procedures\uspQMUpdateLoadShipmentDetail.sql" />
+    <Build Include="dbo\Functions\fnCTGetSampleDetailAllocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspARProcessTradeFinanceLog.sql" />
+    <Build Include="dbo\Tables\tblARCustomerInquiryStagingTable.sql" />
+    <Build Include="dbo\Tables\tblAPVoucherPayableReversed.sql" />
+    <Build Include="dbo\Tables\tblAPVoucherPayableTaxReversed.sql" />
+    <Build Include="dbo\Stored Procedures\uspARMainCustomerInquiryReport.sql" />
+    <None Include="Scripts\Post-Deployment\GR\Fix_Transfer_Storage_Action.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

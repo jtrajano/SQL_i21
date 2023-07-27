@@ -2,6 +2,8 @@ CREATE VIEW vyuQMAuctionReport
 AS
 SELECT intSampleId					= S.intSampleId
 	 , strSaleNumber				= S.strSaleNumber
+	 , strCompanyLocationName		= CompanyLocation.strLocationName
+	 , strFilterSaleNumber			= S.strSaleNumber + ' - ' + CompanyLocation.strLocationName
 	 , strSampleNote				= S.strSampleNote
 	 , strBrokerName				= E.strName
 	 , strAuctionPrice				= CAST(CAST(ISNULL(AUCPRICE.dblMinPrice, 0) AS DECIMAL(18,2)) AS NVARCHAR(100)) + ' - ' + CAST(CAST(ISNULL(AUCPRICE.dblMaxPrice, 0) AS DECIMAL(18,2)) AS NVARCHAR(100))
@@ -32,6 +34,7 @@ FROM tblQMSample S
 LEFT JOIN tblEMEntity SUP ON S.intEntityId = SUP.intEntityId
 LEFT JOIN tblEMEntity E ON S.intBrokerId = E.intEntityId
 LEFT JOIN tblSMCompanyLocationSubLocation SL ON S.intCompanyLocationSubLocationId = SL.intCompanyLocationSubLocationId
+LEFT JOIN tblSMCompanyLocation AS CompanyLocation ON S.intCompanyLocationId = CompanyLocation.intCompanyLocationId
 LEFT JOIN tblICItem ITEM ON S.intItemId = ITEM.intItemId
 LEFT JOIN tblICCommodityAttribute GRADE ON GRADE.intCommodityAttributeId = S.intGradeId
 LEFT JOIN tblICUnitMeasure SIUM ON SIUM.intUnitMeasureId = S.intSampleUOMId
@@ -54,11 +57,12 @@ OUTER APPLY (
 	ORDER BY intCompanySetupID ASC
 ) COMP
 OUTER APPLY (
-	SELECT dblMinPrice	= MIN(ISNULL(dblB1Price, 0))
-		 , dblMaxPrice  = MAX(ISNULL(dblB1Price, 0))
+	SELECT dblMinPrice	= ISNULL(MIN(dblB1Price),0)
+		 , dblMaxPrice  = ISNULL(MAX(dblB1Price),0)
 	FROM tblQMSample A
 	WHERE A.intGardenMarkId=S.intGardenMarkId 
 		and A.intGradeId =S.intGradeId 
-	  AND A.dtmSaleDate IN (Select MAX(B.dtmSaleDate) from tblQMSample B Where B.dtmSaleDate<= S.dtmSaleDate) 
+	  AND A.dtmSaleDate IN (Select MAX(B.dtmSaleDate) from tblQMSample B Where B.dtmSaleDate<= S.dtmSaleDate)
 ) AUCPRICE
 WHERE S.strSaleNumber IS NOT NULL
+AND MZ.strMarketZoneCode = 'AUC'

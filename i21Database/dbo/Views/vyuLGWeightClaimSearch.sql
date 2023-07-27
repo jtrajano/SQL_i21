@@ -37,6 +37,7 @@ SELECT
 	,strWeightUOM = WUOM.strUnitMeasure
 	,CH.strContractNumber
 	,CD.intContractSeq
+	,PT.strDescription AS strProductType
 	,strEntityName = EM.strName
 	,EM.intEntityId
 	,strPaidTo = PTEM.strName
@@ -83,6 +84,7 @@ FROM tblLGWeightClaim WC
 	LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = WD.intLoadContainerId
 	LEFT JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CH.intFreightTermId
 	LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOriginId
+	LEFT JOIN tblICCommodityAttribute PT ON PT.intCommodityAttributeId = I.intProductTypeId
 	LEFT JOIN tblICItemContract CONI ON CONI.intItemContractId = CD.intItemContractId AND CONI.intItemId = I.intItemId
 	LEFT JOIN tblSMCountry OG ON OG.intCountryID = CONI.intCountryId
 	LEFT JOIN tblSMCountry CAC ON CAC.intCountryID = CA.intCountryID

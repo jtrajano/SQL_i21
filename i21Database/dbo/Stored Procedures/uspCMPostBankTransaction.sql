@@ -169,6 +169,8 @@ SELECT	@MODULE_NAME = strModule
 FROM	dbo.tblSMStartingNumber
 WHERE	strTransactionType = @STARTING_NUMBER_TRANS_TYPE
 
+
+
 IF @@ERROR <> 0	GOTO Post_Rollback		
 
 --=====================================================================================================================================
@@ -190,6 +192,16 @@ BEGIN
 	RAISERROR('The transaction is already posted.', 11, 1)
 	GOTO Post_Rollback
 END 
+
+IF @ysnPost = 1 AND @ysnRecap = 0
+BEGIN
+	IF EXISTS(SELECT 1 FROM tblGLDetail where strTransactionId=@strTransactionId AND ISNULL(ysnIsUnposted,0) = 0)
+	BEGIN
+		UPDATE tblCMBankTransaction SET ysnPosted = 1 WHERE strTransactionId=@strTransactionId
+		RAISERROR('The transaction is already has posted entries. Please refresh the screen.', 11, 1)
+		GOTO Post_Rollback
+	END
+END
 
 -- Check if the transaction is already posted
 IF @ysnPost = 0 AND @ysnTransactionPostedFlag = 0

@@ -31,7 +31,7 @@ BEGIN
 			WHEN L.intPurchaseSale = 1 THEN LD.intPContractDetailId
 			WHEN L.intPurchaseSale = 2 THEN LD.intSContractDetailId
 		END
-	INNER JOIN tblCTContractCertification CC ON CC.intContractDetailId = CD.intContractDetailId
+	LEFT JOIN tblCTContractCertification CC ON CC.intContractDetailId = CD.intContractDetailId
 	LEFT JOIN tblCTCondition CTC ON CTC.intConditionId = LC.intConditionId
 	WHERE
 		ICI.intOriginId = @intOriginId AND

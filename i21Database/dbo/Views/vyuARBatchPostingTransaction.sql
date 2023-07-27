@@ -12,6 +12,7 @@ SELECT intBatchPostingTransactionId = CAST(ROW_NUMBER() OVER (ORDER BY AR.dtmBat
 	 , strCurrency				    = SMC.strCurrency
 	 , strCurrencyDescription	    = SMC.strDescription
 	 , strPostingType			    = AR.strPostingType
+	 , intCompanyLocationId			= AR.intCompanyLocationId
 FROM (
 	SELECT strPostingType			= 'Invoice' COLLATE Latin1_General_CI_AS
 		 , dblTotal					= INV.dblInvoiceTotal
@@ -45,22 +46,9 @@ FROM (
 	FROM tblARPayment P
 	WHERE ysnPosted = 1		
 ) AR
-INNER JOIN (
-    SELECT intEntityId
-         , strName
-    FROM tblEMEntity
-) E ON AR.intPostedById = E.intEntityId
-LEFT OUTER JOIN (
-	SELECT intCompanyLocationId
-		 , strLocationName
-	FROM dbo.tblSMCompanyLocation
-) LOC ON AR.intCompanyLocationId = LOC.intCompanyLocationId 
-LEFT OUTER JOIN (
-	SELECT intCurrencyID
-		 , strCurrency
-		 , strDescription 
-	FROM tblSMCurrency
-) SMC ON AR.intCurrencyId = SMC.intCurrencyID	
+INNER JOIN tblEMEntity E ON AR.intPostedById = E.intEntityId
+LEFT JOIN tblSMCompanyLocation LOC ON AR.intCompanyLocationId = LOC.intCompanyLocationId 
+LEFT JOIN tblSMCurrency SMC ON AR.intCurrencyId = SMC.intCurrencyID	
 GROUP BY AR.strBatchId
 	   , AR.dtmBatchDate
 	   , AR.strTransactionType 
@@ -70,3 +58,4 @@ GROUP BY AR.strBatchId
 	   , SMC.strCurrency
 	   , SMC.strDescription
 	   , AR.strPostingType
+	   , AR.intCompanyLocationId

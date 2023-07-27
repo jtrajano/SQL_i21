@@ -9,7 +9,6 @@ BEGIN
 		,@strRowState NVARCHAR(50)
 		,@strERPPONumber NVARCHAR(50)
 		,@strContractNumber NVARCHAR(50)
-		,@ysnPriceApproved BIT
 	DECLARE @tblOutput AS TABLE (
 		intRowNo INT IDENTITY(1, 1)
 		,strContractFeedIds NVARCHAR(MAX)
@@ -151,8 +150,6 @@ BEGIN
 			,@strERPPONumber = NULL
 			,@strContractNumber = NULL
 
-		SELECT @ysnPriceApproved = 1
-
 		SELECT @intContractHeaderId = intContractHeaderId
 			,@strRowState = strRowState
 			,@strERPPONumber = strERPPONumber
@@ -210,23 +207,6 @@ BEGIN
 		SELECT @intPriceContractScreenId = intScreenId
 		FROM tblSMScreen
 		WHERE strNamespace = 'ContractManagement.view.PriceContracts'
-
-		IF @intPriceContractId IS NOT NULL
-		BEGIN
-			IF NOT EXISTS (
-					SELECT TOP 1 1
-					FROM tblSMTransaction
-					WHERE strApprovalStatus IN (
-							'Approved'
-							,'Approved with Modifications'
-							)
-						AND intRecordId = @intPriceContractId
-						AND intScreenId = @intPriceContractScreenId
-					)
-			BEGIN
-				SELECT @ysnPriceApproved = 0
-			END
-		END
 
 		IF @strRowState IN (
 				'Modified'
@@ -309,6 +289,7 @@ BEGIN
 			+ '<CONTRACT_NO>' + ISNULL(CF.strContractNumber, '') + '</CONTRACT_NO>'
 			+ '<PO_NUMBER>' + ISNULL(CF.strERPPONumber, '') + '</PO_NUMBER>'
 			+ '<VENDOR>' + ISNULL(strVendorAccountNum, '') + '</VENDOR>'
+			+ '<VENDOR_REFERENCE_NO>' + ISNULL(CH.strCustomerContract, '') + '</VENDOR_REFERENCE_NO>'
 			+ '<BOOK>' + ISNULL(B.strBook, '') + '</BOOK>'
 			+ '<PAYMENT_TERM>' + dbo.fnEscapeXML(ISNULL(CF.strTerm, '')) + '</PAYMENT_TERM>'
 			+ '<INCO_TERM>' + ISNULL(CF.strContractBasis, '') + '</INCO_TERM>'
@@ -341,30 +322,30 @@ BEGIN
 			+ '<NET_WEIGHT>' + ISNULL(CONVERT(NVARCHAR(50), CONVERT(NUMERIC(18, 2), CF.dblNetWeight)), '') + '</NET_WEIGHT>'
 			+ '<NET_WEIGHT_UOM>' + ISNULL(strNetWeightUOM, '') + '</NET_WEIGHT_UOM>'
 			
-			+ CASE WHEN @ysnPriceApproved=1 THEN '<PRICE_TYPE>' + ISNULL(PT.strPricingType, 0) + '</PRICE_TYPE>'
+			+ '<PRICE_TYPE>' + ISNULL(PT.strPricingType, 0) + '</PRICE_TYPE>'
 			+ '<PRICE_MARKET>' + ISNULL(FM.strFutMarketName, 0) + '</PRICE_MARKET>'
 			+ '<PRICE_MONTH>' + ISNULL(LEFT(CONVERT(NVARCHAR, CONVERT(DATETIME, '01 ' + FMon.strFutureMonth), 112), 6), '') + '</PRICE_MONTH>'
 			+ '<PRICE>' + ISNULL(CONVERT(NVARCHAR(50), CONVERT(NUMERIC(18, 2), CD.dblCashPrice)), '') + '</PRICE>'
 			+ '<PRICE_UOM>' + ISNULL(PUM.strUnitMeasure, '') + '</PRICE_UOM>'
-			+ '<PRICE_CURRENCY>' + ISNULL(C2.strDescription,'') + '</PRICE_CURRENCY>'
+			+ '<PRICE_CURRENCY>' + ISNULL(C2.strCurrency,'') + '</PRICE_CURRENCY>'
 			+ '<BASIS>' + ISNULL(CONVERT(NVARCHAR(50), CONVERT(NUMERIC(18, 2), CD.dblBasis)), '') + '</BASIS>'
 			+ '<BASIS_UOM>' + ISNULL(UM.strUnitMeasure, '') + '</BASIS_UOM>'
-			+ '<BASIS_CURRENCY>' + ISNULL(C.strDescription, '') + '</BASIS_CURRENCY>'
+			+ '<BASIS_CURRENCY>' + ISNULL(C.strCurrency, '') + '</BASIS_CURRENCY>'
 			+ '<FIXATION_DATE>' + RTRIM(LTRIM(ISNULL(CONVERT(CHAR, (
 					CASE WHEN CH.intPricingTypeId = 1 THEN CH.dtmContractDate
 						ELSE (SELECT TOP 1 PFD.dtmFixationDate FROM dbo.tblCTPriceFixationDetail PFD WHERE PFD.intPriceFixationId = PF.intPriceFixationId) END
 						), 112), ''))) + '</FIXATION_DATE>'
-			ELSE '<PRICE_TYPE>Basis</PRICE_TYPE>'
-			+ '<PRICE_MARKET>' + ISNULL(FM.strFutMarketName, 0) + '</PRICE_MARKET>'
-			+ '<PRICE_MONTH>' + ISNULL(LEFT(CONVERT(NVARCHAR, CONVERT(DATETIME, '01 ' + FMon.strFutureMonth), 112), 6), '') + '</PRICE_MONTH>'
-			+ '<PRICE></PRICE>'
-			+ '<PRICE_UOM>' + ISNULL(PUM.strUnitMeasure, '') + '</PRICE_UOM>'
-			+ '<PRICE_CURRENCY>' + ISNULL(C2.strDescription,'') + '</PRICE_CURRENCY>'
-			+ '<BASIS>' + ISNULL(CONVERT(NVARCHAR(50), CONVERT(NUMERIC(18, 2), CD.dblBasis)), '') + '</BASIS>'
-			+ '<BASIS_UOM>' + ISNULL(UM.strUnitMeasure, '') + '</BASIS_UOM>'
-			+ '<BASIS_CURRENCY>' + ISNULL(C.strDescription, '') + '</BASIS_CURRENCY>'
-			+ '<FIXATION_DATE></FIXATION_DATE>' END
 
+			+ '<FUTURE_PRICE>' + ISNULL(CONVERT(NVARCHAR(50), CONVERT(NUMERIC(18, 2), CD.dblFutures)), '') + '</FUTURE_PRICE>'
+			+ '<FUTURE_PRICE_UOM>' + ISNULL(PUM.strUnitMeasure, '') + '</FUTURE_PRICE_UOM>'
+			+ '<FUTURE_PRICE_CURRENCY>' + ISNULL(C2.strCurrency,'') + '</FUTURE_PRICE_CURRENCY>'
+			+ '<HEDGE_PRICE>' + ISNULL(CONVERT(NVARCHAR(50), CONVERT(NUMERIC(18, 2), (SELECT TOP 1 PFD.dblHedgePrice FROM dbo.tblCTPriceFixationDetail PFD WHERE PFD.intPriceFixationId = PF.intPriceFixationId))), '') + '</HEDGE_PRICE>'
+			+ '<HEDGE_PRICE_UOM>' + ISNULL(PUM.strUnitMeasure, '') + '</HEDGE_PRICE_UOM>'
+			+ '<HEDGE_PRICE_CURRENCY>' + ISNULL(C2.strCurrency,'') + '</HEDGE_PRICE_CURRENCY>'
+			+ '<CASH_PRICE>' + ISNULL(CONVERT(NVARCHAR(50), CONVERT(NUMERIC(18, 2), CD.dblCashPrice)), '') + '</CASH_PRICE>'
+			+ '<CASH_PRICE_UOM>' + ISNULL(PUM.strUnitMeasure, '') + '</CASH_PRICE_UOM>'
+			+ '<CASH_PRICE_CURRENCY>' + ISNULL(C2.strCurrency,'') + '</CASH_PRICE_CURRENCY>'
+			+ '<EXCHANGE_RATE>' + ISNULL(CONVERT(NVARCHAR(50), CONVERT(NUMERIC(18, 4), CD.dblRate)), '') + '</EXCHANGE_RATE>'
 			+ '<START_DATE>' + ISNULL(CONVERT(NVARCHAR, CF.dtmStartDate, 112), '') + '</START_DATE>'
 			+ '<END_DATE>' + ISNULL(CONVERT(NVARCHAR, CF.dtmEndDate, 112), '') + '</END_DATE>'
 			+ '<PLANNED_AVL_DATE>' + ISNULL(CONVERT(NVARCHAR, CD.dtmPlannedAvailabilityDate, 112), '') + '</PLANNED_AVL_DATE>'

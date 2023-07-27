@@ -975,7 +975,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				ptcus_country = (CASE WHEN LEN(Loc.strCountry) = 10 THEN Loc.strCountry ELSE '''' END),
 				--Contact
 				ptcus_contact = SUBSTRING((Con.strName),1,20),
-				ptcus_phone = ISNULL( (CASE WHEN CHARINDEX(''x'', P.strPhone) > 0 THEN SUBSTRING(SUBSTRING(P.strPhone,1,15), 0, CHARINDEX(''x'',P.strPhone)) ELSE SUBSTRING(P.strPhone,1,15)END), ''''),
+				ptcus_phone = REPLACE(REPLACE(REPLACE(REPLACE(ISNULL ((CASE WHEN CHARINDEX(''x'', P.strPhone) > 0 THEN SUBSTRING(SUBSTRING(P.strPhone,1,15), 0, CHARINDEX(''x'',P.strPhone)) ELSE SUBSTRING(P.strPhone,1,15)END), '''') , ''('', ''''), '')'', ''''), '' '', ''''),''-'', ''''),
 				ptcus_phone_ext = (CASE WHEN CHARINDEX(''x'', P.strPhone) > 0 THEN SUBSTRING(SUBSTRING(P.strPhone,1,30),CHARINDEX(''x'',P.strPhone) + 1, LEN(P.strPhone))END),
 				ptcus_phone2 = (CASE WHEN CHARINDEX(''x'', M.strPhone) > 0 THEN SUBSTRING(SUBSTRING(M.strPhone,1,15), 0, CHARINDEX(''x'',M.strPhone)) ELSE SUBSTRING(M.strPhone,1,15)END),
 				ptcus_phone_ext2 = (CASE WHEN CHARINDEX(''x'', M.strPhone) > 0 THEN SUBSTRING(SUBSTRING(M.strPhone,1,30),CHARINDEX(''x'',M.strPhone) + 1, LEN(M.strPhone))END),
@@ -997,7 +997,8 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				ptcus_budget_amt = Cus.dblBudgetAmountForBudgetBilling,
 				ptcus_budget_beg_mm = SUBSTRING(Cus.strBudgetBillingBeginMonth,1,2),
 				ptcus_budget_end_mm = SUBSTRING(Cus.strBudgetBillingEndMonth,1,2),
-				ptcus_acct_stat_x_1 = (SELECT strAccountStatusCode FROM tblARAccountStatus WHERE intAccountStatusId = (SELECT TOP 1 intAccountStatusId FROM tblARCustomerAccountStatus WHERE intEntityCustomerId = Cus.intEntityId)),
+				ptcus_acct_stat_x_1 = (SELECT strAccountStatusCode FROM tblARAccountStatus WHERE intAccountStatusId = (SELECT TOP 1 intAccountStatusId FROM tblARCustomerAccountStatus WHERE intEntityCustomerId = Cus.intEntityId ORDER BY intCustomerAccountStatusId DESC)),
+				ptcus_acct_stat_x_2 = (SELECT strAccountStatusCode FROM tblARAccountStatus WHERE intAccountStatusId = (SELECT  intAccountStatusId FROM tblARCustomerAccountStatus WHERE intEntityCustomerId = Cus.intEntityId ORDER BY intCustomerAccountStatusId DESC OFFSET (1) ROW FETCH NEXT (1) ROW ONLY)),
 				ptcus_slsmn_id		= (SELECT strSalespersonId FROM tblARSalesperson WHERE intEntityId = Cus.intSalespersonId),
 				ptcus_srv_cd		= (SELECT strServiceChargeCode FROM tblARServiceCharge WHERE intServiceChargeId = Cus.intServiceChargeId),
 				ptcus_terms_code = (SELECT case when ISNUMERIC(strTermCode) = 0 then null else strTermCode end  FROM tblSMTerm WHERE intTermID = Cus.intTermsId and cast( (case when isnumeric(strTermCode) = 1 then  strTermCode else 266 end ) as bigint) <= 255 ),
@@ -1346,6 +1347,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				SELECT TOP 1 intAccountStatusId 
 				FROM tblARAccountStatus 
 				WHERE strAccountStatusCode COLLATE Latin1_General_CI_AS = ptcus_acct_stat_x_1 COLLATE Latin1_General_CI_AS
+				OR strAccountStatusCode COLLATE Latin1_General_CI_AS = ptcus_acct_stat_x_2 COLLATE Latin1_General_CI_AS
 			) ACCS
 			OUTER APPLY (
 				SELECT TOP 1 intEntityId 

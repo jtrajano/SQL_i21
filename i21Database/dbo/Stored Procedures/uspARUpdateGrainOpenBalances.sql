@@ -10,26 +10,34 @@ BEGIN
 	SET XACT_ABORT ON
 	SET ANSI_WARNINGS OFF
 	
-	DECLARE @IdsForUpdate AS InvoiceId;
-	INSERT INTO @IdsForUpdate
-	SELECT * FROM @InvoiceIds
-		
-	WHILE EXISTS(SELECT TOP 1 NULL FROM @IdsForUpdate ORDER BY intHeaderId)
-	BEGIN				
-		DECLARE  @InvoiceId INT
-				,@ForDelete INT
-				,@UserId INT;
-					
-		SELECT TOP 1 
-			 @InvoiceId	= intHeaderId
-			,@ForDelete	= ysnForDelete
-			,@UserId	= @UserId
-		FROM @IdsForUpdate
-		ORDER BY intHeaderId
+	DECLARE @tblInvoices TABLE (
+		  intInvoiceId	INT
+		, ysnForDelete	BIT
+	)
 
-		EXEC dbo.[uspARUpdateGrainOpenBalance] @InvoiceId, @ForDelete, @UserId
+	INSERT INTO @tblInvoices (
+		  intInvoiceId
+		, ysnForDelete
+	)
+	SELECT DISTINCT intInvoiceId	= ID.intInvoiceId
+				  , ysnForDelete	= II.ysnForDelete
+	FROM tblARInvoiceDetail ID 
+	INNER JOIN @InvoiceIds II ON ID.intInvoiceId = II.intHeaderId
+	WHERE ID.intStorageScheduleTypeId IS NOT NULL
+		
+	WHILE EXISTS(SELECT TOP 1 NULL FROM @tblInvoices ORDER BY intInvoiceId)
+	BEGIN				
+		DECLARE @intInvoiceId INT = NULL
+			  , @ysnForDelete BIT = NULL
+					
+		SELECT TOP 1 @intInvoiceId	= intInvoiceId
+				   , @ysnForDelete	= ysnForDelete
+		FROM @tblInvoices
+		ORDER BY intInvoiceId
+
+		EXEC dbo.[uspARUpdateGrainOpenBalance] @intInvoiceId, @ysnForDelete, @EntityId
 			
-		DELETE FROM @IdsForUpdate WHERE intHeaderId = @InvoiceId
+		DELETE FROM @tblInvoices WHERE intInvoiceId = @intInvoiceId
 	END
 			 
 END

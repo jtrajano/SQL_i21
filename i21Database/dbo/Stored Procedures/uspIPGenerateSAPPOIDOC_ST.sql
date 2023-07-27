@@ -191,6 +191,7 @@ BEGIN
 		IF IsNULL(@strSubBook, '') IN (
 				'Ngon'
 				,'Vayhan'
+				,'Iguacu'
 				)
 		BEGIN
 			UPDATE tblCTContractFeed

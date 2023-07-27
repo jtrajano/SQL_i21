@@ -253,7 +253,7 @@ BEGIN TRY
 		 , dblSamplePrice						= S.dblB1Price		 
 		 , dblSampleQty							= ISNULL(S.dblSampleQty, 0)
 		 , dblRepresentingQty					= ISNULL(S.dblRepresentingQty, 0)
-		 , dblCatReconSampleQty					= ISNULL(CRD.dblPreInvoiceQuantity, 0)
+		 , dblCatReconSampleQty					= ISNULL(CRD.dblQuantity, 0)
 		 , dblCatReconRepQty					= ISNULL(dbo.fnCalculateQtyBetweenUoms(ITEM.strItemNo, SIUM.strUnitMeasure, RIUM.strUnitMeasure, CRD.dblPreInvoiceQuantity), 0)
 		 , strCatReconChopNo					= CRD.strPreInvoiceChopNo
 		 , strSampleChopNo						= S.strChopNumber
@@ -273,7 +273,7 @@ BEGIN TRY
 	LEFT JOIN tblICUnitMeasure RIUM ON RIUM.intUnitMeasureId = S.intRepresentingUOMId
     WHERE CR.intCatalogueReconciliationId = @intCatalogueReconciliationId
       AND ((S.dblB1Price <> CRD.dblPreInvoicePrice AND CRD.dblPreInvoicePrice = CRD.dblBasePrice)
-        OR (S.dblRepresentingQty <> CRD.dblPreInvoiceQuantity AND CRD.dblPreInvoiceQuantity = CRD.dblQuantity)
+        OR (S.dblSampleQty <> CRD.dblPreInvoiceQuantity AND CRD.dblPreInvoiceQuantity = CRD.dblQuantity)
         OR (S.strChopNumber <> CRD.strPreInvoiceChopNo AND CRD.strPreInvoiceChopNo = CRD.strChopNo)
         OR (S.intGardenMarkId <> CRD.intPreInvoiceGardenMarkId AND CRD.intPreInvoiceGardenMarkId = CRD.intGardenMarkId)
         OR (S.intGradeId <> CRD.intPreInvoiceGradeId AND CRD.intPreInvoiceGradeId = CRD.intGradeId))
@@ -285,8 +285,8 @@ BEGIN TRY
 			SET dblB1Price					= ISNULL(SS.dblCatReconPrice, 0)
 			  , dblSupplierValuationPrice	= ISNULL(SS.dblCatReconPrice, 0)
 			  , dblSampleQty				= ISNULL(SS.dblCatReconSampleQty, 0)
-			  , dblRepresentingQty			= ISNULL(SS.dblCatReconRepQty, 0)
-			  , dblB1QtyBought				= ISNULL(SS.dblCatReconRepQty, 0)
+			--   , dblRepresentingQty			= ISNULL(SS.dblCatReconRepQty, 0)
+			--   , dblB1QtyBought				= ISNULL(SS.dblCatReconRepQty, 0)
 			  , strChopNumber				= SS.strCatReconChopNo
 			  , intGardenMarkId				= NULLIF(SS.intCatReconGardenMarkId, 0)
 			  , intGradeId					= NULLIF(SS.intCatReconGradeId, 0)

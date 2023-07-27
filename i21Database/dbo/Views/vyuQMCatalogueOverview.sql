@@ -24,7 +24,7 @@ SELECT S.intSampleId
 	, strParentBatch = Batch.strBatchId
 	, strBuyingOrderNo = S.strBuyingOrderNo
 	, CTT.strCatalogueType
-	, dblNetWeightPerPackage = CASE WHEN ISNULL(S.dblRepresentingQty, 0) = 0 THEN 0 ELSE ISNULL(S.dblSampleQty, 0) / ISNULL(S.dblRepresentingQty, 0) END
+	, dblNetWeightPerPackage = ISNULL(Batch.dblPackagesBought, 0)
 	, strSubCluster = SC.strDescription 
 	, S.ysnOrganic
 	, strSustainability = PL.strDescription 
@@ -41,7 +41,7 @@ SELECT S.intSampleId
 	, strLeafSize = Size.strBrandCode
 	, strCluster = certification.strCertificationName
 	, strStyle = VG.strName
-	, strTasterRemark = S.strComment
+	, strTasterRemark = S.strComments2
 	, S.dblSupplierValuationPrice
 	, strLastPrice = '0.0'
 	, S.intCompanyLocationId

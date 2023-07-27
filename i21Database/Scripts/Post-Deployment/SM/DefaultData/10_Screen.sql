@@ -1,10 +1,13 @@
 ﻿GO
 	PRINT N'BEGIN INSERT DEFAULT SCREEN'
 GO
-	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'SystemManager.view.Activity') 
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'GlobalComponentEngine.view.Activity') 
 		BEGIN
-			INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
-			VALUES (N'Activity', N'Activity', N'SystemManager.view.Activity', N'System Manager', N'tblSMActivity', 0, N'Account')
+			IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'SystemManager.view.Activity') 
+			BEGIN
+				INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+				VALUES (N'Activity', N'Activity', N'SystemManager.view.Activity', N'System Manager', N'tblSMActivity', 0, N'Account')
+			END
 		END
 
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'GeneralLedger.view.GeneralJournal') 

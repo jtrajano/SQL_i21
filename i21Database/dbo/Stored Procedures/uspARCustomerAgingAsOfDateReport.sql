@@ -297,6 +297,7 @@ INNER JOIN @ADCUSTOMERS C ON P.intEntityCustomerId = C.intEntityCustomerId
 LEFT JOIN (
 	SELECT intTransactionId, dtmDate, strTransactionType
 	FROM dbo.tblARNSFStagingTableDetail
+	WHERE ysnProcessed = 1
 	GROUP BY intTransactionId, dtmDate, strTransactionType
 ) NSF ON P.intPaymentId = NSF.intTransactionId AND NSF.strTransactionType = 'Payment'
 WHERE P.ysnPosted = 1
@@ -507,7 +508,7 @@ INSERT INTO #CASHREFUNDS (
 )
 SELECT intOriginalInvoiceId	= I.intOriginalInvoiceId
 	, strDocumentNumber		= ID.strDocumentNumber
-	, dblRefundTotal		= SUM(ID.dblTotal)
+	, dblRefundTotal		= SUM(I.dblPayment)
 FROM tblARInvoiceDetail ID
 INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
 INNER JOIN @ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId

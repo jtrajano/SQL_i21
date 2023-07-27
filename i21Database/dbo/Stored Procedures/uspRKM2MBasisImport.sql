@@ -45,11 +45,11 @@ BEGIN TRY
 		, intStorageUnitId
 		, strPeriodTo
 		, intContractTypeId
-		--, intProductTypeId
-		--, intGradeId
-		--, intProductLineId
-		--, strCertification
-		--, intMTMPointId
+		, intProductTypeId
+		, intGradeId
+		, intProductLineId
+		, strCertification
+		, intMTMPointId
 		, intCurrencyId
 		, strContractInventory
 		, dblCashOrFuture
@@ -70,11 +70,11 @@ BEGIN TRY
 		, intStorageUnitId = storageUnit.intStorageLocationId
 		, strPeriodTo = i.strPeriodTo
 		, intContractTypeId = ctType.intContractTypeId
-		--, intProductTypeId = ProductType.intCommodityAttributeId
-		--, intGradeId = Grade.intCommodityAttributeId
-		--, intProductLineId = ProductLine.intCommodityProductLineId
-		--, strCertification = i.strCertification
-		--, intMTMPointId = MTMPoint.intMTMPointId
+		, intProductTypeId = ProductType.intCommodityAttributeId
+		, intGradeId = Grade.intCommodityAttributeId
+		, intProductLineId = ProductLine.intCommodityProductLineId
+		, strCertification = i.strCertification
+		, intMTMPointId = MTMPoint.intMTMPointId
 		, intCurrencyId = cu.intCurrencyID
 		, strContractInventory = i.strContractInventory
 		, dblCashOrFuture = i.dblCash
@@ -105,27 +105,27 @@ BEGIN TRY
 		AND storageUnit.strName = i.strStorageUnit
 	LEFT JOIN tblCTContractType ctType
 		ON ctType.strContractType = i.strContractType
-	--LEFT JOIN tblICCommodityAttribute ProductType 
-	--	ON ProductType.intCommodityId = c.intCommodityId 
-	--	AND ProductType.strType = 'ProductType' 
-	--	AND ProductType.strDescription = i.strProductType
-	--LEFT JOIN tblICCommodityProductLine ProductLine 
-	--	ON ProductLine.intCommodityId = c.intCommodityId 
-	--	AND ProductLine.strDescription = i.strProductLine
-	--LEFT JOIN tblICCommodityAttribute Grade 
-	--	ON Grade.intCommodityId = c.intCommodityId 
-	--	AND Grade.strType = 'Grade' 
-	--	AND Grade.strDescription = i.strGrade
-	--LEFT JOIN tblCTMTMPoint MTMPoint 
-	--	ON MTMPoint.strMTMPoint = i.strMTMPoint
-	--LEFT JOIN tblICCommodityAttribute CLASS
-	--	ON CLASS.intCommodityId = c.intCommodityId 
-	--	AND  CLASS.strType = 'Class'
-	--	AND CLASS.strDescription = i.strClass
-	--LEFT JOIN tblICCommodityAttribute REGION
-	--	ON REGION.intCommodityId = c.intCommodityId 
-	--	AND REGION.strType = 'Region'
-	--	AND REGION.strDescription = i.strRegion
+	LEFT JOIN tblICCommodityAttribute ProductType 
+		ON ProductType.intCommodityId = c.intCommodityId 
+		AND ProductType.strType = 'ProductType' 
+		AND ProductType.strDescription = i.strProductType
+	LEFT JOIN tblICCommodityProductLine ProductLine 
+		ON ProductLine.intCommodityId = c.intCommodityId 
+		AND ProductLine.strDescription = i.strProductLine
+	LEFT JOIN tblICCommodityAttribute Grade 
+		ON Grade.intCommodityId = c.intCommodityId 
+		AND Grade.strType = 'Grade' 
+		AND Grade.strDescription = i.strGrade
+	LEFT JOIN tblCTMTMPoint MTMPoint 
+		ON MTMPoint.strMTMPoint = i.strMTMPoint
+	LEFT JOIN tblICCommodityAttribute CLASS
+		ON CLASS.intCommodityId = c.intCommodityId 
+		AND  CLASS.strType = 'Class'
+		AND CLASS.strDescription = i.strClass
+	LEFT JOIN tblICCommodityAttribute REGION
+		ON REGION.intCommodityId = c.intCommodityId 
+		AND REGION.strType = 'Region'
+		AND REGION.strDescription = i.strRegion
 
 	COMMIT TRAN
 

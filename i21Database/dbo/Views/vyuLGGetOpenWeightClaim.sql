@@ -8,6 +8,7 @@ SELECT
 	,intAging = DATEDIFF(DD, (CASE WHEN (PC.intPurchaseSale = 2) THEN INV.dtmDate ELSE ISNULL(PC.dtmReceiptDate, IR.dtmReceiptDate) END), GETDATE())
 	,intContractTypeId = CH.intContractTypeId
 	,intContractSeq = CD.intContractSeq
+	,PT.strDescription AS strProductType
 	,strEntityName = EM.strName
 	,intEntityId = PC.intEntityId
 	,intPartyEntityId = PC.intPartyEntityId
@@ -97,6 +98,7 @@ FROM tblLGPendingClaim PC
 					I.intItemId
 					,I.strItemNo
 					,I.strDescription
+					,I.intProductTypeId
 					,C.strCommodityCode 
 					,OG2.strCountry
 				 FROM tblICItem I 
@@ -116,6 +118,7 @@ FROM tblLGPendingClaim PC
 	LEFT JOIN tblCTBook BO ON BO.intBookId = CD.intBookId
 	LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = CD.intSubBookId
 	LEFT JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CH.intFreightTermId
+	LEFT JOIN tblICCommodityAttribute PT ON PT.intCommodityAttributeId = I.intProductTypeId
 	LEFT JOIN tblSMPurchasingGroup PG ON PG.intPurchasingGroupId = CD.intPurchasingGroupId
 	LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = PC.intLoadContainerId
 	OUTER APPLY (SELECT dtmReceiptDate = MAX(IR.dtmReceiptDate) FROM tblICInventoryReceipt IR

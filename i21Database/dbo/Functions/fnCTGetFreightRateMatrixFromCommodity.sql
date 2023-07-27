@@ -25,7 +25,7 @@ BEGIN
                 AND GETDATE() >= FRM.dtmValidFrom
                 AND GETDATE() <= FRM.dtmValidTo
                 AND ISNULL(FRM.ysnOffer, 0) = 1
-	SELECT TOP 1  @dblRate = CASE WHEN ISNULL(ctq.dblWeight, 0) = 0 THEN 0 ELSE dbo.fnCTConvertQtyToTargetCommodityUOM (@intCommodityId,cnt.intWeightUnitMeasureId,@IntUnitMeasureId,(frm.dblTotalCostPerContainer / ctq.dblWeight)) END
+	SELECT TOP 1  @dblRate = CASE WHEN ISNULL(ctq.dblWeight, 0) = 0 THEN 0 ELSE dbo.fnCTConvertQtyToTargetCommodityUOM (@intCommodityId,@IntUnitMeasureId,cnt.intWeightUnitMeasureId,(frm.dblTotalCostPerContainer / ctq.dblWeight)) END --CT-9171 Conversion issue
                 FROM tblLGFreightRateMatrix frm
                 JOIN tblLGContainerType cnt ON cnt.intContainerTypeId = frm.intContainerTypeId
                 JOIN tblLGContainerTypeCommodityQty ctq ON ctq.intContainerTypeId = cnt.intContainerTypeId

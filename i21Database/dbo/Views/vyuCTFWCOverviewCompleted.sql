@@ -59,7 +59,7 @@ AS
 				strCatalogueType = MFB.strTeaType,
 				strSAPSupplierCode = APV.strVendorAccountNum,
 				strSampleType = MZ.strMarketZoneCode,
-				strLotNo = CTD.strVendorLotID, 
+				strLotNo = LOT.strVendorLotNumber, --CT-9197 
 				strTimeStamp =  CONVERT(VARCHAR(20),getdate(), 100),
 				dtmManufacturingDate = MFB.dtmProductionBatch,
 				dblNetWeight = CTD.dblNetWeight,
@@ -76,7 +76,8 @@ AS
 			LEFT JOIN tblCTPricingType			CP	 WITH (NOLOCK) ON CTD.intPricingTypeId	  = CP.intPricingTypeId
 			LEFT JOIN tblEMEntity				EC	 WITH (NOLOCK) ON EC.intEntityId		  = CH.intCreatedById
 			LEFT JOIN tblSMTerm					CT	 WITH (NOLOCK) ON CT.intTermID			  = CH.intTermId
-			LEFT JOIN tblMFBatch				MFB  WITH (NOLOCK) ON CTD.intContractDetailId = MFB.intContractDetailId 
+			LEFT JOIN tblQMSample				QS   WITH (NOLOCK) ON QS.intContractDetailId = CTD.intContractDetailId and QS.intCompanyLocationId = CTD.intCompanyLocationId
+			LEFT JOIN tblMFBatch				MFB  WITH (NOLOCK) ON MFB.intSampleId = QS.intSampleId
 			LEFT JOIN tblQMGardenMark			GM   WITH (NOLOCK) ON GM.intGardenMarkId	  = MFB.intGardenMarkId
 			LEFT JOIN tblSMFreightTerms			IT	 WITH (NOLOCK) ON IT.intFreightTermId	  =	CH.intFreightTermId
 			LEFT JOIN tblSMCity					SC	 WITH (NOLOCK) ON SC.intCityId			  =	CH.intINCOLocationTypeId
@@ -92,10 +93,24 @@ AS
 			LEFT JOIN tblSMCity					DP	 WITH (NOLOCK) ON DP.intCityId			  =	CTD.intDestinationPortId
 			LEFT JOIN tblMFLocationLeadTime		MFL	 WITH (NOLOCK) ON CTD.intLoadingPortId    = MFL.intPortOfDispatchId AND  CTD.intDestinationPortId = MFL.intPortOfArrivalId
 			AND (SELECT  dbo.[fnCTGetSeqDisplayField](CTD.intContractDetailId, 'Origin')) = MFL.strOrigin
+			AND MFL.intChannelId = CTD.intMarketZoneId
+			AND MFL.strReceivingStorageLocation = dbo.[fnCTGetSeqDisplayField](CTD.intSubLocationId, 'tblSMCompanyLocationSubLocation')
 			LEFT JOIN tblQMSaleYear				SY	 WITH (NOLOCK) ON SY.intSaleYearId		  = MFB.intSalesYear
 			LEFT JOIN tblSMPurchasingGroup		PG	 WITH (NOLOCK) ON PG.intPurchasingGroupId = CTD.intPurchasingGroupId
 			LEFT JOIN tblARMarketZone			MZ   WITH (NOLOCK) ON MZ.intMarketZoneId	  = CTD.intMarketZoneId
-			OUTER APPLY dbo.fnCTGetSampleDetail(CTD.intContractDetailId) QA
+			--OUTER APPLY dbo.fnCTGetSampleDetailAllocation(CTD.intContractDetailId) QA
+			OUTER APPLY (
+				SELECT Sum(MB.dblPackagesBought) dblApprovedQty
+				FROM vyuMFBatch MB
+				INNER JOIN tblQMSample QS ON QS.strSampleNumber = MB.strSampleNumber  
+				WHERE QS.intTypeId = 1    AND CTD.intContractDetailId =  QS.intContractDetailId 
+			) QA
+			OUTER APPLY(
+				SELECT  MB.strVendorLotNumber
+				FROM vyuMFBatch MB
+				WHERE QS.intTypeId = 1    AND CTD.intContractDetailId =  QS.intContractDetailId 
+				AND QS.strSampleNumber = MB.strSampleNumber
+			)LOT
 			WHERE CTD.intContractStatusId IN ( 5) --Open, Unconfirmed,Re-Open
 
 			

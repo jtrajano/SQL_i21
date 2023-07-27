@@ -143,6 +143,7 @@ BEGIN
 				FROM	@GLEntriesToValidate A JOIN tblGLAccount B
 				ON A.intAccountId = B.intAccountId
 				WHERE EXISTS( SELECT TOP 1 1 FROM tblGLCompanyPreferenceOption WHERE ysnRestrictCompanyOOB = 1)
+				AND @ysnPost=1
 				GROUP BY intCompanySegmentId, A.strTransactionId
 				HAVING SUM(dblDebit - dblCredit) <> 0
 
