@@ -211,25 +211,17 @@ END
 		,intSourceId    = min(TR.intLoadReceiptId)  
 		,intSourceType     = 3 -- Source type for transports is 3   
 		,dblGross					= CASE WHEN ISNULL(@ysnAllowDifferentUnits,1) = 1 THEN 
-												ISNULL(
-													CASE WHEN min(SP.strGrossOrNet) = 'Gross' THEN SUM(DD.dblDistributionGrossSalesUnits)
-														WHEN min(SP.strGrossOrNet) = 'Net' THEN SUM(DD.dblDistributionNetSalesUnits) 
-														END  
-													,0)
+												ISNULL(SUM(DD.dblDistributionGrossSalesUnits),0)
 											ELSE
 												ISNULL(SUM(DD.dblUnits) ,0)
 											END
-											 + ISNULL(SUM(BID.dblQuantity),0)
+											 + ISNULL((select SUM(dblQuantity) FROM vyuTRGetLoadReceiptToBlendIngredient BLEND WHERE BLEND.intLoadReceiptId = TR.intLoadReceiptId and BLEND.intLoadHeaderId = MIN(TL.intLoadHeaderId) AND DD.intLoadDistributionDetailId IS NULL),0)
 		,dblNet						= CASE WHEN ISNULL(@ysnAllowDifferentUnits,1) = 1 THEN 
-												ISNULL(
-													CASE WHEN min(SP.strGrossOrNet) = 'Gross' THEN SUM(DD.dblDistributionGrossSalesUnits)
-														WHEN min(SP.strGrossOrNet) = 'Net' THEN SUM(DD.dblDistributionNetSalesUnits) 
-														END  
-													,0)
+												ISNULL(SUM(DD.dblDistributionNetSalesUnits),0)
 											ELSE
 												ISNULL(SUM(DD.dblUnits) ,0)
 											END
-											  + ISNULL(SUM(BID.dblQuantity),0)
+											  + ISNULL((select SUM(dblQuantity) FROM vyuTRGetLoadReceiptToBlendIngredient BLEND WHERE BLEND.intLoadReceiptId = TR.intLoadReceiptId and BLEND.intLoadHeaderId = MIN(TL.intLoadHeaderId) AND DD.intLoadDistributionDetailId IS NULL),0)
 		,intInventoryReceiptId		= min(TR.intInventoryReceiptId)
 		,dblSurcharge				= min(TR.dblPurSurcharge)
 		,ysnFreightInPrice			= CAST(MIN(CAST(TR.ysnFreightInPrice AS INT)) AS BIT)
