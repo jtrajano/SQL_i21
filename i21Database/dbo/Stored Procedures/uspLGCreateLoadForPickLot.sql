@@ -270,44 +270,43 @@ BEGIN TRY
 		SELECT @intMinAllocationRecordId = MIN(intAllocationRecordId)
 		FROM @tblAllocationInfo
 		WHERE intAllocationRecordId > @intMinAllocationRecordId
+
+		INSERT INTO tblLGLoadCost (
+			intConcurrencyId,
+			intLoadId,
+			intItemId,
+			intVendorId,
+			strEntityType,
+			strCostMethod,
+			intCurrencyId,
+			dblRate,
+			dblAmount,
+			dblFX,
+			intItemUOMId,
+			ysnAccrue,
+			ysnMTM,
+			ysnPrice
+			)
+		SELECT
+			intConcurrencyId,
+			@intLoadId,
+			intItemId,
+			intVendorId,
+			strEntityType,
+			strCostMethod,
+			intCurrencyId,
+			dblRate,
+			dblAmount,
+			dblFX,
+			intItemUOMId,
+			ysnAccrue,
+			ysnMTM,
+			ysnPrice
+		FROM vyuLGContractCostView
+		WHERE intContractDetailId = @intSContractDetailId
+			AND ISNULL(ysnBasis, 0) = 0 AND ISNULL(ysnBilled, 0) = 0
+
 	END
-
-	INSERT INTO tblLGLoadCost (
-		intConcurrencyId,
-		intLoadId,
-		intItemId,
-		intVendorId,
-		strEntityType,
-		strCostMethod,
-		intCurrencyId,
-		dblRate,
-		dblAmount,
-		dblFX,
-		intItemUOMId,
-		ysnAccrue,
-		ysnMTM,
-		ysnPrice
-		)
-	SELECT
-		intConcurrencyId,
-		@intLoadId,
-		intItemId,
-		intVendorId,
-		strEntityType,
-		strCostMethod,
-		intCurrencyId,
-		dblRate,
-		dblAmount,
-		dblFX,
-		intItemUOMId,
-		ysnAccrue,
-		ysnMTM,
-		ysnPrice
-	FROM vyuLGContractCostView
-	WHERE intContractDetailId = @intSContractDetailId
-		AND ISNULL(ysnBasis, 0) = 0 AND ISNULL(ysnBilled, 0) = 0
-
-	
 
 	EXEC uspLGReserveStockForInventoryShipment @intLoadId = @intLoadId
 											  ,@ysnReserveStockForInventoryShipment = 1
