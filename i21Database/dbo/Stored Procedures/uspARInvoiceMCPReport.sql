@@ -723,7 +723,7 @@ BEGIN
 		INNER JOIN tblARInvoiceDetail ID ON IDT.intInvoiceDetailId = ID.intInvoiceDetailId
 		INNER JOIN tblSMTaxClass TCLASS ON IDT.intTaxClassId = TCLASS.intTaxClassId
 		INNER JOIN tblSMTaxReportType TREPORT ON TCLASS.intTaxReportTypeId = TREPORT.intTaxReportTypeId
-		WHERE TREPORT.strType = 'State Sales Tax'
+		WHERE TREPORT.strType <> 'State Sales Tax'
 		  AND IDT.dblAdjustedTax <> 0			  
 		GROUP BY ID.intInvoiceId
 	) SST ON STAGING.intInvoiceId = SST.intInvoiceId
