@@ -10247,7 +10247,6 @@
     <Build Include="dbo\Views\vyuMFInvPlngReportMaterial.sql" />
     <Build Include="dbo\User Defined Types\StagingTransactionLogPassport.sql" />
     <Build Include="dbo\Tables\tblSTTranslogRebatesPassport.sql" />
-	<Build Include="dbo\Tables\tblSTMassUpdateAudit.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutPassportTranslog.sql" />
     <Build Include="dbo\Stored Procedures\uspMFDemandTransferStgXML.sql" />
     <None Include="Scripts\Post-Deployment\ST\37_FileFieldMapping_Passport_CPJR_340.sql" />
