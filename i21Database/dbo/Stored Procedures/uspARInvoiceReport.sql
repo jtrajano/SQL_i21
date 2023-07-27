@@ -590,43 +590,20 @@ FROM #INVOICES I
 WHERE I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment')
 
 --COMMENTS
-UPDATE I
-SET strComments	= dbo.fnEliminateHTMLTags(I.strComments, 0)
-FROM #INVOICES I
-WHERE I.strComments IS NOT NULL
-  AND I.strComments <> ''
+UPDATE #INVOICES
+SET strComments			= dbo.fnEliminateHTMLTags(strComments, 0)
+WHERE strComments IS NOT NULL
+  AND strComments <> ''
 
 --HEADER COMMENT
-UPDATE I
-SET strInvoiceHeaderComment	= ISNULL(HEADER.strMessage, I.strComments)
-FROM #INVOICES I
-OUTER APPLY (
-	SELECT TOP 1 strMessage	= '<html>' + CAST(blbMessage AS VARCHAR(MAX)) + '</html>'
-	FROM tblSMDocumentMaintenanceMessage H
-	INNER JOIN tblSMDocumentMaintenance M ON H.intDocumentMaintenanceId = M.intDocumentMaintenanceId
-	WHERE H.strHeaderFooter = 'Header'
-	  AND M.strType = I.strType
-	  AND M.strSource = I.strTransactionType
-	ORDER BY M.[intDocumentMaintenanceId] DESC
-		   , ISNULL(I.intEntityCustomerId, -10 * M.intDocumentMaintenanceId) DESC
-		   , ISNULL(I.intCompanyLocationId, -100 * M.intDocumentMaintenanceId) DESC
-) HEADER
+UPDATE #INVOICES
+SET strInvoiceHeaderComment = strComments
 
 --FOOTER COMMENT
-UPDATE I
-SET strInvoiceFooterComment	= ISNULL(FOOTER.strMessage, I.strFooterComments)
-FROM #INVOICES I
-OUTER APPLY (
-	SELECT TOP 1 strMessage	= '<html>' + CAST(blbMessage AS VARCHAR(MAX)) + '</html>'
-	FROM tblSMDocumentMaintenanceMessage H
-	INNER JOIN tblSMDocumentMaintenance M ON H.intDocumentMaintenanceId = M.intDocumentMaintenanceId
-	WHERE H.strHeaderFooter = 'Footer'
-	  AND M.strType = I.strType
-	  AND M.strSource = I.strTransactionType
-	ORDER BY M.[intDocumentMaintenanceId] DESC
-		   , ISNULL(I.intEntityCustomerId, -10 * M.intDocumentMaintenanceId) DESC
-		   , ISNULL(I.intCompanyLocationId, -100 * M.intDocumentMaintenanceId) DESC
-) FOOTER
+UPDATE #INVOICES
+SET strInvoiceFooterComment = dbo.fnEliminateHTMLTags(strFooterComments, 0)
+WHERE strFooterComments IS NOT NULL
+AND strFooterComments <> ''
 
 --EMAIL COUNT
 UPDATE I
