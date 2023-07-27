@@ -3,7 +3,7 @@
 AS 
 SELECT 
 	compSetup.strCompanyName AS strCompanyName
-	,SUBSTRING(compSetup.strPhone, 1, 3) + '-' + SUBSTRING(compSetup.strPhone, 4, 3) + '-' + SUBSTRING(compSetup.strPhone, 7, LEN(compSetup.strPhone)) AS strPhone
+	,compSetup.strPhone AS strPhone
 	,A.intPurchaseId
 	,A.dtmDate
 	,A.dtmExpectedDate
