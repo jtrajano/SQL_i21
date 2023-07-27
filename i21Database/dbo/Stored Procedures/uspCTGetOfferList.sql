@@ -257,7 +257,7 @@ BEGIN
 		  ,strReference
 		  ,dblQuantity 
 		  ,strPacking
-		  ,dblOfferCost = dblBasis + dblFreightOffer + dblCIFInStore + dblCUMStorage + dblCUMFinancing + dblSwitchCost 
+		  ,dblOfferCost = ISNULL(dblBasis,0) + ISNULL(dblFreightOffer,0) + ISNULL(dblCIFInStore,0) + ISNULL(dblCUMStorage,0) + ISNULL(dblCUMFinancing,0) + ISNULL(dblSwitchCost,0) 
 		  ,strPricingType
 		  ,strFutureMonth
 		  ,dblBasis	
@@ -1399,7 +1399,7 @@ BEGIN
 		  ,strReference
 		  ,dblQuantity 
 		  ,strPacking
-		  ,dblOfferCost = dblBasis + dblFreightOffer + dblCIFInStore + dblCUMStorage + dblCUMFinancing + dblSwitchCost 
+		  ,dblOfferCost = ISNULL(dblBasis,0) + ISNULL(dblFreightOffer,0) + ISNULL(dblCIFInStore,0) + ISNULL(dblCUMStorage,0) + ISNULL(dblCUMFinancing,0) + ISNULL(dblSwitchCost,0)
 		  ,strPricingType
 		  ,strFutureMonth
 		  ,dblBasis	
@@ -1660,7 +1660,7 @@ BEGIN
 		  ,strReference
 		  ,dblQuantity 
 		  ,strPacking
-		  ,dblOfferCost = dblBasis + dblFreightOffer + dblCIFInStore + dblCUMStorage + dblCUMFinancing + dblSwitchCost 
+		  ,dblOfferCost = ISNULL(dblBasis,0) + ISNULL(dblFreightOffer,0) + ISNULL(dblCIFInStore,0) + ISNULL(dblCUMStorage,0) + ISNULL(dblCUMFinancing,0) + ISNULL(dblSwitchCost,0)
 		  ,strPricingType
 		  ,strFutureMonth
 		  ,dblBasis	
@@ -1922,7 +1922,7 @@ BEGIN
 		  ,strReference
 		  ,dblQuantity 
 		  ,strPacking
-		  ,dblOfferCost = dblBasis + dblFreightOffer + dblCIFInStore + dblCUMStorage + dblCUMFinancing + dblSwitchCost 
+		  ,dblOfferCost = ISNULL(dblBasis,0) + ISNULL(dblFreightOffer,0) + ISNULL(dblCIFInStore,0) + ISNULL(dblCUMStorage,0) + ISNULL(dblCUMFinancing,0) + ISNULL(dblSwitchCost,0)
 		  ,strPricingType
 		  ,strFutureMonth
 		  ,dblBasis	
@@ -2199,7 +2199,7 @@ BEGIN
 		  ,strReference
 		  ,dblQuantity 
 		  ,strPacking
-		  ,dblOfferCost = dblBasis + dblFreightOffer + dblCIFInStore + dblCUMStorage + dblCUMFinancing + dblSwitchCost 
+		  ,dblOfferCost = ISNULL(dblBasis,0) + ISNULL(dblFreightOffer,0) + ISNULL(dblCIFInStore,0) + ISNULL(dblCUMStorage,0) + ISNULL(dblCUMFinancing,0) + ISNULL(dblSwitchCost,0) 
 		  ,strPricingType
 		  ,strFutureMonth
 		  ,dblBasis	
@@ -2501,7 +2501,7 @@ BEGIN
 		  ,strReference
 		  ,dblQuantity 
 		  ,strPacking
-		  ,dblOfferCost = dblBasis + dblFreightOffer + dblCIFInStore + dblCUMStorage + dblCUMFinancing + dblSwitchCost 
+		  ,dblOfferCost = ISNULL(dblBasis,0) + ISNULL(dblFreightOffer,0) + ISNULL(dblCIFInStore,0) + ISNULL(dblCUMStorage,0) + ISNULL(dblCUMFinancing,0) + ISNULL(dblSwitchCost,0) 
 		  ,strPricingType
 		  ,strFutureMonth
 		  ,dblBasis	
