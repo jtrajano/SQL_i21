@@ -3550,6 +3550,52 @@ BEGIN TRY
 						,@strProcess = 'Contract Process Stg XML'
 						,@intUserId = @intUserId
 
+					-- Saving current values in Contract Last Modification table
+				;
+					MERGE INTO tblCTContractHeaderLastModification as destination
+					using  (
+						select 
+							intContractHeaderId 
+							,intEntityId 
+							,intPositionId 
+							,intFreightTermId 
+							,intTermId 
+							,intGradeId 
+							,intWeightId 
+							,intINCOLocationTypeId
+							from tblCTContractHeader 
+								where intContractHeaderId = @intNewContractHeaderId --order by intContractHeaderId desc
+					) as source
+					on destination.intContractHeaderId = source.intContractHeaderId
+					when not matched then
+					insert ( intContractHeaderId 
+							,intEntityId 
+							,intPositionId 
+							,intFreightTermId 
+							,intTermId 
+							,intGradeId 
+							,intWeightId 
+							,intINCOLocationTypeId
+					)values (
+						source.intContractHeaderId 
+							,source.intEntityId 
+							,source.intPositionId 
+							,source.intFreightTermId 
+							,source.intTermId 
+							,source.intGradeId 
+							,source.intWeightId
+							,source.intINCOLocationTypeId )
+					when matched then 
+					update set intContractHeaderId = source.intContractHeaderId
+							,intEntityId  = source.intEntityId
+							,intPositionId  = source.intPositionId  
+							,intFreightTermId  = source.intFreightTermId  
+							,intTermId  = source.intTermId  
+							,intGradeId  = source.intGradeId  
+							,intWeightId  = source.intWeightId
+							,intINCOLocationTypeId =source.intINCOLocationTypeId
+					;
+
 					SELECT @intRecordId = min(intContractDetailId)
 					FROM #tmpContractDetail
 					WHERE intContractDetailId > @intRecordId
