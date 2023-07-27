@@ -112,7 +112,6 @@
 	[dblOldNetWeight] DECIMAL(18, 6) NULL, --Final voucher net wt
 	[dblFinalQtyReceived] DECIMAL(18, 6) NULL, -- Final voucher qty
 	[ysnNetWeightChanged] BIT NOT NULL DEFAULT 0,
-	[ysnOverrideSubTotal] BIT NOT NULL DEFAULT 0,
 	[intSaleYear] INT NULL,
 	[strSaleNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[dtmSaleDate] DATETIME NULL, 
