@@ -141,7 +141,7 @@ IF ISNULL(@strInvoiceIds, '') <> ''
 						, intEntityCustomerId		= INV.intEntityCustomerId
 						, intCompanyLocationId		= INV.intCompanyLocationId
 						, intCurrencyId				= INV.intCurrencyId
-						, intTermId					= INV.intTermId
+						, intTermId					= C.intTermsId
 						, dtmDate					= ISNULL(SCI.dtmForgiveDate, @dtmDateToday)
 						, dtmPostDate				= ISNULL(SCI.dtmForgiveDate, @dtmDateToday)
 						, dtmShipDate				= @dtmDateToday
@@ -166,13 +166,14 @@ IF ISNULL(@strInvoiceIds, '') <> ''
 					FROM tblARInvoice INV
 					INNER JOIN #SERVICECHARGETOFORGIVE SCI ON INV.intInvoiceId = SCI.intInvoiceId
 					INNER JOIN tblARInvoiceDetail ARID ON ARID.intInvoiceId = INV.intInvoiceId
+					INNER JOIN tblARCustomer C ON C.intEntityId = INV.intEntityCustomerId
 					GROUP BY  strTransactionType
-						, strType
+						, Inv.strType
 						, INV.strInvoiceNumber
 						, INV.intEntityCustomerId
 						, INV.intCompanyLocationId
 						, INV.intCurrencyId
-						, INV.intTermId
+						, C.intTermId
 						, ISNULL(SCI.dtmForgiveDate, @dtmDateToday)
 						, ISNULL(SCI.dtmForgiveDate, @dtmDateToday)
 						, dtmShipDate
