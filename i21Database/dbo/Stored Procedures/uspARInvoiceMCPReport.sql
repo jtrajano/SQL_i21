@@ -134,6 +134,7 @@ SELECT strCompanyName			= CASE WHEN L.strUseLocationAddress = 'Letterhead' THEN 
 	 , strType					= INV.strType
 	 , ysnPrintInvoicePaymentDetail = @ysnPrintInvoicePaymentDetail
 	 , strFooterComment  		= ISNULL(INV.strFooterComments,'')
+	 , strSalesPersonName		= SALESPERSON.strName
 INTO #INVOICES
 FROM dbo.tblARInvoice INV WITH (NOLOCK)
 INNER JOIN #MCPINVOICES SELECTEDINV ON INV.intInvoiceId = SELECTEDINV.intInvoiceId
@@ -341,6 +342,7 @@ INSERT INTO tblARInvoiceReportStagingTable WITH (TABLOCK) (
 	 , dtmCreated
 	 , ysnPrintInvoicePaymentDetail
 	 , strInvoiceFooterComment
+	 , strSalespersonName
 )
 SELECT strCompanyName
 	 , strCompanyAddress
@@ -403,6 +405,7 @@ SELECT strCompanyName
 	 , dtmCreated
 	 , ysnPrintInvoicePaymentDetail
 	 , strInvoiceFooterComment = strFooterComment
+	 , strSalespersonName = strSalesPersonName
 FROM #INVOICES
 
 UPDATE STAGING
@@ -723,7 +726,7 @@ BEGIN
 		INNER JOIN tblARInvoiceDetail ID ON IDT.intInvoiceDetailId = ID.intInvoiceDetailId
 		INNER JOIN tblSMTaxClass TCLASS ON IDT.intTaxClassId = TCLASS.intTaxClassId
 		INNER JOIN tblSMTaxReportType TREPORT ON TCLASS.intTaxReportTypeId = TREPORT.intTaxReportTypeId
-		WHERE TREPORT.strType = 'State Sales Tax'
+		WHERE TREPORT.strType <> 'State Sales Tax'
 		  AND IDT.dblAdjustedTax <> 0			  
 		GROUP BY ID.intInvoiceId
 	) SST ON STAGING.intInvoiceId = SST.intInvoiceId
