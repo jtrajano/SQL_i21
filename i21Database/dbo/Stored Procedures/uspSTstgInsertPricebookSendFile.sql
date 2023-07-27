@@ -1099,8 +1099,8 @@ SELECT '@tblTempPassportITT', * FROM @tblTempPassportITT
 									ON IUM.intUnitMeasureId = IUOM.intUnitMeasureId
 								JOIN tblSTRegister R 
 									ON R.intStoreId = ST.intStoreId
-								JOIN tblICItemPricing Prc 
-									ON Prc.intItemLocationId = IL.intItemLocationId
+								LEFT JOIN tblICItemSpecialPricing SplPrc 
+									ON SplPrc.intItemId = I.intItemId
 								JOIN vyuSTItemHierarchyPricing itemPricing
 									ON I.intItemId = itemPricing.intItemId
 									AND IL.intItemLocationId = itemPricing.intItemLocationId
