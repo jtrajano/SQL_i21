@@ -990,6 +990,7 @@ SELECT '@tblTempPassportITT', * FROM @tblTempPassportITT
 							strActionType,
 							strUpcCode,
 							strDescription,
+							strUnitMeasure,
 							dblSalePrice,
 							ysnSalesTaxed,
 							ysnIdRequiredLiquor,
@@ -1004,6 +1005,7 @@ SELECT '@tblTempPassportITT', * FROM @tblTempPassportITT
 							strActionType = t1.strActionType,
 							strUpcCode = t1.strUpcCode,
 							strDescription = t1.strDescription,
+							strUnitMeasure = t1.strUnitMeasure,
 							dblSalePrice = t1.dblSalePrice,
 							ysnSalesTaxed = t1.ysnSalesTaxed,
 							ysnIdRequiredLiquor = t1.ysnIdRequiredLiquor,
@@ -1014,29 +1016,25 @@ SELECT '@tblTempPassportITT', * FROM @tblTempPassportITT
 						FROM  
 						(
 							SELECT *,
-									rn = ROW_NUMBER() OVER(PARTITION BY t.intItemId ORDER BY (SELECT NULL))
+									rn = ROW_NUMBER() OVER(PARTITION BY t.intItemId, t.strUnitMeasure ORDER BY (SELECT NULL))
 							FROM 
 							(
 								SELECT DISTINCT
 									CASE WHEN tmpItem.strActionType = 'Created' THEN 'ADD' ELSE 'CHG' END AS strActionType
-									, dbo.fnSTRemoveCheckDigit(ISNULL(IUOM.strUPCA, IUOM.strLongUPCCode)) AS strUpcCode
+									, ISNULL(dbo.fnSTRemoveCheckDigit(ISNULL(IUOM.strUPCA, IUOM.strLongUPCCode)), IUOM.strUpcCode) AS strUpcCode
 									, I.strDescription AS strDescription
-									, CASE  WHEN GETDATE() between SplPrc.dtmBeginDate AND SplPrc.dtmEndDate THEN SplPrc.dblUnitAfterDiscount 
-											WHEN (GETDATE() > (SELECT TOP 1 dtmEffectiveRetailPriceDate FROM tblICEffectiveItemPrice EIP 
-																							WHERE EIP.intItemLocationId = IL.intItemLocationId
-																							AND GETDATE() >= dtmEffectiveRetailPriceDate
-																							ORDER BY dtmEffectiveRetailPriceDate ASC))
-																		THEN (SELECT TOP 1 dblRetailPrice FROM tblICEffectiveItemPrice EIP 
-																								WHERE EIP.intItemLocationId = IL.intItemLocationId
-																								AND GETDATE() >= dtmEffectiveRetailPriceDate
-																								ORDER BY dtmEffectiveRetailPriceDate ASC) --Effective Retail Price
-										ELSE Prc.dblSalePrice 
-									END AS dblSalePrice
+									, IUM.strUnitMeasure AS strUnitMeasure
+									, itemPricing.dblSalePrice AS dblSalePrice
+									, IL.intItemLocationId AS intItemLocationId
+									, IUOM.intItemUOMId		-- rev
 									, IL.ysnTaxFlag1 AS ysnSalesTaxed
 									, IL.ysnIdRequiredLiquor AS ysnIdRequiredLiquor
 									, IL.ysnIdRequiredCigarette AS ysnIdRequiredCigarette
 									, SubCat.strRegProdCode AS strRegProdCode
 									, I.intItemId AS intItemId
+									, SplPrc.dtmBeginDate AS dtmBeginDate
+									, SplPrc.dtmEndDate AS dtmEndDate
+									, SplPrc.dblUnitAfterDiscount AS dblUnitAfterDiscount
 								FROM tblICItem I
 								JOIN tblICCategory Cat 
 									ON Cat.intCategoryId = I.intCategoryId
@@ -1057,17 +1055,18 @@ SELECT '@tblTempPassportITT', * FROM @tblTempPassportITT
 									ON IUM.intUnitMeasureId = IUOM.intUnitMeasureId
 								JOIN tblSTRegister R 
 									ON R.intStoreId = ST.intStoreId
-								JOIN tblICItemPricing Prc 
-									ON Prc.intItemLocationId = IL.intItemLocationId
+								JOIN vyuSTItemHierarchyPricing itemPricing
+									ON I.intItemId = itemPricing.intItemId
+									AND IL.intItemLocationId = itemPricing.intItemLocationId
+									AND IUOM.intItemUOMId = itemPricing.intItemUOMId
 								LEFT JOIN tblICItemSpecialPricing SplPrc 
 									ON SplPrc.intItemId = I.intItemId
 								WHERE I.ysnFuelItem = CAST(0 AS BIT) 
 									AND ST.intStoreId = @intStoreId
-									AND IUOM.strLongUPCCode IS NOT NULL
-									--AND IUOM.strLongUPCCode <> ''
-									--AND IUOM.strLongUPCCode <> '0'
-									AND IUOM.strLongUPCCode NOT LIKE '%[^0-9]%'
-									AND ISNULL(SUBSTRING(IUOM.strLongUPCCode, PATINDEX('%[^0]%',IUOM.strLongUPCCode), LEN(IUOM.strLongUPCCode)), 0) NOT IN ('') -- NOT IN ('0', '')
+									AND ((IUOM.strLongUPCCode IS NOT NULL
+										AND IUOM.strLongUPCCode NOT LIKE '%[^0-9]%'
+										AND ISNULL(SUBSTRING(IUOM.strLongUPCCode, PATINDEX('%[^0]%',IUOM.strLongUPCCode), LEN(IUOM.strLongUPCCode)), 0) NOT IN (''))
+										OR (ISNULL(IUOM.strUpcCode , '') <> '' AND ISNULL(IUOM.strLongUPCCode, '') = ''))
 							) as t
 						) t1
 						WHERE rn = 1
