@@ -39,7 +39,7 @@ BEGIN TRY
 			@SalesEndDate   	NVARCHAR(50),
 			@ysnPreview			NVARCHAR(1),
 			@currentUserId		INT
-	SET @strResultMsg = 'success'
+	
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT, @XML 
 
@@ -1416,15 +1416,11 @@ END CATCH
 
 
 ExitWithCommit:
-	INSERT INTO tblSTMassUpdateAudit (strScreenName,strXML, strStatus,dtmDateGenerated,intCurrentUserId)
-		VALUES ('Mass Update',@XML,@strResultMsg,GETDATE(),@currentUserId);
 	COMMIT TRANSACTION
 	GOTO ExitPost
 	
 
 ExitWithRollback:
-	INSERT INTO tblSTMassUpdateAudit (strScreenName,strXML, strStatus,dtmDateGenerated,intCurrentUserId)
-		VALUES ('Mass Update',@XML,@strResultMsg,GETDATE(),@currentUserId);
 	IF @@TRANCOUNT > 0
 		BEGIN
 			ROLLBACK TRANSACTION 
