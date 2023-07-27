@@ -26,7 +26,7 @@ SELECT
 	,strTerminalName = TCN.strName
 	,strTerminalControlNumber = TCN.strTerminalControlNumber
 	,strFromSupplier = V.strName
-	,strFromTerminal = TCN.strName
+	,strFromTerminal = VL.strLocationName
 	,strFromStorageLocation = CLSL.strSubLocationName
 	,strFromLocation = CL.strLocationName
 	,strFromAddress = CASE WHEN (DOD.intVendorId IS NOT NULL) THEN VL.strAddress 
