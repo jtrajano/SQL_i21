@@ -20,7 +20,8 @@ from tblARInvoiceDetail aid
  left join tblTRLoadDistributionDetail ldd on ldd.intLoadDistributionDetailId = aid.intLoadDistributionDetailId  
  left join tblTRLoadHeader lh on lh.strTransaction = ai.strActualCostId  
    
-where ai.strType = 'Transport Delivery'  
+WHERE 
+(ai.strType = 'Transport Delivery' OR ai.strType = 'Tank Delivery')
 and strDocumentNumber like 'TR%'    
   
   
