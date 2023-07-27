@@ -2265,11 +2265,15 @@ END CATCH
 
 
 ExitWithCommit:
+	INSERT INTO tblSTMassUpdateAudit (strScreenName,strXML, strStatus,dtmDateGenerated,intCurrentUserId)
+		VALUES ('Update Item Data',@XML,@strResultMsg,GETDATE(),@intCurrentEntityUserId);
 	COMMIT TRANSACTION
 	GOTO ExitPost
 	
 
 ExitWithRollback:
+	INSERT INTO tblSTMassUpdateAudit (strScreenName,strXML, strStatus,dtmDateGenerated,intCurrentUserId)
+		VALUES ('Update Item Data',@XML,@strResultMsg,GETDATE(),@intCurrentEntityUserId);
 	IF @@TRANCOUNT > 0
 		BEGIN
 			ROLLBACK TRANSACTION 
