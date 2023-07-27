@@ -212,6 +212,9 @@ BEGIN TRY
 				THEN LD.intPContractDetailId
 				ELSE LD.intSContractDetailId
 			END
+			OR ((ISNULL(L.intPurchaseSale, 0) = 1 AND CD.intContractDetailId = LD.intPContractDetailId)
+			OR (ISNULL(L.intPurchaseSale, 0) <> 1 AND CD.intContractDetailId = LD.intSContractDetailId))
+
 		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 		JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = LD.intItemId
 			AND ItemLoc.intLocationId = CD.intCompanyLocationId
