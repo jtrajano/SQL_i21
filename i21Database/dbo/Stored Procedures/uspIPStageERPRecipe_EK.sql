@@ -149,6 +149,7 @@ BEGIN TRY
 					 ORDER BY x.LocationCode
 						,x.BlendCode
 						,x.WeekCommencing
+						,x.OrderNo
 					) AS strSessionId
 				,'By Quantity'
 				,1 AS ActionId
@@ -162,6 +163,7 @@ BEGIN TRY
 					,BlendCode NVARCHAR(50)	  collate Latin1_General_CI_AS
 					,OrderQuantityUOM NVARCHAR(50)	  collate Latin1_General_CI_AS
 					,WeekCommencing DATETIME
+					,OrderNo  NVARCHAR(50)	  collate Latin1_General_CI_AS
 					) x
 			LEFT JOIN tblSMCompanyLocation CL ON CL.strVendorRefNoPrefix = x.LocationCode
 				AND strLocationType = 'Plant'
@@ -221,6 +223,7 @@ BEGIN TRY
 					 ORDER BY x.LocationCode
 						,x.BlendCode
 						,x.WeekCommencing
+						,x.OrderNo
 					) AS strSessionId
 				,'C' AS RowState
 				,NULL AS ItemGroupName
@@ -234,6 +237,7 @@ BEGIN TRY
 					,WeekCommencing DATETIME '../WeekCommencing'
 					,BlendCode NVARCHAR(50) Collate Latin1_General_CI_AS '../BlendCode'
 					,LocationCode NVARCHAR(6) Collate Latin1_General_CI_AS '../LocationCode'
+					,OrderNo  NVARCHAR(50)	  collate Latin1_General_CI_AS '../OrderNo'
 					) x
 			LEFT JOIN tblSMCompanyLocation CL ON CL.strVendorRefNoPrefix = x.LocationCode
 				AND strLocationType = 'Plant'
