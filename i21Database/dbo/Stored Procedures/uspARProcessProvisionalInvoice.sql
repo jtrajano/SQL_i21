@@ -181,9 +181,6 @@ BEGIN TRY
 		,[intStorageLocationId]
 		,[intCompanyLocationSubLocationId]
 		,[dblComputedGrossPrice]
-		,[ysnAddConvenienceFee]
-		,[dblConvenienceFee]
-		,[dblBaseConvenienceFee]
 	)
 	SELECT 
 		[strTransactionType]				= 'Invoice'
@@ -283,9 +280,6 @@ BEGIN TRY
 		,[intStorageLocationId]				= ARID.[intStorageLocationId]
 		,[intCompanyLocationSubLocationId]	= ARID.[intCompanyLocationSubLocationId]
 		,[dblComputedGrossPrice]			= ARID.[dblComputedGrossPrice]
-		,[ysnAddConvenienceFee]				= ARID.[ysnAddConvenienceFee]
-		,[dblConvenienceFee]				= ARID.[dblConvenienceFee]
-		,[dblBaseConvenienceFee]			= ARID.[dblBaseConvenienceFee]
 	FROM tblICInventoryShipmentItem ISI
 	INNER JOIN tblICItem I ON ISI.[intItemId] = I.[intItemId]
 	INNER JOIN tblICInventoryShipment ISH ON ISI.[intInventoryShipmentId] = ISH.[intInventoryShipmentId]
@@ -397,9 +391,6 @@ BEGIN TRY
 		,[intStorageLocationId]				= ARID.[intStorageLocationId]
 		,[intCompanyLocationSubLocationId]	= ARID.[intCompanyLocationSubLocationId]
 		,[dblComputedGrossPrice]			= ARID.[dblComputedGrossPrice]
-		,[ysnAddConvenienceFee]				= ARID.[ysnAddConvenienceFee]
-		,[dblConvenienceFee]				= ARID.[dblConvenienceFee]
-		,[dblBaseConvenienceFee]			= ARID.[dblBaseConvenienceFee]
 	FROM tblARInvoiceDetail ARID
 	LEFT JOIN tblICItem I ON ARID.intItemId = I.intItemId
 	WHERE intInvoiceId = @InvoiceId 
