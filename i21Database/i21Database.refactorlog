@@ -7812,4 +7812,53 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[trgAfterInsertCTContractCost]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="d0341851-fb7e-4220-a2a8-ae91b48f2dde" ChangeDateTime="07/23/2023 15:45:18">
+    <Property Name="ElementName" Value="[dbo].[tblLGNotifyPartyGroup].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblLGNotifyPartyGroup]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intNotifyPartyGroupId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="c2316507-da84-48fd-9135-cd559de56642" ChangeDateTime="07/24/2023 13:40:30">
+    <Property Name="ElementName" Value="[dbo].[tblLGNotifyPartyGroup].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblLGNotifyPartyGroup]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intNotifyPartyGroupId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="3fc0f5da-1606-470d-93ba-1cce28c6b4fe" ChangeDateTime="07/24/2023 13:51:09">
+    <Property Name="ElementName" Value="[dbo].[tblLGNotifyPartyGroup].[intDestinationPortId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblLGNotifyPartyGroup]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strDestinationPort" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="624ec52f-1a5c-408e-a727-ff2f7a2b9ba7" ChangeDateTime="07/24/2023 13:51:19">
+    <Property Name="ElementName" Value="[dbo].[tblLGNotifyPartyGroup].[intSubLocationId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblLGNotifyPartyGroup]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intStorageLocationId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="eb2d53ef-7fe2-4e99-a397-588b07deb448" ChangeDateTime="07/24/2023 13:53:09">
+    <Property Name="ElementName" Value="[dbo].[tblLGNotifyPartyGroupDetail].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblLGNotifyPartyGroupDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intNotifyPartyGroupDetailId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="fba4b6fa-735e-4ea0-8e25-6bc2665caea7" ChangeDateTime="07/25/2023 09:36:27">
+    <Property Name="ElementName" Value="[dbo].[tblLGNotifyPartyGroup].[intConc]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblLGNotifyPartyGroup]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intConcurrencyId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="e8cbfd3b-c783-45a1-8c8b-69d58e0015de" ChangeDateTime="07/25/2023 14:40:36">
+    <Property Name="ElementName" Value="[dbo].[tblLGNotifyPartyGroup].[intOriginId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblLGNotifyPartyGroup]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intCountryId" />
+  </Operation>
 </Operations>
