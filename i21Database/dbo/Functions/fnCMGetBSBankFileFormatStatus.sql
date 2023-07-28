@@ -18,7 +18,7 @@ RETURN (
     BankDescription = 0
     UNION
     SELECT BankFileFormatId , 'Bank File Statement  should have Cleared Date field.'  COLLATE Latin1_General_CI_AS  strError  FROM vyuCMBSBankFileFormatStatus WHERE 
-    BankDescription = 0
+    ClearDate = 0
 )
 
 
