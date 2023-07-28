@@ -3,7 +3,7 @@ AS
 SELECT DISTINCT
 	 strTransactionType			= ARI.strTransactionType
 	,strTransactionId			= ARI.strInvoiceNumber
-	,strTransactionDate			= ARI.dtmDate
+	,strTransactionDate			= ARI.dtmPostDate
 	,strTransactionDueDate		= ARI.dtmDueDate
 	,strVendorName				= EME.strName
 	,strCommodity				= ICCom.strDescription
@@ -72,5 +72,3 @@ LEFT JOIN (
 	GROUP BY ARPD.intInvoiceId
 ) PAYMENT ON PAYMENT.intInvoiceId = ARID.intInvoiceId
 WHERE ARI.ysnPosted = 1 
-
-
