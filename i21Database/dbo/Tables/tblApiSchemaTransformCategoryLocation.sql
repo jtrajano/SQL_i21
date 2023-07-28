@@ -34,7 +34,7 @@ CREATE TABLE [dbo].[tblApiSchemaTransformCategoryLocation](
 	, ysnDefaultPrePriced BIT NULL
 	, ysnDefaultIDRequiredLiquor BIT NULL
 	, ysnDefaultIDRequiredCigarette BIT NULL
-	, intDefaultMinimumAge BIT NULL
+	, intDefaultMinimumAge INT NULL
 	, ysnReportNetGross BIT NULL
 	, ysnReturnable BIT NULL
 	, ysnSaleable BIT NULL
