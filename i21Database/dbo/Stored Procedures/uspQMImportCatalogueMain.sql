@@ -1338,7 +1338,7 @@ BEGIN TRY
 				,@strPatternString = @strSampleNumber OUTPUT
 
 			/* Item UOM Validation. */
-			IF NOT EXISTS (SELECT * FROM tblICItemUOM WHERE intItemId = @intItemId AND intUnitMeasureId = @intRepresentingUOMId)
+			IF @intImportType = 1 AND NOT EXISTS (SELECT * FROM tblICItemUOM WHERE intItemId = @intItemId AND intUnitMeasureId = @intRepresentingUOMId)
 				BEGIN
 					SELECT @strItemLog = strItemNo
 					FROM tblICItem 
