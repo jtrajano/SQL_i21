@@ -1127,6 +1127,9 @@ BEGIN TRY
 						DELETE
 						FROM #tmpAddItemReceiptResult
 						WHERE intInventoryReceiptId = @intInventoryReceiptId
+
+						DELETE FROM @ReceiptStagingTable
+						DELETE FROM @LotEntries
 					END
 				END
 						----************************************************
