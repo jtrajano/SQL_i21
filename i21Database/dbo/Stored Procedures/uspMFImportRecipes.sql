@@ -889,6 +889,7 @@ BEGIN
 					AND strRecipeHeaderItemNo = HI.strItemNo
 					AND RIS.strValidFrom=RI.dtmValidFrom 
 					AND L.intCompanyLocationId =R.intLocationId 
+					AND RIS.strSessionId = @strSessionId
 				)
 			AND RI.ysnImported = 1
 			
