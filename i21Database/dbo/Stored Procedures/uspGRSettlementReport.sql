@@ -1095,7 +1095,7 @@ BEGIN
 			-- 	ON Bill.intBillId = StrgHstry.intBillId
 			JOIN tblGRCustomerStorage CS 
 				ON CS.intCustomerStorageId = StrgHstry.intCustomerStorageId
-			LEFT JOIN tblSCTicket SC  
+			JOIN tblSCTicket SC  
 				ON SC.intTicketId = CS.intTicketId
 			LEFT JOIN vyuSCGetScaleDistribution SD 
 				ON CS.intCustomerStorageId = SD.intCustomerStorageId
