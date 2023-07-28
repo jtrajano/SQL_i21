@@ -822,7 +822,7 @@
     <Build Include="dbo\Tables\tblICLotReleased.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutCommanderFuelTotal.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutFuelTotals.sql" />
-	<Build Include="dbo\Tables\tblSTMassUpdateAudit.sql" />
+    <Build Include="dbo\Tables\tblSTMassUpdateAudit.sql" />
     <Build Include="dbo\User Defined Types\StagingCommanderFuelTotal.sql" />
     <Build Include="dbo\Functions\fnCTGetQualityResultAmount.sql" />
     <Build Include="dbo\Views\vyuARCreditCardByExpiration.sql" />
@@ -1782,6 +1782,7 @@
     <None Include="Scripts\Post-Deployment\MF\15_DemandForecastFix.sql" />
     <Build Include="dbo\Views\vyuRKGetSequenceMonth.sql" />
     <Build Include="dbo\Functions\fnRKIsDerivativeLocked.sql" />
+    <Build Include="dbo\Views\vyuSTPromotionItemListDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
