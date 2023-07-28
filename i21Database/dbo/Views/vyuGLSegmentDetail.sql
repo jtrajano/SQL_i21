@@ -20,7 +20,8 @@ SELECT
 	S.intConcurrencyId,
 	S.intCode,
 	CompanyDetails.intCompanyDetailsId,
-	CompanyDetails.strCompanyName
+	CompanyDetails.strCompanyName,
+	S.intPrimaryOrderId
 FROM            
 	dbo.tblGLAccountSegment AS S LEFT OUTER JOIN
 	dbo.tblGLAccountGroup AS G ON S.intAccountGroupId = G.intAccountGroupId LEFT OUTER JOIN
