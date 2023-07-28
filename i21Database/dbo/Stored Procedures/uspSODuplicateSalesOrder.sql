@@ -241,6 +241,7 @@ BEGIN
 				   ,[ysnAddonParent]
 		           ,[dblAddOnQuantity]
 				   ,[dblStandardWeight]
+				   ,[intItemCustomerXrefId]
 				)
 			SELECT 
 					@NewSalesOrderId
@@ -292,6 +293,7 @@ BEGIN
 				   ,[ysnAddonParent]
 			       ,[dblAddOnQuantity]
 				   ,[dblStandardWeight]
+				   ,[intItemCustomerXrefId]
 			FROM
 				[tblSOSalesOrderDetail]
 			WHERE
