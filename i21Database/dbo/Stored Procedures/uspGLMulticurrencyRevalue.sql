@@ -205,7 +205,7 @@ BEGIN
 FROM vyuCMMultiCurrencyRevalue A
 LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
 WHERE dtmDate = @dtmDate
-AND @intDefaultCurrencyId <> intCurrencyId
+AND @intDefaultCurrencyId <> A.intCurrencyId
 END
 
 IF @strModule = 'FA'
