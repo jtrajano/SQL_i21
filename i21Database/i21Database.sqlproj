@@ -1857,6 +1857,7 @@
     <Build Include="dbo\Tables\tblLGNotifyPartyGroupDetail.sql" />
     <Build Include="dbo\Views\vyuLGNotifyPartyGroup.sql" />
     <Build Include="dbo\Views\vyuLGStorageLocation.sql" />
+    <Build Include="dbo\Views\vyuNotifyPartyGroupView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
