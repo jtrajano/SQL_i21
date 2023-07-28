@@ -39,9 +39,9 @@ BEGIN
 			END
 			INSERT INTO tblGLJournal(
 				intCompanyId, strDescription,intCurrencyId,dtmDate,dtmReverseDate,strJournalId,strJournalType,strTransactionType,strSourceType,
-				intEntityId,ysnPosted,strRecurringStatus, intFiscalYearId, intFiscalPeriodId)
+				intEntityId,ysnPosted,strRecurringStatus, intFiscalYearId, intFiscalPeriodId, intCompanySegmentId)
 			SELECT intCompanyId,strDescription,intCurrencyId,@journalDate,@reverseDate,@smID,'Recurring Journal','General Journal','GJ',
-				@entityid,0,'Locked', FY.intFiscalYearId, FY.intGLFiscalYearPeriodId
+				@entityid,0,'Locked', FY.intFiscalYearId, FY.intGLFiscalYearPeriodId,intCompanySegmentId
 			FROM tblGLJournal J
 			OUTER APPLY(
 				SELECT intFiscalYearId, intGLFiscalYearPeriodId FROM tblGLFiscalYearPeriod WHERE @journalDate BETWEEN dtmStartDate AND dtmEndDate
