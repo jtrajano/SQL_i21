@@ -1853,6 +1853,10 @@
     <Build Include="dbo\Tables\tblHDStatementOfWorkType.sql" />
     <Build Include="dbo\Tables\tblHDStatementOfWorkTypeSubtype.sql" />
     <None Include="Scripts\Post-Deployment\EM\2310_FixCMBankTransactionNonExistentEFT.sql" />
+    <Build Include="dbo\Tables\tblLGNotifyPartyGroup.sql" />
+    <Build Include="dbo\Tables\tblLGNotifyPartyGroupDetail.sql" />
+    <Build Include="dbo\Views\vyuLGNotifyPartyGroup.sql" />
+    <Build Include="dbo\Views\vyuLGStorageLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
