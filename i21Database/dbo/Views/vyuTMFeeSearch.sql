@@ -1,7 +1,8 @@
 ﻿CREATE VIEW [dbo].[vyuTMFeeSearch]
 AS  
 	SELECT 
-		dtmDate = A.dtmDateTime
+		intFeeId = A.intFeeId
+		,dtmDate = A.dtmDateTime
 		,strFeeType = D.strFeeTypeDescription
 		,strDescription = A.strDescription
 		,dblAmount = A.dblAmount
