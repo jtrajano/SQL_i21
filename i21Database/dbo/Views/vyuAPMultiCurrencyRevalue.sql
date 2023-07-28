@@ -27,7 +27,8 @@ SELECT DISTINCT
     dblDebit                =    0, --Calcuate By GL
     dblCredit               =    0,  --Calcuate By GL
 	intAccountId			= 	 A.intAccountId,
-	intCompanyLocationId	=	 A.intShipToId
+	intCompanyLocationId	=	 A.intShipToId,
+	dtmDatePaid  			= 	PAYMENT.dtmDatePaid
 FROM tblAPBill A
 INNER JOIN tblAPBillDetail BD ON BD.intBillId = A.intBillId
 JOIN vyuAPBill v ON v.intBillId = A.intBillId
@@ -45,4 +46,17 @@ LEFT JOIN dbo.tblICCommodity CC
 	ON CC.intCommodityId = IT.intCommodityId
 LEFT JOIN dbo.tblSMCurrencyExchangeRateType CER
 	ON CER.intCurrencyExchangeRateTypeId = BD.intCurrencyExchangeRateTypeId
-WHERE A.ysnPosted = 1 AND A.ysnPaid = 0
+LEFT JOIN (
+	SELECT
+		 P.intPaymentId
+		,PD.intBillId
+		,dtmDatePaid = MAX(dtmDatePaid)
+	FROM tblAPPayment P
+	INNER JOIN tblAPPaymentDetail PD
+	ON  P.intPaymentId = PD.intPaymentId
+	WHERE P.ysnPosted = 1
+	GROUP BY P.intPaymentId
+	,PD.intBillId
+) PAYMENT ON PAYMENT.intBillId = A.intBillId
+WHERE A.ysnPosted = 1 --AND A.ysnPaid = 0
+AND A.intCurrencyId <> dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
