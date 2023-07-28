@@ -635,11 +635,6 @@ CREATE TABLE #ARItemsForContracts (
 	, [ysnFromReturn]					BIT NULL
 )
 
-DELETE PQ
-FROM tblARPostingQueue PQ
-INNER JOIN #ARPostInvoiceHeader II ON II.strInvoiceNumber = PQ.strTransactionNumber AND II.intInvoiceId = PQ.intTransactionId
-WHERE DATEDIFF(SECOND, dtmPostingdate, GETDATE()) > 20 OR @post = 0
-
 EXEC [dbo].[uspARPopulateInvalidPostInvoiceData]
          @Post     = @post
         ,@Recap    = @recap
@@ -693,27 +688,6 @@ IF(@totalInvalid > 0)
 	END
 
 SELECT @totalRecords = COUNT([intInvoiceId]) FROM #ARPostInvoiceHeader
-
---INSERT INVOICES TO POSTING QUEUE
-IF (@totalRecords > 0) AND @recap = 0 AND @post = 1
-	BEGIN
-		INSERT INTO tblARPostingQueue (
-			  intTransactionId
-			, strTransactionNumber
-			, strBatchId
-			, dtmPostingdate
-			, intEntityId
-			, strTransactionType
-		)
-		SELECT DISTINCT 
-			  intTransactionId		= intInvoiceId
-			, strTransactionNumber	= strInvoiceNumber
-			, strBatchId			= strBatchId
-			, dtmPostingdate		= GETDATE()
-			, intEntityId			= intEntityId
-			, strTransactionType	= 'Invoice'
-		FROM #ARPostInvoiceHeader 
-	END
 			
 IF(@totalInvalid >= 1 AND @totalRecords <= 0)
 	BEGIN
