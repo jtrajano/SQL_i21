@@ -177,7 +177,7 @@ FROM (
   (      
    --TO CORRECTLY CALCULATE THE EXCHANGE RATE ON PARTIAL PAYMENT IF EACH VOUCHER DETAIL HAVE DIFFERENT RATE      
    --USE THE PERCENTAGE OF DETAIL TO TOTAL OF VOUCHER THEN MULTIPLE TO PAYMENT      
-   dbo.fnAPGetPaymentAmountFactor(C2.dblTotal, B.dblPayment, C.dblTotal) * ISNULL(NULLIF(C2.dblRate, 0), 1)    
+   dbo.fnAPGetPaymentAmountFactor(C2.dblTotal, B.dblPayment, NULLIF(C.dblTotal,0)) * ISNULL(NULLIF(C2.dblRate, 0), 1)    
   )      
   ) AS dblAmountPaid,       
    dblTotal = 0       
@@ -199,7 +199,7 @@ FROM (
     END)       
     *      
     (      
-     dbo.fnAPGetPaymentAmountFactor(C2.dblTotal, B.dblDiscount, C.dblTotal) * ISNULL(NULLIF(C2.dblRate, 0), 1)       
+     dbo.fnAPGetPaymentAmountFactor(C2.dblTotal, B.dblDiscount, NULLIF(C.dblTotal,0)) * ISNULL(NULLIF(C2.dblRate, 0), 1)       
     )      
     ) AS dblDiscount      
   , (      
@@ -210,7 +210,7 @@ FROM (
     END)      
     *      
     (      
-     dbo.fnAPGetPaymentAmountFactor(C2.dblTotal, B.dblInterest, C.dblTotal) * ISNULL(NULLIF(C2.dblRate, 0), 1)    
+     dbo.fnAPGetPaymentAmountFactor(C2.dblTotal, B.dblInterest, NULLIF(C.dblTotal,0)) * ISNULL(NULLIF(C2.dblRate, 0), 1)    
     )      
     ) AS dblInterest       
   , dblPrepaidAmount = 0       
@@ -228,7 +228,7 @@ FROM (
   INNER JOIN dbo.tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId      
   INNER JOIN dbo.tblAPBill C ON ISNULL(B.intBillId,B.intOrigBillId) = C.intBillId      
  --  LEFT JOIN dbo.fnAPGetVoucherAverageRate() avgRate ON C.intBillId = avgRate.intBillId --handled payment for origin old payment import      
-  LEFT JOIN dbo.tblAPBillDetail C2 ON C.intBillId = C2.intBillId      
+  INNER JOIN dbo.tblAPBillDetail C2 ON C.intBillId = C2.intBillId      
   LEFT JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityId] = D2.intEntityId)      
    ON A.[intEntityVendorId] = D.[intEntityId]      
  LEFT JOIN dbo.tblGLAccount F ON  B.intAccountId = F.intAccountId        
@@ -309,7 +309,7 @@ FROM (
   (      
    --TO CORRECTLY CALCULATE THE EXCHANGE RATE ON PARTIAL PAYMENT IF EACH VOUCHER DETAIL HAVE DIFFERENT RATE      
    --USE THE PERCENTAGE OF DETAIL TO TOTAL OF VOUCHER THEN MULTIPLE TO PAYMENT      
-   dbo.fnAPGetPaymentAmountFactor(C3.dblAdjustedTax, B.dblPayment, C.dblTotal) * ISNULL(NULLIF(C2.dblRate, 0), 1)   
+   dbo.fnAPGetPaymentAmountFactor(C3.dblAdjustedTax, B.dblPayment, NULLIF(C.dblTotal,0)) * ISNULL(NULLIF(C2.dblRate, 0), 1)   
   )      
   ) AS dblAmountPaid,       
    dblTotal = 0       
@@ -331,7 +331,7 @@ FROM (
     END)       
     *      
     (      
-     dbo.fnAPGetPaymentAmountFactor(C3.dblAdjustedTax, B.dblDiscount, C.dblTotal) * ISNULL(NULLIF(C2.dblRate, 0), 1)      
+     dbo.fnAPGetPaymentAmountFactor(C3.dblAdjustedTax, B.dblDiscount, NULLIF(C.dblTotal,0)) * ISNULL(NULLIF(C2.dblRate, 0), 1)      
     )      
     ) AS dblDiscount      
   , (      
@@ -342,7 +342,7 @@ FROM (
     END)      
     *      
     (      
-     dbo.fnAPGetPaymentAmountFactor(C3.dblAdjustedTax, B.dblInterest, C.dblTotal) * ISNULL(NULLIF(C2.dblRate, 0), 1)       
+     dbo.fnAPGetPaymentAmountFactor(C3.dblAdjustedTax, B.dblInterest, NULLIF(C.dblTotal,0)) * ISNULL(NULLIF(C2.dblRate, 0), 1)       
     )      
     ) AS dblInterest       
   , dblPrepaidAmount = 0       
