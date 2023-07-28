@@ -168,6 +168,9 @@
 	,@ItemOverrideTaxGroup					BIT				= 0
 	,@Surcharge								NUMERIC(18, 6)	= 0
 	,@ItemDispatchId						INT				= NULL
+	,@ItemAddConvenienceFee					BIT				= 0
+	,@ItemConvenienceFee					NUMERIC(18, 6)	= 0.000000
+	,@ItemBaseConvenienceFee				NUMERIC(18, 6)	= 0.000000
 AS
 
 BEGIN
@@ -564,6 +567,9 @@ BEGIN TRY
 		,[intTaxLocationId]
 		,[strTaxPoint]
 		,[dblSurcharge]
+		,[ysnAddConvenienceFee]
+		,[dblConvenienceFee]
+		,[dblBaseConvenienceFee]
 	)
 	SELECT [strInvoiceNumber]				= CASE WHEN @UseOriginIdAsInvoiceNumber = 1 THEN @InvoiceOriginId ELSE NULL END
 		,[strTransactionType]				= @TransactionType
@@ -669,6 +675,9 @@ BEGIN TRY
 		,[intTaxLocationId]					= @TaxLocationId
 		,[strTaxPoint]						= @TaxPoint
 		,[dblSurcharge]						= @Surcharge
+		,[ysnAddConvenienceFee]				= @ItemAddConvenienceFee	
+		,[dblConvenienceFee]				= @ItemConvenienceFee	
+		,[dblBaseConvenienceFee]			= @ItemBaseConvenienceFee
 	FROM tblARCustomer C
 	LEFT OUTER JOIN [tblEMEntityLocation] EL ON C.[intEntityId] = EL.[intEntityId] AND EL.ysnDefaultLocation = 1
 	LEFT OUTER JOIN [tblEMEntityLocation] SL ON ISNULL(@ShipToLocationId, 0) <> 0 AND @ShipToLocationId = SL.intEntityLocationId

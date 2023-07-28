@@ -74,6 +74,8 @@ SELECT
 	,intDaysOld							= DATEDIFF(DAYOFYEAR, CAST(ARIFP.[dtmDate] AS DATE), CAST(GETUTCDATE() AS DATE))
 	,intPayToBankAccountId				= ARIFP.intPayToBankAccountId
 	,strPayToBankAccountNo				= ISNULL(ARIFP.strPayToBankAccountNo, '')
+	,[dblConvenienceFee]				= ARIFP.[dblConvenienceFee]
+	,[dblBaseConvenienceFee]			= ARIFP.[dblBaseConvenienceFee]
 FROM (
 		--AR TRANSACTIONS
 		SELECT 
@@ -139,6 +141,8 @@ FROM (
 			,ysnForgiven						= ARI.ysnForgiven
 			,intPayToBankAccountId				= PFBA.intBankAccountId
 			,strPayToBankAccountNo				= PFBA.strBankAccountNo
+			,[dblConvenienceFee]				= ARI.[dblConvenienceFee]
+			,[dblBaseConvenienceFee]			= ARI.[dblBaseConvenienceFee]
 		FROM dbo.tblARInvoice ARI WITH (NOLOCK)
 		INNER JOIN tblARCustomer ARC WITH (NOLOCK) ON ARI.[intEntityCustomerId] = ARC.[intEntityId]
 		INNER JOIN (
@@ -256,6 +260,8 @@ FROM (
 			,ysnForgiven						= CAST(0 AS BIT)
 			,intPayToBankAccountId				= NULL
 			,strPayToBankAccountNo				= NULL
+			,[dblConvenienceFee]				= CAST(0 AS DECIMAL(18,6))
+			,[dblBaseConvenienceFee]			= CAST(0 AS DECIMAL(18,6))
 		FROM [vyuAPVouchersForARPayment] APB
 		INNER JOIN tblAPVendor ARC WITH (NOLOCK) ON APB.intEntityCustomerId = ARC.intEntityId
 		INNER JOIN (
@@ -322,6 +328,8 @@ FROM (
 			,ysnForgiven						= CAST(0 AS BIT)
 			,intPayToBankAccountId				= NULL
 			,strPayToBankAccountNo				= NULL
+			,[dblConvenienceFee]				= CAST(0 AS DECIMAL(18,6))
+			,[dblBaseConvenienceFee]			= CAST(0 AS DECIMAL(18,6))
 		FROM dbo.tblARCustomerBudget CB WITH (NOLOCK)
 		INNER JOIN (
 			SELECT C.intEntityId

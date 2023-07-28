@@ -1186,6 +1186,7 @@ BEGIN
 	WHERE P.[ysnPost] = 1
       AND P.[strTransactionType] <> 'Claim'
       AND (P.[dblCreditCardFee] <> @ZeroDecimal OR P.[dblBaseCreditCardFee] <> @ZeroDecimal)
+	  AND P.[dblBasePayment] <> 0
 
     DECLARE @TempPaymentIds AS [dbo].[Id]
     DELETE FROM @TempPaymentIds

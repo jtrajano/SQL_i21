@@ -207,6 +207,9 @@ SELECT
 	,strSourcedFrom						= CASE WHEN ISNULL(INV.intDefaultPayToBankAccountId,0) <> 0 THEN INV.strSourcedFrom ELSE '' END
 	,intProfitCenter					= CLOC.intProfitCenter
 	,dblSurcharge						= INV.dblSurcharge
+	,ysnAddConvenienceFee				= INV.ysnAddConvenienceFee
+	,dblConvenienceFee					= INV.dblConvenienceFee
+	,dblBaseConvenienceFee				= INV.dblBaseConvenienceFee
 FROM tblARInvoice INV WITH (NOLOCK)
 INNER JOIN (
     SELECT 

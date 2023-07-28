@@ -94,6 +94,8 @@
 	[ysnAllowIntraLocationEntriesInvoice]	BIT NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnAllowIntraLocationEntriesInvoice] DEFAULT((0)),
 	[ysnAllowIntraLocationEntriesPayment]	BIT NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnAllowIntraLocationEntriesPayment] DEFAULT((0)),
 	[ysnEnableUserProfileSignature]		    BIT NOT NULL DEFAULT 0,
+	[dblExternalPercentage]					NUMERIC(18, 2),
+	[dblExternalFixedAmount]				NUMERIC(18, 2),
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intARAccountId] FOREIGN KEY ([intARAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intDiscountAccountId] FOREIGN KEY ([intDiscountAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intWriteOffAccountId] FOREIGN KEY ([intWriteOffAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),

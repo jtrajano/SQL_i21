@@ -61,7 +61,10 @@ BEGIN
       , tblARInvoice.[dblDiscount]      = ISNULL(tblARInvoice.[dblDiscount], @ZeroDecimal) - P.[dblDiscount]			
       , tblARInvoice.[dblBaseDiscount]  = ISNULL(tblARInvoice.[dblBaseDiscount], @ZeroDecimal) - P.[dblBaseDiscount]			
       , tblARInvoice.[dblInterest]      = ISNULL(tblARInvoice.[dblInterest], @ZeroDecimal) - P.[dblInterest]				
-      , tblARInvoice.[dblBaseInterest]  = ISNULL(tblARInvoice.[dblBaseInterest], @ZeroDecimal) - P.[dblBaseInterest]				
+      , tblARInvoice.[dblBaseInterest]  = ISNULL(tblARInvoice.[dblBaseInterest], @ZeroDecimal) - P.[dblBaseInterest]
+      , tblARInvoice.[dblConvenienceFee]	= ISNULL(P.[dblCreditCardFee], @ZeroDecimal)
+      , tblARInvoice.[dblBaseConvenienceFee]= ISNULL(P.[dblBaseCreditCardFee], @ZeroDecimal)
+      , tblARInvoice.[ysnAddConvenienceFee]	= CASE WHEN ISNULL(P.[dblCreditCardFee], @ZeroDecimal) <> 0 THEN 1 ELSE 0 END
     FROM (
         SELECT 
              [dblPayment]      = SUM((A.[dblPayment] + A.[dblWriteOffAmount]) * [dbo].[fnARGetInvoiceAmountMultiplier](C.[strTransactionType])) 
@@ -71,6 +74,8 @@ BEGIN
             ,[dblInterest]     = SUM(A.[dblInterest]) 						
             ,[dblBaseInterest] = SUM(A.[dblBaseInterest]) 						
             ,[intInvoiceId]    = A.[intInvoiceId] 
+			,[dblCreditCardFee]		= SUM(A.[dblCreditCardFee])
+			,[dblBaseCreditCardFee]	= SUM(A.[dblBaseCreditCardFee])
         FROM tblARPaymentDetail A
         INNER JOIN tblARPayment B ON A.intPaymentId = B.intPaymentId
         INNER JOIN @PaymentIds P ON B.[intPaymentId] = P.[intId] 					
@@ -253,6 +258,9 @@ BEGIN
       , tblARInvoice.dblBaseDiscount    = ISNULL(tblARInvoice.dblBaseDiscount,0.00) + P.dblBaseDiscount				
       , tblARInvoice.dblInterest        = ISNULL(tblARInvoice.dblInterest,0.00) + P.dblInterest
       , tblARInvoice.dblBaseInterest    = ISNULL(tblARInvoice.dblBaseInterest,0.00) + P.dblBaseInterest
+      , tblARInvoice.dblConvenienceFee	= ISNULL(P.[dblCreditCardFee], @ZeroDecimal)
+      , tblARInvoice.dblBaseConvenienceFee  = ISNULL(P.[dblBaseCreditCardFee], @ZeroDecimal)
+      , tblARInvoice.ysnAddConvenienceFee   = CASE WHEN ISNULL(P.[dblCreditCardFee], @ZeroDecimal) <> 0 THEN 1 ELSE 0 END
     FROM (
         SELECT dblPayment         = SUM((A.dblPayment + A.dblWriteOffAmount) * [dbo].[fnARGetInvoiceAmountMultiplier](A.[strTransactionType])) 
              , dblBasePayment     = SUM((A.dblBasePayment + A.dblBaseWriteOffAmount) * [dbo].[fnARGetInvoiceAmountMultiplier](A.[strTransactionType]))
@@ -261,6 +269,8 @@ BEGIN
              , dblInterest        = SUM(A.dblInterest) 
              , dblBaseInterest    = SUM(A.dblBaseInterest)
 		     , intInvoiceId       = A.intInvoiceId 			
+			 , dblCreditCardFee	    = SUM(A.[dblCreditCardFee])
+			 , dblBaseCreditCardFee	= SUM(A.[dblBaseCreditCardFee])
         FROM #ARPostPaymentDetail A
         WHERE A.[ysnInvoicePrepayment] = @ZeroBit
           AND A.[ysnPost] = @OneBit
