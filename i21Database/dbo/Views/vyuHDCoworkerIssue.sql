@@ -1,102 +1,137 @@
 ﻿CREATE VIEW [dbo].[vyuHDCoworkerIssue]
 AS 
-SELECT  intId						= CONVERT(INT,ROW_NUMBER() OVER ( ORDER BY CoworkerIssues.intEntityId, CoworkerIssues.intTimeEntryPeriodDetailId ))
-	   ,strAgentName				= CoworkerIssues.strFullName 
-	   ,intTimeEntryPeriodDetailId	= CoworkerIssues.intTimeEntryPeriodDetailId
-	   ,intEntityId					= CoworkerIssues.intEntityId
-	   ,ysnActive					= CoworkerIssues.ysnActive
-	   ,strRemarks					= CoworkerIssues.strNoCoworkerGoal + CoworkerIssues.strNoTimeEntryOrInsufficientHours + CoworkerIssues.strInactiveWithTimeEntry + CoworkerIssues.strUnapprovedTimeEntry  COLLATE Latin1_General_CI_AS
-	   ,intConcurrencyId			= 1
+SELECT 
+    intCoworkerIssueId = CoworkerIssue.intCoworkerIssueId,
+    intUserId = CoworkerIssue.intUserId,
+    intTimeEntryPeriodDetailId = CoworkerIssue.intTimeEntryPeriodDetailId,
+    intEntityId = CoworkerIssue.intEntityId,
+    strAgentName = CoworkerIssue.strFullName,
+    dblHours = CoworkerIssue.dblHours,
+    strRemarks = CoworkerIssue.strCoworkerGoalRemarks + CoworkerIssue.strApprovalRemarks,
+    ysnActive = CoworkerIssue.ysnActive,
+    strCountry = CoworkerIssue.strCountry,
+    strApprover = CoworkerIssue.strApprover,
+    intConcurrencyId = CoworkerIssue.intConcurrencyId
 FROM (
+    SELECT
+        intCoworkerIssueId = CI.intCoworkerIssueId,
+        intUserId = CI.intUserId,
+        intTimeEntryPeriodDetailId = CI.intTimeEntryPeriodDetailId,
+        intEntityId = CI.intEntityId,
+        strFullName = CI.strAgentName,
+        strApprovalRemarks = CASE
+								WHEN TimeEntry.dblTotalHours >= 1 AND TimeEntry.dblTotalHours < TimeEntry.intRequiredHours 
+								THEN CONCAT('Insufficient Time Entry. ', CONVERT(DECIMAL (18, 2), TimeEntry.intRequiredHours - TimeEntry.dblTotalHours), ' hours short. ', ApproverSingle.Remarks)
+								WHEN TimeEntry.dblTotalHours <= 0 OR TimeEntry.dblTotalHours IS NULL 
+								THEN 'No Time Entry'
+								ELSE
+									CASE
+										WHEN ApproverSingle.intApproverId IS NULL AND ApproverGroupInfo.intApproverGroupId IS NOT NULL 
+										THEN ApproverGroupInfo.strStatus
+										WHEN ApproverSingle.intApproverId IS NOT NULL AND ApproverGroupInfo.intApproverGroupId IS NULL 
+										THEN ApproverSingle.Remarks
+										WHEN ApproverSingle.intApproverId IS NULL AND ApproverGroupInfo.intApproverGroupId IS NULL 
+										THEN 'Waiting for Submit'
+										ELSE ApproverSingle.Remarks
+									END
+								END,
+        strCoworkerGoalRemarks = CASE
+									WHEN CoworkerGoalTimeEntryPeriodDetails.intCoworkerGoalId IS NULL 
+									THEN 'No Coworker Goal Setup. '
+									ELSE ''
+									END,
+        dblHours = ISNULL(CONVERT(DECIMAL(18, 2), TimeEntry.dblTotalHours), 0),
+        ysnActive = CI.ysnActive,
+        strCountry = WorkersComp.strCountry,
+        strApprover = CASE
+						WHEN ApproverSingle.intApproverId IS NULL AND ApproverGroupInfo.intApproverGroupId IS NULL 
+						THEN NULL
+						WHEN ApproverSingle.intApproverId IS NULL AND ApproverGroupInfo.intApproverGroupId IS NOT NULL 
+						THEN ApproverGroupInfo.Approver
+						ELSE ApproverSingle.Approver
+					 END,
+        intConcurrencyId = CI.intConcurrencyId
+    
+	FROM tblHDCoworkerIssue CI
+    OUTER APPLY (
+        SELECT TOP 1 EMP.intEntityId, EMP.intWorkersCompensationId, PC.strWCCode as strCountry
+        FROM [dbo].[tblPREmployee] EMP
+        JOIN tblPRWorkersCompensation PC ON EMP.intEntityId = CI.intEntityId AND PC.intWorkersCompensationId = EMP.intWorkersCompensationId
+    ) WorkersComp
 
-	SELECT  Agent.strFullName
-		   ,intTimeEntryPeriodDetailId						= ISNULL(TimeEntryPeriodDetail.intTimeEntryPeriodDetailId, 0)
-		   ,intEntityId										= Agent.intEntityId
-		   ,ysnActive										= ISNULL(CoworkerGoalTimeEntryperiodDetails.ysnActive, 0)
-		   ,strNoCoworkerGoal								= CASE WHEN CoworkerGoalTimeEntryperiodDetails.intEntityId IS NULL AND hw.intTicketHoursWorkedId IS NOT NULL
-																		THEN 'No Coworker Goal Setup but has time entry. '
-																	ELSE ''
-															  END
-		   ,strNoTimeEntryOrInsufficientHours				= CASE WHEN ISNULL(CoworkerGoalTimeEntryperiodDetails.ysnActive, 0) = 1 AND  
-																	 ( AgentTimeEntryPeriodDetailSummaries.intAgentTimeEntryPeriodDetailSummaryId IS NULL OR
-																		AgentTimeEntryPeriodDetailSummaries.intRequiredHours - AgentTimeEntryPeriodDetailSummaries.dblTotalHours > 0)
-																		THEN 'No Time Entry or insufficient time entry. '
-																	ELSE ''
-															  END
-		   ,strInactiveWithTimeEntry						=  CASE WHEN ISNULL(CoworkerGoalTimeEntryperiodDetails.ysnActive, 0) = 0 AND AgentTimeEntryPeriodDetailSummaries.dblTotalHours > 0 AND CoworkerGoalTimeEntryperiodDetails.intEntityId IS NOT NULL 
-																			THEN 'Inactive but has a Time Entry. '
-																		ELSE ''
-																  END
-		   ,strUnapprovedTimeEntry					      =  CASE WHEN  hw.intTicketHoursWorkedId IS NOT NULL AND ApprovalInfo.strStatus IS NOT NULL AND ( ApprovalInfo.strStatus NOT IN ('Approved', 'No Need for Approval'))
-																		THEN 'Has unapproved Time Entry.'
-																	ELSE ''
-															 END 
-	FROM vyuHDAgentDetail Agent
-	--	LEFT JOIN
-	--	(
-	--		SELECT	 intTimeEntryPeriodDetailId = CoworkerGoals.intTimeEntryPeriodDetailId
-	--				,intEntityId			  = CoworkerGoals.intEntityId
-	--				,ysnActive				  = CoworkerGoals.ysnActive 
-	--		FROM tblHDTimeEntryPeriodDetail TimeEntryPeriodDetail
-	--			LEFT JOIN (
-	--				SELECT  intTimeEntryPeriodDetailId = CoworkerGoalDetail.intTimeEntryPeriodDetailId
-	--					   ,intEntityId				   = CoworkerGoal.intEntityId
-	--					   ,ysnActive				   = CoworkerGoal.ysnActive
-	--				FROM tblHDCoworkerGoal CoworkerGoal
-	--					INNER JOIN tblHDCoworkerGoalDetail  CoworkerGoalDetail
-	--				ON CoworkerGoalDetail.intCoworkerGoalId = CoworkerGoal.intCoworkerGoalId
-	--			) CoworkerGoals
-	--		ON CoworkerGoals.intTimeEntryPeriodDetailId = TimeEntryPeriodDetail.intTimeEntryPeriodDetailId
-	--) CoworkerGoalTimeEntryperiodDetails
-	--ON CoworkerGoalTimeEntryperiodDetails.intEntityId = Agent.intEntityId
-		CROSS JOIN (
-			SELECT intTimeEntryPeriodDetailId
-				   ,dtmBillingPeriodStart
-				   ,dtmBillingPeriodEnd
-			FROM tblHDTimeEntryPeriodDetail
-		) TimeEntryPeriodDetail
-		OUTER APPLY(
-				SELECT	 TOP 1 intEntityId			  = CoworkerGoals.intEntityId
-							  ,ysnActive				  = CoworkerGoals.ysnActive 
-				FROM tblHDCoworkerGoal CoworkerGoals
-				WHERE CoworkerGoals.intEntityId = Agent.intEntityId
-		) CoworkerGoalTimeEntryperiodDetails
-		OUTER APPLY(
-			SELECT TOP 1 intAgentTimeEntryPeriodDetailSummaryId = AgentTimeEntryPeriodDetailSummary.intAgentTimeEntryPeriodDetailSummaryId
-						 ,intRequiredHours						= AgentTimeEntryPeriodDetailSummary.intRequiredHours
-						 ,dblTotalHours							= AgentTimeEntryPeriodDetailSummary.dblTotalHours
-			FROM tblHDAgentTimeEntryPeriodDetailSummary AgentTimeEntryPeriodDetailSummary
-			WHERE AgentTimeEntryPeriodDetailSummary.intEntityId = Agent.intEntityId AND
-				  AgentTimeEntryPeriodDetailSummary.intTimeEntryPeriodDetailId = TimeEntryPeriodDetail.intTimeEntryPeriodDetailId
-		) AgentTimeEntryPeriodDetailSummaries
-		OUTER APPLY(
-			SELECT TOP 1 hw.intTicketHoursWorkedId
-			FROM vyuHDTicketHoursWorked hw
-			WHERE dtmDate >= TimeEntryPeriodDetail.dtmBillingPeriodStart AND dtmDate <= TimeEntryPeriodDetail.dtmBillingPeriodEnd AND
-				  intAgentEntityId = Agent.intEntityId
-					
-		) hw
-		OUTER APPLY(
-			SELECT TOP 1 TimeEntry.intTimeEntryId
-			FROM tblHDTimeEntry TimeEntry
-			WHERE TimeEntry.intTimeEntryPeriodDetailId = TimeEntryPeriodDetail.intTimeEntryPeriodDetailId AND
-				  TimeEntry.intEntityId = Agent.intEntityId
-		) TimeEntry
-		OUTER APPLY(
-			SELECT  strStatus = Approval.strStatus 
-			FROM tblSMApproval Approval
-					INNER JOIN tblSMScreen Screen
-			ON Approval.intScreenId = Screen.intScreenId
-					INNER JOIN tblSMTransaction SMTransaction
-			ON Approval.intTransactionId = SMTransaction.intTransactionId
-			WHERE Screen.strScreenName = 'Time Entry' AND
-				  SMTransaction.intRecordId = TimeEntry.intTimeEntryId AND
-				  Approval.ysnCurrent = 1
-		) ApprovalInfo
-	WHERE Agent.ysnDisabled = 0
-) CoworkerIssues
-WHERE CoworkerIssues.strInactiveWithTimeEntry != '' OR
-CoworkerIssues.strNoCoworkerGoal != '' OR
-CoworkerIssues.strNoTimeEntryOrInsufficientHours != '' OR
-CoworkerIssues.strUnapprovedTimeEntry != ''
+    OUTER APPLY (
+        SELECT TOP 1 AgentDetail.strFullName as Approver, AP.intApproverId, AP.intApproverGroupId, AP.strStatus as Remarks
+        FROM tblSMApproval AP
+			JOIN vyuHDAgentDetail AgentDetail 
+			ON AgentDetail.intId = AP.intApproverId
+			JOIN tblSMTransaction TR 
+			ON TR.intTransactionId = AP.intTransactionId
+			JOIN tblHDTimeEntryPeriodDetail TE 
+			ON TR.dtmDate = TE.dtmBillingPeriodEnd
+			JOIN tblSMScreen SC 
+			ON AP.intScreenId = SC.intScreenId
+        WHERE SC.strScreenName = 'Time Entry' 
+			AND TE.intTimeEntryPeriodDetailId = CI.intTimeEntryPeriodDetailId
+			AND CI.intEntityId = TR.intEntityId
+			AND AP.ysnCurrent = 1
+    ) ApproverSingle
+
+    OUTER APPLY (
+        SELECT TOP 1  AP.intApproverGroupId, AP.strStatus,
+        STUFF((SELECT ', '+ AgentDetail.strFullName
+            FROM tblSMApproval AP
+				INNER JOIN tblSMApproverGroupUserSecurity GU 
+					ON GU.intApproverGroupId = AP.intApproverGroupId
+				INNER JOIN vyuHDAgentDetail AgentDetail 
+					ON AgentDetail.intId = GU.intEntityUserSecurityId
+				INNER JOIN tblSMTransaction TR 
+					ON TR.intTransactionId = AP.intTransactionId
+				INNER JOIN tblHDTimeEntryPeriodDetail TE 
+					ON TR.dtmDate = TE.dtmBillingPeriodEnd 
+				INNER JOIN tblSMScreen SC 
+					ON AP.intScreenId = SC.intScreenId
+            WHERE SC.strScreenName = 'Time Entry' 
+				AND TE.intTimeEntryPeriodDetailId = CI.intTimeEntryPeriodDetailId 
+				AND CI.intEntityId = TR.intEntityId
+				AND AP.ysnCurrent = 1
+            FOR XML PATH('')), 1, 1, '') AS Approver -- Concatenated Approver names within a group separated with ','.
+        FROM tblSMApproval AP
+        INNER JOIN tblSMApproverGroupUserSecurity GU 
+			ON GU.intApproverGroupId = AP.intApproverGroupId
+        INNER JOIN vyuHDAgentDetail AgentDetail 
+			ON AgentDetail.intId = GU.intEntityUserSecurityId
+        INNER JOIN tblSMTransaction TR 
+			ON TR.intTransactionId = AP.intTransactionId 
+        INNER JOIN tblHDTimeEntryPeriodDetail TE 
+			ON TR.dtmDate = TE.dtmBillingPeriodEnd 
+        INNER JOIN tblSMScreen SC 
+			ON AP.intScreenId = SC.intScreenId
+        WHERE SC.strScreenName = 'Time Entry' 
+		AND TE.intTimeEntryPeriodDetailId = CI.intTimeEntryPeriodDetailId 
+		AND CI.intEntityId = TR.intEntityId
+		AND AP.ysnCurrent = 1
+		
+    ) AS ApproverGroupInfo
+
+	OUTER APPLY(	
+		Select TOP 1 CG.intCoworkerGoalId
+		FROM tblHDCoworkerGoalDetail CD
+		INNER JOIN tblHDCoworkerGoal CG
+			ON CD.intCoworkerGoalId = CG.intCoworkerGoalId
+		INNER JOIN tblHDTimeEntryPeriodDetail TD
+			ON TD.intTimeEntryPeriodDetailId = CD.intTimeEntryPeriodDetailId
+		INNER JOIN tblHDTimeEntryPeriod TP
+			ON TD.intTimeEntryPeriodId = TP.intTimeEntryPeriodId 
+		WHERE CG.intEntityId = CI.intEntityId AND 
+			  TD.intTimeEntryPeriodDetailId = CI.intTimeEntryPeriodDetailId
+	)CoworkerGoalTimeEntryPeriodDetails
+
+    OUTER APPLY (
+        SELECT TOP 1 intAgentTimeEntryPeriodDetailSummaryId, intEntityId, 
+        intTimeEntryPeriodDetailId, dblTotalHours, 
+        intRequiredHours
+        FROM tblHDAgentTimeEntryPeriodDetailSummary AgentTimeEntry
+        WHERE AgentTimeEntry.intEntityId = CI.intEntityId AND AgentTimeEntry.intTimeEntryPeriodDetailId = CI.intTimeEntryPeriodDetailId
+    ) TimeEntry
+) CoworkerIssue
 GO
