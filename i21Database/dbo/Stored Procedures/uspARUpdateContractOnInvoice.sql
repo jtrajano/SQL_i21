@@ -43,6 +43,7 @@ BEGIN TRY
 		, dblQty						NUMERIC(12,4)
 		, intLoadDetailId				INT
 		, intSiteId						INT NULL
+		, ysnMobileBilling				BIT NOT NULL DEFAULT (0)
 	)
 
 	INSERT INTO @tblToProcess (
@@ -54,6 +55,7 @@ BEGIN TRY
 		, [dblQty]
 		, [intLoadDetailId]
 		, [intSiteId]
+		, [ysnMobileBilling]
 	)
 	--Quantity/UOM Changed
 	SELECT [intInvoiceDetailId]			= I.[intInvoiceDetailId]
@@ -64,6 +66,7 @@ BEGIN TRY
 		, [dblQty]						= dbo.fnCalculateQtyBetweenUOM(D.[intItemUOMId], CD.[intItemUOMId], (CASE WHEN @ForDelete = 1 THEN D.[dblQtyShipped] ELSE (D.dblQtyShipped - TD.dblQtyShipped) END))
 		, [intLoadDetailId]				= I.[intLoadDetailId]
 		, [intSiteId]					= D.[intSiteId]
+		, [ysnMobileBilling]		    = 0
 	FROM @ItemsFromInvoice I
 	INNER JOIN tblARInvoiceDetail D ON I.[intInvoiceDetailId] = D.[intInvoiceDetailId]
 	INNER JOIN tblICItem ITEM ON D.intItemId = ITEM.intItemId AND ITEM.strType <> 'Other Charge'
@@ -93,6 +96,7 @@ BEGIN TRY
 		, [dblQty]						= dbo.fnCalculateQtyBetweenUOM(D.[intItemUOMId], CD.[intItemUOMId], D.[dblQtyShipped])
 		, [intLoadDetailId]				= I.[intLoadDetailId]
 		, [intSiteId]					= D.[intSiteId]
+		, [ysnMobileBilling]		    = 0
 	FROM @ItemsFromInvoice I
 	INNER JOIN tblARInvoiceDetail D ON I.[intInvoiceDetailId] = D.[intInvoiceDetailId]
 	INNER JOIN tblICItem ITEM ON D.intItemId = ITEM.intItemId AND ITEM.strType <> 'Other Charge'
@@ -121,6 +125,7 @@ BEGIN TRY
 		, [dblQty]						= dbo.fnCalculateQtyBetweenUOM(TD.[intItemUOMId], CD.[intItemUOMId], (TD.[dblQtyShipped] * -1))
 		, [intLoadDetailId]				= I.[intLoadDetailId]
 		, [intSiteId]					= D.[intSiteId]
+		, [ysnMobileBilling]		    = 0
 	FROM @ItemsFromInvoice I
 	INNER JOIN tblARInvoiceDetail D ON I.[intInvoiceDetailId] = D.[intInvoiceDetailId]
 	INNER JOIN tblICItem ITEM ON D.intItemId = ITEM.intItemId AND ITEM.strType <> 'Other Charge'
@@ -149,6 +154,7 @@ BEGIN TRY
 		, [dblQty]						= dbo.fnCalculateQtyBetweenUOM(TD.[intItemUOMId], CD.[intItemUOMId], (TD.[dblQtyShipped] * -1))
 		, [intLoadDetailId]				= I.[intLoadDetailId]
 		, [intSiteId]					= D.[intSiteId]
+		, [ysnMobileBilling]		    = 0
 	FROM @ItemsFromInvoice I
 	INNER JOIN tblARInvoiceDetail D ON I.[intInvoiceDetailId] = D.[intInvoiceDetailId]
 	INNER JOIN tblICItem ITEM ON D.intItemId = ITEM.intItemId AND ITEM.strType <> 'Other Charge'
@@ -177,6 +183,7 @@ BEGIN TRY
 		, [dblQty]						= dbo.fnCalculateQtyBetweenUOM(D.[intItemUOMId], CD.[intItemUOMId], D.[dblQtyShipped])
 		, [intLoadDetailId]				= D.[intLoadDetailId]
 		, [intSiteId]					= TD.intSiteId
+		, [ysnMobileBilling]		    = 0
 	FROM
 		@ItemsFromInvoice I
 	INNER JOIN
@@ -217,7 +224,8 @@ BEGIN TRY
 		, [intItemUOMId]				= TD.[intItemUOMId]
 		, [dblQty]						= dbo.fnCalculateQtyBetweenUOM(TD.[intItemUOMId], CD.[intItemUOMId], (TD.[dblQtyShipped] * -1))
 		, [intLoadDetailId]				= TD.[intLoadDetailId]
-		, [intSiteId]					= TD.intSiteId
+		, [intSiteId]					= TD.[intSiteId]
+		, [ysnMobileBilling]		    = 0
 	FROM tblARTransactionDetail TD
 	INNER JOIN tblICItem ITEM ON TD.intItemId = ITEM.intItemId AND ITEM.strType <> 'Other Charge'
 	INNER JOIN tblARInvoice H ON TD.[intTransactionId] = H.[intInvoiceId]		
@@ -242,11 +250,12 @@ BEGIN TRY
 		, [dblQty]						= dbo.fnCalculateQtyBetweenUOM(Detail.[intItemUOMId], CD.[intItemUOMId], Detail.[dblQtyShipped])
 		, [intLoadDetailId]				= Detail.[intLoadDetailId]
 		, [intSiteId]					= Detail.[intSiteId]
+		, [ysnMobileBilling]		    = CASE WHEN  ISNULL(MBIL.strInvoiceNo, '') = ''   THEN 0 ELSE 1 END
 	FROM tblARInvoiceDetail Detail
 	INNER JOIN tblICItem ITEM ON Detail.intItemId = ITEM.intItemId AND ITEM.strType <> 'Other Charge'
 	INNER JOIN tblARInvoice Header ON Detail.intInvoiceId = Header.intInvoiceId 
 	INNER JOIN tblCTContractDetail CD ON Detail.intContractDetailId = CD.intContractDetailId
-	LEFT JOIN tblMBILInvoice MBIL ON Header.intInvoiceId = MBIL.inti21InvoiceId
+	LEFT JOIN tblMBILInvoice MBIL ON Header.strInvoiceNumber = MBIL.strInvoiceNo
 	WHERE Detail.intInvoiceId = @TransactionId 
 		AND Header.strTransactionType IN ('Cash', 'Invoice')
 		AND Detail.intContractDetailId IS NOT NULL
@@ -269,12 +278,13 @@ BEGIN TRY
 		, [dblQty]						= dbo.fnCalculateQtyBetweenUOM(Detail.[intItemUOMId], CD.[intItemUOMId], Detail.[dblQtyShipped]) * CASE WHEN ISNULL(IDS.ysnForDelete, 0) = 0 THEN 1 ELSE -1 END
 		, [intLoadDetailId]				= Detail.[intLoadDetailId]
 		, [intSiteId]					= Detail.[intSiteId]
+		, [ysnMobileBilling]		    = CASE WHEN  ISNULL(MBIL.strInvoiceNo, '') = ''   THEN 0 ELSE 1 END
     FROM tblARInvoiceDetail Detail
     INNER JOIN @InvoiceIds IDS ON Detail.intInvoiceId = IDS.intHeaderId
     INNER JOIN tblICItem ITEM ON Detail.intItemId = ITEM.intItemId AND ITEM.strType <> 'Other Charge'
     INNER JOIN tblARInvoice Header ON Detail.intInvoiceId = Header.intInvoiceId 
     INNER JOIN tblCTContractDetail CD ON Detail.intContractDetailId = CD.intContractDetailId
-	LEFT JOIN tblMBILInvoice MBIL ON Header.intInvoiceId = MBIL.inti21InvoiceId
+	LEFT JOIN tblMBILInvoice MBIL ON Header.strInvoiceNumber = MBIL.strInvoiceNo
     WHERE Header.strTransactionType IN ('Cash', 'Invoice')
       AND Detail.intContractDetailId IS NOT NULL
       AND Detail.[intInventoryShipmentItemId] IS NULL
@@ -294,12 +304,13 @@ BEGIN TRY
 		, [dblQty]						= dbo.fnCalculateQtyBetweenUOM(D.[intItemUOMId], CD.[intItemUOMId], (CASE WHEN @ForDelete = 1 THEN D.[dblQtyShipped] ELSE -D.dblQtyShipped END))
 		, [intLoadDetailId]				= I.intLoadDetailId
 		, [intSiteId]					= D.[intSiteId]
+		, [ysnMobileBilling]		    = CASE WHEN  ISNULL(MBIL.strInvoiceNo, '') = ''   THEN 0 ELSE 1 END
 	FROM @ItemsFromInvoice I
 	INNER JOIN tblARInvoiceDetail D ON	I.[intInvoiceDetailId] = D.[intInvoiceDetailId]
 	INNER JOIN tblARInvoice Header ON D.intInvoiceId = Header.intInvoiceId 
 	INNER JOIN tblICItem ITEM ON D.intItemId = ITEM.intItemId AND ITEM.strType <> 'Other Charge'
 	INNER JOIN tblSCTicket T ON D.intTicketId = T.intTicketId
-	LEFT JOIN tblMBILInvoice MBIL ON Header.intInvoiceId = MBIL.inti21InvoiceId
+	LEFT JOIN tblMBILInvoice MBIL ON Header.strInvoiceNumber = MBIL.strInvoiceNo
 	LEFT JOIN tblARTransactionDetail TD ON D.intInvoiceDetailId = TD.intTransactionDetailId 
 									   AND D.intInvoiceId = TD.intTransactionId 
 									   AND TD.strTransactionType IN ('Cash', 'Invoice')
@@ -327,7 +338,7 @@ BEGIN TRY
 		, intTicketId					= P.intTicketId
 		, intInventoryShipmentItemId	= P.intInventoryShipmentItemId
 		, intItemUOMId					= P.intItemUOMId
-		, dblQty						= (CASE WHEN TRD.intTransactionDetailId IS NULL OR @TransactionId IS NOT NULL
+		, dblQty						= (CASE WHEN TRD.intTransactionDetailId IS NULL
 													THEN 
 														CASE WHEN ABS(P.dblQty) > TMO.dblQuantity
 																THEN (ABS(P.dblQty) - TMO.dblQuantity)
@@ -341,13 +352,13 @@ BEGIN TRY
 	FROM @tblToProcess P
 	LEFT JOIN tblARInvoiceDetail ID ON P.intInvoiceDetailId = ID.intInvoiceDetailId AND ID.intSiteId IS NOT NULL
 	CROSS APPLY ( 
-		SELECT TOP 1 TMO.dblQuantity
-			       , TMO.intContractDetailId
-		FROM tblTMOrder TMO 
-		INNER JOIN tblTMDispatch D ON TMO.intDispatchId = D.intDispatchID
-		WHERE TMO.intSiteId = P.intSiteId
-		  AND TMO.intContractDetailId = P.intContractDetailId
-		ORDER BY TMO.dtmTransactionDate DESC
+		SELECT TOP 1 
+			 dblQuantity
+			,intContractDetailId
+		FROM tblTMOrder
+		WHERE intSiteId = P.intSiteId
+		  AND intContractDetailId = P.intContractDetailId
+		ORDER BY dtmTransactionDate DESC
 	) TMO
 	OUTER APPLY (
 		SELECT TOP 1 TD.intTransactionDetailId
@@ -358,20 +369,35 @@ BEGIN TRY
 	WHERE TMO.intContractDetailId IS NOT NULL
 	  AND P.intSiteId IS NOT NULL
 	  AND (ABS(P.dblQty) <> TMO.dblQuantity OR (ABS(P.dblQty) = TMO.dblQuantity AND TRD.intTransactionDetailId IS NOT NULL))
-	  AND ISNULL(@ForDelete, 0) = 0
+	  AND P.ysnMobileBilling = 0
 	  
+	DELETE P 
+	FROM @tblToProcess P
+	CROSS APPLY ( 
+		SELECT TOP 1 *
+		FROM tblTMOrder
+		WHERE intSiteId = P.intSiteId
+		  AND intContractDetailId = P.intContractDetailId
+		ORDER BY dtmTransactionDate DESC
+	) TMO 
+	WHERE P.intSiteId IS NOT NULL
+	  AND P.ysnMobileBilling = 0
+
+	--SCENARIO AR-16406
 	DELETE P 
 	FROM @tblToProcess P
 	CROSS APPLY ( 
 		SELECT TOP 1 TMO.*
 		FROM tblTMOrder TMO 
-		INNER JOIN tblTMDispatch D ON TMO.intDispatchId = D.intDispatchID
+		INNER JOIN tblTMDispatch D ON TMO.intSiteId = D.intSiteID
 		WHERE TMO.intSiteId = P.intSiteId
 		  AND TMO.intContractDetailId = P.intContractDetailId
 		ORDER BY TMO.dtmTransactionDate DESC
 	) TMO 
 	WHERE P.intSiteId IS NOT NULL
-	
+	  AND P.ysnMobileBilling = 1
+	  AND P.dblQty = TMO.dblQuantity
+	  	
 	SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess
 
 	WHILE ISNULL(@intUniqueId,0) > 0
@@ -420,7 +446,7 @@ BEGIN TRY
 				FROM tblSCTicket WHERE intTicketId = @intTicketId
 			END
 
-		IF @dblQty > 0
+		IF (@dblQty <> 0 OR @ForDelete = 1)
 		BEGIN
 			
 		IF ((ISNULL(@intTicketId, 0) = 0 AND ISNULL(@intTicketTypeId, 0) <> 9 AND (ISNULL(@intTicketType, 0) <> 6 AND ISNULL(@strInOutFlag, '') <> 'O')) AND (ISNULL(@intInventoryShipmentItemId, 0) = 0) AND ISNULL(@intLoadDetailId,0) = 0) OR @strPricing IN ('Subsystem - Direct', 'MANUAL OVERRIDE')	
