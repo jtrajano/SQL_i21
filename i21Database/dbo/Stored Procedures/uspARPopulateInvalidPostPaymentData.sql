@@ -26,36 +26,36 @@ ORDER BY intCompanyPreferenceId ASC
 
 IF @Post = @OneBit
 BEGIN
-    DELETE PQ
-    FROM tblARPostingQueue PQ
-    WHERE DATEDIFF(SECOND, dtmPostingdate, GETDATE()) >= 60
-	  OR @ysnAutoApplyPrepaids = 1
+    -- DELETE PQ
+    -- FROM tblARPostingQueue PQ
+    -- WHERE DATEDIFF(SECOND, dtmPostingdate, GETDATE()) >= 60
+	--   OR @ysnAutoApplyPrepaids = 1
 
-	DELETE PQ
-    FROM tblARPostingQueue PQ
-    INNER JOIN tblARPrepaidAndCredit PC ON PQ.intTransactionId = PC.intInvoiceId
+	-- DELETE PQ
+    -- FROM tblARPostingQueue PQ
+    -- INNER JOIN tblARPrepaidAndCredit PC ON PQ.intTransactionId = PC.intInvoiceId
 
-    INSERT INTO #ARInvalidPaymentData
-        ([intTransactionId]
-        ,[strTransactionId]
-        ,[strTransactionType]
-        ,[intTransactionDetailId]
-        ,[strBatchId]
-        ,[strError])
-    --Undeposited Funds Account    
-    SELECT
-         [intTransactionId]         = P.[intTransactionId]
-        ,[strTransactionId]         = P.[strTransactionId]
-        ,[strTransactionType]       = @TransType
-        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
-        ,[strBatchId]               = P.[strBatchId]
-        ,[strError]                 = 'There''s an on-going posting for other transactions. Please try again later.'
-    FROM #ARPostPaymentHeader P
-    CROSS APPLY (
-        SELECT TOP 1 intTransactionId 
-        FROM tblARPostingQueue 
-        WHERE DATEDIFF(SECOND, dtmPostingdate, GETDATE()) <= 60
-    ) PQ
+    -- INSERT INTO #ARInvalidPaymentData
+    --     ([intTransactionId]
+    --     ,[strTransactionId]
+    --     ,[strTransactionType]
+    --     ,[intTransactionDetailId]
+    --     ,[strBatchId]
+    --     ,[strError])
+    -- --Undeposited Funds Account    
+    -- SELECT
+    --      [intTransactionId]         = P.[intTransactionId]
+    --     ,[strTransactionId]         = P.[strTransactionId]
+    --     ,[strTransactionType]       = @TransType
+    --     ,[intTransactionDetailId]   = P.[intTransactionDetailId]
+    --     ,[strBatchId]               = P.[strBatchId]
+    --     ,[strError]                 = 'There''s an on-going posting for other transactions. Please try again later.'
+    -- FROM #ARPostPaymentHeader P
+    -- CROSS APPLY (
+    --     SELECT TOP 1 intTransactionId 
+    --     FROM tblARPostingQueue 
+    --     WHERE DATEDIFF(SECOND, dtmPostingdate, GETDATE()) <= 60
+    -- ) PQ
     
     INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
