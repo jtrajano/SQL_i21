@@ -17,7 +17,7 @@
     [ysnEmailConfirmed]					BIT            DEFAULT ((1)) NOT NULL,
     [strPhone]							NVARCHAR(100)  COLLATE Latin1_General_CI_AS NULL,
     [ysnPhoneConfirmed]					BIT            DEFAULT ((1)) NOT NULL,
-    [strSecurityStamp]					NVARCHAR(250)  COLLATE Latin1_General_CI_AS DEFAULT NEWID(),
+    [strSecurityStamp]					NVARCHAR(1000)  COLLATE Latin1_General_CI_AS DEFAULT NEWID(),
     [ysnTwoFactorEnabled]				BIT            DEFAULT ((0)) NOT NULL,
     [dtmLockoutEndDateUtc]				DATETIME       NULL,
     [ysnLockoutEnabled]					BIT            DEFAULT ((0)) NOT NULL,
