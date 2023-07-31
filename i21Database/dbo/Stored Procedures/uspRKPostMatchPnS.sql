@@ -225,8 +225,8 @@ BEGIN TRY
 			, strAccountId
 			, strAccountDescription
 			-- CONVERSION TO FUNCTIONAL CURRENCY DUE TO CHANGES FOR POSTING TO BANK TRANSACTION
-			, dblDebit = ROUND(dbo.fnRKGetCurrencyConvertion(@intCurrencyId, @intFunctionalCurrencyId, DEFAULT) * dblDebit, 2)
-			, dblCredit = ROUND(dbo.fnRKGetCurrencyConvertion(@intCurrencyId, @intFunctionalCurrencyId, DEFAULT) * dblCredit, 2)
+			, dblDebit = dbo.fnRKGetCurrencyConvertion(@intCurrencyId, @intFunctionalCurrencyId, DEFAULT) * dblDebit
+			, dblCredit = dbo.fnRKGetCurrencyConvertion(@intCurrencyId, @intFunctionalCurrencyId, DEFAULT) * dblCredit
 			, dblDebitUnit = ROUND(dblDebitUnit, 2)
 			, dblCreditUnit = ROUND(dblCreditUnit, 2)
 			, intCurrencyId
@@ -276,10 +276,10 @@ BEGIN TRY
 		, strAccountDescription
 		, strBrokerBankAccount = @strBrokerBankAccount
 		-- CHECKING IF DEBIT/CREDIT OR DEBIT/CREDIT FOREIGN
-		, dblDebit = CASE WHEN ysnForeignCurrency = 0 THEN dblDebit
+		, dblDebit = CASE WHEN ysnForeignCurrency = 0 THEN ROUND(dblDebit, 2)
 							ELSE 0
 							END
-		, dblCredit = CASE WHEN ysnForeignCurrency = 0 THEN dblCredit
+		, dblCredit = CASE WHEN ysnForeignCurrency = 0 THEN ROUND(dblCredit, 2)
 							ELSE 0
 							END
 		, dblDebitForeign = CASE WHEN ysnForeignCurrency = 0 THEN 0

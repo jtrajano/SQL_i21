@@ -36,7 +36,7 @@ SELECT dblGrossPL = ISNULL(dblGrossPL, 0.00)
 	, intSFutureMonthId
 	, strSFutureMonth
 FROM (
-	SELECT dblGrossPL = ((dblSPrice - dblLPrice) * dblMatchQty * dblContractSize) / CASE WHEN ysnSubCurrency = 1 THEN intCent ELSE 1 END
+	SELECT dblGrossPL = ROUND(((dblSPrice - dblLPrice) * dblMatchQty * dblContractSize) / CASE WHEN ysnSubCurrency = 1 THEN intCent ELSE 1 END, 2)
 		, *
 	FROM (
 		SELECT psh.intMatchFuturesPSHeaderId
