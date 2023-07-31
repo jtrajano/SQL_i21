@@ -100,12 +100,12 @@ SELECT	DISTINCT CI.intContractImportId,			intContractTypeId	=	CASE WHEN CI.strCo
 		intFutureMarketId	=	MA.intFutureMarketId,	intFutureMonthId			=	MO.intFutureMonthId,
 		dblFutures			=	CI.dblFutures,			dblBasis					=	CI.dblBasis,
 		dblCashPrice		=	CI.dblCashPrice,		strRemark					=	CI.strRemark,
-		intPricingTypeId	=	CASE	WHEN	MA.intFutureMarketId IS NOT NULL AND CI.dblCashPrice IS NOT NULL
-										THEN	1
-										WHEN	MA.intFutureMarketId IS NOT NULL AND CI.dblCashPrice IS NULL AND CI.dblFutures IS NOT NULL
-										THEN	3
-										WHEN	MA.intFutureMarketId IS NOT NULL AND CI.dblCashPrice IS NULL AND CI.dblBasis IS NOT NULL
-										THEN	2
+		intPricingTypeId	=	CASE	WHEN	MA.intFutureMarketId IS NOT NULL OR MA.intFutureMarketId IS NULL AND CI.dblFutures IS NOT NULL AND CI.dblBasis IS NOT NULL AND CI.dblCashPrice IS NOT NULL
+										THEN	1 -- PRICED
+										WHEN	MA.intFutureMarketId IS NOT NULL OR MA.intFutureMarketId IS NULL AND CI.dblCashPrice IS NULL AND CI.dblFutures IS NOT NULL AND CI.dblBasis IS NULL
+										THEN	3 -- HTA
+										WHEN	MA.intFutureMarketId IS NOT NULL OR MA.intFutureMarketId IS NULL AND CI.dblCashPrice IS NULL AND CI.dblBasis IS NOT NULL AND CI.dblFutures IS NULL
+										THEN	2 -- BASIS
 										WHEN	MA.intFutureMarketId IS NULL AND CI.dblCashPrice IS NOT NULL
 										THEN	6
 										ELSE	4
@@ -117,11 +117,13 @@ SELECT	DISTINCT CI.intContractImportId,			intContractTypeId	=	CASE WHEN CI.strCo
 		ysnQuantityAtHeaderLevel	=	CASE WHEN CI.strQtyAtHeaderLevel = 'Yes' THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
 
 FROM	tblCTContractImport			CI	LEFT
-JOIN	tblICItem					IM	ON	IM.strItemNo		=	CI.strItem				LEFT
+
 JOIN	tblICUnitMeasure			IU	ON	IU.strUnitMeasure	=	CI.strQuantityUOM		LEFT
+JOIN	tblICCommodity				CM	ON	CM.strCommodityCode	=	CI.strCommodity			LEFT
+JOIN	tblICItem					IM	ON	IM.strItemNo		=	CI.strItem AND IM.intCommodityId = CM.intCommodityId	LEFT
 JOIN	tblICItemUOM				QU	ON	QU.intItemId		=	IM.intItemId		
 										AND	QU.intUnitMeasureId	=	IU.intUnitMeasureId		LEFT
-JOIN	tblICCommodity				CM	ON	CM.strCommodityCode	=	CI.strCommodity			LEFT
+
 JOIN	tblICCommodityUnitMeasure	CU	ON	CU.intCommodityId	=	CM.intCommodityId	 		
 										AND	CU.intUnitMeasureId =	IU.intUnitMeasureId		LEFT
 JOIN	tblSMCurrency				CY	ON	CY.strCurrency		=	CI.strCurrency			LEFT
