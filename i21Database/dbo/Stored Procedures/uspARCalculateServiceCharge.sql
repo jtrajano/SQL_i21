@@ -10,7 +10,7 @@
 	@locationId				INT = 0,
 	@serviceChargeDate		DATE,
 	@serviceChargePostDate	DATE,
-	@batchId				NVARCHAR(100) = NULL OUTPUT,
+	@batchId				NVARCHAR(MAX) = NULL OUTPUT,
 	@totalAmount			NUMERIC(18,6) = 0 OUTPUT,
 	@upToDateCustomer 		BIT = 0,
 	@intEntityUserId		INT = NULL,
@@ -26,7 +26,7 @@ SELECT DISTINCT intCurrencyId
 FROM tblARInvoice
 WHERE dtmDueDate <= @asOfDate
 
-SET @batchId = CONVERT(NVARCHAR(100), NEWID())
+SET @batchId = CONVERT(NVARCHAR(MAX), NEWID())
 SET @totalAmount = @ZeroDecimal
 
 WHILE EXISTS(SELECT TOP 1 1 FROM @tblTransactionCurrency)
