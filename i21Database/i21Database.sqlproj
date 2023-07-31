@@ -1850,6 +1850,7 @@
     <Build Include="dbo\Tables\tblICInventoryValueAdjustmentLog.sql" />
     <Build Include="dbo\Functions\fnCreateInTransitValueAdjDescription.sql" />
     <None Include="Scripts\Post-Deployment\HD\DefaultData\4_SOWTypeDefaults.sql" />
+    <None Include="Scripts\Post-Deployment\EM\2310_FixCMBankTransactionNonExistentEFT.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
