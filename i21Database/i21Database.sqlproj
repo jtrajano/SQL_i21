@@ -1858,6 +1858,7 @@
     <Build Include="dbo\Views\vyuLGNotifyPartyGroup.sql" />
     <Build Include="dbo\Views\vyuLGStorageLocation.sql" />
     <Build Include="dbo\Views\vyuLGNotifyPartyGroupView.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGUpdateNotifyPartyGroup.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
