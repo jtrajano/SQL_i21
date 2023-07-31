@@ -470,7 +470,7 @@ ELSE
 	A.strType,
 	B.strCurrency,
 	intAccountIdOverride = A.intAccountId,
-	intLOBSegmentOverrideId = intLOBSegmentCodeId,
+	intLOBSegmentOverrideId = CASE WHEN GLPref.ysnRevalOverrideLOB = 1 THEN intLOBSegmentCodeId ELSE NULL END,
 	A.intNewCurrencyExchangeRateTypeId,
 	A.strNewForexRateType,
 	CL.* 
@@ -479,8 +479,12 @@ ELSE
 	LEFT JOIN tblSMCurrency B ON A.intCurrencyId = B.intCurrencyID
 	OUTER APPLY(
 		SELECT	
-		intLocationSegmentCodeId = intProfitCenter  , 
+		intLocationSegmentCodeId = intProfitCenter, 
 		intCompanySegmentCodeId = intCompanySegment 
 		FROM dbo.tblSMCompanyLocation 
 		WHERE intCompanyLocationId = A.intCompanyLocationId
 	)CL
+	OUTER APPLY(
+		SELECT TOP 1 
+		ISNULL(ysnRevalOverrideLOB,0) ysnRevalOverrideLOB 
+	 FROM tblGLCompanyPreferenceOption) GLPref
