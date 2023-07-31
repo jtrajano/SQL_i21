@@ -475,15 +475,15 @@ END
 SELECT intWorkOrderRecipeComputationId 
   	 , intTestId						
   	 , strTestName						
-  , intPropertyId					
-  , strPropertyName					
-  , ISNULL(dblComputedValue, 0)				 
-  , ISNULL(dblMinValue, 0)						
-  , ISNULL(dblMaxValue, 0)						
-  , strMethodName					
-  , intMethodId						
-  , intSequenceNo					
-  , dblPinpointValue
+  	 , intPropertyId					
+  	 , strPropertyName					
+  	 , ISNULL(dblComputedValue, 0)	AS	dblComputedValue					 
+  	 , ISNULL(dblMinValue, 0)		AS	dblMinValue						
+  	 , ISNULL(dblMaxValue, 0)		AS	dblMaxValue						
+  	 , strMethodName					
+  	 , intMethodId						
+  	 , intSequenceNo					
+  	 , dblPinpointValue
 FROM @tblComputedValue
 ORDER BY intSequenceNo
 
