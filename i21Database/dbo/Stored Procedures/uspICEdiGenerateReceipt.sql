@@ -242,6 +242,12 @@ BEGIN
 					COLLATE SQL_Latin1_General_CP1_CS_AS
 					AND @VendorId IS NULL 
 				)
+				OR (
+					SUBSTRING(v.strName, 1, 6) =
+					SUBSTRING(inv.VendorCode, PATINDEX('%[^0]%', inv.VendorCode), LEN(inv.VendorCode))
+					COLLATE SQL_Latin1_General_CP1_CS_AS
+					AND @VendorId IS NULL 
+				)
 		) v
 		OUTER APPLY (
 			SELECT 
@@ -314,6 +320,12 @@ BEGIN
 				v.intEntityId = @VendorId
 				OR (
 					SUBSTRING(v.strVendorAccountNum, PATINDEX('%[^0]%', v.strVendorAccountNum), LEN(v.strVendorAccountNum)) =
+					SUBSTRING(inv.VendorCode, PATINDEX('%[^0]%', inv.VendorCode), LEN(inv.VendorCode))
+					COLLATE SQL_Latin1_General_CP1_CS_AS
+					AND @VendorId IS NULL 
+				)
+				OR (
+					SUBSTRING(v.strName, 1, 6) =
 					SUBSTRING(inv.VendorCode, PATINDEX('%[^0]%', inv.VendorCode), LEN(inv.VendorCode))
 					COLLATE SQL_Latin1_General_CP1_CS_AS
 					AND @VendorId IS NULL 
@@ -391,6 +403,12 @@ BEGIN
 				v.intEntityId = @VendorId
 				OR (
 					SUBSTRING(v.strVendorAccountNum, PATINDEX('%[^0]%', v.strVendorAccountNum), LEN(v.strVendorAccountNum)) =
+					SUBSTRING(inv.VendorCode, PATINDEX('%[^0]%', inv.VendorCode), LEN(inv.VendorCode))
+					COLLATE SQL_Latin1_General_CP1_CS_AS
+					AND @VendorId IS NULL 
+				)
+				OR (
+					SUBSTRING(v.strName, 1, 6) =
 					SUBSTRING(inv.VendorCode, PATINDEX('%[^0]%', inv.VendorCode), LEN(inv.VendorCode))
 					COLLATE SQL_Latin1_General_CP1_CS_AS
 					AND @VendorId IS NULL 
@@ -492,6 +510,54 @@ BEGIN
 		) v		
 	WHERE 
 		v.intEntityId IS NULL 
+		
+	-- Log error for duplicate vendor code in vendor name. 
+	INSERT INTO tblICImportLogDetail(
+		intImportLogId
+		, strType
+		, intRecordNo
+		, strField
+		, strValue
+		, strMessage
+		, strStatus
+		, strAction
+		, intConcurrencyId
+	)
+	SELECT 
+		@LogId
+		, 'Error'
+		, i.RecordIndex
+		, 'Vendor Code'
+		, inv.VendorCode
+		, 'Vendor Account No.: ' + inv.VendorCode + ' found a duplicate Vendor setup.'
+		, 'Failed'
+		, 'Record not imported.'
+		, 1
+	FROM 
+		@Items i INNER JOIN @Invoices inv
+			ON i.FileIndex = inv.FileIndex
+		OUTER APPLY 
+		 (
+			SELECT TOP 1 
+				v.*
+			FROM 
+				(SELECT * 
+				FROM (
+					SELECT strName, COUNT(SUBSTRING(strName, 1, 6)) AS intCount
+					FROM vyuAPVendor
+					GROUP BY strName
+				) vCount
+				WHERE vCount.intCount > 1) v 
+			WHERE 			
+				(
+					SUBSTRING(v.strName, 1, 6) =
+					SUBSTRING(inv.VendorCode, PATINDEX('%[^0]%', inv.VendorCode), LEN(inv.VendorCode))
+					COLLATE SQL_Latin1_General_CP1_CS_AS
+					AND @VendorId IS NULL 
+				)
+		) v		
+	WHERE 
+		v.strName IS NOT NULL 
 
 	IF EXISTS (SELECT TOP 1 1 FROM tblICImportLogDetail WHERE intImportLogId = @LogId AND strType = 'Error' AND strStatus = 'Failed') 
 	BEGIN 
@@ -583,6 +649,12 @@ FROM
 			v.intEntityId = @VendorId
 			OR (
 				SUBSTRING(v.strVendorAccountNum, PATINDEX('%[^0]%', v.strVendorAccountNum), LEN(v.strVendorAccountNum)) =
+				SUBSTRING(inv.VendorCode, PATINDEX('%[^0]%', inv.VendorCode), LEN(inv.VendorCode))
+				COLLATE SQL_Latin1_General_CP1_CS_AS
+				AND @VendorId IS NULL 
+			)
+			OR (
+				SUBSTRING(v.strName, 1, 6) =
 				SUBSTRING(inv.VendorCode, PATINDEX('%[^0]%', inv.VendorCode), LEN(inv.VendorCode))
 				COLLATE SQL_Latin1_General_CP1_CS_AS
 				AND @VendorId IS NULL 
@@ -704,6 +776,7 @@ FROM
 	--	AND el.ysnActive = 1
 	--	AND el.intEntityLocationId = v.intDefaultLocationId
 	--	AND ISNULL(c.Amount, 0) <> 0
+
 IF EXISTS(SELECT * FROM @ReceiptStagingTable)
 BEGIN 
 	EXEC dbo.uspICAddItemReceipt 
