@@ -45,14 +45,14 @@ CREATE TRIGGER trgInsteadOfInsertSMUpload
             FROM inserted;
             IF (@currentStorageSize + (@fileSize / (1024 * 1024 * 1024))) > @storageLimit
             BEGIN
-                DECLARE @currentStorageSizeString VARCHAR(10)
-                SELECT @currentStorageSizeString = CAST(@currentStorageSize AS VARCHAR)
+                DECLARE @storageLimitString VARCHAR(10)
+                SELECT @storageLimitString = CAST(@storageLimit AS VARCHAR)
 
                 RAISERROR(
 				N'Storage limit exceeded with the limit of %s GB. Insertion cancelled.'
 				, 16
 				, 1
-				, @currentStorageSizeString);
+				, @storageLimitSizeString);
 
                 RETURN;
             END;
