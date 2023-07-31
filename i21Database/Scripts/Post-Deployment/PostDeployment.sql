@@ -737,6 +737,7 @@ print 'Test'
 :R .\HD\DefaultData\1_StatusData.sql
 :R .\HD\DefaultData\2_Screen.sql
 :R .\HD\DefaultData\3_UpgradeTypeAndEnvironment.sql
+:R .\HD\DefaultData\4_SOWTypeDefaults.sql
 :R .\HD\HDEntryDataFix.sql
 :R .\HD\CustomField.sql
 :R .\HD\RemoveHDObsoleteScreen.sql
