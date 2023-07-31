@@ -45,7 +45,7 @@ DECLARE @Invoices TABLE(
 	, InvoiceNumber NVARCHAR(50)
 	, InvoiceTotal NUMERIC(38, 20)
 	, RecordType NVARCHAR(50)
-	, StoreNumber NVARCHAR(50)
+	--, StoreNumber NVARCHAR(50)
 	, VendorCode NVARCHAR(50)
 )
 
