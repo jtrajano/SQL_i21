@@ -11774,6 +11774,7 @@
     <Build Include="dbo\Tables\tblARCustomerInquiryStagingTable.sql" />
     <Build Include="dbo\Stored Procedures\uspARMainCustomerInquiryReport.sql" />
     <None Include="Scripts\Post-Deployment\GR\Fix_Transfer_Storage_Action.sql" />
+    <Build Include="dbo\Views\vyuARGetInvoiceDetailTax.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
