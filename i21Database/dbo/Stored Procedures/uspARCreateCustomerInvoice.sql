@@ -22,7 +22,7 @@
 	,@PaymentMethodId						INT				= NULL
 	,@InvoiceOriginId						NVARCHAR(25)	= NULL
 	,@MobileBillingShiftNo					NVARCHAR(50)	= NULL
-	,@PONumber								NVARCHAR(50)	= ''
+	,@PONumber								NVARCHAR(25)	= ''
 	,@BOLNumber								NVARCHAR(50)	= ''
 	,@PaymentInfo							NVARCHAR(50)	= ''
 	,@Comment								NVARCHAR(MAX)	= ''
@@ -168,6 +168,7 @@
 	,@ItemOverrideTaxGroup					BIT				= 0
 	,@Surcharge								NUMERIC(18, 6)	= 0
 	,@ItemDispatchId						INT				= NULL
+	,@ReleasePONumber						NVARCHAR(25)	= ''
 AS
 
 BEGIN
@@ -564,6 +565,7 @@ BEGIN TRY
 		,[intTaxLocationId]
 		,[strTaxPoint]
 		,[dblSurcharge]
+		,strReleasePONumber
 	)
 	SELECT [strInvoiceNumber]				= CASE WHEN @UseOriginIdAsInvoiceNumber = 1 THEN @InvoiceOriginId ELSE NULL END
 		,[strTransactionType]				= @TransactionType
@@ -669,6 +671,7 @@ BEGIN TRY
 		,[intTaxLocationId]					= @TaxLocationId
 		,[strTaxPoint]						= @TaxPoint
 		,[dblSurcharge]						= @Surcharge
+		,strReleasePONumber					= @ReleasePONumber
 	FROM tblARCustomer C
 	LEFT OUTER JOIN [tblEMEntityLocation] EL ON C.[intEntityId] = EL.[intEntityId] AND EL.ysnDefaultLocation = 1
 	LEFT OUTER JOIN [tblEMEntityLocation] SL ON ISNULL(@ShipToLocationId, 0) <> 0 AND @ShipToLocationId = SL.intEntityLocationId

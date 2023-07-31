@@ -207,6 +207,7 @@ SELECT
 	,strSourcedFrom						= CASE WHEN ISNULL(INV.intDefaultPayToBankAccountId,0) <> 0 THEN INV.strSourcedFrom ELSE '' END
 	,intProfitCenter					= CLOC.intProfitCenter
 	,dblSurcharge						= INV.dblSurcharge
+	,strReleasePONumber					= INV.strReleasePONumber
 FROM tblARInvoice INV WITH (NOLOCK)
 INNER JOIN (
     SELECT 
@@ -396,11 +397,6 @@ OUTER APPLY(
 	AND SC.strScreenName = 'Invoice'
 	WHERE SRA.intEntityUserSecurityId = INV.intEntityId
 ) USERCREDITAPPROVER
--- OUTER APPLY(
--- 	SELECT TOP 1 dblCreditStopDays
--- 	FROM dbo.vyuARCustomerInquiry
--- 	WHERE intEntityCustomerId = INV.intEntityCustomerId
--- ) CUSTOMERAGING
 OUTER APPLY(
 	SELECT TOP 1 strCompanyName
 	FROM dbo.tblSMInterCompany
