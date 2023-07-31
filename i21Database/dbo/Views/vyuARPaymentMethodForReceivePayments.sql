@@ -8,11 +8,19 @@ SELECT
 	,intEntityCardInfoId	= NULL
 	,intEntityId			= 0 
 	,strCardType			= NULL
-	,dblConvenienceFee		= CAST(0 AS NUMERIC(18, 6))
-	,strConvenienceFeeType	= NULL
+	,dblConvenienceFee		= CASE WHEN UPPER(CP.strCreditCardProcessingType) = 'External' AND PM.strPaymentMethod = 'Manual Credit Card' 
+								THEN CAST(ISNULL(dblExternalPercentage, 0) AS NUMERIC(18, 6)) ELSE CAST(0 AS NUMERIC(18, 6)) END
+	,strConvenienceFeeType	= CASE WHEN UPPER(CP.strCreditCardProcessingType) = 'External' AND PM.strPaymentMethod = 'Manual Credit Card' 
+								THEN CP.strCreditCardConvenienceFee ELSE NULL END
 	,ysnExemptCreditCardFee	= CAST(1 AS BIT)
 	,strDescription			= PM.strDescription
 FROM tblSMPaymentMethod PM
+OUTER APPLY (
+	SELECT TOP 1 dblExternalPercentage
+			   , strCreditCardConvenienceFee
+			   , strCreditCardProcessingType
+	FROM tblARCompanyPreference
+) CP
 WHERE strPaymentMethod <> 'Credit Card' --and ysnActive = 1
 
 UNION ALL 

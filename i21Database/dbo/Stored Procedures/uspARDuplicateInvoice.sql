@@ -87,9 +87,12 @@ DECLARE	 @OriginalInvoiceId			INT
 		,@ItemSubCurrencyId			INT
 		,@ItemSubCurrencyRate		NUMERIC(18,6)
 		,@ysnRecurringDuplicate		BIT = 0
-		,@intDocumentMaintenanceId		INT = NULL
+		,@intDocumentMaintenanceId	INT = NULL
 		,@intLineOfBusinessId		INT = NULL
 		,@intICTId					INT = NULL
+		,@ysnAddConvenienceFee		BIT	= 0
+		,@dblConvenienceFee			NUMERIC(18, 6)
+		,@dblBaseConvenienceFee		NUMERIC(18, 6)
 		
 SELECT 
 	 @InvoiceNumber					= [strInvoiceNumber]
@@ -141,6 +144,9 @@ SELECT
 	,@intDocumentMaintenanceId		= [intDocumentMaintenanceId]
 	,@intLineOfBusinessId			= [intLineOfBusinessId]
 	,@intICTId						= [intICTId]
+	,@ysnAddConvenienceFee			= [ysnAddConvenienceFee]
+	,@dblConvenienceFee				= [dblConvenienceFee]
+	,@dblBaseConvenienceFee			= [dblBaseConvenienceFee]
 FROM
 	tblARInvoice
 WHERE
@@ -361,10 +367,13 @@ IF @IsCancel = 0
 				,@ItemSubCurrencyId						= @ItemSubCurrencyId
 				,@ItemSubCurrencyRate					= @ItemSubCurrencyRate
 				,@EntityContactId						= @EntityContactId
-				,@ItemStorageScheduleTypeId					= @StorageScheduleTypeId
+				,@ItemStorageScheduleTypeId				= @StorageScheduleTypeId
 				,@DocumentMaintenanceId					= @intDocumentMaintenanceId
 				,@intLineOfBusinessId					= @intLineOfBusinessId
 				,@intICTId								= @intICTId
+				,@ItemAddConvenienceFee					= @ysnAddConvenienceFee	
+				,@ItemConvenienceFee					= @dblConvenienceFee		
+				,@ItemBaseConvenienceFee				= @dblBaseConvenienceFee
 
 		END TRY
 		BEGIN CATCH

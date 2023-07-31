@@ -341,7 +341,9 @@ DECLARE  @Id									INT
 		,@ItemComputedGrossPrice				NUMERIC(18, 6)
 		,@ItemOverrideTaxGroup					BIT
 		,@ItemDispatchId						INT
-
+		,@ItemAddConvenienceFee					BIT
+		,@ItemConvenienceFee					NUMERIC(18, 6)
+		,@ItemBaseConvenienceFee				NUMERIC(18, 6)
 --INSERT
 BEGIN TRY
 WHILE EXISTS(SELECT NULL FROM #EntriesForProcessing WHERE ISNULL([ysnForInsert],0) = 1 AND ISNULL([ysnProcessed],0) = 0)
@@ -563,6 +565,9 @@ BEGIN
 		,@ItemComputedGrossPrice		= (CASE WHEN @GroupingOption = 0 THEN [dblComputedGrossPrice] ELSE NULL END)
 		,@ItemOverrideTaxGroup			= (CASE WHEN @GroupingOption = 0 THEN [ysnOverrideTaxGroup] ELSE NULL END)
 		,@ItemDispatchId				= (CASE WHEN @GroupingOption = 0 THEN intDispatchId ELSE NULL END)
+		,@ItemAddConvenienceFee			= (CASE WHEN @GroupingOption = 0 THEN [ysnAddConvenienceFee] ELSE NULL END)
+		,@ItemConvenienceFee			= (CASE WHEN @GroupingOption = 0 THEN [dblConvenienceFee] ELSE NULL END)
+		,@ItemBaseConvenienceFee		= (CASE WHEN @GroupingOption = 0 THEN [dblBaseConvenienceFee] ELSE NULL END)
 	FROM
 		@InvoiceEntries
 	WHERE
@@ -857,6 +862,9 @@ BEGIN
 			,@ItemComputedGrossPrice		= @ItemComputedGrossPrice
 			,@ItemOverrideTaxGroup			= @ItemOverrideTaxGroup
 			,@ItemDispatchId				= @ItemDispatchId
+			,@ItemAddConvenienceFee			= @ItemAddConvenienceFee
+			,@ItemConvenienceFee			= @ItemConvenienceFee
+			,@ItemBaseConvenienceFee		= @ItemBaseConvenienceFee
 	
 		IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 			BEGIN

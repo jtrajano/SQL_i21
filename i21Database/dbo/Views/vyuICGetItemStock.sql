@@ -163,7 +163,13 @@ SELECT
 	dblStandardWeight = StockUOM.dblStandardWeight,
 	dblReceiveStandardWeight = ReceiveUOM.dblStandardWeight,
 	Item.ysnTankRequired,
-	Item.intBrandId
+    Item.intBrandId,
+	ItemLocation.intAllowZeroCostTypeId,
+	strAllowZeroCostType = (CASE WHEN ItemLocation.intAllowZeroCostTypeId = 1 THEN 'No'
+							 WHEN ItemLocation.intAllowZeroCostTypeId = 2 THEN 'Yes'
+							 WHEN ItemLocation.intAllowZeroCostTypeId = 3 THEN 'Yes, with warning message' 
+							 WHEN ItemLocation.intAllowZeroCostTypeId = 4 THEN 'Yes on Produce' 
+							 END) COLLATE Latin1_General_CI_AS
 FROM	
 	tblICItem Item 
 	LEFT JOIN (
