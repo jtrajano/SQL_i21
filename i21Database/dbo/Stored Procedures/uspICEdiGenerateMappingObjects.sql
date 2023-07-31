@@ -5,6 +5,7 @@ DECLARE @ColumnName AS NVARCHAR(MAX)
 
 SELECT @ColumnName= ISNULL(@ColumnName + ',','') + QUOTENAME([Key])
 FROM (SELECT DISTINCT o.[Key] FROM tblICEdiMapObject o WHERE Identifier = @Identifier) AS Keys
+ORDER BY [Key] ASC		--rev
 
 SET @DynamicPivotQuery =
 N'SELECT [FileIndex], [RecordIndex], ' + @ColumnName + '
