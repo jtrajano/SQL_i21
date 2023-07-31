@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspARCustomerAgingDetailAsOfDateReport]
 	  @dtmDateFrom				DATETIME = NULL
 	, @dtmDateTo				DATETIME = NULL
-    , @strSourceTransaction		NVARCHAR(100) = NULL	
+    , @strSourceTransaction		NVARCHAR(MAX) = NULL	
 	, @strCustomerIds			NVARCHAR(MAX) = NULL
 	, @strSalespersonIds		NVARCHAR(MAX) = NULL
 	, @strCompanyLocationIds	NVARCHAR(MAX) = NULL
