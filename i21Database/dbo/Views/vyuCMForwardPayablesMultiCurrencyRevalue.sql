@@ -14,12 +14,12 @@ SELECT DISTINCT
 	strItemId				=	'' COLLATE Latin1_General_CI_AS,
 	dblQuantity				=	NULL,
 	dblUnitPrice			=	NULL,
-	dblAmount    			=   BT.dblAmountForeignFrom,
+	dblAmount    			=   BT.dblAmountForeignFrom * -1,
 	intCurrencyId			=	BT.intCurrencyIdAmountFrom,
 	intForexRateType		=	BT.intRateTypeIdAmountFrom,
 	strForexRateType		=	RateType.strCurrencyExchangeRateType,
 	dblForexRate			=	BT.dblRateAmountFrom,
-	dblHistoricAmount		=	BT.dblAmountFrom,
+	dblHistoricAmount		=	BT.dblAmountFrom * -1,
 	dblAmountDifference		=	0,
 	dblNewForexRate         =   0, -- Calcuate By GL
     dblNewAmount            =   0, -- Calcuate By GL
