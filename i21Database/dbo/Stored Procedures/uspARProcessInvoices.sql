@@ -242,6 +242,7 @@ DECLARE  @Id									INT
 		,@TaxLocationId							INT
 		,@TaxPoint								NVARCHAR(50)
 		,@Surcharge								NUMERIC(18, 6)
+		,@ReleasePONumber						NVARCHAR(25)
 
 		,@InvoiceDetailId						INT
 		,@ItemId								INT
@@ -472,6 +473,7 @@ BEGIN
 		,@TaxLocationId					= [intTaxLocationId]
 		,@TaxPoint						= [strTaxPoint]
 		,@Surcharge						= [dblSurcharge]
+		,@ReleasePONumber				= strReleasePONumber
 
 		,@InvoiceDetailId				= [intInvoiceDetailId]
 		,@ItemId						= (CASE WHEN @GroupingOption = 0 THEN [intItemId] ELSE NULL END) 
@@ -1494,62 +1496,63 @@ BEGIN TRY
 		SELECT @ExistingInvoiceId = [intInvoiceId] FROM #EntriesForProcessing WHERE ISNULL([ysnForUpdate],0) = 1 AND ISNULL([ysnProcessed],0) = 0 AND ISNULL([intInvoiceId],0) <> 0 ORDER BY [intId]
 									
 		SELECT TOP 1
-			 @TransactionType				= [strTransactionType]
-			,@Type							= [strType]		 	
-			,@SourceTransaction				= [strSourceTransaction]
-			,@SourceId						= [intSourceId]
-			,@PeriodsToAccrue 				= [intPeriodsToAccrue]
-			,@SourceNumber					= [strSourceId]
-			,@InvoiceId						= [intInvoiceId]
-			,@EntityCustomerId				= [intEntityCustomerId]
-			,@CompanyLocationId				= [intCompanyLocationId]
-			,@AccountId						= [intAccountId] 
-			,@CurrencyId					= ISNULL([intCurrencyId], [dbo].[fnARGetCustomerDefaultCurrency]([intEntityCustomerId]))
-			,@TermId						= [intTermId]
-			,@Date							= CASE WHEN [strSourceTransaction] = 'Transport Load' THEN [dtmDate] ELSE CAST([dtmDate] AS DATE) END
-			,@DueDate						= [dtmDueDate]
-			,@ShipDate						= [dtmShipDate]
-			,@CalculatedDate				= [dtmCalculated]
-			,@PostDate						= [dtmPostDate]
-			,@EntitySalespersonId			= [intEntitySalespersonId]
-			,@FreightTermId					= [intFreightTermId]
-			,@ShipViaId						= [intShipViaId]
-			,@PaymentMethodId				= [intPaymentMethodId]
-			,@InvoiceOriginId				= [strInvoiceOriginId]
-			,@MobileBillingShiftNo			= [strMobileBillingShiftNo]
-			,@PONumber						= [strPONumber]
-			,@BOLNumber						= [strBOLNumber]
-			,@PaymentInfo					= [strPaymentInfo]
-			,@Comment						= [strComments]
-			,@FooterComment					= [strFooterComments]
-			,@ShipToLocationId				= [intShipToLocationId]
-			,@BillToLocationId				= [intBillToLocationId]
-			,@Template						= [ysnTemplate]
-			,@Forgiven						= [ysnForgiven]
-			,@Calculated					= [ysnCalculated]
-			,@Splitted						= [ysnSplitted]
-			,@ImpactInventory				= ISNULL([ysnImpactInventory], CAST(1 AS BIT))
-			,@PaymentId						= [intPaymentId]
-			,@SplitId						= [intSplitId]			
-			,@LoadDistributionHeaderId		= [intLoadDistributionHeaderId]
-			,@ActualCostId					= [strActualCostId]
-			,@ShipmentId					= [intShipmentId]
-			,@TransactionId 				= [intTransactionId]
-			,@MeterReadingId				= [intMeterReadingId]
-			,@ContractHeaderId				= [intContractHeaderId] 
-			,@LoadId						= [intLoadId] 
-			,@OriginalInvoiceId				= [intOriginalInvoiceId]
-			,@EntityId						= [intEntityId]
-			,@TruckDriverId					= [intTruckDriverId]
-			,@TruckDriverReferenceId		= [intTruckDriverReferenceId]
-			,@ResetDetails					= [ysnResetDetails]
-			,@Recap							= [ysnRecap] 
-			,@Post							= [ysnPost]
-			,@UpdateAvailableDiscount		= [ysnUpdateAvailableDiscount]
-			,@FreightCharge					= [dblFreightCharge]
-			,@FreightCompanySegment			= [intFreightCompanySegment]
-			,@FreightLocationSegment		= [intFreightLocationSegment]
-			,@Surcharge						= [dblSurcharge]
+			 @TransactionType			= [strTransactionType]
+			,@Type						= [strType]		 	
+			,@SourceTransaction			= [strSourceTransaction]
+			,@SourceId					= [intSourceId]
+			,@PeriodsToAccrue 			= [intPeriodsToAccrue]
+			,@SourceNumber				= [strSourceId]
+			,@InvoiceId					= [intInvoiceId]
+			,@EntityCustomerId			= [intEntityCustomerId]
+			,@CompanyLocationId			= [intCompanyLocationId]
+			,@AccountId					= [intAccountId] 
+			,@CurrencyId				= ISNULL([intCurrencyId], [dbo].[fnARGetCustomerDefaultCurrency]([intEntityCustomerId]))
+			,@TermId					= [intTermId]
+			,@Date						= CASE WHEN [strSourceTransaction] = 'Transport Load' THEN [dtmDate] ELSE CAST([dtmDate] AS DATE) END
+			,@DueDate					= [dtmDueDate]
+			,@ShipDate					= [dtmShipDate]
+			,@CalculatedDate			= [dtmCalculated]
+			,@PostDate					= [dtmPostDate]
+			,@EntitySalespersonId		= [intEntitySalespersonId]
+			,@FreightTermId				= [intFreightTermId]
+			,@ShipViaId					= [intShipViaId]
+			,@PaymentMethodId			= [intPaymentMethodId]
+			,@InvoiceOriginId			= [strInvoiceOriginId]
+			,@MobileBillingShiftNo		= [strMobileBillingShiftNo]
+			,@PONumber					= [strPONumber]
+			,@BOLNumber					= [strBOLNumber]
+			,@PaymentInfo				= [strPaymentInfo]
+			,@Comment					= [strComments]
+			,@FooterComment				= [strFooterComments]
+			,@ShipToLocationId			= [intShipToLocationId]
+			,@BillToLocationId			= [intBillToLocationId]
+			,@Template					= [ysnTemplate]
+			,@Forgiven					= [ysnForgiven]
+			,@Calculated				= [ysnCalculated]
+			,@Splitted					= [ysnSplitted]
+			,@ImpactInventory			= ISNULL([ysnImpactInventory], CAST(1 AS BIT))
+			,@PaymentId					= [intPaymentId]
+			,@SplitId					= [intSplitId]			
+			,@LoadDistributionHeaderId	= [intLoadDistributionHeaderId]
+			,@ActualCostId				= [strActualCostId]
+			,@ShipmentId				= [intShipmentId]
+			,@TransactionId 			= [intTransactionId]
+			,@MeterReadingId			= [intMeterReadingId]
+			,@ContractHeaderId			= [intContractHeaderId] 
+			,@LoadId					= [intLoadId] 
+			,@OriginalInvoiceId			= [intOriginalInvoiceId]
+			,@EntityId					= [intEntityId]
+			,@TruckDriverId				= [intTruckDriverId]
+			,@TruckDriverReferenceId	= [intTruckDriverReferenceId]
+			,@ResetDetails				= [ysnResetDetails]
+			,@Recap						= [ysnRecap] 
+			,@Post						= [ysnPost]
+			,@UpdateAvailableDiscount	= [ysnUpdateAvailableDiscount]
+			,@FreightCharge				= [dblFreightCharge]
+			,@FreightCompanySegment		= [intFreightCompanySegment]
+			,@FreightLocationSegment	= [intFreightLocationSegment]
+			,@Surcharge					= [dblSurcharge]
+			,@ReleasePONumber			= strReleasePONumber				
 		FROM
 			@InvoiceEntries
 		WHERE
@@ -1697,6 +1700,7 @@ BEGIN TRY
 			,[intFreightCompanySegment]	= @FreightCompanySegment
 			,[intFreightLocationSegment]= @FreightLocationSegment
 			,[dblSurcharge]				= @Surcharge
+			,strReleasePONumber			= @ReleasePONumber
 		FROM
 			tblARCustomer C
 		LEFT OUTER JOIN

@@ -155,5 +155,6 @@
 	[strLogoType]						NVARCHAR (10)	COLLATE Latin1_General_CI_AS NULL,
 	[dblLaidInCost]						NUMERIC (18, 6)	NULL,
 	strTaxNumber						NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
-	intHasTaxException					INT				NULL
+	intHasTaxException					INT				NULL,
+	strReleasePONumber					NVARCHAR (MAX)	NULL
 );

@@ -22,7 +22,7 @@
 	,@PaymentMethodId						INT				= NULL
 	,@InvoiceOriginId						NVARCHAR(25)	= NULL
 	,@MobileBillingShiftNo					NVARCHAR(50)	= NULL
-	,@PONumber								NVARCHAR(50)	= ''
+	,@PONumber								NVARCHAR(25)	= ''
 	,@BOLNumber								NVARCHAR(50)	= ''
 	,@PaymentInfo							NVARCHAR(50)	= ''
 	,@Comment								NVARCHAR(MAX)	= ''
@@ -171,6 +171,7 @@
 	,@ItemAddConvenienceFee					BIT				= 0
 	,@ItemConvenienceFee					NUMERIC(18, 6)	= 0.000000
 	,@ItemBaseConvenienceFee				NUMERIC(18, 6)	= 0.000000
+	,@ReleasePONumber						NVARCHAR(25)	= ''
 AS
 
 BEGIN
@@ -570,6 +571,7 @@ BEGIN TRY
 		,[ysnAddConvenienceFee]
 		,[dblConvenienceFee]
 		,[dblBaseConvenienceFee]
+		,strReleasePONumber
 	)
 	SELECT [strInvoiceNumber]				= CASE WHEN @UseOriginIdAsInvoiceNumber = 1 THEN @InvoiceOriginId ELSE NULL END
 		,[strTransactionType]				= @TransactionType
@@ -678,6 +680,7 @@ BEGIN TRY
 		,[ysnAddConvenienceFee]				= @ItemAddConvenienceFee	
 		,[dblConvenienceFee]				= @ItemConvenienceFee	
 		,[dblBaseConvenienceFee]			= @ItemBaseConvenienceFee
+		,strReleasePONumber					= @ReleasePONumber
 	FROM tblARCustomer C
 	LEFT OUTER JOIN [tblEMEntityLocation] EL ON C.[intEntityId] = EL.[intEntityId] AND EL.ysnDefaultLocation = 1
 	LEFT OUTER JOIN [tblEMEntityLocation] SL ON ISNULL(@ShipToLocationId, 0) <> 0 AND @ShipToLocationId = SL.intEntityLocationId

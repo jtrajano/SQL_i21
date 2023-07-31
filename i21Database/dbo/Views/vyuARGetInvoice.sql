@@ -210,6 +210,7 @@ SELECT
 	,ysnAddConvenienceFee				= INV.ysnAddConvenienceFee
 	,dblConvenienceFee					= INV.dblConvenienceFee
 	,dblBaseConvenienceFee				= INV.dblBaseConvenienceFee
+	,strReleasePONumber					= INV.strReleasePONumber
 FROM tblARInvoice INV WITH (NOLOCK)
 INNER JOIN (
     SELECT 
@@ -399,11 +400,6 @@ OUTER APPLY(
 	AND SC.strScreenName = 'Invoice'
 	WHERE SRA.intEntityUserSecurityId = INV.intEntityId
 ) USERCREDITAPPROVER
--- OUTER APPLY(
--- 	SELECT TOP 1 dblCreditStopDays
--- 	FROM dbo.vyuARCustomerInquiry
--- 	WHERE intEntityCustomerId = INV.intEntityCustomerId
--- ) CUSTOMERAGING
 OUTER APPLY(
 	SELECT TOP 1 strCompanyName
 	FROM dbo.tblSMInterCompany

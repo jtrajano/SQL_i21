@@ -237,4 +237,5 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[ysnAddConvenienceFee]					BIT												NULL
 	,[dblConvenienceFee]					NUMERIC(18, 6)									NULL
 	,[dblBaseConvenienceFee]				NUMERIC(18, 6)									NULL
+	,strReleasePONumber						NVARCHAR(25)									NULL
 )

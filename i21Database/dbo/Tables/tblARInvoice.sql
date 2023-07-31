@@ -167,6 +167,7 @@
 	[ysnAddConvenienceFee] 				BIT											    NULL		CONSTRAINT [DF_tblARInvoice_ysnAddConvenienceFee] DEFAULT ((0)),
 	[dblConvenienceFee]					NUMERIC(18, 6)									NULL,
 	[dblBaseConvenienceFee]				NUMERIC(18, 6)									NULL,
+	strReleasePONumber					NVARCHAR(25)									NULL,
     CONSTRAINT [PK_tblARInvoice_intInvoiceId] PRIMARY KEY CLUSTERED ([intInvoiceId] ASC),
 	CONSTRAINT [UK_tblARInvoice_strInvoiceNumber] UNIQUE ([strInvoiceNumber]),
     CONSTRAINT [FK_tblARInvoice_tblARCustomer_intEntityCustomerId] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityId]),
