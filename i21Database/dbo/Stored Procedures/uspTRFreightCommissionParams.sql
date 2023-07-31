@@ -1,18 +1,19 @@
-﻿create procedure uspTRFreightCommissionParams  
-@dtmDateFrom nvarchar(50),    
-@dtmDateTo nvarchar(50),    
+﻿CREATE PROCEDURE uspTRFreightCommissionParams    
+@dtmDateFrom NVARCHAR(50),    
+@dtmDateTo NVARCHAR(50),    
 @dtmRealDateFrom DATETIME,    
 @dtmRealDateTo DATETIME,    
 @intDriverId INT,  
 @intShipViaId INT,  
-@strDeliveryType nvarchar(100),    
+@strDeliveryType NVARCHAR(100),    
 @intFreightItemId INT,    
 @intSurchargeItemId INT,    
 @intFreightCategoryId INT,    
 @dblFreightUnitCommissionPct INT,  
 @dblOtherUnitCommissionPct INT  
       
-as
+AS
+
 BEGIN
 
 	SET QUOTED_IDENTIFIER OFF      
@@ -24,7 +25,7 @@ BEGIN
 
 	IF OBJECT_ID(N'tempdb..#tmpCommissionFreightReport') IS NOT NULL DROP TABLE #tmpCommissionFreightReport
 
-	select dtmFrom = @dtmDateFrom    
+	SELECT dtmFrom = @dtmDateFrom    
 	,dtmTo = @dtmDateTo    
 	,dtmRealDateFrom = @dtmRealDateFrom    
 	,dtmRealDateTo = @dtmRealDateTo    
@@ -60,16 +61,13 @@ BEGIN
 
 
 	INTO #tmpCommissionFreightReport  
-	from vyuTRGetFreightCommissionLine cl    
+	FROM vyuTRGetFreightCommissionLine cl    
     
-	where ((cl.intDriverId =  @intDriverId OR @intDriverId = 0))    
-	and (cl.strDeliveryType = @strDeliveryType     
-	  OR @strDeliveryType = 'All'     
-	  OR cl.strDeliveryType = 'Other Charge'  
-	  OR (RTRIM(LTRIM(ISNULL(cl.strReceiptLink, ''))) = '' AND cl.intItemCategoryId = @intFreightCategoryId))    
+	WHERE (cl.intDriverId =  @intDriverId OR @intDriverId = 0)  
+	AND (cl.strDeliveryType = @strDeliveryType OR @strDeliveryType = 'All' OR cl.strDeliveryType = 'Other Charge')
 	AND (cl.dtmLoadDateTime >= @dtmRealDateFrom AND cl.dtmLoadDateTime <= @dtmRealDateTo)   
 	AND (cl.intShipViaId = @intShipViaId OR @intShipViaId = 0)  
-	order by cl.dtmLoadDateTime, cl.strMovement desc    
+	ORDER BY cl.dtmLoadDateTime, cl.strMovement DESC    
     
 
 	IF ((SELECT COUNT(*) FROM #tmpCommissionFreightReport) > 0)
@@ -130,7 +128,6 @@ BEGIN
 			,intLoadDistributionHeaderId = 0  
 			,intLoadDistributionDetailId = 0
 	  END
-
 
 	DROP TABLE #tmpCommissionFreightReport
 END
