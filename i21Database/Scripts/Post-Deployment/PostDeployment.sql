@@ -584,6 +584,7 @@ print 'Test'
 :r .\EM\1910_Set_Contact_Location.sql
 :r .\EM\2210_AddDefaultEFTBank.sql
 :r .\EM\2210_CompanyPreference.sql
+:r .\EM\2310_FixCMBankTransactionNonExistentEFT.sql
 
 -- Quality Module
 :r .\QM\1_MasterTables.sql

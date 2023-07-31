@@ -1859,6 +1859,7 @@
     <Build Include="dbo\Views\vyuLGStorageLocation.sql" />
     <Build Include="dbo\Views\vyuLGNotifyPartyGroupView.sql" />
     <Build Include="dbo\Stored Procedures\uspLGUpdateNotifyPartyGroup.sql" />
+    <None Include="Scripts\Post-Deployment\EM\2310_FixCMBankTransactionNonExistentEFT.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
