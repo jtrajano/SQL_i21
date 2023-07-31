@@ -4750,9 +4750,9 @@ ELSE
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Notify Party Groups' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsMaintenanceParentMenuId)
     INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-    VALUES (N'Notify Party Groups', N'Logistics', @LogisticsMaintenanceParentMenuId, N'Notify Party Groups', N'Maintenance', N'Screen', N'Logistics.view.NotifyPartyGroup', N'small-menu-maintenance', 0, 0, 0, 1, 14, 1)
+    VALUES (N'Notify Party Groups', N'Logistics', @LogisticsMaintenanceParentMenuId, N'Notify Party Groups', N'Maintenance', N'Screen', N'Logistics.view.NotifyPartyGroup?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 14, 1)
 ELSE
-    UPDATE tblSMMasterMenu SET intSort = 14, strCommand = N'Logistics.view.NotifyPartyGroup' WHERE strMenuName = 'Notify Party Groups' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsMaintenanceParentMenuId
+    UPDATE tblSMMasterMenu SET intSort = 14, strCommand = N'Logistics.view.NotifyPartyGroup?showSearch=true' WHERE strMenuName = 'Notify Party Groups' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsMaintenanceParentMenuId
 
 /* START OF DELETING */
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Allocated Contracts List' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsMaintenanceParentMenuId
