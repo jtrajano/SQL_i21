@@ -46,7 +46,7 @@ SELECT
 	,[dblTaxPerQty]				= CASE WHEN ISNULL(ID.dblQtyShipped, 0) <> 0 THEN IDT.dblAdjustedTax / ID.dblQtyShipped ELSE 0 END
 	,[dblComputedGrossPrice]	= ISNULL(ID.dblComputedGrossPrice, 0)	
 	,[ysnIncludeInvoicePrice]	= ISNULL(SMTCode.ysnIncludeInvoicePrice, 0)
-	,strException				= CASE WHEN ISNULL(IDT.strException, '') = '' THEN ISNULL(I.strTaxNumber, '') ELSE ISNULL(IDT.strException, '') END
+	,strException				= CASE WHEN IDT.strException IS NULL THEN ISNULL(I.strTaxNumber, '') ELSE ISNULL(IDT.strException, '') END
 FROM (
 	SELECT
 		 intInvoiceDetailTaxId
@@ -90,7 +90,7 @@ INNER JOIN (
 INNER JOIN tblSMTaxCode SMTCode ON IDT.intTaxCodeId = SMTCode.intTaxCodeId
 INNER JOIN tblSMTaxClass SMTClass ON SMTCode.intTaxClassId = SMTClass.intTaxClassId	
 WHERE (
-	(IDT.ysnTaxExempt = 1 AND ISNULL(IDT.strException, '') <> '') 
+	(IDT.ysnTaxExempt = 1 AND (ISNULL(I.strTaxNumber, '') <> '' OR ISNULL(IDT.strException, '') <> '')) 
 	OR 
 	(IDT.ysnTaxExempt = 0 AND IDT.dblAdjustedTax <> 0)
 )
