@@ -172,15 +172,15 @@ IF ISNULL(@intInvoiceIdTo, 0) = 0
 IF ISNULL(@intInvoiceIdFrom, 0) = 0
 	SET @intInvoiceIdFrom = (SELECT MIN(intInvoiceId) FROM dbo.tblARInvoice)
 
-DECLARE @strInvoiceReportName			NVARCHAR(100) = 'Standard'
-	  , @strTankDeliveryInvoiceFormat	NVARCHAR(100) = 'Standard'
-	  , @strTransportsInvoiceFormat		NVARCHAR(100) = 'Standard'
-	  , @strGrainInvoiceFormat			NVARCHAR(100) = 'Standard'
-	  , @strMeterBillingInvoiceFormat	NVARCHAR(100) = 'Standard'
-	  , @strCreditMemoReportName		NVARCHAR(100) = 'Standard'
-	  , @strOtherChargeInvoiceReport	NVARCHAR(100) = 'Standard'
-	  , @strOtherChargeCreditMemoReport	NVARCHAR(100) = 'Standard'
-	  , @strServiceChargeFormat		    NVARCHAR(100) = 'Standard'
+DECLARE @strInvoiceReportName			NVARCHAR(100) = NULL
+	  , @strTankDeliveryInvoiceFormat	NVARCHAR(100) = NULL
+	  , @strTransportsInvoiceFormat		NVARCHAR(100) = NULL
+	  , @strGrainInvoiceFormat			NVARCHAR(100) = NULL
+	  , @strMeterBillingInvoiceFormat	NVARCHAR(100) = NULL
+	  , @strCreditMemoReportName		NVARCHAR(100) = NULL
+	  , @strOtherChargeInvoiceReport	NVARCHAR(100) = NULL
+	  , @strOtherChargeCreditMemoReport	NVARCHAR(100) = NULL
+	  , @strServiceChargeFormat		    NVARCHAR(100) = NULL
 	  , @strCompanyName					NVARCHAR(100) = NULL
 	  , @ysnStretchLogo					BIT = 0
 	  , @intPerformanceLogId			INT = NULL	  
@@ -199,6 +199,14 @@ FROM dbo.tblARCompanyPreference WITH (NOLOCK)
 
 EXEC dbo.uspARLogPerformanceRuntime 'Invoice Report', 'uspARInvoiceMainReport', @strRequestId, 1, @intEntityUserId, NULL, @intPerformanceLogId OUT
 
+SET @strInvoiceReportName = ISNULL(@strInvoiceReportName, 'Standard')
+SET @strTankDeliveryInvoiceFormat = ISNULL(@strTankDeliveryInvoiceFormat, 'Standard')
+SET @strTransportsInvoiceFormat = ISNULL(@strTransportsInvoiceFormat, 'Standard')
+SET @strGrainInvoiceFormat = ISNULL(@strGrainInvoiceFormat, 'Standard')
+SET @strMeterBillingInvoiceFormat = ISNULL(@strMeterBillingInvoiceFormat, 'Standard')
+SET @strCreditMemoReportName = ISNULL(@strInvoiceReportName, 'Standard')
+SET @strServiceChargeFormat = ISNULL(@strServiceChargeFormat, 'Standard')
+SET @ysnStretchLogo = 0
 SET @strCompanyName = (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup WHERE strCompanyName LIKE '%Cel Oil%')
 
 --GET INVOICES WITH FILTERS
