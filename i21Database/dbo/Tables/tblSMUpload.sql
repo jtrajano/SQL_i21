@@ -52,7 +52,7 @@ CREATE TRIGGER trgInsteadOfInsertSMUpload
 				N'Storage limit exceeded with the limit of %s GB. Insertion cancelled.'
 				, 16
 				, 1
-				, @storageLimitSizeString);
+				, @storageLimitString);
 
                 RETURN;
             END;
