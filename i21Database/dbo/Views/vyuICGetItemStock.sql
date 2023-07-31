@@ -161,7 +161,13 @@ SELECT
 	ysnHasSubstitute = CAST(ISNULL(ItemSubstitute.ysnHasSubstitute, 0) AS BIT),
 	ysnHasAddOnOtherCharge = CAST(ISNULL(AddOnOtherCharge.ysnHasAddOnOtherCharge, 0) AS BIT),
 	dblStandardWeight = StockUOM.dblStandardWeight,
-	dblReceiveStandardWeight = ReceiveUOM.dblStandardWeight
+	dblReceiveStandardWeight = ReceiveUOM.dblStandardWeight,
+	ItemLocation.intAllowZeroCostTypeId,
+	strAllowZeroCostType = (CASE WHEN ItemLocation.intAllowZeroCostTypeId = 1 THEN 'No'
+							 WHEN ItemLocation.intAllowZeroCostTypeId = 2 THEN 'Yes'
+							 WHEN ItemLocation.intAllowZeroCostTypeId = 3 THEN 'Yes, with warning message' 
+							 WHEN ItemLocation.intAllowZeroCostTypeId = 4 THEN 'Yes on Produce' 
+							 END) COLLATE Latin1_General_CI_AS
 FROM	
 	tblICItem Item 
 	LEFT JOIN (

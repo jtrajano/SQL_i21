@@ -11,6 +11,7 @@
     [dtmShiftClosedDate] DATETIME NULL,
     [strCheckoutStartDate] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
     [strCheckoutCloseDate] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+    [strPeriodSeqNum] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
     [dblProcessXMLVersion] DECIMAL(18, 6) NULL,
     [strStatus] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     [strRegister] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,

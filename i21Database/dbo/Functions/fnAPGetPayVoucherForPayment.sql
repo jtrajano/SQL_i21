@@ -98,9 +98,9 @@ RETURNS TABLE AS RETURN
 	FROM vyuAPBillForPayment forPay
 	LEFT JOIN tblAPBill voucher ON voucher.intBillId = forPay.intBillId
 	LEFT JOIN tblARInvoice invoice ON invoice.intInvoiceId = forPay.intInvoiceId
-	-- LEFT JOIN tblAPPaymentDetail payDetail
-	-- 	ON voucher.intBillId = payDetail.intBillId AND payDetail.intPaymentId = @paymentId
-	-- 	AND ISNULL(payDetail.intPayScheduleId,-1) = ISNULL(forPay.intPayScheduleId,-1)
+	LEFT JOIN tblAPPaymentDetail payDetail
+		ON voucher.intBillId = payDetail.intBillId AND payDetail.intPaymentId = @paymentId
+		AND ISNULL(payDetail.intPayScheduleId,-1) = ISNULL(forPay.intPayScheduleId,-1)
 	LEFT JOIN vyuCMBankAccount account ON account.intBankAccountId = voucher.intPayFromBankAccountId
 	LEFT JOIN vyuAPEntityEFTInformation eft ON eft.intEntityEFTInfoId = voucher.intPayToBankAccountId
 	LEFT JOIN vyuGLAccountDetail accountDetail ON accountDetail.intAccountId = voucher.intAccountId
@@ -134,10 +134,10 @@ RETURNS TABLE AS RETURN
 					ELSE 1 END)
 				)
 			)
-		-- AND 1 = (CASE WHEN @paymentId > 0 
-		-- 				THEN 
-		-- 					(CASE WHEN payDetail.intPaymentDetailId > 0 AND payDetail.intPaymentId = @paymentId THEN 1 ELSE 0 END)
-		-- 				ELSE 1 END)
+		AND 1 = (CASE WHEN @paymentId > 0 
+						THEN 
+							(CASE WHEN payDetail.intPaymentDetailId > 0 AND payDetail.intPaymentId = @paymentId THEN 1 ELSE 0 END)
+						ELSE 1 END)
 		AND 1 = (CASE WHEN @paymentId = 0
 						THEN (CASE WHEN ((forPay.ysnInPayment IS NULL OR forPay.ysnInPayment = 0) OR forPay.ysnPrepayHasPayment <> 0) THEN 1 WHEN forPay.ysnInPaymentSched = 1 THEN 1 ELSE 0 END)
 						ELSE 1 END)

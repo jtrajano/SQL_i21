@@ -133,8 +133,10 @@ BEGIN
 	OUTER APPLY(
 		SELECT TOP 1 intInvoiceId FROM @ValidationResult WHERE intInvoiceId = A.intId
 	)Z
-	WHERE D.intClockID IS NULL
+	WHERE D.intClockID IS NULL 
+		AND ysnRequireClock = 1
 		AND Z.intInvoiceId IS NULL
+		
 
 	IF EXISTS(SELECT TOP 1 1 FROM @ValidationResult)
 	BEGIN

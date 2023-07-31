@@ -684,7 +684,7 @@ BEGIN
 						LEFT JOIN tblTMDispatch G
 							ON A.intSiteID = G.intSiteID
 								AND G.intDispatchID = B.intDispatchId
-						INNER JOIN tblTMClock H
+						LEFT JOIN tblTMClock H
 							ON A.intClockID = H.intClockID
 						LEFT JOIN tblEMEntity I
 							ON I.intEntityId = C.intEntitySalespersonId
