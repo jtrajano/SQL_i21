@@ -1379,7 +1379,7 @@ BEGIN
 					,[strRateType]
 			FROM @GLEntriesTemp GLEntries
 			OUTER APPLY (
-				SELECT TOP 1 LD.intPriceCurrencyId
+				SELECT TOP 1 LD.intPriceCurrencyId, BD.intLoadShipmentCostId
 				FROM tblICInventoryTransaction IT
 				INNER JOIN tblAPBillDetail BD ON BD.intBillDetailId = IT.intTransactionDetailId
 				CROSS APPLY (
@@ -1387,7 +1387,7 @@ BEGIN
 				) LD
 				WHERE IT.intInventoryTransactionId = GLEntries.intJournalLineNo
 			) LS
-			WHERE LS.intPriceCurrencyId <> GLEntries.intCurrencyId
+			WHERE LS.intPriceCurrencyId <> GLEntries.intCurrencyId AND LS.intLoadShipmentCostId IS NOT NULL
 			UNION ALL
 			SELECT 	[dtmDate] 
 					,[strBatchId]
@@ -1425,7 +1425,7 @@ BEGIN
 					,ItemCurrencyToFunctional.strCurrencyExchangeRateType
 			FROM @GLEntriesTemp GLEntries
 			OUTER APPLY (
-				SELECT TOP 1 LD.intPriceCurrencyId
+				SELECT TOP 1 LD.intPriceCurrencyId, BD.intLoadShipmentCostId
 				FROM tblICInventoryTransaction IT
 				INNER JOIN tblAPBillDetail BD ON BD.intBillDetailId = IT.intTransactionDetailId
 				CROSS APPLY (
@@ -1454,7 +1454,7 @@ BEGIN
 				AND intToCurrencyId = @intFunctionalCurrencyId
 				ORDER BY dtmValidFromDate DESC
 			) ItemCurrencyToFunctional
-			WHERE LS.intPriceCurrencyId <> GLEntries.intCurrencyId
+			WHERE LS.intPriceCurrencyId <> GLEntries.intCurrencyId AND LS.intLoadShipmentCostId IS NOT NULL
 
 			UPDATE @GLEntries SET strModuleName = 'Accounts Payable'
 		END TRY
