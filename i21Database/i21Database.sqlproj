@@ -10883,7 +10883,6 @@
     <Build Include="dbo\Stored Procedures\uspTFGenerateALTRPR.sql" />
     <None Include="Scripts\Post-Deployment\CM\9_CleanupObjects.sql" />
     <Build Include="dbo\Views\vyuICGetReceiptItem.sql" />
-    <Build Include="dbo\Views\vyuARTaxDetailExemptReport.sql" />
     <Build Include="dbo\Tables\tblIPPaymentStatusArchive.sql" />
     <Build Include="dbo\Tables\tblIPPaymentStatusError.sql" />
     <Build Include="dbo\Tables\tblIPPaymentStatusStage.sql" />
