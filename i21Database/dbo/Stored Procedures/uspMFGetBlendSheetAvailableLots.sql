@@ -203,6 +203,10 @@ SELECT Lot.intLotId
 	 , Item.intLayerPerPallet
 	 , ISNULL(InputLot.dblPickedQty, 0) AS dblPickedQty
 	 , Item.strShortName
+	 , 0		AS intSaleNo
+	 , 0.00		AS dblRequiredQty
+	 , 0		AS ysnIsSubstitute
+	 , 0		AS intRecipeItemId
 INTO #tempLot
 FROM tblICLot AS Lot
 JOIN tblICItem AS Item ON Lot.intItemId = Item.intItemId
@@ -299,13 +303,16 @@ IF @ysnEnableParentLot = 0
 			 , TemporaryLot.strLeafGrade
 			 , TemporaryLot.strTeaOrigin
 			 , TemporaryLot.strVendorLotNumber
-			 , TemporaryLot.intSales
 			 , ROUND((ISNULL((ISNULL(TemporaryLot.dblPhysicalQty, 0) - ISNULL(ReservedQty.dblReservedQty, 0) - ISNULL(TemporaryLot.dblReservedQtyInTBS, 0)), 0) / CASE WHEN ISNULL(TemporaryLot.dblWeightPerUnit, 0) = 0 THEN 1 ELSE TemporaryLot.dblWeightPerUnit END), 0) AS dblSelectedQty
 			 , TemporaryLot.intUnitPerLayer
 			 , TemporaryLot.intLayerPerPallet
 			 , TemporaryLot.dblPickedQty 
 			 , TemporaryLot.strShortName 
 			 , (TemporaryLot.dblReservedQtyInTBS / ISNULL(NULLIF(TemporaryLot.dblWeightPerUnit, 0), 1)) AS dblReservedQtyInTBSUnit
+			 , TemporaryLot.intSaleNo
+			 , TemporaryLot.dblRequiredQty
+			 , TemporaryLot.ysnIsSubstitute
+			 , TemporaryLot.intRecipeItemId
 		FROM #tempLot AS TemporaryLot 
 		LEFT JOIN @tblReservedQty AS ReservedQty ON TemporaryLot.intLotId = ReservedQty.intLotId
 	END
@@ -369,6 +376,10 @@ ELSE
 					 , TemporaryLot.intLayerPerPallet
 					 , TemporaryLot.dblPickedQty
 					 , TemporaryLot.strShortName
+					 , TemporaryLot.intSaleNo
+					 , TemporaryLot.dblRequiredQty
+					 , TemporaryLot.ysnIsSubstitute
+					 , TemporaryLot.intRecipeItemId
 				INTO #tempParentLotByStorageLocation
 				FROM #tempLot AS TemporaryLot 
 				JOIN tblICParentLot AS ParentLot on TemporaryLot.intParentLotId = ParentLot.intParentLotId 
@@ -398,6 +409,10 @@ ELSE
 					   , TemporaryLot.dblTeaAppearance
 					   , TemporaryLot.dblTeaVolume
 					   , TemporaryLot.intAge
+					   , TemporaryLot.intSaleNo
+					   , TemporaryLot.dblRequiredQty
+					   , TemporaryLot.ysnIsSubstitute
+					   , TemporaryLot.intRecipeItemId
 
 
 				SELECT ParentLotStorageLocation.*
@@ -467,6 +482,10 @@ ELSE
 					 , TemporaryLot.intLayerPerPallet
 					 , TemporaryLot.dblPickedQty
 					 , TemporaryLot.strShortName
+					 , TemporaryLot.intSaleNo
+					 , TemporaryLot.dblRequiredQty
+					 , TemporaryLot.ysnIsSubstitute
+					 , TemporaryLot.intRecipeItemId
 				INTO #tempParentLotByLocation
 				FROM #tempLot AS TemporaryLot
 				JOIN tblICParentLot AS ParentLot ON TemporaryLot.intParentLotId = ParentLot.intParentLotId 
@@ -495,6 +514,10 @@ ELSE
 					   , TemporaryLot.dblTeaAppearance
 					   , TemporaryLot.dblTeaVolume
 					   , TemporaryLot.intAge
+					   , TemporaryLot.intSaleNo
+					   , TemporaryLot.dblRequiredQty
+					   , TemporaryLot.ysnIsSubstitute
+					   , TemporaryLot.intRecipeItemId
 
 				SELECT ParentLotLocation.*
 					 , ISNULL(ReservedQty.dblReservedQty,0) AS dblReservedQty
