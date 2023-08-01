@@ -295,6 +295,7 @@ DECLARE @ysnSuccess BIT
  SET intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1  
   ,intSampleTypeId = x.intSampleTypeId  
   ,intCompanyLocationId = x.intCompanyLocationId  
+  ,intLocationId = x.intCompanyLocationId
   ,intProductTypeId = x.intProductTypeId  
   ,intProductValueId = x.intProductValueId  
   ,intSampleStatusId = x.intSampleStatusId  
