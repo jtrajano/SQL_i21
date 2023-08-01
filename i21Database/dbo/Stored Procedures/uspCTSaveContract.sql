@@ -239,6 +239,14 @@ BEGIN TRY
 		WHERE CD.intPricingTypeId IN (1, 6)
 	end
 
+	--UPDATE SHIP VIA
+	BEGIN
+		UPDATE CTD SET CTD.intShipViaId = (CASE WHEN  E.ysnActive = 0 THEN NULL ELSE CTD.intShipViaId END)
+		FROM tblCTContractDetail CTD
+		INNER JOIN @CDTableUpdate CD ON CD.intContractDetailId = CTD.intContractDetailId
+		INNER JOIN vyuCTEntity E ON E.intEntityId = CTD.intShipViaId and E.strEntityType = 'Ship Via'
+	END
+
 	SELECT	@ErrMsg = COALESCE(@ErrMsg, '') + '#' + LTRIM(CC.strItemNo)  + '@' + LTRIM(CD.intContractSeq) + '^' + CD.strItemUOM + '.' +CHAR(13) + CHAR(10) 
 	FROM	vyuCTContractCostView	CC
 	JOIN	vyuCTContractSequence	CD	ON CD.intContractDetailId	=	CC.intContractDetailId
