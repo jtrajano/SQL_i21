@@ -503,11 +503,14 @@ SELECT Item.intItemId
 	 , CAST(ISNULL(ISNULL(ROUND((ISNULL((ISNULL(PhysicalQty.dblPhysicalQty, 0) - ISNULL(ReservedQty.dblReservedQty, 0) - ISNULL(ReservedQtyInTBS.dblReservedQtyInTBS, 0)), 0)) / CASE WHEN ISNULL(PhysicalQty.dblWeightPerUnit, 1) = 0 THEN 1
 																																													  ELSE ISNULL(PhysicalQty.dblWeightPerUnit, 1)
 																																												 END, 0), 0.0), 0) / (Item.intLayerPerPallet * Item.intUnitPerLayer) AS NUMERIC(18, 2)) AS dblNoOfPallet
-	  , MT.strDescription AS strProductType
+	 , MT.strDescription AS strProductType
 	 , B.strBrandCode
 	 , Item.intUnitPerLayer
 	 , Item.intLayerPerPallet
 	 , Item.strShortName
+	 , 0.00		AS dblBSPct
+	 , 0		AS intRowNo
+	 , NULL		AS intStorageLocationId
 FROM @tblRequiredQty AS RequiredQty
 JOIN tblICItem AS Item ON RequiredQty.intItemId = Item.intItemId
 LEFT JOIN @tblPhysicalQty AS PhysicalQty ON RequiredQty.intItemId = PhysicalQty.intItemId
