@@ -534,7 +534,15 @@ BEGIN TRY
 					FROM tblMFWorkOrderInputLot
 					WHERE intWorkOrderId = @intWorkOrderId
 						AND intLotId = @intLotId
-					)
+					) 
+				AND EXISTS (
+						SELECT *
+						FROM dbo.tblMFWorkOrder
+						WHERE intWorkOrderId = @intWorkOrderId
+							AND intStatusId = 2
+							AND intCreatedUserId = @intUserId
+							AND intLastModifiedUserId=@intUserId
+						)
 			BEGIN
 				INSERT INTO tblMFWorkOrderInputLot (
 					intWorkOrderId
