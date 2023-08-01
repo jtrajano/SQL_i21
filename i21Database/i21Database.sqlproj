@@ -6233,7 +6233,6 @@
     <Build Include="dbo\Stored Procedures\uspARUpdateTransactionAccounts.sql" />
     <Build Include="dbo\Stored Procedures\uspPATGatherVolumeForPatronage.sql" />
     <Build Include="dbo\Functions\fnRoundBanker.sql" />
-    <None Include="Scripts\Post-Deployment\AR\DefaultData\25_UpdateTransactionAccountIds.sql" />
     <Build Include="dbo\Stored Procedures\uspARGetItemAccount.sql" />
     <Build Include="dbo\User Defined Types\TFProductCodes.sql" />
     <Build Include="dbo\User Defined Types\TFTerminalControlNumbers.sql" />
