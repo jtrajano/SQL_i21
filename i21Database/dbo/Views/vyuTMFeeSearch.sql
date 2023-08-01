@@ -3,7 +3,7 @@ AS
 	SELECT 
 		intFeeId = A.intFeeId
 		,dtmDate = A.dtmDateTime
-		,strFeeType = D.strFeeTypeDescription
+		,strFeeTypeDescription = D.strFeeTypeDescription
 		,strDescription = A.strDescription
 		,dblAmount = A.dblAmount
 		,ysnUniversal = A.ysnUniversal
