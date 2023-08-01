@@ -1852,6 +1852,7 @@
     <None Include="Scripts\Post-Deployment\HD\DefaultData\4_SOWTypeDefaults.sql" />
     <Build Include="dbo\Tables\tblHDStatementOfWorkType.sql" />
     <Build Include="dbo\Tables\tblHDStatementOfWorkTypeSubtype.sql" />
+    <None Include="Scripts\Post-Deployment\EM\2310_FixCMBankTransactionNonExistentEFT.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
