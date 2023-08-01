@@ -135,6 +135,8 @@ SELECT strCompanyName			= CASE WHEN L.strUseLocationAddress = 'Letterhead' THEN 
 	 , ysnPrintInvoicePaymentDetail = @ysnPrintInvoicePaymentDetail
 	 , strFooterComment  		= ISNULL(INV.strFooterComments,'')
 	 , strSalesPersonName		= SALESPERSON.strName
+	 , strRemitToAddress		= CASE WHEN SELECTEDINV.strInvoiceFormat = 'Format 11 - Newton Oil' THEN @strBerryOilAddress ELSE '' END
+	 , strNewtonCompanyAddress  = L.strFullAddress 
 INTO #INVOICES
 FROM dbo.tblARInvoice INV WITH (NOLOCK)
 INNER JOIN #MCPINVOICES SELECTEDINV ON INV.intInvoiceId = SELECTEDINV.intInvoiceId
@@ -280,6 +282,13 @@ FROM #INVOICES I
 WHERE strComments <> '' 
    OR strOrigin <> ''
 
+--ADDRESS NEWTON
+UPDATE I
+SET strCompanyAddress = strNewtonCompanyAddress
+FROM #INVOICES I
+WHERE strInvoiceFormat = 'Format 11 - Newton Oil'
+
+
 INSERT INTO tblARInvoiceReportStagingTable WITH (TABLOCK) (
 	   strCompanyName
 	 , strCompanyAddress
@@ -343,6 +352,7 @@ INSERT INTO tblARInvoiceReportStagingTable WITH (TABLOCK) (
 	 , ysnPrintInvoicePaymentDetail
 	 , strInvoiceFooterComment
 	 , strSalespersonName
+	 , strRemitToAddress
 )
 SELECT strCompanyName
 	 , strCompanyAddress
@@ -406,6 +416,7 @@ SELECT strCompanyName
 	 , ysnPrintInvoicePaymentDetail
 	 , strInvoiceFooterComment = strFooterComment
 	 , strSalespersonName = strSalesPersonName
+	 , strRemitToAddress = strRemitToAddress
 FROM #INVOICES
 
 UPDATE STAGING
