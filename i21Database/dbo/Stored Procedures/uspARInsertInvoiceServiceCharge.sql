@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspARInsertInvoiceServiceCharge]
 	@ysnRecap					BIT = 0,
-	@batchId					NVARCHAR(MAX) = NULL,
+	@batchId					NVARCHAR(100) = NULL,
 	@intEntityCustomerId		INT = 0,
 	@intEntityUserId			INT = 0,
 	@intCompanyLocationId		INT = 0,
