@@ -1475,8 +1475,8 @@ BEGIN
 		,[strPostingError]		= 'Unable to find the tax account that matches the segment of AR Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
 		,[strSessionId]			= @strSessionId
 	FROM tblARInvoiceDetailTax ARIDT
-	INNER JOIN tblARPostInvoiceDetail ARPID ON ARIDT.intInvoiceDetailId = ARPID.intInvoiceDetailId AND ARPID.strSessionId = @strSessionId
-	INNER JOIN tblARPostInvoiceHeader ARPIH ON ARPID.intInvoiceId = ARPIH.intInvoiceId
+	INNER JOIN tblARPostInvoiceDetail ARPID ON ARIDT.intInvoiceDetailId = ARPID.intInvoiceDetailId
+	INNER JOIN tblARPostInvoiceHeader ARPIH ON ARPID.intInvoiceId = ARPIH.intInvoiceId AND ARPIH.strSessionId = @strSessionId
 	OUTER APPLY (
 		SELECT bitOverriden, strOverrideAccount, bitSameCompanySegment, bitSameLocationSegment
 		FROM dbo.[fnARGetOverrideAccount](ARPIH.intAccountId, ARIDT.intSalesTaxAccountId, @OverrideCompanySegment, @OverrideLocationSegment, 0)
