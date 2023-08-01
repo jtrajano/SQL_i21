@@ -193,12 +193,16 @@ BEGIN
 		END
 		IF EXISTS (SELECT TOP 1 1 FROM tblTRLoadHeader WHERE intLoadHeaderId = @LoadHeaderId AND ISNULL(intDispatchOrderId, '') <> '' AND intConcurrencyId <= 1)
 		BEGIN
-			SELECT DISTINCT LGD.intDispatchOrderId
-			INTO #tmpDispatchOrders
-			FROM tblTRLoadDistributionDetail TRD
-			JOIN tblLGDispatchOrderDetail LGD ON LGD.intDispatchOrderDetailId = TRD.intDispatchOrderDetailId
-			JOIN tblTRLoadDistributionHeader TRH ON TRH.intLoadDistributionHeaderId = TRD.intLoadDistributionHeaderId
-			WHERE TRH.intLoadHeaderId = @LoadHeaderId
+			--SELECT DISTINCT LGD.intDispatchOrderId
+			--INTO #tmpDispatchOrders
+			--FROM tblTRLoadDistributionDetail TRD
+			--JOIN tblLGDispatchOrderDetail LGD ON LGD.intDispatchOrderDetailId = TRD.intDispatchOrderDetailId
+			--JOIN tblTRLoadDistributionHeader TRH ON TRH.intLoadDistributionHeaderId = TRD.intLoadDistributionHeaderId
+			--WHERE TRH.intLoadHeaderId = @LoadHeaderId
+
+			SELECT DISTINCT intDispatchOrderId    
+		    INTO #tmpDispatchOrders    
+		    FROM tblTRLoadHeader WHERE intLoadHeaderId = @LoadHeaderId
 
 			DECLARE @intDispatchOrderId INT
 
