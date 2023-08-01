@@ -149,145 +149,331 @@ END
 
 -- Get the GL Account ids for the Other Charges 
 BEGIN 
-	DECLARE @OtherChargeGLAccounts AS dbo.ItemGLAccount; 
+	DECLARE @OtherChargeGLAccounts AS dbo.ItemGLAccount;
+
+	DECLARE @ysnOverrideLOBSegment AS BIT 
+	SELECT TOP 1 
+		@ysnOverrideLOBSegment = ysnOverrideLOBSegment
+	FROM tblICCompanyPreference	
 
 	-- FIFO LOG
-	INSERT INTO @OtherChargeGLAccounts (
-			intItemId 
-			,intItemLocationId 
-			,intOtherChargeExpense
-			,intTransactionTypeId
-	)
-	SELECT	Query.intItemId
-			,Query.intItemLocationId
-			,intOtherChargeExpense = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_OtherCharge_Expense) 
-			,intTransactionTypeId
-	FROM	(
-				SELECT	DISTINCT 
-						intItemId = cbLog.intOtherChargeItemId
-						, intItemLocationId = ocl.intItemLocationId
-						, t.intTransactionTypeId
-				FROM	dbo.tblICInventoryTransaction t INNER JOIN tblICInventoryFIFOCostAdjustmentLog cbLog
-							ON cbLog.intInventoryTransactionId = t.intInventoryTransactionId
-							AND cbLog.intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost
-						INNER JOIN tblICItemLocation il
-							ON il.intItemLocationId = ISNULL(t.intInTransitSourceLocationId, t.intItemLocationId)
-						INNER JOIN tblICItemLocation ocl
-							ON ocl.intItemId = cbLog.intOtherChargeItemId
-							AND ocl.intLocationId = il.intLocationId
-				WHERE	t.strBatchId = @strBatchId
-						AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
-						AND cbLog.intOtherChargeItemId IS NOT NULL 
-			) Query
+	IF @ysnOverrideLOBSegment = 1 
+	BEGIN 
+		INSERT INTO @OtherChargeGLAccounts (
+				intItemId 
+				,intItemLocationId 
+				,intContraInventoryId
+				,intOtherChargeExpense
+				,intTransactionTypeId
+		)
+		SELECT	Query.intOtherChargeItemId
+				,Query.intItemLocationId
+				,intContraInventoryId = dbo.fnGetItemCommodityGLAccount(Query.intOtherChargeItemId, Query.intItemLocationId, @AccountCategory_Cost_Adjustment, Query.intCommodityId)
+				,intOtherChargeExpense = dbo.fnGetItemCommodityGLAccount(Query.intOtherChargeItemId, Query.intItemLocationId, @AccountCategory_OtherCharge_Expense, Query.intCommodityId)
+				,intTransactionTypeId
+		FROM	(
+					SELECT	DISTINCT 
+							intOtherChargeItemId = cbLog.intOtherChargeItemId
+							, intItemLocationId = ocl.intItemLocationId
+							, t.intTransactionTypeId
+							, i.intCommodityId
+					FROM	dbo.tblICInventoryTransaction t INNER JOIN tblICInventoryFIFOCostAdjustmentLog cbLog
+								ON cbLog.intInventoryTransactionId = t.intInventoryTransactionId
+								AND cbLog.intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost						
+							INNER JOIN tblICItem i 
+								ON i.intItemId = t.intItemId
+							INNER JOIN tblICItemLocation il
+								ON il.intItemLocationId = ISNULL(t.intInTransitSourceLocationId, t.intItemLocationId)
+							INNER JOIN tblICItemLocation ocl
+								ON ocl.intItemId = cbLog.intOtherChargeItemId
+								AND ocl.intLocationId = il.intLocationId
+					WHERE	t.strBatchId = @strBatchId
+							AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
+							AND cbLog.intOtherChargeItemId IS NOT NULL 
+				) Query
+	END 
+	ELSE
+	BEGIN 
+		INSERT INTO @OtherChargeGLAccounts (
+				intItemId 
+				,intItemLocationId 
+				,intContraInventoryId
+				,intOtherChargeExpense
+				,intTransactionTypeId
+		)
+		SELECT	Query.intOtherChargeItemId
+				,Query.intItemLocationId
+				,intContraInventoryId = dbo.fnGetItemGLAccount(Query.intOtherChargeItemId, Query.intItemLocationId, @AccountCategory_Cost_Adjustment)
+				,intOtherChargeExpense = dbo.fnGetItemGLAccount(Query.intOtherChargeItemId, Query.intItemLocationId, @AccountCategory_OtherCharge_Expense) 
+				,intTransactionTypeId
+		FROM	(
+					SELECT	DISTINCT 
+							intOtherChargeItemId = cbLog.intOtherChargeItemId
+							, intItemLocationId = ocl.intItemLocationId
+							, t.intTransactionTypeId
+					FROM	dbo.tblICInventoryTransaction t INNER JOIN tblICInventoryFIFOCostAdjustmentLog cbLog
+								ON cbLog.intInventoryTransactionId = t.intInventoryTransactionId
+								AND cbLog.intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost						
+							INNER JOIN tblICItemLocation il
+								ON il.intItemLocationId = ISNULL(t.intInTransitSourceLocationId, t.intItemLocationId)
+							INNER JOIN tblICItemLocation ocl
+								ON ocl.intItemId = cbLog.intOtherChargeItemId
+								AND ocl.intLocationId = il.intLocationId
+					WHERE	t.strBatchId = @strBatchId
+							AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
+							AND cbLog.intOtherChargeItemId IS NOT NULL 
+				) Query
+	END
+	;
 
 	-- LIFO LOG
-	INSERT INTO @OtherChargeGLAccounts (
-			intItemId 
-			,intItemLocationId 
-			,intOtherChargeExpense
-			,intTransactionTypeId
-	)
-	SELECT	Query.intItemId
-			,Query.intItemLocationId
-			,intOtherChargeExpense = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_OtherCharge_Expense) 
-			,intTransactionTypeId
-	FROM	(
-				SELECT	DISTINCT 
-						intItemId = cbLog.intOtherChargeItemId
-						, intItemLocationId = ocl.intItemLocationId
-						, t.intTransactionTypeId
-				FROM	dbo.tblICInventoryTransaction t INNER JOIN tblICInventoryLIFOCostAdjustmentLog cbLog
-							ON cbLog.intInventoryTransactionId = t.intInventoryTransactionId
-							AND cbLog.intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost
-						INNER JOIN tblICItemLocation il
-							ON il.intItemLocationId = ISNULL(t.intInTransitSourceLocationId, t.intItemLocationId)
-						INNER JOIN tblICItemLocation ocl
-							ON ocl.intItemId = cbLog.intOtherChargeItemId
-							AND ocl.intLocationId = il.intLocationId
-						LEFT JOIN @OtherChargeGLAccounts OtherChargeGLAccounts
-							ON OtherChargeGLAccounts.intItemId = cbLog.intOtherChargeItemId
-							AND OtherChargeGLAccounts.intItemLocationId = ocl.intItemLocationId
-							AND OtherChargeGLAccounts.intTransactionTypeId = t.intTransactionTypeId
-				WHERE	t.strBatchId = @strBatchId
-						AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)						
-						AND cbLog.intOtherChargeItemId IS NOT NULL 
-						AND t.intItemLocationId IS NOT NULL 
-						AND OtherChargeGLAccounts.intItemId IS NULL 
-			) Query
+	IF @ysnOverrideLOBSegment = 1 
+	BEGIN 
+		INSERT INTO @OtherChargeGLAccounts (
+				intItemId 
+				,intItemLocationId 
+				,intContraInventoryId 
+				,intOtherChargeExpense
+				,intTransactionTypeId
+		)
+		SELECT	Query.intOtherChargeItemId
+				,Query.intItemLocationId
+				,intContraInventoryId = dbo.fnGetItemCommodityGLAccount(Query.intOtherChargeItemId, Query.intItemLocationId, @AccountCategory_Cost_Adjustment, Query.intCommodityId)
+				,intOtherChargeExpense = dbo.fnGetItemCommodityGLAccount(Query.intOtherChargeItemId, Query.intItemLocationId, @AccountCategory_OtherCharge_Expense, Query.intCommodityId) 
+				,intTransactionTypeId
+		FROM	(
+					SELECT	DISTINCT 
+							intOtherChargeItemId = cbLog.intOtherChargeItemId
+							, intItemLocationId = ocl.intItemLocationId
+							, t.intTransactionTypeId
+							, i.intCommodityId
+					FROM	dbo.tblICInventoryTransaction t INNER JOIN tblICInventoryLIFOCostAdjustmentLog cbLog
+								ON cbLog.intInventoryTransactionId = t.intInventoryTransactionId
+								AND cbLog.intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost
+							INNER JOIN tblICItem i 
+								ON i.intItemId = t.intItemId
+							INNER JOIN tblICItemLocation il
+								ON il.intItemLocationId = ISNULL(t.intInTransitSourceLocationId, t.intItemLocationId)
+							INNER JOIN tblICItemLocation ocl
+								ON ocl.intItemId = cbLog.intOtherChargeItemId
+								AND ocl.intLocationId = il.intLocationId
+							LEFT JOIN @OtherChargeGLAccounts OtherChargeGLAccounts
+								ON OtherChargeGLAccounts.intItemId = cbLog.intOtherChargeItemId
+								AND OtherChargeGLAccounts.intItemLocationId = ocl.intItemLocationId
+								AND OtherChargeGLAccounts.intTransactionTypeId = t.intTransactionTypeId
+					WHERE	t.strBatchId = @strBatchId
+							AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)						
+							AND cbLog.intOtherChargeItemId IS NOT NULL 
+							AND t.intItemLocationId IS NOT NULL 
+							AND OtherChargeGLAccounts.intItemId IS NULL 
+				) Query	
+	END 
+	ELSE 
+	BEGIN 
+		INSERT INTO @OtherChargeGLAccounts (
+				intItemId 
+				,intItemLocationId 
+				,intContraInventoryId 
+				,intOtherChargeExpense
+				,intTransactionTypeId
+		)
+		SELECT	Query.intOtherChargeItemId
+				,Query.intItemLocationId
+				,intContraInventoryId = dbo.fnGetItemGLAccount(Query.intOtherChargeItemId, Query.intItemLocationId, @AccountCategory_Cost_Adjustment)
+				,intOtherChargeExpense = dbo.fnGetItemGLAccount(Query.intOtherChargeItemId, Query.intItemLocationId, @AccountCategory_OtherCharge_Expense) 
+				,intTransactionTypeId
+		FROM	(
+					SELECT	DISTINCT 
+							intOtherChargeItemId = cbLog.intOtherChargeItemId
+							, intItemLocationId = ocl.intItemLocationId
+							, t.intTransactionTypeId
+					FROM	dbo.tblICInventoryTransaction t INNER JOIN tblICInventoryLIFOCostAdjustmentLog cbLog
+								ON cbLog.intInventoryTransactionId = t.intInventoryTransactionId
+								AND cbLog.intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost
+							INNER JOIN tblICItemLocation il
+								ON il.intItemLocationId = ISNULL(t.intInTransitSourceLocationId, t.intItemLocationId)
+							INNER JOIN tblICItemLocation ocl
+								ON ocl.intItemId = cbLog.intOtherChargeItemId
+								AND ocl.intLocationId = il.intLocationId
+							LEFT JOIN @OtherChargeGLAccounts OtherChargeGLAccounts
+								ON OtherChargeGLAccounts.intItemId = cbLog.intOtherChargeItemId
+								AND OtherChargeGLAccounts.intItemLocationId = ocl.intItemLocationId
+								AND OtherChargeGLAccounts.intTransactionTypeId = t.intTransactionTypeId
+					WHERE	t.strBatchId = @strBatchId
+							AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)						
+							AND cbLog.intOtherChargeItemId IS NOT NULL 
+							AND t.intItemLocationId IS NOT NULL 
+							AND OtherChargeGLAccounts.intItemId IS NULL 
+				) Query	
+	END 
 	;
 
 	-- LOT LOG 
-	INSERT INTO @OtherChargeGLAccounts (
-			intItemId 
-			,intItemLocationId 
-			,intOtherChargeExpense
-			,intTransactionTypeId
-	)
-	SELECT	Query.intItemId
-			,Query.intItemLocationId
-			,intOtherChargeExpense = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_OtherCharge_Expense) 
-			,intTransactionTypeId
-	FROM	(
-				SELECT	DISTINCT 
-						intItemId = cbLog.intOtherChargeItemId
-						, intItemLocationId = ocl.intItemLocationId
-						, t.intTransactionTypeId
-				FROM	dbo.tblICInventoryTransaction t INNER JOIN tblICInventoryLotCostAdjustmentLog cbLog
-							ON cbLog.intInventoryTransactionId = t.intInventoryTransactionId
-							AND cbLog.intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost
-						INNER JOIN tblICItemLocation il
-							ON il.intItemLocationId = ISNULL(t.intInTransitSourceLocationId, t.intItemLocationId)
-						INNER JOIN tblICItemLocation ocl
-							ON ocl.intItemId = cbLog.intOtherChargeItemId
-							AND ocl.intLocationId = il.intLocationId
-						LEFT JOIN @OtherChargeGLAccounts OtherChargeGLAccounts
-							ON OtherChargeGLAccounts.intItemId = cbLog.intOtherChargeItemId
-							AND OtherChargeGLAccounts.intItemLocationId = ocl.intItemLocationId
-							AND OtherChargeGLAccounts.intTransactionTypeId = t.intTransactionTypeId
-				WHERE	t.strBatchId = @strBatchId
-						AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
-						AND cbLog.intOtherChargeItemId IS NOT NULL 
-						AND t.intItemLocationId IS NOT NULL 
-						AND OtherChargeGLAccounts.intItemId IS NULL 
-			) Query
+	IF @ysnOverrideLOBSegment = 1 
+	BEGIN 
+		INSERT INTO @OtherChargeGLAccounts (
+				intItemId 
+				,intItemLocationId 
+				,intContraInventoryId 
+				,intOtherChargeExpense
+				,intTransactionTypeId
+		)
+		SELECT	Query.intOtherChargeItemId
+				,Query.intItemLocationId
+				,intContraInventoryId = dbo.fnGetItemCommodityGLAccount(Query.intOtherChargeItemId, Query.intItemLocationId, @AccountCategory_Cost_Adjustment, Query.intCommodityId)
+				,intOtherChargeExpense = dbo.fnGetItemCommodityGLAccount(Query.intOtherChargeItemId, Query.intItemLocationId, @AccountCategory_OtherCharge_Expense, Query.intCommodityId) 
+				,intTransactionTypeId
+		FROM	(
+					SELECT	DISTINCT 
+							intOtherChargeItemId = cbLog.intOtherChargeItemId
+							, intItemLocationId = ocl.intItemLocationId
+							, t.intTransactionTypeId
+							, i.intCommodityId
+					FROM	dbo.tblICInventoryTransaction t INNER JOIN tblICInventoryLotCostAdjustmentLog cbLog
+								ON cbLog.intInventoryTransactionId = t.intInventoryTransactionId
+								AND cbLog.intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost
+							INNER JOIN tblICItem i 
+								ON i.intItemId = t.intItemId
+							INNER JOIN tblICItemLocation il
+								ON il.intItemLocationId = ISNULL(t.intInTransitSourceLocationId, t.intItemLocationId)
+							INNER JOIN tblICItemLocation ocl
+								ON ocl.intItemId = cbLog.intOtherChargeItemId
+								AND ocl.intLocationId = il.intLocationId
+							LEFT JOIN @OtherChargeGLAccounts OtherChargeGLAccounts
+								ON OtherChargeGLAccounts.intItemId = cbLog.intOtherChargeItemId
+								AND OtherChargeGLAccounts.intItemLocationId = ocl.intItemLocationId
+								AND OtherChargeGLAccounts.intTransactionTypeId = t.intTransactionTypeId
+					WHERE	t.strBatchId = @strBatchId
+							AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
+							AND cbLog.intOtherChargeItemId IS NOT NULL 
+							AND t.intItemLocationId IS NOT NULL 
+							AND OtherChargeGLAccounts.intItemId IS NULL 
+				) Query
+	END 
+	ELSE
+	BEGIN 
+		INSERT INTO @OtherChargeGLAccounts (
+				intItemId 
+				,intItemLocationId 
+				,intContraInventoryId 
+				,intOtherChargeExpense
+				,intTransactionTypeId
+		)
+		SELECT	Query.intOtherChargeItemId
+				,Query.intItemLocationId
+				,intContraInventoryId = dbo.fnGetItemGLAccount(Query.intOtherChargeItemId, Query.intItemLocationId, @AccountCategory_Cost_Adjustment)
+				,intOtherChargeExpense = dbo.fnGetItemGLAccount(Query.intOtherChargeItemId, Query.intItemLocationId, @AccountCategory_OtherCharge_Expense) 
+				,intTransactionTypeId
+		FROM	(
+					SELECT	DISTINCT 
+							intOtherChargeItemId = cbLog.intOtherChargeItemId
+							, intItemLocationId = ocl.intItemLocationId
+							, t.intTransactionTypeId
+					FROM	dbo.tblICInventoryTransaction t INNER JOIN tblICInventoryLotCostAdjustmentLog cbLog
+								ON cbLog.intInventoryTransactionId = t.intInventoryTransactionId
+								AND cbLog.intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost
+							INNER JOIN tblICItemLocation il
+								ON il.intItemLocationId = ISNULL(t.intInTransitSourceLocationId, t.intItemLocationId)
+							INNER JOIN tblICItemLocation ocl
+								ON ocl.intItemId = cbLog.intOtherChargeItemId
+								AND ocl.intLocationId = il.intLocationId
+							LEFT JOIN @OtherChargeGLAccounts OtherChargeGLAccounts
+								ON OtherChargeGLAccounts.intItemId = cbLog.intOtherChargeItemId
+								AND OtherChargeGLAccounts.intItemLocationId = ocl.intItemLocationId
+								AND OtherChargeGLAccounts.intTransactionTypeId = t.intTransactionTypeId
+					WHERE	t.strBatchId = @strBatchId
+							AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
+							AND cbLog.intOtherChargeItemId IS NOT NULL 
+							AND t.intItemLocationId IS NOT NULL 
+							AND OtherChargeGLAccounts.intItemId IS NULL 
+				) Query
+	END 
 	;
 
 	-- ACTUAL COST LOG 
-	INSERT INTO @OtherChargeGLAccounts (
-			intItemId 
-			,intItemLocationId 
-			,intOtherChargeExpense
-			,intTransactionTypeId
-	)
-	SELECT	Query.intItemId
-			,Query.intItemLocationId
-			,intOtherChargeExpense = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_OtherCharge_Expense) 
-			,intTransactionTypeId
-	FROM	(
-				SELECT	DISTINCT 
-						intItemId = cbLog.intOtherChargeItemId
-						, intItemLocationId = ocl.intItemLocationId
-						, t.intTransactionTypeId
-				FROM	dbo.tblICInventoryTransaction t INNER JOIN tblICInventoryActualCostAdjustmentLog cbLog
-							ON cbLog.intInventoryTransactionId = t.intInventoryTransactionId
-							AND cbLog.intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost
-						INNER JOIN tblICItemLocation il
-							ON il.intItemLocationId = ISNULL(t.intInTransitSourceLocationId, t.intItemLocationId)
-						INNER JOIN tblICItemLocation ocl
-							ON ocl.intItemId = cbLog.intOtherChargeItemId
-							AND ocl.intLocationId = il.intLocationId
+	IF @ysnOverrideLOBSegment = 1 
+	BEGIN 
+		INSERT INTO @OtherChargeGLAccounts (
+				intItemId 
+				,intItemLocationId 
+				,intContraInventoryId 
+				,intOtherChargeExpense
+				,intTransactionTypeId
+		)
+		SELECT	Query.intOtherChargeItemId
+				,Query.intItemLocationId
+				,intContraInventoryId = dbo.fnGetItemCommodityGLAccount(Query.intOtherChargeItemId, Query.intItemLocationId, @AccountCategory_Cost_Adjustment, Query.intCommodityId)
+				,intOtherChargeExpense = dbo.fnGetItemCommodityGLAccount(Query.intOtherChargeItemId, Query.intItemLocationId, @AccountCategory_OtherCharge_Expense, Query.intCommodityId) 
+				,intTransactionTypeId
+		FROM	(
+					SELECT	DISTINCT 
+							intOtherChargeItemId = cbLog.intOtherChargeItemId
+							, intItemLocationId = ocl.intItemLocationId
+							, t.intTransactionTypeId
+							, i.intCommodityId
+					FROM	dbo.tblICInventoryTransaction t INNER JOIN tblICInventoryActualCostAdjustmentLog cbLog
+								ON cbLog.intInventoryTransactionId = t.intInventoryTransactionId
+								AND cbLog.intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost
+							INNER JOIN tblICItem i 
+								ON i.intItemId = t.intItemId
+							INNER JOIN tblICItemLocation il
+								ON il.intItemLocationId = ISNULL(t.intInTransitSourceLocationId, t.intItemLocationId)
+							INNER JOIN tblICItemLocation ocl
+								ON ocl.intItemId = cbLog.intOtherChargeItemId
+								AND ocl.intLocationId = il.intLocationId
 						
-						LEFT JOIN @OtherChargeGLAccounts OtherChargeGLAccounts
-							ON OtherChargeGLAccounts.intItemId = cbLog.intOtherChargeItemId
-							AND OtherChargeGLAccounts.intItemLocationId = ocl.intItemLocationId
-							AND OtherChargeGLAccounts.intTransactionTypeId = t.intTransactionTypeId
+							LEFT JOIN @OtherChargeGLAccounts OtherChargeGLAccounts
+								ON OtherChargeGLAccounts.intItemId = cbLog.intOtherChargeItemId
+								AND OtherChargeGLAccounts.intItemLocationId = ocl.intItemLocationId
+								AND OtherChargeGLAccounts.intTransactionTypeId = t.intTransactionTypeId
 
-				WHERE	t.strBatchId = @strBatchId
-						AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
-						AND cbLog.intOtherChargeItemId IS NOT NULL 
-						AND t.intItemLocationId IS NOT NULL 
-						AND OtherChargeGLAccounts.intItemId IS NULL 
-			) Query
+					WHERE	t.strBatchId = @strBatchId
+							AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
+							AND cbLog.intOtherChargeItemId IS NOT NULL 
+							AND t.intItemLocationId IS NOT NULL 
+							AND OtherChargeGLAccounts.intItemId IS NULL 
+				) Query
+	END
+	ELSE
+	BEGIN 
+		INSERT INTO @OtherChargeGLAccounts (
+				intItemId 
+				,intItemLocationId 
+				,intContraInventoryId 
+				,intOtherChargeExpense
+				,intTransactionTypeId
+		)
+		SELECT	Query.intOtherChargeItemId
+				,Query.intItemLocationId
+				,intContraInventoryId = dbo.fnGetItemGLAccount(Query.intOtherChargeItemId, Query.intItemLocationId, @AccountCategory_Cost_Adjustment)
+				,intOtherChargeExpense = dbo.fnGetItemGLAccount(Query.intOtherChargeItemId, Query.intItemLocationId, @AccountCategory_OtherCharge_Expense) 
+				,intTransactionTypeId
+		FROM	(
+					SELECT	DISTINCT 
+							intOtherChargeItemId = cbLog.intOtherChargeItemId
+							, intItemLocationId = ocl.intItemLocationId
+							, t.intTransactionTypeId
+					FROM	dbo.tblICInventoryTransaction t INNER JOIN tblICInventoryActualCostAdjustmentLog cbLog
+								ON cbLog.intInventoryTransactionId = t.intInventoryTransactionId
+								AND cbLog.intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost
+							INNER JOIN tblICItemLocation il
+								ON il.intItemLocationId = ISNULL(t.intInTransitSourceLocationId, t.intItemLocationId)
+							INNER JOIN tblICItemLocation ocl
+								ON ocl.intItemId = cbLog.intOtherChargeItemId
+								AND ocl.intLocationId = il.intLocationId
+						
+							LEFT JOIN @OtherChargeGLAccounts OtherChargeGLAccounts
+								ON OtherChargeGLAccounts.intItemId = cbLog.intOtherChargeItemId
+								AND OtherChargeGLAccounts.intItemLocationId = ocl.intItemLocationId
+								AND OtherChargeGLAccounts.intTransactionTypeId = t.intTransactionTypeId
+
+					WHERE	t.strBatchId = @strBatchId
+							AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
+							AND cbLog.intOtherChargeItemId IS NOT NULL 
+							AND t.intItemLocationId IS NOT NULL 
+							AND OtherChargeGLAccounts.intItemId IS NULL 
+				) Query
+	END
 	;
 END
 
@@ -383,6 +569,38 @@ BEGIN
 	BEGIN 
 		-- {Item} in {Location} is missing a GL account setup for {Other Charge Expense} account category.
 		EXEC uspICRaiseError 80008, @strItemNo, @strLocationName, @AccountCategory_OtherCharge_Expense;
+		RETURN -1;
+	END 
+END 
+;
+
+-- Check for missing Other Charge AP Clearing
+BEGIN 
+	SET @strItemNo = NULL
+	SET @intItemId = NULL
+
+	SELECT	TOP 1 
+			@intItemId = Item.intItemId 
+			,@strItemNo = Item.strItemNo
+	FROM	tblICItem Item INNER JOIN @OtherChargeGLAccounts ItemGLAccount
+				ON Item.intItemId = ItemGLAccount.intItemId
+	WHERE	ItemGLAccount.intContraInventoryId IS NULL 
+			AND ISNULL(Item.strType, '') IN ('Other Charge')
+
+	SELECT	TOP 1 
+			@strLocationName = c.strLocationName
+	FROM	tblICItemLocation il INNER JOIN tblSMCompanyLocation c
+				ON il.intLocationId = c.intCompanyLocationId
+			INNER JOIN @OtherChargeGLAccounts ItemGLAccount
+				ON ItemGLAccount.intItemId = il.intItemId
+				AND ItemGLAccount.intItemLocationId = il.intItemLocationId
+	WHERE	il.intItemId = @intItemId
+			AND ItemGLAccount.intContraInventoryId IS NULL 
+	
+	IF @intItemId IS NOT NULL 
+	BEGIN 
+		-- {Item} in {Location} is missing a GL account setup for {Other Charge AP Clearing} account category.
+		EXEC uspICRaiseError 80008, @strItemNo, @strLocationName, @AccountCategory_Cost_Adjustment;
 		RETURN -1;
 	END 
 END 
@@ -637,7 +855,7 @@ SELECT
 		,intOtherChargeExpense
 		,@strBatchId
 FROM	@GLAccounts
-;
+;	
 
 -- Generate the G/L Entries here: 
 WITH ForGLEntries_CTE (
@@ -647,9 +865,11 @@ WITH ForGLEntries_CTE (
 	,intTransactionId
 	,strTransactionId
 	,dblValue
+	,dblForexValue 
 	,intTransactionTypeId
 	,intCurrencyId
-	,dblExchangeRate
+	,dblExchangeRate	
+	,intForexRateTypeId
 	,intInventoryTransactionId
 	,strInventoryTransactionTypeName
 	,strTransactionForm
@@ -666,6 +886,13 @@ WITH ForGLEntries_CTE (
 	,ysnFixInventoryRoundingDiscrepancy 
 	,intSourceEntityId
 	,intCommodityId
+	,intTypeId
+	,intOtherChargeCurrencyId
+	,intOtherChargeForexRateTypeId 
+	,dblOtherChargeForexRate 
+	,strOtherCharge
+	,strItemForexRateType 
+	,strOtherChargeForexRateType 
 )
 AS
 (
@@ -676,9 +903,11 @@ AS
 			,t.intTransactionId
 			,t.strTransactionId
 			,dblValue = ROUND(ISNULL(cbLog.dblQty, 0) * ISNULL(cbLog.dblCost, 0) + ISNULL(cbLog.dblValue, 0), 2)
+			,dblForexValue = ROUND(ISNULL(cbLog.dblForexValue, 0), 2)
 			,t.intTransactionTypeId
 			,ISNULL(t.intCurrencyId, @intFunctionalCurrencyId) 
 			,t.dblExchangeRate
+			,t.intForexRateTypeId
 			,t.intInventoryTransactionId
 			,strInventoryTransactionTypeName = TransType.strName
 			,strTransactionForm = ISNULL(TransType.strTransactionForm, t.strTransactionForm) 
@@ -695,6 +924,13 @@ AS
 			,ysnFixInventoryRoundingDiscrepancy = CAST(0 AS BIT)
 			,t.intSourceEntityId
 			,i.intCommodityId
+			,intTypeId = CAST(1 AS TINYINT) 
+			,intOtherChargeCurrencyId = cbLog.intOtherChargeCurrencyId
+			,intOtherChargeForexRateTypeId = cbLog.intOtherChargeForexRateTypeId
+			,dblOtherChargeForexRate = cbLog.dblOtherChargeForexRate
+			,[strOtherCharge] = charge.strItemNo
+			,strItemForexRateType = itemCurrencyRateType.strCurrencyExchangeRateType
+			,strOtherChargeForexRateType = otherChargeCurrencyRateType.strCurrencyExchangeRateType
 	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON t.intTransactionTypeId = TransType.intTransactionTypeId
 			INNER JOIN tblICItem i 
@@ -704,6 +940,10 @@ AS
 				AND cbLog.intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost				
 			LEFT JOIN tblICItem charge
 				ON charge.intItemId = cbLog.intOtherChargeItemId
+			LEFT JOIN tblSMCurrencyExchangeRateType itemCurrencyRateType
+				ON itemCurrencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
+			LEFT JOIN tblSMCurrencyExchangeRateType otherChargeCurrencyRateType
+				ON otherChargeCurrencyRateType.intCurrencyExchangeRateTypeId = cbLog.intOtherChargeForexRateTypeId
 	WHERE	t.strBatchId = @strBatchId
 			AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
 			AND ROUND(ISNULL(cbLog.dblQty, 0) * ISNULL(cbLog.dblCost, 0) + ISNULL(cbLog.dblValue, 0), 2) <> 0 
@@ -716,9 +956,11 @@ AS
 			,t.intTransactionId
 			,t.strTransactionId
 			,dblValue = ISNULL(cbLog.dblValue, 0)
+			,dblForexValue = ROUND(ISNULL(cbLog.dblForexValue, 0), 2)
 			,t.intTransactionTypeId
 			,ISNULL(t.intCurrencyId, @intFunctionalCurrencyId) 
 			,t.dblExchangeRate
+			,t.intForexRateTypeId
 			,t.intInventoryTransactionId
 			,strInventoryTransactionTypeName = TransType.strName
 			,strTransactionForm = ISNULL(TransType.strTransactionForm, t.strTransactionForm) 
@@ -735,6 +977,13 @@ AS
 			,ysnFixInventoryRoundingDiscrepancy = CAST(0 AS BIT)
 			,t.intSourceEntityId
 			,i.intCommodityId
+			,intTypeId = CAST(1 AS TINYINT)
+			,intOtherChargeCurrencyId = cbLog.intOtherChargeCurrencyId
+			,intOtherChargeForexRateTypeId = cbLog.intOtherChargeForexRateTypeId --CAST(NULL AS INT) 
+			,dblOtherChargeForexRate = cbLog.dblOtherChargeForexRate --CAST(NULL AS NUMERIC(18, 6)) 
+			,[strOtherCharge] = charge.strItemNo
+			,strItemForexRateType = itemCurrencyRateType.strCurrencyExchangeRateType
+			,strOtherChargeForexRateType = otherChargeCurrencyRateType.strCurrencyExchangeRateType
 	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON t.intTransactionTypeId = TransType.intTransactionTypeId
 			INNER JOIN tblICItem i 
@@ -742,8 +991,12 @@ AS
 			CROSS APPLY (
 				SELECT 
 					dblValue = SUM(ROUND(ISNULL(cbLog.dblQty, 0) * ISNULL(cbLog.dblCost, 0) + ISNULL(cbLog.dblValue, 0), 2))
+					,dblForexValue = SUM(ROUND(ISNULL(cbLog.dblForexValue, 0), 2))
 					,cbLog.intInventoryCostAdjustmentTypeId 
 					,cbLog.intOtherChargeItemId
+					,cbLog.intOtherChargeCurrencyId
+					,cbLog.intOtherChargeForexRateTypeId
+					,cbLog.dblOtherChargeForexRate
 				FROM
 					tblICInventoryFIFOCostAdjustmentLog cbLog
 				WHERE
@@ -752,25 +1005,33 @@ AS
 				GROUP BY 
 					cbLog.intInventoryCostAdjustmentTypeId
 					,cbLog.intOtherChargeItemId
+					,cbLog.intOtherChargeCurrencyId
+					,cbLog.intOtherChargeForexRateTypeId
+					,cbLog.dblOtherChargeForexRate
 			) cbLog
 			LEFT JOIN tblICItem charge
 				ON charge.intItemId = cbLog.intOtherChargeItemId
+			LEFT JOIN tblSMCurrencyExchangeRateType itemCurrencyRateType
+				ON itemCurrencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
+			LEFT JOIN tblSMCurrencyExchangeRateType otherChargeCurrencyRateType
+				ON otherChargeCurrencyRateType.intCurrencyExchangeRateTypeId = cbLog.intOtherChargeForexRateTypeId
 	WHERE	t.strBatchId = @strBatchId
 			AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
 			AND ISNULL(cbLog.dblValue, 0) <> 0 
 			AND dbo.fnICGetCostAdjustmentSetup(t.intItemId, t.intItemLocationId) IN (@costAdjustmentType_SUMMARIZED, @costAdjustmentType_RETROACTIVE_SUMMARIZED)
-
-	-- LIFO DETAILED
+	-- FIFO - Offset other charge value in foreign currency. 
 	UNION ALL 
 	SELECT	t.dtmDate
 			,t.intItemId
 			,ISNULL(t.intInTransitSourceLocationId, t.intItemLocationId)
 			,t.intTransactionId
 			,t.strTransactionId
-			,dblValue = ROUND(ISNULL(cbLog.dblQty, 0) * ISNULL(cbLog.dblCost, 0) + ISNULL(cbLog.dblValue, 0), 2)
+			,dblValue = ROUND(ISNULL(cbLog.dblValue, 0), 2)
+			,dblForexValue = ROUND(ISNULL(cbLog.dblOtherChargeValue, 0), 2)
 			,t.intTransactionTypeId
-			,ISNULL(t.intCurrencyId, @intFunctionalCurrencyId) 
-			,t.dblExchangeRate
+			,ISNULL(cbLog.intOtherChargeCurrencyId, @intFunctionalCurrencyId) 
+			,cbLog.dblOtherChargeForexRate
+			,cbLog.intOtherChargeForexRateTypeId --t.intForexRateTypeId
 			,t.intInventoryTransactionId
 			,strInventoryTransactionTypeName = TransType.strName
 			,strTransactionForm = ISNULL(TransType.strTransactionForm, t.strTransactionForm) 
@@ -787,6 +1048,67 @@ AS
 			,ysnFixInventoryRoundingDiscrepancy = CAST(0 AS BIT)
 			,t.intSourceEntityId
 			,i.intCommodityId
+			,intTypeId = CAST(2 AS TINYINT)
+			,intOtherChargeCurrencyId = cbLog.intOtherChargeCurrencyId
+			,intOtherChargeForexRateTypeId = cbLog.intOtherChargeForexRateTypeId
+			,dblOtherChargeForexRate = cbLog.dblOtherChargeForexRate
+			,[strOtherCharge] = charge.strItemNo
+			,strItemForexRateType = itemCurrencyRateType.strCurrencyExchangeRateType
+			,strOtherChargeForexRateType = otherChargeCurrencyRateType.strCurrencyExchangeRateType
+	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
+				ON t.intTransactionTypeId = TransType.intTransactionTypeId
+			INNER JOIN tblICItem i 
+				ON i.intItemId = t.intItemId
+			INNER JOIN tblICInventoryFIFOCostAdjustmentLog cbLog
+				ON cbLog.intInventoryTransactionId = t.intInventoryTransactionId
+				AND cbLog.intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Value
+			LEFT JOIN tblICItem charge
+				ON charge.intItemId = cbLog.intOtherChargeItemId
+			LEFT JOIN tblSMCurrencyExchangeRateType itemCurrencyRateType
+				ON itemCurrencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
+			LEFT JOIN tblSMCurrencyExchangeRateType otherChargeCurrencyRateType
+				ON otherChargeCurrencyRateType.intCurrencyExchangeRateTypeId = cbLog.intOtherChargeForexRateTypeId
+	WHERE	t.strBatchId = @strBatchId
+			AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
+			AND (t.intCurrencyId <> cbLog.intOtherChargeCurrencyId AND cbLog.intOtherChargeCurrencyId IS NOT NULL)
+			AND cbLog.dblOtherChargeValue <> 0 
+
+	-- LIFO DETAILED
+	UNION ALL 
+	SELECT	t.dtmDate
+			,t.intItemId
+			,ISNULL(t.intInTransitSourceLocationId, t.intItemLocationId)
+			,t.intTransactionId
+			,t.strTransactionId
+			,dblValue = ROUND(ISNULL(cbLog.dblQty, 0) * ISNULL(cbLog.dblCost, 0) + ISNULL(cbLog.dblValue, 0), 2)
+			,dblForexValue = ROUND(ISNULL(cbLog.dblForexValue, 0), 2)
+			,t.intTransactionTypeId
+			,ISNULL(t.intCurrencyId, @intFunctionalCurrencyId) 
+			,t.dblExchangeRate
+			,t.intForexRateTypeId
+			,t.intInventoryTransactionId
+			,strInventoryTransactionTypeName = TransType.strName
+			,strTransactionForm = ISNULL(TransType.strTransactionForm, t.strTransactionForm) 
+			,t.intInTransitSourceLocationId
+			,i.strItemNo
+			,cbLog.intRelatedTransactionId  -- t.intRelatedTransactionId
+			,cbLog.strRelatedTransactionId --t.strRelatedTransactionId
+			,t.strBatchId
+			,t.intLotId 
+			,t.intFobPointId
+			,t.dblForexRate
+			,cbLog.intInventoryCostAdjustmentTypeId
+			,charge.intItemId
+			,ysnFixInventoryRoundingDiscrepancy = CAST(0 AS BIT)
+			,t.intSourceEntityId
+			,i.intCommodityId
+			,intTypeId = CAST(1 AS TINYINT)
+			,intOtherChargeCurrencyId = cbLog.intOtherChargeCurrencyId
+			,intOtherChargeForexRateTypeId = cbLog.intOtherChargeForexRateTypeId
+			,dblOtherChargeForexRate = cbLog.dblOtherChargeForexRate
+			,[strOtherCharge] = charge.strItemNo
+			,strItemForexRateType = itemCurrencyRateType.strCurrencyExchangeRateType
+			,strOtherChargeForexRateType = otherChargeCurrencyRateType.strCurrencyExchangeRateType
 	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON t.intTransactionTypeId = TransType.intTransactionTypeId
 			INNER JOIN tblICItem i 
@@ -796,6 +1118,10 @@ AS
 				AND cbLog.intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost
 			LEFT JOIN tblICItem charge
 				ON charge.intItemId = cbLog.intOtherChargeItemId
+			LEFT JOIN tblSMCurrencyExchangeRateType itemCurrencyRateType
+				ON itemCurrencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
+			LEFT JOIN tblSMCurrencyExchangeRateType otherChargeCurrencyRateType
+				ON otherChargeCurrencyRateType.intCurrencyExchangeRateTypeId = cbLog.intOtherChargeForexRateTypeId
 	WHERE	t.strBatchId = @strBatchId
 			AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
 			AND ROUND(ISNULL(cbLog.dblQty, 0) * ISNULL(cbLog.dblCost, 0) + ISNULL(cbLog.dblValue, 0), 2) <> 0 
@@ -808,9 +1134,11 @@ AS
 			,t.intTransactionId
 			,t.strTransactionId
 			,dblValue = ISNULL(cbLog.dblValue, 0)
+			,dblForexValue = ROUND(ISNULL(cbLog.dblForexValue, 0), 2)
 			,t.intTransactionTypeId
 			,ISNULL(t.intCurrencyId, @intFunctionalCurrencyId) 
 			,t.dblExchangeRate
+			,t.intForexRateTypeId
 			,t.intInventoryTransactionId
 			,strInventoryTransactionTypeName = TransType.strName
 			,strTransactionForm = ISNULL(TransType.strTransactionForm, t.strTransactionForm) 
@@ -827,6 +1155,13 @@ AS
 			,ysnFixInventoryRoundingDiscrepancy = CAST(0 AS BIT)
 			,t.intSourceEntityId
 			,i.intCommodityId
+			,intTypeId = CAST(1 AS TINYINT)
+			,intOtherChargeCurrencyId = cbLog.intOtherChargeCurrencyId
+			,intOtherChargeForexRateTypeId = cbLog.intOtherChargeForexRateTypeId --CAST(NULL AS INT) 
+			,dblOtherChargeForexRate = cbLog.dblOtherChargeForexRate --CAST(NULL AS NUMERIC(18, 6)) 
+			,[strOtherCharge] = charge.strItemNo
+			,strItemForexRateType = itemCurrencyRateType.strCurrencyExchangeRateType
+			,strOtherChargeForexRateType = otherChargeCurrencyRateType.strCurrencyExchangeRateType
 	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON t.intTransactionTypeId = TransType.intTransactionTypeId
 			INNER JOIN tblICItem i 
@@ -834,8 +1169,12 @@ AS
 			CROSS APPLY(
 				SELECT 
 					dblValue = SUM(ROUND(ISNULL(cbLog.dblQty, 0) * ISNULL(cbLog.dblCost, 0) + ISNULL(cbLog.dblValue, 0), 2))
+					,dblForexValue = SUM(ROUND(ISNULL(cbLog.dblForexValue, 0), 2)) 
 					,cbLog.intInventoryCostAdjustmentTypeId
 					,cbLog.intOtherChargeItemId
+					,cbLog.intOtherChargeCurrencyId
+					,cbLog.intOtherChargeForexRateTypeId
+					,cbLog.dblOtherChargeForexRate
 				FROM 
 					tblICInventoryLIFOCostAdjustmentLog cbLog
 				WHERE
@@ -844,25 +1183,33 @@ AS
 				GROUP BY 
 					cbLog.intInventoryCostAdjustmentTypeId
 					,cbLog.intOtherChargeItemId
+					,cbLog.intOtherChargeCurrencyId
+					,cbLog.intOtherChargeForexRateTypeId
+					,cbLog.dblOtherChargeForexRate
 			) cbLog
 			LEFT JOIN tblICItem charge
 				ON charge.intItemId = cbLog.intOtherChargeItemId
+			LEFT JOIN tblSMCurrencyExchangeRateType itemCurrencyRateType
+				ON itemCurrencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
+			LEFT JOIN tblSMCurrencyExchangeRateType otherChargeCurrencyRateType
+				ON otherChargeCurrencyRateType.intCurrencyExchangeRateTypeId = cbLog.intOtherChargeForexRateTypeId
 	WHERE	t.strBatchId = @strBatchId
 			AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
 			AND ISNULL(cbLog.dblValue, 0) <> 0 
 			AND dbo.fnICGetCostAdjustmentSetup(t.intItemId, t.intItemLocationId) IN (@costAdjustmentType_SUMMARIZED, @costAdjustmentType_RETROACTIVE_SUMMARIZED)
-
-	-- LOT DETAILED
+	-- LIFO - Offset other charge value in foreign currency. 
 	UNION ALL 
 	SELECT	t.dtmDate
 			,t.intItemId
 			,ISNULL(t.intInTransitSourceLocationId, t.intItemLocationId)
 			,t.intTransactionId
 			,t.strTransactionId
-			,dblValue = ROUND(ISNULL(cbLog.dblQty, 0) * ISNULL(cbLog.dblCost, 0) + ISNULL(cbLog.dblValue, 0), 2)
+			,dblValue = ROUND(ISNULL(cbLog.dblValue, 0), 2)
+			,dblForexValue = ROUND(ISNULL(cbLog.dblOtherChargeValue, 0), 2)
 			,t.intTransactionTypeId
-			,ISNULL(t.intCurrencyId, @intFunctionalCurrencyId) 
-			,t.dblExchangeRate
+			,ISNULL(cbLog.intOtherChargeCurrencyId, @intFunctionalCurrencyId) 
+			,cbLog.dblOtherChargeForexRate
+			,cbLog.intOtherChargeForexRateTypeId --t.intForexRateTypeId
 			,t.intInventoryTransactionId
 			,strInventoryTransactionTypeName = TransType.strName
 			,strTransactionForm = ISNULL(TransType.strTransactionForm, t.strTransactionForm) 
@@ -879,6 +1226,67 @@ AS
 			,ysnFixInventoryRoundingDiscrepancy = CAST(0 AS BIT)
 			,t.intSourceEntityId
 			,i.intCommodityId
+			,intTypeId = CAST(2 AS TINYINT)
+			,intOtherChargeCurrencyId = cbLog.intOtherChargeCurrencyId
+			,intOtherChargeForexRateTypeId = cbLog.intOtherChargeForexRateTypeId
+			,dblOtherChargeForexRate = cbLog.dblOtherChargeForexRate
+			,[strOtherCharge] = charge.strItemNo
+			,strItemForexRateType = itemCurrencyRateType.strCurrencyExchangeRateType
+			,strOtherChargeForexRateType = otherChargeCurrencyRateType.strCurrencyExchangeRateType
+	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
+				ON t.intTransactionTypeId = TransType.intTransactionTypeId
+			INNER JOIN tblICItem i 
+				ON i.intItemId = t.intItemId
+			INNER JOIN tblICInventoryLIFOCostAdjustmentLog cbLog
+				ON cbLog.intInventoryTransactionId = t.intInventoryTransactionId
+				AND cbLog.intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Value
+			LEFT JOIN tblICItem charge
+				ON charge.intItemId = cbLog.intOtherChargeItemId
+			LEFT JOIN tblSMCurrencyExchangeRateType itemCurrencyRateType
+				ON itemCurrencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
+			LEFT JOIN tblSMCurrencyExchangeRateType otherChargeCurrencyRateType
+				ON otherChargeCurrencyRateType.intCurrencyExchangeRateTypeId = cbLog.intOtherChargeForexRateTypeId
+	WHERE	t.strBatchId = @strBatchId
+			AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
+			AND (t.intCurrencyId <> cbLog.intOtherChargeCurrencyId AND cbLog.intOtherChargeCurrencyId IS NOT NULL)
+			AND cbLog.dblOtherChargeValue <> 0 
+
+	-- LOT DETAILED
+	UNION ALL 
+	SELECT	t.dtmDate
+			,t.intItemId
+			,ISNULL(t.intInTransitSourceLocationId, t.intItemLocationId)
+			,t.intTransactionId
+			,t.strTransactionId
+			,dblValue = ROUND(ISNULL(cbLog.dblQty, 0) * ISNULL(cbLog.dblCost, 0) + ISNULL(cbLog.dblValue, 0), 2)
+			,dblForexValue = ROUND(ISNULL(cbLog.dblForexValue, 0), 2)
+			,t.intTransactionTypeId
+			,ISNULL(t.intCurrencyId, @intFunctionalCurrencyId) 
+			,t.dblExchangeRate
+			,t.intForexRateTypeId
+			,t.intInventoryTransactionId
+			,strInventoryTransactionTypeName = TransType.strName
+			,strTransactionForm = ISNULL(TransType.strTransactionForm, t.strTransactionForm) 
+			,t.intInTransitSourceLocationId
+			,i.strItemNo
+			,cbLog.intRelatedTransactionId  -- t.intRelatedTransactionId
+			,cbLog.strRelatedTransactionId --t.strRelatedTransactionId
+			,t.strBatchId
+			,t.intLotId 
+			,t.intFobPointId
+			,t.dblForexRate
+			,cbLog.intInventoryCostAdjustmentTypeId
+			,charge.intItemId
+			,ysnFixInventoryRoundingDiscrepancy = CAST(0 AS BIT)
+			,t.intSourceEntityId
+			,i.intCommodityId
+			,intTypeId = CAST(1 AS TINYINT)
+			,intOtherChargeCurrencyId = cbLog.intOtherChargeCurrencyId
+			,intOtherChargeForexRateTypeId = cbLog.intOtherChargeForexRateTypeId
+			,dblOtherChargeForexRate = cbLog.dblOtherChargeForexRate
+			,[strOtherCharge] = charge.strItemNo
+			,strItemForexRateType = itemCurrencyRateType.strCurrencyExchangeRateType
+			,strOtherChargeForexRateType = otherChargeCurrencyRateType.strCurrencyExchangeRateType
 	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON t.intTransactionTypeId = TransType.intTransactionTypeId
 			INNER JOIN tblICItem i 
@@ -888,6 +1296,10 @@ AS
 				AND cbLog.intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost
 			LEFT JOIN tblICItem charge
 				ON charge.intItemId = cbLog.intOtherChargeItemId
+			LEFT JOIN tblSMCurrencyExchangeRateType itemCurrencyRateType
+				ON itemCurrencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
+			LEFT JOIN tblSMCurrencyExchangeRateType otherChargeCurrencyRateType
+				ON otherChargeCurrencyRateType.intCurrencyExchangeRateTypeId = cbLog.intOtherChargeForexRateTypeId
 	WHERE	t.strBatchId = @strBatchId
 			AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
 			AND ROUND(ISNULL(cbLog.dblQty, 0) * ISNULL(cbLog.dblCost, 0) + ISNULL(cbLog.dblValue, 0), 2) <> 0 
@@ -900,9 +1312,11 @@ AS
 			,t.intTransactionId
 			,t.strTransactionId
 			,dblValue = ISNULL(cbLog.dblValue, 0)
+			,dblForexValue = ROUND(ISNULL(cbLog.dblForexValue, 0), 2)
 			,t.intTransactionTypeId
 			,ISNULL(t.intCurrencyId, @intFunctionalCurrencyId) 
 			,t.dblExchangeRate
+			,t.intForexRateTypeId
 			,t.intInventoryTransactionId
 			,strInventoryTransactionTypeName = TransType.strName
 			,strTransactionForm = ISNULL(TransType.strTransactionForm, t.strTransactionForm) 
@@ -919,6 +1333,13 @@ AS
 			,ysnFixInventoryRoundingDiscrepancy = CAST(0 AS BIT)
 			,t.intSourceEntityId
 			,i.intCommodityId
+			,intTypeId = CAST(1 AS TINYINT)
+			,intOtherChargeCurrencyId = cbLog.intOtherChargeCurrencyId
+			,intOtherChargeForexRateTypeId = CAST(NULL AS INT) 
+			,dblOtherChargeForexRate = CAST(NULL AS NUMERIC(18, 6)) 
+			,[strOtherCharge] = charge.strItemNo
+			,strItemForexRateType = itemCurrencyRateType.strCurrencyExchangeRateType
+			,strOtherChargeForexRateType = otherChargeCurrencyRateType.strCurrencyExchangeRateType
 	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON t.intTransactionTypeId = TransType.intTransactionTypeId
 			INNER JOIN tblICItem i 
@@ -926,8 +1347,12 @@ AS
 			CROSS APPLY(
 				SELECT 
 					dblValue = SUM(ROUND(ISNULL(cbLog.dblQty, 0) * ISNULL(cbLog.dblCost, 0) + ISNULL(cbLog.dblValue, 0), 2))
+					,dblForexValue = SUM(ROUND(ISNULL(cbLog.dblForexValue, 0), 2)) 
 					,cbLog.intInventoryCostAdjustmentTypeId
 					,cbLog.intOtherChargeItemId
+					,cbLog.intOtherChargeCurrencyId
+					,cbLog.intOtherChargeForexRateTypeId
+					,cbLog.dblOtherChargeForexRate
 				FROM 
 					tblICInventoryLotCostAdjustmentLog cbLog
 				WHERE
@@ -936,25 +1361,33 @@ AS
 				GROUP BY
 					cbLog.intInventoryCostAdjustmentTypeId
 					,cbLog.intOtherChargeItemId
+					,cbLog.intOtherChargeCurrencyId
+					,cbLog.intOtherChargeForexRateTypeId
+					,cbLog.dblOtherChargeForexRate
 			) cbLog
 			LEFT JOIN tblICItem charge
 				ON charge.intItemId = cbLog.intOtherChargeItemId
+			LEFT JOIN tblSMCurrencyExchangeRateType itemCurrencyRateType
+				ON itemCurrencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
+			LEFT JOIN tblSMCurrencyExchangeRateType otherChargeCurrencyRateType
+				ON otherChargeCurrencyRateType.intCurrencyExchangeRateTypeId = cbLog.intOtherChargeForexRateTypeId
 	WHERE	t.strBatchId = @strBatchId
 			AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
 			AND ISNULL(cbLog.dblValue, 0) <> 0 
 			AND dbo.fnICGetCostAdjustmentSetup(t.intItemId, t.intItemLocationId) IN (@costAdjustmentType_SUMMARIZED, @costAdjustmentType_RETROACTIVE_SUMMARIZED) 
-
-	-- ACTUAL COST DETAILED
+	-- LOT COSTING - Offset other charge value in foreign currency. 
 	UNION ALL 
 	SELECT	t.dtmDate
 			,t.intItemId
 			,ISNULL(t.intInTransitSourceLocationId, t.intItemLocationId)
 			,t.intTransactionId
 			,t.strTransactionId
-			,dblValue = ROUND(ISNULL(cbLog.dblQty, 0) * ISNULL(cbLog.dblCost, 0) + ISNULL(cbLog.dblValue, 0), 2)
+			,dblValue = ROUND(ISNULL(cbLog.dblValue, 0), 2)
+			,dblForexValue = ROUND(ISNULL(cbLog.dblOtherChargeValue, 0), 2)
 			,t.intTransactionTypeId
-			,ISNULL(t.intCurrencyId, @intFunctionalCurrencyId) 
-			,t.dblExchangeRate
+			,ISNULL(cbLog.intOtherChargeCurrencyId, @intFunctionalCurrencyId) 
+			,cbLog.dblOtherChargeForexRate
+			,cbLog.intOtherChargeForexRateTypeId --t.intForexRateTypeId
 			,t.intInventoryTransactionId
 			,strInventoryTransactionTypeName = TransType.strName
 			,strTransactionForm = ISNULL(TransType.strTransactionForm, t.strTransactionForm) 
@@ -971,6 +1404,67 @@ AS
 			,ysnFixInventoryRoundingDiscrepancy = CAST(0 AS BIT)
 			,t.intSourceEntityId
 			,i.intCommodityId
+			,intTypeId = CAST(2 AS TINYINT)
+			,intOtherChargeCurrencyId = cbLog.intOtherChargeCurrencyId
+			,intOtherChargeForexRateTypeId = cbLog.intOtherChargeForexRateTypeId
+			,dblOtherChargeForexRate = cbLog.dblOtherChargeForexRate
+			,[strOtherCharge] = charge.strItemNo
+			,strItemForexRateType = itemCurrencyRateType.strCurrencyExchangeRateType
+			,strOtherChargeForexRateType = otherChargeCurrencyRateType.strCurrencyExchangeRateType
+	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
+				ON t.intTransactionTypeId = TransType.intTransactionTypeId
+			INNER JOIN tblICItem i 
+				ON i.intItemId = t.intItemId
+			INNER JOIN tblICInventoryLotCostAdjustmentLog cbLog
+				ON cbLog.intInventoryTransactionId = t.intInventoryTransactionId
+				AND cbLog.intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Value
+			LEFT JOIN tblICItem charge
+				ON charge.intItemId = cbLog.intOtherChargeItemId
+			LEFT JOIN tblSMCurrencyExchangeRateType itemCurrencyRateType
+				ON itemCurrencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
+			LEFT JOIN tblSMCurrencyExchangeRateType otherChargeCurrencyRateType
+				ON otherChargeCurrencyRateType.intCurrencyExchangeRateTypeId = cbLog.intOtherChargeForexRateTypeId
+	WHERE	t.strBatchId = @strBatchId
+			AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
+			AND (t.intCurrencyId <> cbLog.intOtherChargeCurrencyId AND cbLog.intOtherChargeCurrencyId IS NOT NULL)
+			AND cbLog.dblOtherChargeValue <> 0 
+
+	-- ACTUAL COST DETAILED
+	UNION ALL 
+	SELECT	t.dtmDate
+			,t.intItemId
+			,ISNULL(t.intInTransitSourceLocationId, t.intItemLocationId)
+			,t.intTransactionId
+			,t.strTransactionId
+			,dblValue = ROUND(ISNULL(cbLog.dblQty, 0) * ISNULL(cbLog.dblCost, 0) + ISNULL(cbLog.dblValue, 0), 2)
+			,dblForexValue = ROUND(ISNULL(cbLog.dblForexValue, 0), 2)
+			,t.intTransactionTypeId
+			,ISNULL(t.intCurrencyId, @intFunctionalCurrencyId) 
+			,t.dblExchangeRate
+			,t.intForexRateTypeId
+			,t.intInventoryTransactionId
+			,strInventoryTransactionTypeName = TransType.strName
+			,strTransactionForm = ISNULL(TransType.strTransactionForm, t.strTransactionForm) 
+			,t.intInTransitSourceLocationId
+			,i.strItemNo
+			,cbLog.intRelatedTransactionId  -- t.intRelatedTransactionId
+			,cbLog.strRelatedTransactionId --t.strRelatedTransactionId
+			,t.strBatchId
+			,t.intLotId 
+			,t.intFobPointId
+			,t.dblForexRate
+			,cbLog.intInventoryCostAdjustmentTypeId
+			,charge.intItemId
+			,ysnFixInventoryRoundingDiscrepancy = CAST(0 AS BIT)
+			,t.intSourceEntityId
+			,i.intCommodityId
+			,intTypeId = CAST(1 AS TINYINT)
+			,intOtherChargeCurrencyId = cbLog.intOtherChargeCurrencyId
+			,intOtherChargeForexRateTypeId = cbLog.intOtherChargeForexRateTypeId
+			,dblOtherChargeForexRate = cbLog.dblOtherChargeForexRate
+			,[strOtherCharge] = charge.strItemNo
+			,strItemForexRateType = itemCurrencyRateType.strCurrencyExchangeRateType
+			,strOtherChargeForexRateType = otherChargeCurrencyRateType.strCurrencyExchangeRateType
 	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON t.intTransactionTypeId = TransType.intTransactionTypeId
 			INNER JOIN tblICItem i 
@@ -980,6 +1474,10 @@ AS
 				AND cbLog.intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost
 			LEFT JOIN tblICItem charge
 				ON charge.intItemId = cbLog.intOtherChargeItemId
+			LEFT JOIN tblSMCurrencyExchangeRateType itemCurrencyRateType
+				ON itemCurrencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
+			LEFT JOIN tblSMCurrencyExchangeRateType otherChargeCurrencyRateType
+				ON otherChargeCurrencyRateType.intCurrencyExchangeRateTypeId = cbLog.intOtherChargeForexRateTypeId
 	WHERE	t.strBatchId = @strBatchId
 			AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
 			AND ROUND(ISNULL(cbLog.dblQty, 0) * ISNULL(cbLog.dblCost, 0) + ISNULL(cbLog.dblValue, 0), 2) <> 0 
@@ -992,9 +1490,11 @@ AS
 			,t.intTransactionId
 			,t.strTransactionId
 			,dblValue = ISNULL(cbLog.dblValue, 0)
+			,dblForexValue = ROUND(ISNULL(cbLog.dblForexValue, 0), 2)
 			,t.intTransactionTypeId
 			,ISNULL(t.intCurrencyId, @intFunctionalCurrencyId) 
 			,t.dblExchangeRate
+			,t.intForexRateTypeId
 			,t.intInventoryTransactionId
 			,strInventoryTransactionTypeName = TransType.strName
 			,strTransactionForm = ISNULL(TransType.strTransactionForm, t.strTransactionForm) 
@@ -1011,6 +1511,13 @@ AS
 			,ysnFixInventoryRoundingDiscrepancy = CAST(0 AS BIT)
 			,t.intSourceEntityId
 			,i.intCommodityId
+			,intTypeId = CAST(1 AS TINYINT)
+			,intOtherChargeCurrencyId = cbLog.intOtherChargeCurrencyId
+			,intOtherChargeForexRateTypeId = CAST(NULL AS INT) 
+			,dblOtherChargeForexRate = CAST(NULL AS NUMERIC(18, 6)) 
+			,[strOtherCharge] = charge.strItemNo
+			,strItemForexRateType = itemCurrencyRateType.strCurrencyExchangeRateType
+			,strOtherChargeForexRateType = otherChargeCurrencyRateType.strCurrencyExchangeRateType
 	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON t.intTransactionTypeId = TransType.intTransactionTypeId
 			INNER JOIN tblICItem i 
@@ -1018,8 +1525,12 @@ AS
 			CROSS APPLY (
 				SELECT 
 					dblValue = SUM(ROUND(ISNULL(cbLog.dblQty, 0) * ISNULL(cbLog.dblCost, 0) + ISNULL(cbLog.dblValue, 0), 2))
+					,dblForexValue = SUM(ROUND(ISNULL(cbLog.dblForexValue, 0), 2)) 
 					,cbLog.intInventoryCostAdjustmentTypeId
 					,cbLog.intOtherChargeItemId
+					,cbLog.intOtherChargeCurrencyId
+					,cbLog.intOtherChargeForexRateTypeId
+					,cbLog.dblOtherChargeForexRate
 				FROM
 					tblICInventoryActualCostAdjustmentLog cbLog
 				WHERE
@@ -1028,13 +1539,73 @@ AS
 				GROUP BY 
 					cbLog.intInventoryCostAdjustmentTypeId
 					,cbLog.intOtherChargeItemId
+					,cbLog.intOtherChargeCurrencyId
+					,cbLog.intOtherChargeForexRateTypeId
+					,cbLog.dblOtherChargeForexRate
 			) cbLog 
 			LEFT JOIN tblICItem charge
 				ON charge.intItemId = cbLog.intOtherChargeItemId
+			LEFT JOIN tblSMCurrencyExchangeRateType itemCurrencyRateType
+				ON itemCurrencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
+			LEFT JOIN tblSMCurrencyExchangeRateType otherChargeCurrencyRateType
+				ON otherChargeCurrencyRateType.intCurrencyExchangeRateTypeId = cbLog.intOtherChargeForexRateTypeId
 	WHERE	t.strBatchId = @strBatchId
 			AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
 			AND ISNULL(cbLog.dblValue, 0) <> 0 
-			AND dbo.fnICGetCostAdjustmentSetup(t.intItemId, t.intItemLocationId) IN (@costAdjustmentType_SUMMARIZED, @costAdjustmentType_RETROACTIVE_SUMMARIZED)
+			AND dbo.fnICGetCostAdjustmentSetup(t.intItemId, t.intItemLocationId) = @costAdjustmentType_SUMMARIZED
+	-- LOT COSTING - Offset other charge value in foreign currency. 
+	UNION ALL 
+	SELECT	t.dtmDate
+			,t.intItemId
+			,ISNULL(t.intInTransitSourceLocationId, t.intItemLocationId)
+			,t.intTransactionId
+			,t.strTransactionId
+			,dblValue = ROUND(ISNULL(cbLog.dblValue, 0), 2)
+			,dblForexValue = ROUND(ISNULL(cbLog.dblOtherChargeValue, 0), 2)
+			,t.intTransactionTypeId
+			,ISNULL(cbLog.intOtherChargeCurrencyId, @intFunctionalCurrencyId) 
+			,cbLog.dblOtherChargeForexRate
+			,cbLog.intOtherChargeForexRateTypeId --t.intForexRateTypeId
+			,t.intInventoryTransactionId
+			,strInventoryTransactionTypeName = TransType.strName
+			,strTransactionForm = ISNULL(TransType.strTransactionForm, t.strTransactionForm) 
+			,t.intInTransitSourceLocationId
+			,i.strItemNo
+			,cbLog.intRelatedTransactionId  -- t.intRelatedTransactionId
+			,cbLog.strRelatedTransactionId --t.strRelatedTransactionId
+			,t.strBatchId
+			,t.intLotId 
+			,t.intFobPointId
+			,t.dblForexRate
+			,cbLog.intInventoryCostAdjustmentTypeId
+			,charge.intItemId
+			,ysnFixInventoryRoundingDiscrepancy = CAST(0 AS BIT)
+			,t.intSourceEntityId
+			,i.intCommodityId
+			,intTypeId = CAST(2 AS TINYINT)
+			,intOtherChargeCurrencyId = cbLog.intOtherChargeCurrencyId
+			,intOtherChargeForexRateTypeId = cbLog.intOtherChargeForexRateTypeId
+			,dblOtherChargeForexRate = cbLog.dblOtherChargeForexRate
+			,[strOtherCharge] = charge.strItemNo
+			,strItemForexRateType = itemCurrencyRateType.strCurrencyExchangeRateType
+			,strOtherChargeForexRateType = otherChargeCurrencyRateType.strCurrencyExchangeRateType
+	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
+				ON t.intTransactionTypeId = TransType.intTransactionTypeId
+			INNER JOIN tblICItem i 
+				ON i.intItemId = t.intItemId
+			INNER JOIN tblICInventoryActualCostAdjustmentLog cbLog
+				ON cbLog.intInventoryTransactionId = t.intInventoryTransactionId
+				AND cbLog.intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Value
+			LEFT JOIN tblICItem charge
+				ON charge.intItemId = cbLog.intOtherChargeItemId
+			LEFT JOIN tblSMCurrencyExchangeRateType itemCurrencyRateType
+				ON itemCurrencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
+			LEFT JOIN tblSMCurrencyExchangeRateType otherChargeCurrencyRateType
+				ON otherChargeCurrencyRateType.intCurrencyExchangeRateTypeId = cbLog.intOtherChargeForexRateTypeId
+	WHERE	t.strBatchId = @strBatchId
+			AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
+			AND (t.intCurrencyId <> cbLog.intOtherChargeCurrencyId AND cbLog.intOtherChargeCurrencyId IS NOT NULL)
+			AND cbLog.dblOtherChargeValue <> 0 
 
 	-- AUTO VARIANCE 
 	UNION ALL 
@@ -1044,9 +1615,11 @@ AS
 			,t.intTransactionId
 			,t.strTransactionId
 			,dblValue = ROUND(ISNULL(t.dblQty, 0) * ISNULL(t.dblCost, 0) + ISNULL(t.dblValue, 0), 2)
+			,dblForexValue = ROUND(ISNULL(t.dblForexValue, 0), 2)
 			,t.intTransactionTypeId
 			,ISNULL(t.intCurrencyId, @intFunctionalCurrencyId) 
 			,t.dblExchangeRate
+			,t.intForexRateTypeId
 			,t.intInventoryTransactionId
 			,strInventoryTransactionTypeName = TransType.strName
 			,strTransactionForm = ISNULL(TransType.strTransactionForm, t.strTransactionForm) 
@@ -1063,10 +1636,19 @@ AS
 			,ysnFixInventoryRoundingDiscrepancy = CAST(0 AS BIT)
 			,t.intSourceEntityId
 			,i.intCommodityId
+			,intTypeId = CAST(1 AS TINYINT)
+			,intOtherChargeCurrencyId = CAST(NULL AS INT) 
+			,intOtherChargeForexRateTypeId = CAST(NULL AS INT) 
+			,dblOtherChargeForexRate = CAST(NULL AS NUMERIC(18, 6)) 
+			,[strOtherCharge] = CAST(NULL AS NVARCHAR(50)) 
+			,strItemForexRateType = itemCurrencyRateType.strCurrencyExchangeRateType
+			,strOtherChargeForexRateType = CAST(NULL AS NVARCHAR(50)) 
 	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON t.intTransactionTypeId = TransType.intTransactionTypeId
 			INNER JOIN tblICItem i 
 				ON i.intItemId = t.intItemId
+			LEFT JOIN tblSMCurrencyExchangeRateType itemCurrencyRateType
+				ON itemCurrencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId			
 	WHERE	t.strBatchId = @strBatchId
 			AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
 			AND t.intTransactionTypeId = @INV_TRANS_TYPE_Auto_Variance
@@ -1084,6 +1666,8 @@ INSERT INTO @GLEntries (
 	,strReference
 	,intCurrencyId
 	,dblExchangeRate
+	,intCurrencyExchangeRateTypeId
+	,strRateType				
 	,dtmDateEntered
 	,dtmTransactionDate
 	,strJournalLineDescription
@@ -1106,13 +1690,14 @@ INSERT INTO @GLEntries (
 	,intSourceEntityId
 	,intCommodityId
 )
-
 /*-----------------------------------------------------------------------------------
-  GL Entries for Adjust Value 
-  Debit	....... Inventory
-  Credit	..................... Cost Adjustment (Item's AP Clearing) 
-  -- OR -- 
-  Credit	..................... Other Charge Expense 
+  GL Entries to offset the foreign currency
+  
+  Debit	....... Inventory (Charge Currency)
+  Credit	..................... AP Clearing (Charge Currency)
+
+  Reversal:
+  Credit	..................... Inventory (Charge Currency)
 -----------------------------------------------------------------------------------*/
 SELECT	
 		dtmDate						= ForGLEntries_CTE.dtmDate
@@ -1130,11 +1715,13 @@ SELECT
 									) 
 		,strCode					= 'ICA' 
 		,strReference				= '1' 
-		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
-		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,intCurrencyId				= ForGLEntries_CTE.intOtherChargeCurrencyId --ForGLEntries_CTE.intCurrencyId
+		,dblExchangeRate			= ForGLEntries_CTE.dblOtherChargeForexRate --ForGLEntries_CTE.dblExchangeRate
+		,intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intOtherChargeForexRateTypeId --ForGLEntries_CTE.intForexRateTypeId
+		,strRateType				= ForGLEntries_CTE.strOtherChargeForexRateType
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
-        ,strJournalLineDescription  = '' 
+        ,strJournalLineDescription  = ForGLEntries_CTE.strOtherCharge
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
 		,ysnIsUnposted				= 0 --CASE WHEN ISNULL(@ysnPost, 0) = 1 THEN 0 ELSE 1 END 
 		,intUserId					= @intEntityUserSecurityId
@@ -1145,9 +1732,183 @@ SELECT
 		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= NULL 
+		,dblDebitForeign			= DebitForeign.Value 
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= NULL 
+		,dblCreditForeign			= CreditForeign.Value 
+		,dblCreditReport			= NULL 
+		,dblReportingRate			= NULL 
+		,dblForeignRate				= ForGLEntries_CTE.dblOtherChargeForexRate --ForGLEntries_CTE.dblForexRate 
+		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId 
+		,intCommodityId				= ForGLEntries_CTE.intCommodityId
+FROM	ForGLEntries_CTE
+		INNER JOIN @GLAccounts GLAccounts
+			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
+			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId 
+			AND ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
+		INNER JOIN dbo.tblGLAccount
+			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
+		CROSS APPLY dbo.fnGetDebit(dblValue) Debit
+		CROSS APPLY dbo.fnGetCredit(dblValue) Credit
+		OUTER APPLY dbo.fnGetDebit(dblForexValue) DebitForeign
+		OUTER APPLY dbo.fnGetCredit(dblForexValue) CreditForeign
+WHERE	intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Value
+		AND intTypeId = 2
+UNION ALL 
+SELECT	
+		dtmDate						= ForGLEntries_CTE.dtmDate
+		,strBatchId					= @strBatchId
+		,intAccountId				= tblGLAccount.intAccountId
+		,dblDebit					= Credit.Value
+		,dblCredit					= Debit.Value
+		,dblDebitUnit				= 0
+		,dblCreditUnit				= 0
+		,strDescription				= dbo.fnCreateCostAdjGLDescription(
+										@strGLDescription
+										,tblGLAccount.strDescription
+										,ForGLEntries_CTE.strItemNo
+										,ForGLEntries_CTE.strRelatedTransactionId
+									)
+		,strCode					= 'ICA' 
+		,strReference				= '2' 
+		,intCurrencyId				= ForGLEntries_CTE.intOtherChargeCurrencyId --ForGLEntries_CTE.intCurrencyId
+		,dblExchangeRate			= ForGLEntries_CTE.dblOtherChargeForexRate --ForGLEntries_CTE.dblExchangeRate
+		,intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intOtherChargeForexRateTypeId --ForGLEntries_CTE.intForexRateTypeId
+		,strRateType				= ForGLEntries_CTE.strOtherChargeForexRateType
+		,dtmDateEntered				= GETDATE()
+		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
+        ,strJournalLineDescription  = ForGLEntries_CTE.strOtherCharge 
+		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
+		,ysnIsUnposted				= 0 -- CASE WHEN ISNULL(@ysnPost, 0) = 1 THEN 0 ELSE 1 END 
+		,intUserId					= @intEntityUserSecurityId
+		,intEntityId				= @intEntityUserSecurityId 
+		,strTransactionId			= ForGLEntries_CTE.strTransactionId
+		,intTransactionId			= ForGLEntries_CTE.intTransactionId
+		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
+		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
+		,strModuleName				= @ModuleName
+		,intConcurrencyId			= 1
+		,dblDebitForeign			= CreditForeign.Value 
+		,dblDebitReport				= NULL 
+		,dblCreditForeign			= DebitForeign.Value
+		,dblCreditReport			= NULL 
+		,dblReportingRate			= NULL 
+		,dblForeignRate				= ForGLEntries_CTE.dblOtherChargeForexRate --ForGLEntries_CTE.dblForexRate 
+		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
+		,intCommodityId				= ForGLEntries_CTE.intCommodityId
+FROM	ForGLEntries_CTE 
+		INNER JOIN @OtherChargeGLAccounts GLAccounts
+			ON ForGLEntries_CTE.intOtherChargeItemId = GLAccounts.intItemId
+			--AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId
+			AND ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
+		INNER JOIN dbo.tblGLAccount
+			ON tblGLAccount.intAccountId = GLAccounts.intContraInventoryId
+		CROSS APPLY dbo.fnGetDebit(dblValue) Debit
+		CROSS APPLY dbo.fnGetCredit(dblValue) Credit
+		OUTER APPLY dbo.fnGetDebit(dblForexValue) DebitForeign
+		OUTER APPLY dbo.fnGetCredit(dblForexValue) CreditForeign
+WHERE	intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Value
+		AND intTypeId = 2
+
+-- Reversal
+UNION ALL
+SELECT	
+		dtmDate						= ForGLEntries_CTE.dtmDate
+		,strBatchId					= @strBatchId
+		,intAccountId				= tblGLAccount.intAccountId
+		,dblDebit					= Credit.Value
+		,dblCredit					= Debit.Value
+		,dblDebitUnit				= 0
+		,dblCreditUnit				= 0
+		,strDescription				= dbo.fnCreateCostAdjGLDescription(
+										@strGLDescription
+										,tblGLAccount.strDescription
+										,ForGLEntries_CTE.strItemNo
+										,ForGLEntries_CTE.strRelatedTransactionId
+									) 
+		,strCode					= 'ICA' 
+		,strReference				= '4' 
+		,intCurrencyId				= ForGLEntries_CTE.intOtherChargeCurrencyId --ForGLEntries_CTE.intCurrencyId
+		,dblExchangeRate			= ForGLEntries_CTE.dblOtherChargeForexRate --ForGLEntries_CTE.dblExchangeRate
+		,intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intOtherChargeForexRateTypeId --ForGLEntries_CTE.intForexRateTypeId
+		,strRateType				= ForGLEntries_CTE.strOtherChargeForexRateType
+		,dtmDateEntered				= GETDATE()
+		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
+        ,strJournalLineDescription  = ForGLEntries_CTE.strOtherCharge 
+		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
+		,ysnIsUnposted				= 0 --CASE WHEN ISNULL(@ysnPost, 0) = 1 THEN 0 ELSE 1 END 
+		,intUserId					= @intEntityUserSecurityId
+		,intEntityId				= @intEntityUserSecurityId
+		,strTransactionId			= ForGLEntries_CTE.strTransactionId
+		,intTransactionId			= ForGLEntries_CTE.intTransactionId
+		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
+		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
+		,strModuleName				= @ModuleName
+		,intConcurrencyId			= 1
+		,dblDebitForeign			= CreditForeign.Value 
+		,dblDebitReport				= NULL 
+		,dblCreditForeign			= DebitForeign.Value 
+		,dblCreditReport			= NULL 
+		,dblReportingRate			= NULL 
+		,dblForeignRate				= ForGLEntries_CTE.dblOtherChargeForexRate --ForGLEntries_CTE.dblForexRate 
+		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId 
+		,intCommodityId				= ForGLEntries_CTE.intCommodityId
+FROM	ForGLEntries_CTE
+		INNER JOIN @GLAccounts GLAccounts
+			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
+			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId 
+			AND ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
+		INNER JOIN dbo.tblGLAccount
+			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
+		CROSS APPLY dbo.fnGetDebit(dblValue) Debit
+		CROSS APPLY dbo.fnGetCredit(dblValue) Credit
+		OUTER APPLY dbo.fnGetDebit(dblForexValue) DebitForeign
+		OUTER APPLY dbo.fnGetCredit(dblForexValue) CreditForeign
+WHERE	intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Value
+		AND intTypeId = 2
+
+/*-----------------------------------------------------------------------------------
+  GL Entries for Adjust Value 
+  
+  Debit	....... Inventory (Item Currency)
+  Credit	..................... AP Clearing 
+-----------------------------------------------------------------------------------*/
+UNION ALL
+SELECT	
+		dtmDate						= ForGLEntries_CTE.dtmDate
+		,strBatchId					= @strBatchId
+		,intAccountId				= tblGLAccount.intAccountId
+		,dblDebit					= Debit.Value
+		,dblCredit					= Credit.Value
+		,dblDebitUnit				= 0
+		,dblCreditUnit				= 0
+		,strDescription				= dbo.fnCreateCostAdjGLDescription(
+										@strGLDescription
+										,tblGLAccount.strDescription
+										,ForGLEntries_CTE.strItemNo
+										,ForGLEntries_CTE.strRelatedTransactionId
+									) 
+		,strCode					= 'ICA' 
+		,strReference				= '7' 
+		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
+		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intForexRateTypeId
+		,strRateType				= ForGLEntries_CTE.strItemForexRateType
+		,dtmDateEntered				= GETDATE()
+		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
+        ,strJournalLineDescription  = ForGLEntries_CTE.strOtherCharge 
+		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
+		,ysnIsUnposted				= 0 --CASE WHEN ISNULL(@ysnPost, 0) = 1 THEN 0 ELSE 1 END 
+		,intUserId					= @intEntityUserSecurityId
+		,intEntityId				= @intEntityUserSecurityId
+		,strTransactionId			= ForGLEntries_CTE.strTransactionId
+		,intTransactionId			= ForGLEntries_CTE.intTransactionId
+		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
+		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
+		,strModuleName				= @ModuleName
+		,intConcurrencyId			= 1
+		,dblDebitForeign			= DebitForeign.Value 
+		,dblDebitReport				= NULL 
+		,dblCreditForeign			= CreditForeign.Value 
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -1162,7 +1923,10 @@ FROM	ForGLEntries_CTE
 			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
 		CROSS APPLY dbo.fnGetDebit(dblValue) Debit
 		CROSS APPLY dbo.fnGetCredit(dblValue) Credit
+		OUTER APPLY dbo.fnGetDebit(dblForexValue) DebitForeign
+		OUTER APPLY dbo.fnGetCredit(dblForexValue) CreditForeign
 WHERE	intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Value
+		AND intTypeId = 1
 
 -- Cost Adjustment from Item cost change. 
 UNION ALL 
@@ -1181,12 +1945,14 @@ SELECT
 										,ForGLEntries_CTE.strRelatedTransactionId
 									)
 		,strCode					= 'ICA' 
-		,strReference				= '2' 
+		,strReference				= '8' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intForexRateTypeId
+		,strRateType				= ForGLEntries_CTE.strItemForexRateType
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
-        ,strJournalLineDescription  = '' 
+        ,strJournalLineDescription  = ForGLEntries_CTE.strOtherCharge 
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
 		,ysnIsUnposted				= 0 -- CASE WHEN ISNULL(@ysnPost, 0) = 1 THEN 0 ELSE 1 END 
 		,intUserId					= @intEntityUserSecurityId
@@ -1197,9 +1963,9 @@ SELECT
 		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= NULL 
+		,dblDebitForeign			= CreditForeign.Value 
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= NULL 
+		,dblCreditForeign			= DebitForeign.Value
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -1214,8 +1980,11 @@ FROM	ForGLEntries_CTE
 			ON tblGLAccount.intAccountId = GLAccounts.intContraInventoryId
 		CROSS APPLY dbo.fnGetDebit(dblValue) Debit
 		CROSS APPLY dbo.fnGetCredit(dblValue) Credit
-WHERE	intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Value
+		OUTER APPLY dbo.fnGetDebit(dblForexValue) DebitForeign
+		OUTER APPLY dbo.fnGetCredit(dblForexValue) CreditForeign
+WHERE	intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Value		
 		AND ForGLEntries_CTE.intOtherChargeItemId IS NULL 
+		AND intTypeId = 1
 
 -- Cost Adjustment from Other Charges
 UNION ALL 
@@ -1234,12 +2003,14 @@ SELECT
 										,ForGLEntries_CTE.strRelatedTransactionId
 									)
 		,strCode					= 'ICA' 
-		,strReference				= '3' 
-		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
-		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,strReference				= '9' 
+		,intCurrencyId				= ISNULL(ForGLEntries_CTE.intOtherChargeCurrencyId, ForGLEntries_CTE.intCurrencyId)
+		,dblExchangeRate			= ISNULL(ForGLEntries_CTE.dblOtherChargeForexRate, ForGLEntries_CTE.dblExchangeRate)
+		,intCurrencyExchangeRateTypeId = ISNULL(ForGLEntries_CTE.intOtherChargeForexRateTypeId, ForGLEntries_CTE.intForexRateTypeId)
+		,strRateType				= ISNULL(ForGLEntries_CTE.strOtherChargeForexRateType, ForGLEntries_CTE.strItemForexRateType)
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
-        ,strJournalLineDescription  = '' 
+        ,strJournalLineDescription  = ForGLEntries_CTE.strOtherCharge 
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
 		,ysnIsUnposted				= 0 -- CASE WHEN ISNULL(@ysnPost, 0) = 1 THEN 0 ELSE 1 END 
 		,intUserId					= @intEntityUserSecurityId
@@ -1250,12 +2021,12 @@ SELECT
 		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= NULL 
+		,dblDebitForeign			= CreditForeign.Value 
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= NULL 
+		,dblCreditForeign			= DebitForeign.Value 
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
-		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
+		,dblForeignRate				= ISNULL(ForGLEntries_CTE.dblOtherChargeForexRate, ForGLEntries_CTE.dblForexRate) 
 		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
 		,intCommodityId				= ForGLEntries_CTE.intCommodityId
 FROM	ForGLEntries_CTE 
@@ -1264,18 +2035,21 @@ FROM	ForGLEntries_CTE
 			--AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId	
 			AND ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
 		INNER JOIN dbo.tblGLAccount
-			ON tblGLAccount.intAccountId = GLAccounts.intOtherChargeExpense
+			ON tblGLAccount.intAccountId = GLAccounts.intContraInventoryId 
 		INNER JOIN tblICItemLocation il
 			ON il.intItemLocationId =  ForGLEntries_CTE.intItemLocationId
 		INNER JOIN tblICItemLocation ocl
 			ON ocl.intItemId = ForGLEntries_CTE.intOtherChargeItemId
-			AND ocl.intLocationId = il.intLocationId			
-		
+			AND ocl.intLocationId = il.intLocationId					
 		CROSS APPLY dbo.fnGetDebit(dblValue) Debit
 		CROSS APPLY dbo.fnGetCredit(dblValue) Credit
+		OUTER APPLY dbo.fnGetDebit(dblForexValue) DebitForeign
+		OUTER APPLY dbo.fnGetCredit(dblForexValue) CreditForeign
 WHERE	intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Value
 		AND ForGLEntries_CTE.intOtherChargeItemId IS NOT NULL 
 		AND GLAccounts.intItemLocationId = ocl.intItemLocationId
+		AND intTypeId = 1
+		AND ForGLEntries_CTE.intCurrencyId = ForGLEntries_CTE.intOtherChargeCurrencyId
 
 /*-----------------------------------------------------------------------------------
   GL Entries for Adjust Work In Progress
@@ -1298,12 +2072,14 @@ SELECT
 										,ForGLEntries_CTE.strRelatedTransactionId
 									) 
 		,strCode					= 'ICA' 
-		,strReference				= '4' 
+		,strReference				= '10' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intForexRateTypeId
+		,strRateType				= ForGLEntries_CTE.strItemForexRateType
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
-        ,strJournalLineDescription  = '' 
+        ,strJournalLineDescription  = ForGLEntries_CTE.strOtherCharge
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
 		,ysnIsUnposted				= 0 --CASE WHEN ISNULL(@ysnPost, 0) = 1 THEN 0 ELSE 1 END 
 		,intUserId					= @intEntityUserSecurityId
@@ -1314,9 +2090,9 @@ SELECT
 		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= NULL 
+		,dblDebitForeign			= DebitForeign.Value 
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= NULL 
+		,dblCreditForeign			= CreditForeign.Value 
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -1331,8 +2107,10 @@ FROM	ForGLEntries_CTE
 			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
 		CROSS APPLY dbo.fnGetDebit(dblValue) Debit
 		CROSS APPLY dbo.fnGetCredit(dblValue) Credit
+		OUTER APPLY dbo.fnGetDebit(dblForexValue) DebitForeign
+		OUTER APPLY dbo.fnGetCredit(dblForexValue) CreditForeign
 WHERE	intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_WIP
-
+		AND intTypeId = 1
 UNION ALL 
 SELECT	
 		dtmDate						= ForGLEntries_CTE.dtmDate
@@ -1349,12 +2127,14 @@ SELECT
 										,ForGLEntries_CTE.strRelatedTransactionId
 									)
 		,strCode					= 'ICA' 
-		,strReference				= '5' 
+		,strReference				= '11' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intForexRateTypeId
+		,strRateType				= ForGLEntries_CTE.strItemForexRateType
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
-        ,strJournalLineDescription  = '' 
+        ,strJournalLineDescription  = ForGLEntries_CTE.strOtherCharge 
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
 		,ysnIsUnposted				= 0 --CASE WHEN ISNULL(@ysnPost, 0) = 1 THEN 0 ELSE 1 END 
 		,intUserId					= @intEntityUserSecurityId
@@ -1365,9 +2145,9 @@ SELECT
 		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= NULL 
+		,dblDebitForeign			= CreditForeign.Value 
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= NULL 
+		,dblCreditForeign			= DebitForeign.Value 
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate
@@ -1382,8 +2162,10 @@ FROM	ForGLEntries_CTE
 			ON tblGLAccount.intAccountId = GLAccounts.intRevalueWIP
 		CROSS APPLY dbo.fnGetDebit(dblValue) Debit
 		CROSS APPLY dbo.fnGetCredit(dblValue) Credit
+		OUTER APPLY dbo.fnGetDebit(dblForexValue) DebitForeign
+		OUTER APPLY dbo.fnGetCredit(dblForexValue) CreditForeign
 WHERE	intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_WIP
-
+		AND intTypeId = 1
 /*-----------------------------------------------------------------------------------
   GL Entries for Adjust In-Transit
   Debit	....... In-Transit
@@ -1405,12 +2187,14 @@ SELECT
 										,ForGLEntries_CTE.strRelatedTransactionId
 									)
 		,strCode					= 'ICA' 
-		,strReference				= '6' 
+		,strReference				= '12' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intForexRateTypeId
+		,strRateType				= ForGLEntries_CTE.strItemForexRateType
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
-        ,strJournalLineDescription  = '' 
+        ,strJournalLineDescription  = ForGLEntries_CTE.strOtherCharge 
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
 		,ysnIsUnposted				= 0 --CASE WHEN ISNULL(@ysnPost, 0) = 1 THEN 0 ELSE 1 END 
 		,intUserId					= @intEntityUserSecurityId
@@ -1421,9 +2205,9 @@ SELECT
 		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= NULL 
+		,dblDebitForeign			= CreditForeign.Value 
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= NULL 
+		,dblCreditForeign			= DebitForeign.Value 
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -1438,7 +2222,10 @@ FROM	ForGLEntries_CTE
 			ON tblGLAccount.intAccountId = GLAccounts.intRevalueInTransit
 		CROSS APPLY dbo.fnGetDebit(dblValue) Debit
 		CROSS APPLY dbo.fnGetCredit(dblValue) Credit
+		OUTER APPLY dbo.fnGetDebit(dblForexValue) DebitForeign
+		OUTER APPLY dbo.fnGetCredit(dblForexValue) CreditForeign
 WHERE	intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_InTransit_Inventory --@COST_ADJ_TYPE_Adjust_InTransit 
+		AND intTypeId = 1
 UNION ALL
 SELECT	
 		dtmDate						= ForGLEntries_CTE.dtmDate
@@ -1455,12 +2242,14 @@ SELECT
 										,ForGLEntries_CTE.strRelatedTransactionId
 									)
 		,strCode					= 'ICA' 
-		,strReference				= '7' 
+		,strReference				= '13' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intForexRateTypeId
+		,strRateType				= ForGLEntries_CTE.strItemForexRateType
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
-        ,strJournalLineDescription  = '' 
+        ,strJournalLineDescription  = ForGLEntries_CTE.strOtherCharge
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
 		,ysnIsUnposted				= 0 --CASE WHEN ISNULL(@ysnPost, 0) = 1 THEN 0 ELSE 1 END 
 		,intUserId					= @intEntityUserSecurityId 
@@ -1471,9 +2260,9 @@ SELECT
 		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= NULL 
+		,dblDebitForeign			= DebitForeign.Value 
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= NULL 
+		,dblCreditForeign			= CreditForeign.Value 
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -1488,8 +2277,10 @@ FROM	ForGLEntries_CTE
 			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
 		CROSS APPLY dbo.fnGetDebit(dblValue) Debit
 		CROSS APPLY dbo.fnGetCredit(dblValue) Credit
+		OUTER APPLY dbo.fnGetDebit(dblForexValue) DebitForeign
+		OUTER APPLY dbo.fnGetCredit(dblForexValue) CreditForeign
 WHERE	intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_InTransit_Inventory --@COST_ADJ_TYPE_Adjust_InTransit
-
+		AND intTypeId = 1
 /*-----------------------------------------------------------------------------------
   GL Entries for Adjust In-Transit from Transfer Order
   Debit		... Inventory   
@@ -1511,12 +2302,14 @@ SELECT
 										,ForGLEntries_CTE.strRelatedTransactionId
 									)
 		,strCode					= 'ICA' 
-		,strReference				= '9' 
+		,strReference				= '14' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intForexRateTypeId
+		,strRateType				= ForGLEntries_CTE.strItemForexRateType
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
-        ,strJournalLineDescription  = '' 
+        ,strJournalLineDescription  = ForGLEntries_CTE.strOtherCharge 
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
 		,ysnIsUnposted				= 0 --CASE WHEN ISNULL(@ysnPost, 0) = 1 THEN 0 ELSE 1 END 
 		,intUserId					= @intEntityUserSecurityId 
@@ -1527,9 +2320,9 @@ SELECT
 		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= NULL 
+		,dblDebitForeign			= DebitForeign.Value 
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= NULL 
+		,dblCreditForeign			= CreditForeign.Value 
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -1544,7 +2337,10 @@ FROM	ForGLEntries_CTE
 			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
 		CROSS APPLY dbo.fnGetDebit(dblValue) Debit
 		CROSS APPLY dbo.fnGetCredit(dblValue) Credit
+		OUTER APPLY dbo.fnGetDebit(dblForexValue) DebitForeign
+		OUTER APPLY dbo.fnGetCredit(dblForexValue) CreditForeign
 WHERE	intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_InTransit_Transfer_Order_Add --@COST_ADJ_TYPE_Adjust_InTransit_Inventory
+		AND intTypeId = 1	
 UNION ALL 
 SELECT	
 		dtmDate						= ForGLEntries_CTE.dtmDate
@@ -1561,12 +2357,14 @@ SELECT
 										,ForGLEntries_CTE.strRelatedTransactionId
 									)
 		,strCode					= 'ICA' 
-		,strReference				= '8' 
+		,strReference				= '15' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intForexRateTypeId
+		,strRateType				= ForGLEntries_CTE.strItemForexRateType
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
-        ,strJournalLineDescription  = '' 
+        ,strJournalLineDescription  = ForGLEntries_CTE.strOtherCharge
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
 		,ysnIsUnposted				= 0 --CASE WHEN ISNULL(@ysnPost, 0) = 1 THEN 0 ELSE 1 END 
 		,intUserId					= @intEntityUserSecurityId
@@ -1577,9 +2375,9 @@ SELECT
 		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= NULL 
+		,dblDebitForeign			= DebitForeign.Value 
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= NULL 
+		,dblCreditForeign			= CreditForeign.Value 
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -1594,8 +2392,10 @@ FROM	ForGLEntries_CTE
 			ON tblGLAccount.intAccountId = GLAccounts.intRevalueInTransit
 		CROSS APPLY dbo.fnGetDebit(dblValue) Debit
 		CROSS APPLY dbo.fnGetCredit(dblValue) Credit
+		OUTER APPLY dbo.fnGetDebit(dblForexValue) DebitForeign
+		OUTER APPLY dbo.fnGetCredit(dblForexValue) CreditForeign
 WHERE	intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_InTransit_Transfer_Order_Reduce --@COST_ADJ_TYPE_Adjust_InTransit_Inventory
-
+		AND intTypeId = 1
 /*-----------------------------------------------------------------------------------
   GL Entries for Adjust In-Transit Sold (In Transit reduced from Invoice)
   Debit	....... COGS
@@ -1617,12 +2417,14 @@ SELECT
 										,ForGLEntries_CTE.strRelatedTransactionId
 									)
 		,strCode					= 'ICA' 
-		,strReference				= '10' 
+		,strReference				= '16' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intForexRateTypeId
+		,strRateType				= ForGLEntries_CTE.strItemForexRateType
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
-        ,strJournalLineDescription  = '' 
+        ,strJournalLineDescription  = ForGLEntries_CTE.strOtherCharge 
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
 		,ysnIsUnposted				= 0 --CASE WHEN ISNULL(@ysnPost, 0) = 1 THEN 0 ELSE 1 END 
 		,intUserId					= @intEntityUserSecurityId
@@ -1633,9 +2435,9 @@ SELECT
 		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= NULL 
+		,dblDebitForeign			= CreditForeign.Value 
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= NULL 
+		,dblCreditForeign			= DebitForeign.Value 
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -1650,7 +2452,10 @@ FROM	ForGLEntries_CTE
 			ON tblGLAccount.intAccountId = GLAccounts.intRevalueSoldId
 		CROSS APPLY dbo.fnGetDebit(dblValue) Debit
 		CROSS APPLY dbo.fnGetCredit(dblValue) Credit
+		OUTER APPLY dbo.fnGetDebit(dblForexValue) DebitForeign
+		OUTER APPLY dbo.fnGetCredit(dblForexValue) CreditForeign
 WHERE	intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_InTransit_Sold
+		AND intTypeId = 1
 UNION ALL 
 SELECT	
 		dtmDate						= ForGLEntries_CTE.dtmDate
@@ -1667,12 +2472,14 @@ SELECT
 										,ForGLEntries_CTE.strRelatedTransactionId
 									)
 		,strCode					= 'ICA' 
-		,strReference				= '11' 
+		,strReference				= '17' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intForexRateTypeId
+		,strRateType				= ForGLEntries_CTE.strItemForexRateType
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
-        ,strJournalLineDescription  = '' 
+        ,strJournalLineDescription  = ForGLEntries_CTE.strOtherCharge 
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
 		,ysnIsUnposted				= 0 --CASE WHEN ISNULL(@ysnPost, 0) = 1 THEN 0 ELSE 1 END 
 		,intUserId					= @intEntityUserSecurityId
@@ -1683,9 +2490,9 @@ SELECT
 		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= NULL 
+		,dblDebitForeign			= DebitForeign.Value  
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= NULL 
+		,dblCreditForeign			= CreditForeign.Value
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -1700,8 +2507,10 @@ FROM	ForGLEntries_CTE
 			ON tblGLAccount.intAccountId = GLAccounts.intRevalueInTransit
 		CROSS APPLY dbo.fnGetDebit(dblValue) Debit
 		CROSS APPLY dbo.fnGetCredit(dblValue) Credit
+		OUTER APPLY dbo.fnGetDebit(dblForexValue) DebitForeign
+		OUTER APPLY dbo.fnGetCredit(dblForexValue) CreditForeign
 WHERE	intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_InTransit_Sold
-
+		AND intTypeId = 1
 
 /*-----------------------------------------------------------------------------------
   GL Entries for Adjust Inventory Adjustment   
@@ -1729,12 +2538,14 @@ SELECT
 										,ForGLEntries_CTE.strRelatedTransactionId
 									) 
 		,strCode					= 'ICA' 
-		,strReference				= '12' 
+		,strReference				= '18' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intForexRateTypeId
+		,strRateType				= ForGLEntries_CTE.strItemForexRateType
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
-        ,strJournalLineDescription  = '' 
+        ,strJournalLineDescription  = ForGLEntries_CTE.strOtherCharge 
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
 		,ysnIsUnposted				= 0 --CASE WHEN ISNULL(@ysnPost, 0) = 1 THEN 0 ELSE 1 END 
 		,intUserId					= @intEntityUserSecurityId
@@ -1745,9 +2556,9 @@ SELECT
 		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= NULL 
+		,dblDebitForeign			= DebitForeign.Value 
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= NULL 
+		,dblCreditForeign			= CreditForeign.Value 
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -1762,7 +2573,10 @@ FROM	ForGLEntries_CTE
 			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
 		CROSS APPLY dbo.fnGetDebit(dblValue) Debit
 		CROSS APPLY dbo.fnGetCredit(dblValue) Credit
+		OUTER APPLY dbo.fnGetDebit(dblForexValue) DebitForeign
+		OUTER APPLY dbo.fnGetCredit(dblForexValue) CreditForeign
 WHERE	intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_InventoryAdjustment
+		AND intTypeId = 1
 
 /*-----------------------------------------------------------------------------------
   GL Entries for Adjust Sold
@@ -1785,12 +2599,14 @@ SELECT
 										,ForGLEntries_CTE.strRelatedTransactionId
 									) 
 		,strCode					= 'ICA' 
-		,strReference				= '13' 
+		,strReference				= '19' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intForexRateTypeId
+		,strRateType				= ForGLEntries_CTE.strItemForexRateType
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
-        ,strJournalLineDescription  = '' 
+        ,strJournalLineDescription  = ForGLEntries_CTE.strOtherCharge 
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
 		,ysnIsUnposted				= 0 --CASE WHEN ISNULL(@ysnPost, 0) = 1 THEN 0 ELSE 1 END 
 		,intUserId					= @intEntityUserSecurityId
@@ -1801,9 +2617,9 @@ SELECT
 		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= NULL 
+		,dblDebitForeign			= DebitForeign.Value  
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= NULL 
+		,dblCreditForeign			= CreditForeign.Value 
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -1818,8 +2634,10 @@ FROM	ForGLEntries_CTE
 			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
 		CROSS APPLY dbo.fnGetDebit(dblValue) Debit
 		CROSS APPLY dbo.fnGetCredit(dblValue) Credit
+		OUTER APPLY dbo.fnGetDebit(dblForexValue) DebitForeign
+		OUTER APPLY dbo.fnGetCredit(dblForexValue) CreditForeign
 WHERE	intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Sold
-
+		AND intTypeId = 1
 UNION ALL 
 SELECT	
 		dtmDate						= ForGLEntries_CTE.dtmDate
@@ -1836,12 +2654,14 @@ SELECT
 										,ForGLEntries_CTE.strRelatedTransactionId
 									)
 		,strCode					= 'ICA' 
-		,strReference				= '14' 
+		,strReference				= '20' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intForexRateTypeId
+		,strRateType				= ForGLEntries_CTE.strItemForexRateType
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
-        ,strJournalLineDescription  = '' 
+        ,strJournalLineDescription  = ForGLEntries_CTE.strOtherCharge 
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
 		,ysnIsUnposted				= 0 --CASE WHEN ISNULL(@ysnPost, 0) = 1 THEN 0 ELSE 1 END 
 		,intUserId					= @intEntityUserSecurityId
@@ -1852,9 +2672,9 @@ SELECT
 		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= NULL 
+		,dblDebitForeign			= CreditForeign.Value 
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= NULL 
+		,dblCreditForeign			= DebitForeign.Value 
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -1869,8 +2689,10 @@ FROM	ForGLEntries_CTE
 			ON tblGLAccount.intAccountId = GLAccounts.intRevalueSoldId
 		CROSS APPLY dbo.fnGetDebit(dblValue) Debit
 		CROSS APPLY dbo.fnGetCredit(dblValue) Credit
+		OUTER APPLY dbo.fnGetDebit(dblForexValue) DebitForeign
+		OUTER APPLY dbo.fnGetCredit(dblForexValue) CreditForeign
 WHERE	intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Sold
-
+		AND intTypeId = 1
 /*-------------------------------------------------------------------------------------------
   GL Entries for Auto Variance 
   Debit	....... Inventory
@@ -1892,12 +2714,14 @@ SELECT
 										,ForGLEntries_CTE.strRelatedTransactionId
 									) 
 		,strCode					= 'ICA' 
-		,strReference				= '15' 
+		,strReference				= '21' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intForexRateTypeId
+		,strRateType				= ForGLEntries_CTE.strItemForexRateType
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
-        ,strJournalLineDescription  = '' 
+        ,strJournalLineDescription  = ForGLEntries_CTE.strOtherCharge 
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
 		,ysnIsUnposted				= 0 --CASE WHEN ISNULL(@ysnPost, 0) = 1 THEN 0 ELSE 1 END 
 		,intUserId					= @intEntityUserSecurityId
@@ -1908,9 +2732,9 @@ SELECT
 		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= NULL 
+		,dblDebitForeign			= DebitForeign.Value  
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= NULL 
+		,dblCreditForeign			= CreditForeign.Value
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -1925,9 +2749,11 @@ FROM	ForGLEntries_CTE
 			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
 		CROSS APPLY dbo.fnGetDebit(dblValue) Debit
 		CROSS APPLY dbo.fnGetCredit(dblValue) Credit
+		OUTER APPLY dbo.fnGetDebit(dblForexValue) DebitForeign
+		OUTER APPLY dbo.fnGetCredit(dblForexValue) CreditForeign
 WHERE	intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Auto_Variance
 		AND ysnFixInventoryRoundingDiscrepancy = 0
-
+		AND intTypeId = 1
 UNION ALL 
 SELECT	
 		dtmDate						= ForGLEntries_CTE.dtmDate
@@ -1944,12 +2770,14 @@ SELECT
 										,ForGLEntries_CTE.strRelatedTransactionId
 									)
 		,strCode					= 'ICA' 
-		,strReference				= '16' 
+		,strReference				= '22' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intForexRateTypeId
+		,strRateType				= ForGLEntries_CTE.strItemForexRateType
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
-        ,strJournalLineDescription  = '' 
+        ,strJournalLineDescription  = ForGLEntries_CTE.strOtherCharge 
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
 		,ysnIsUnposted				= 0 --CASE WHEN ISNULL(@ysnPost, 0) = 1 THEN 0 ELSE 1 END 
 		,intUserId					= @intEntityUserSecurityId
@@ -1960,9 +2788,9 @@ SELECT
 		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= NULL 
+		,dblDebitForeign			= CreditForeign.Value  
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= NULL 
+		,dblCreditForeign			= DebitForeign.Value 
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -1977,8 +2805,11 @@ FROM	ForGLEntries_CTE
 			ON tblGLAccount.intAccountId = GLAccounts.intAutoNegativeId
 		CROSS APPLY dbo.fnGetDebit(dblValue) Debit
 		CROSS APPLY dbo.fnGetCredit(dblValue) Credit
+		OUTER APPLY dbo.fnGetDebit(dblForexValue) DebitForeign
+		OUTER APPLY dbo.fnGetCredit(dblForexValue) CreditForeign
 WHERE	intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Auto_Variance
 		AND ysnFixInventoryRoundingDiscrepancy = 0
+		AND intTypeId = 1
 ;
 
 -- Fix the decimal discrepancy. 
@@ -2012,6 +2843,8 @@ BEGIN
 		,intLotId
 		,intFOBPointId
 		,dblForexRate
+		,intCurrencyExchangeRateTypeId
+		,strRateType
 		,intInventoryCostAdjustmentTypeId
 		,intOtherChargeItemId
 		,ysnFixInventoryRoundingDiscrepancy 
@@ -2045,6 +2878,8 @@ BEGIN
 				,t.intLotId 
 				,t.intFobPointId
 				,t.dblForexRate
+				,t.intCurrencyExchangeRateTypeId
+				,t.strRateType
 				,intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Auto_Variance
 				,intOtherChargeItemId = NULL 
 				,ysnFixInventoryRoundingDiscrepancy = CAST(1 AS BIT)
@@ -2078,10 +2913,14 @@ BEGIN
 							t.* 
 							,i.strItemNo
 							,i.intCommodityId
+							,currencyRateType.intCurrencyExchangeRateTypeId
+							,strRateType = currencyRateType.strCurrencyExchangeRateType
 					FROM	tblICInventoryTransaction t INNER JOIN tblICItem i
 								ON i.intItemId = t.intItemId
 							INNER JOIN tblICInventoryLotCostAdjustmentLog cbLog 
 								ON cbLog.intInventoryTransactionId = t.intInventoryTransactionId
+							LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
+								ON currencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
 					WHERE	t.strBatchId = @strBatchId
 							AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
 							AND cbLog.strRelatedTransactionId = lot.strRelatedTransactionId
@@ -2134,6 +2973,8 @@ BEGIN
 				,t.intLotId 
 				,t.intFobPointId
 				,t.dblForexRate
+				,t.intCurrencyExchangeRateTypeId
+				,t.strRateType
 				,intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Auto_Variance
 				,intOtherChargeItemId = NULL 
 				,ysnFixInventoryRoundingDiscrepancy = CAST(1 AS BIT)
@@ -2164,12 +3005,16 @@ BEGIN
 							t.* 
 							,i.strItemNo
 							,i.intCommodityId
+							,currencyRateType.intCurrencyExchangeRateTypeId
+							,strRateType = currencyRateType.strCurrencyExchangeRateType
 					FROM	tblICInventoryTransaction t INNER JOIN tblICItem i
 								ON i.intItemId = t.intItemId
 							INNER JOIN tblICCostingMethod c
 								ON c.intCostingMethodId = t.intCostingMethod
 							INNER JOIN tblICInventoryFIFOCostAdjustmentLog cbLog 
 								ON cbLog.intInventoryTransactionId = t.intInventoryTransactionId
+							LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
+								ON currencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
 					WHERE	t.strBatchId = @strBatchId
 							AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
 							AND cbLog.strRelatedTransactionId = fifo.strRelatedTransactionId
@@ -2223,6 +3068,8 @@ BEGIN
 				,t.intLotId 
 				,t.intFobPointId
 				,t.dblForexRate
+				,t.intCurrencyExchangeRateTypeId
+				,t.strRateType
 				,intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Auto_Variance
 				,intOtherChargeItemId = NULL 
 				,ysnFixInventoryRoundingDiscrepancy = CAST(1 AS BIT)
@@ -2253,10 +3100,14 @@ BEGIN
 							t.* 
 							,i.strItemNo
 							,i.intCommodityId
+							,currencyRateType.intCurrencyExchangeRateTypeId
+							,strRateType = currencyRateType.strCurrencyExchangeRateType
 					FROM	tblICInventoryTransaction t INNER JOIN tblICItem i
 								ON i.intItemId = t.intItemId
 							INNER JOIN tblICInventoryLIFOCostAdjustmentLog cbLog 
 								ON cbLog.intInventoryTransactionId = t.intInventoryTransactionId
+							LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
+								ON currencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
 					WHERE	t.strBatchId = @strBatchId
 							AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
 							AND cbLog.strRelatedTransactionId = lifo.strRelatedTransactionId
@@ -2309,6 +3160,8 @@ BEGIN
 				,t.intLotId 
 				,t.intFobPointId
 				,t.dblForexRate
+				,t.intCurrencyExchangeRateTypeId
+				,t.strRateType
 				,intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Auto_Variance
 				,intOtherChargeItemId = NULL 
 				,ysnFixInventoryRoundingDiscrepancy = CAST(1 AS BIT)
@@ -2339,10 +3192,14 @@ BEGIN
 							t.* 
 							,i.strItemNo
 							,i.intCommodityId
+							,currencyRateType.intCurrencyExchangeRateTypeId
+							,strRateType = currencyRateType.strCurrencyExchangeRateType							
 					FROM	tblICInventoryTransaction t INNER JOIN tblICItem i
 								ON i.intItemId = t.intItemId
 							INNER JOIN tblICInventoryActualCostAdjustmentLog cbLog 
 								ON cbLog.intInventoryTransactionId = t.intInventoryTransactionId
+							LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
+								ON currencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
 					WHERE	t.strBatchId = @strBatchId
 							AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
 							AND cbLog.strRelatedTransactionId = actual.strRelatedTransactionId
@@ -2403,6 +3260,8 @@ BEGIN
 		,dblForeignRate
 		,intSourceEntityId
 		,intCommodityId
+		,intCurrencyExchangeRateTypeId
+		,strRateType
 	)
 	SELECT	
 			dtmDate						= DecimalDiscrepancy.dtmDate
@@ -2443,6 +3302,9 @@ BEGIN
 			,dblForeignRate				= DecimalDiscrepancy.dblForexRate 
 			,intSourceEntityId			= DecimalDiscrepancy.intSourceEntityId
 			,intCommodityId				= DecimalDiscrepancy.intCommodityId
+			,DecimalDiscrepancy.intCurrencyExchangeRateTypeId
+			,DecimalDiscrepancy.strRateType
+
 	FROM	DecimalDiscrepancy 
 			INNER JOIN @GLAccounts GLAccounts
 				ON DecimalDiscrepancy.intItemId = GLAccounts.intItemId
@@ -2503,6 +3365,8 @@ BEGIN
 			,dblForeignRate	
 			,intSourceEntityId
 			,intCommodityId
+			,intCurrencyExchangeRateTypeId
+			,strRateType
 		)
 		SELECT	TOP 1 
 				dtmDate
@@ -2538,6 +3402,8 @@ BEGIN
 				,dblForeignRate
 				,intSourceEntityId
 				,intCommodityId
+				,glEntries.intCurrencyExchangeRateTypeId
+				,glEntries.strRateType
 		FROM	@GLEntries glEntries
 				CROSS APPLY dbo.fnGetDebit(@discrepancy) Debit
 				CROSS APPLY dbo.fnGetCredit(@discrepancy) Credit	
@@ -2584,6 +3450,8 @@ SELECT
 		,dblForeignRate 
 		,intSourceEntityId
 		,intCommodityId
+		,intCurrencyExchangeRateTypeId
+		,strRateType
 FROM	@GLEntries
 
 --IF @ysnPost = 0 
@@ -2596,3 +3464,4 @@ FROM	@GLEntries
 --			AND GLEntries.strCode = 'ICA'
 --			AND ysnIsUnposted = 0 
 --END 
+
