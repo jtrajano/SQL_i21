@@ -65,7 +65,7 @@ EXEC dbo.[uspSOUpdateItemContractOnSalesOrder] @intSalesOrderId, @ysnForDelete, 
 DECLARE @Ids AS Id
 DECLARE @ItemAccounts AS [InvoiceItemAccount]
 INSERT INTO @Ids(intId) SELECT @intSalesOrderId
-EXEC dbo.[uspARUpdateTransactionAccounts] @Ids = @Ids, @ItemAccounts = @ItemAccounts, @TransactionType	= 2
+EXEC dbo.[uspARUpdateTransactionAccounts] @Ids = @Ids, @ItemAccounts = @ItemAccounts
 
 DELETE FROM [tblARTransactionDetail] WHERE [intTransactionId] = @intSalesOrderId AND [strTransactionType] IN ('Order', 'Quote')
 
