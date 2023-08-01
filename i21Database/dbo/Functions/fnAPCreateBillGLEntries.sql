@@ -1485,8 +1485,7 @@ BEGIN
 		-- 										END
 		-- 										* (CASE WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END),
 		[dblDebit]						=	CAST((SUM(ISNULL(D.dblAdjustedTax, D.dblTax)) - SUM(D.dblTax)) * ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2))
-														* (CASE WHEN A.ysnFinalVoucher = 1 THEN (100 - A.dblProvisionalPercentage) / 100
-															WHEN A.intTransactionType = 16 THEN (A.dblProvisionalPercentage / 100)
+														* (CASE WHEN A.intTransactionType = 16 THEN (A.dblProvisionalPercentage / 100)
 															WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END),
 		[dblCredit]						=	0,
 		[dblDebitUnit]					=	0,
@@ -1510,8 +1509,7 @@ BEGIN
 		[strTransactionForm]			=	@SCREEN_NAME,
 		[strModuleName]					=	@MODULE_NAME,
 		[dblDebitForeign]				=	CAST(SUM(ISNULL(D.dblAdjustedTax, D.dblTax)) - SUM(D.dblTax) AS DECIMAL(18,2))
-															* (CASE WHEN A.ysnFinalVoucher = 1 THEN (100 - A.dblProvisionalPercentage) / 100 
-																	WHEN A.intTransactionType = 16 THEN (A.dblProvisionalPercentage / 100)
+															* (CASE WHEN A.intTransactionType = 16 THEN (A.dblProvisionalPercentage / 100)
 																 ELSE 1 END),
 		-- [dblDebitForeign]				=	CASE WHEN charges.intInventoryReceiptChargeId > 0 
 		-- 											THEN  (CASE 
@@ -2219,7 +2217,7 @@ BEGIN
 												AND charges.ysnPrice = 1
 											THEN (R2.dblAdjustedTax - R2.dblTax) * -1 ELSE (R2.dblAdjustedTax - R2.dblTax) END) 
 						ELSE (R2.dblAdjustedTax - R2.dblTax)
-					END) * (100 - A.dblProvisionalPercentage) / 100 AS DECIMAL(18,2))
+					END) AS DECIMAL(18,2))
 				AS dblTotal,
 				 R.dblRate  AS dblRate,
 				 exRates.intCurrencyExchangeRateTypeId,
