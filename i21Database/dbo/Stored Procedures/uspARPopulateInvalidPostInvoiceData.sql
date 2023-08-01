@@ -1410,6 +1410,39 @@ BEGIN
 		,[strBatchId]
 		,[strPostingError]
 		,[strSessionId])
+	--Company and Location Override of Tax Account
+	SELECT
+		 [intInvoiceId]			= ARPID.[intInvoiceId]
+		,[strInvoiceNumber]		= ARPID.[strInvoiceNumber]		
+		,[strTransactionType]	= ARPID.[strTransactionType]
+		,[intInvoiceDetailId]	= ARPID.[intInvoiceDetailId]
+		,[intItemId]			= ARPID.[intItemId]
+		,[strBatchId]			= ARPID.[strBatchId]
+		,[strPostingError]		= 'Unable to find the tax account that matches the segment of AR Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
+		,[strSessionId]			= @strSessionId
+	FROM tblARInvoiceDetailTax ARIDT
+	INNER JOIN tblARPostInvoiceDetail ARPID ON ARIDT.intInvoiceDetailId = ARPID.intInvoiceDetailId AND ARPID.strSessionId = @strSessionId
+	INNER JOIN tblARPostInvoiceHeader ARPIH ON ARPID.intInvoiceId = ARPIH.intInvoiceId
+	OUTER APPLY (
+		SELECT bitOverriden, strOverrideAccount, bitSameCompanySegment, bitSameLocationSegment
+		FROM dbo.[fnARGetOverrideAccount](ARPIH.intAccountId, ARIDT.intSalesTaxAccountId, @OverrideCompanySegment, @OverrideLocationSegment, 0)
+	) OVERRIDESEGMENT
+	WHERE (
+		(@OverrideCompanySegment = 1 AND OVERRIDESEGMENT.bitSameCompanySegment = 0)
+		OR
+		(@OverrideLocationSegment = 1 AND OVERRIDESEGMENT.bitSameLocationSegment = 0)
+	)
+	AND OVERRIDESEGMENT.bitOverriden = 0
+
+	INSERT INTO tblARPostInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError]
+		,[strSessionId])
 	--Tax Adjustment Account
 	SELECT
 		 [intInvoiceId]			= I.[intInvoiceId]

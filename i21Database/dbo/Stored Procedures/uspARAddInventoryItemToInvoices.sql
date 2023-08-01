@@ -941,7 +941,8 @@ LEFT OUTER JOIN
 		ON IE.[intInvoiceId] = IP.[intInvoiceId]
 		AND (IE.[intId] = IP.[intId]
 			OR
-			IE.[intInvoiceDetailId] = IP.[intInvoiceDetailId])
+			IE.[intInvoiceDetailId] = IP.[intInvoiceDetailId]
+		)
 
 BEGIN TRY
 MERGE INTO tblARInvoiceDetail AS Target
