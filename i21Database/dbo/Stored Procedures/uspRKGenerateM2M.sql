@@ -1794,7 +1794,13 @@ BEGIN TRY
 				ON PCT.intContractDetailId = LD.intPContractDetailId 
 				AND PCT.dblQuantity > ISNULL(PCT.dblInvoicedQty, 0)
 			OUTER APPLY (
-				SELECT dblReceivedQty = SUM(LDCL.dblReceivedQty)
+				SELECT 
+					LC.intLoadContainerId
+					, LC.strContainerNumber
+					, LC.dblNetWt
+					, LDCL.dblQuantity
+					, LDCL.dblReceivedQty
+					, LC.strMarks 
 				FROM 
 					tblLGLoadDetailContainerLink LDCL INNER JOIN tblLGLoadContainer LC 
 						ON LDCL.intLoadContainerId = LC.intLoadContainerId
@@ -1816,7 +1822,13 @@ BEGIN TRY
 				ON PCT.intContractDetailId = LD.intSContractDetailId 
 				AND PCT.dblQuantity > PCT.dblInvoicedQty
 			OUTER APPLY (
-				SELECT dblReceivedQty = SUM(LDCL.dblReceivedQty)
+				SELECT 
+					LC.intLoadContainerId
+					, LC.strContainerNumber
+					, LC.dblNetWt
+					, LDCL.dblQuantity
+					, LDCL.dblReceivedQty
+					, LC.strMarks 
 				FROM 
 					tblLGLoadDetailContainerLink LDCL INNER JOIN tblLGLoadContainer LC 
 						ON LDCL.intLoadContainerId = LC.intLoadContainerId
