@@ -236,7 +236,11 @@ BEGIN TRY
 			FROM tblRKSettlementPriceImport
 			WHERE intImportSettlementPriceId = @mRowNumber AND strFutureMarket = @strFutureMarket
 		END
-		ELSE IF	@dtmPriceDate IS NOT NULL AND EXISTS(SELECT * FROM tblRKFuturesSettlementPrice sp JOIN tblRKFutureMarket fm on sp.intFutureMarketId=fm.intFutureMarketId WHERE fm.strFutMarketName= @strFutureMarket AND convert(datetime,dtmPriceDate,@ConvertYear)=convert(datetime,@dtmPriceDate,@ConvertYear))
+		ELSE IF	@dtmPriceDate IS NOT NULL 
+					AND EXISTS(SELECT * FROM tblRKFuturesSettlementPrice sp 
+								JOIN tblRKFutureMarket fm on sp.intFutureMarketId = fm.intFutureMarketId 
+								WHERE fm.strFutMarketName = @strFutureMarket 
+								AND CONVERT(NVARCHAR, CONVERT(DATETIME, dtmPriceDate, @ConvertYear), 0) = CONVERT(NVARCHAR, CONVERT(DATETIME, @dtmPriceDate, @ConvertYear), 0))
 		BEGIN
 			INSERT INTO @ErrLogs (intImportSettlementPriceId
 				, strPriceDate

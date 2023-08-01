@@ -21,8 +21,11 @@ BEGIN TRY
 	ELSE IF (@strDateTimeFormat = 'DD MM YYYY HH:MI' OR @strDateTimeFormat ='YYYY DD MM HH:MI')
 		SELECT @ConvertYear = 103
 		
-	BEGIN TRAN
+	IF OBJECT_ID('tempdb..#temp') IS NOT NULL
+		DROP TABLE #temp
 
+	BEGIN TRAN
+	
 	DECLARE @mRowNumber INT
 	SELECT ROW_NUMBER() OVER (ORDER BY strFutureMarket) intRowNum
 		, strFutureMarket
@@ -52,7 +55,7 @@ BEGIN TRY
 		SELECT @intCommodityMarketId = intCommodityMarketId FROM tblRKFutureMarket m
 		JOIN tblRKCommodityMarketMapping mm ON m.intFutureMarketId = mm.intFutureMarketId
 		WHERE m.intFutureMarketId = @intFutureMarketId
-		
+
 		INSERT INTO tblRKFuturesSettlementPrice(intFutureMarketId, dtmPriceDate, intConcurrencyId, intCommodityMarketId, strPricingType)
 		VALUES(@intFutureMarketId, @strSettlementDate, 1, @intCommodityMarketId, 'Mark To Market')
 		
