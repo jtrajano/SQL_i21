@@ -115,6 +115,7 @@
 	[strReferenceNo] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
 	[intBankValuationRuleId] INT NULL,
 	[intFreightTermId] INT NULL, 
+	[intLineOfBusinessId]	INT NULL,
 	[strComments] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
 	[dblRoundingTotal] DECIMAL (18, 6) NOT NULL DEFAULT 0,
 	[dblAverageExchangeRate] DECIMAL (18, 6) NULL,
@@ -151,6 +152,7 @@
 	CONSTRAINT [FK_tblAPBill_intStoreLocationId] FOREIGN KEY ([intStoreLocationId]) REFERENCES tblSMCompanyLocation([intCompanyLocationId]),
 	CONSTRAINT [FK_tblAPBill_intDeferredVoucherId] FOREIGN KEY ([intDeferredVoucherId]) REFERENCES tblAPBill([intBillId]),
 	CONSTRAINT [FK_tblAPBill_intBookId] FOREIGN KEY ([intBookId]) REFERENCES tblCTBook([intBookId]),
+	CONSTRAINT [FK_tblAPBillDetail_intLineOfBusinessId] FOREIGN KEY ([intLineOfBusinessId]) REFERENCES tblSMLineOfBusiness([intLineOfBusinessId]),
 	CONSTRAINT [FK_tblAPBill_intSubBookId] FOREIGN KEY ([intSubBookId]) REFERENCES tblCTSubBook([intSubBookId])
 );
 GO

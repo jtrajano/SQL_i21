@@ -138,7 +138,9 @@ RETURNS @returntable TABLE
  	[dblOptionalityPremium] DECIMAL(18, 6) DEFAULT 0,
 	 /*Tax Override*/
 	[strTaxPoint] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
-	[intTaxLocationId] INT NULL
+	[intTaxLocationId] INT NULL,
+	[intLineOfBusinessId] INT NULL,
+	[strLineOfBusiness] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL
 )
 AS
 BEGIN
@@ -266,6 +268,8 @@ BEGIN
 		,[dblOptionalityPremium]				=	A.dblOptionalityPremium
 		,[strTaxPoint]							=	A.strTaxPoint
 		,[intTaxLocationId]						=	A.intTaxLocationId
+		,[intLineOfBusinessId]				= A.intLineOfBusinessId
+		,[strLineOfBusiness]				  = A.strLineOfBusiness
 	FROM tblAPVoucherPayable A
 	INNER JOIN @payableIds B ON A.intVoucherPayableId = B.intId
 	RETURN;

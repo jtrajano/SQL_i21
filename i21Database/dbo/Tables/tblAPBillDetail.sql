@@ -42,6 +42,7 @@
 	[intItemBundleId]	INT 	NULL,
 	[intLotId]	INT 	NULL,
 	[intLinkingId]	INT NULL,
+	[intLineOfBusinessId]	INT NULL,
 	[intComputeTotalOption] TINYINT NOT NULL DEFAULT(0),
     [dblTotal]        DECIMAL (18, 6) NOT NULL DEFAULT 0,
 	[dblBundleTotal]        DECIMAL (18, 6) NOT NULL DEFAULT 0,
@@ -139,6 +140,7 @@
 	CONSTRAINT [FK_tblAPBillDetail_intInvoiceId] FOREIGN KEY ([intInvoiceId]) REFERENCES tblARInvoice([intInvoiceId]),
 	CONSTRAINT [FK_tblAPBillDetail_tblHDTicket_intTicketId] FOREIGN KEY ([intTicketId]) REFERENCES tblHDTicket([intTicketId]),
 	CONSTRAINT [FK_tblAPBillDetail_tblAPBillReallocation] FOREIGN KEY ([intReallocationId]) REFERENCES tblAPBillReallocation([intReallocationId]),
+	CONSTRAINT [FK_tblAPBillDetail_intLineOfBusinessId] FOREIGN KEY ([intLineOfBusinessId]) REFERENCES tblSMLineOfBusiness([intLineOfBusinessId]),
 	CONSTRAINT [FK_tblAPBillDetail_tblSCTicketDistributionAllocation] FOREIGN KEY ([intTicketDistributionAllocationId]) REFERENCES tblSCTicketDistributionAllocation([intTicketDistributionAllocationId]),
 ) ON [PRIMARY];
 

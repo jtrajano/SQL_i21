@@ -352,6 +352,8 @@ ELSE SAVE TRAN @SavePoint
 				,B.[strTaxLocation]
 				,B.[intVoucherPayableId]
 				,C.intOldPayableId AS intVoucherPayableKey
+				,B.[intLineOfBusinessId]
+				,B.[strLineOfBusiness]
 			FROM tblAPVoucherPayable B
 			INNER JOIN @payablesKey C
 				ON B.intVoucherPayableId = C.intNewPayableId
@@ -496,6 +498,8 @@ ELSE SAVE TRAN @SavePoint
 			,[strTaxPoint]
 			,[intTaxLocationId]
 			,[strTaxLocation]
+			,[intLineOfBusinessId]
+			,[strLineOfBusiness]
 		)
 		VALUES (
 			[intTransactionType]
@@ -623,6 +627,8 @@ ELSE SAVE TRAN @SavePoint
 			,[strTaxPoint]
 			,[intTaxLocationId]
 			,[strTaxLocation]
+			,[intLineOfBusinessId]
+			,[strLineOfBusiness]
 		)
 		OUTPUT
 			SourceData.intVoucherPayableId,
@@ -924,6 +930,8 @@ ELSE SAVE TRAN @SavePoint
 				,D.[strTaxLocation]
 				,D.[intVoucherPayableId]	
 				,B.intVoucherPayableId AS intVoucherPayableKey
+				,B.[intLineOfBusinessId]
+				,B.[strLineOfBusiness]
 			-- FROM tblAPBillDetail A
 			-- INNER JOIN tblAPBill B ON A.intBillId = B.intBillId
 			-- INNER JOIN @voucherIds C ON B.intBillId = C.intId
@@ -1069,6 +1077,8 @@ ELSE SAVE TRAN @SavePoint
 			,[strTaxPoint]
 			,[intTaxLocationId]
 			,[strTaxLocation]
+			,[intLineOfBusinessId]
+			,[strLineOfBusiness]
 		)
 		VALUES(
 			[intTransactionType]
@@ -1194,6 +1204,8 @@ ELSE SAVE TRAN @SavePoint
 			,[strTaxPoint]
 			,[intTaxLocationId]
 			,[strTaxLocation]
+			,[intLineOfBusinessId]
+			,[strLineOfBusiness]
 		)
 		OUTPUT SourceData.intVoucherPayableId, inserted.intVoucherPayableId, SourceData.intVoucherPayableKey INTO @deleted;
 

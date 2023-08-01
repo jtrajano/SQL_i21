@@ -320,6 +320,8 @@ BEGIN
 			,[strTaxPoint]							=	A.strTaxPoint
 			,[intTaxLocationId]						=	A.intTaxLocationId
 			,[strTaxLocation]						=	taxLocation.strLocationName
+			,[strLineOfBusiness]				=	LOB.strLineOfBusiness
+			,[intLineOfBusinessId]			=	A.intLineOfBusinessId
 		FROM @voucherPayable A
 		INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)
 			ON A.intEntityVendorId = vendor.intEntityId
@@ -360,6 +362,7 @@ BEGIN
 		LEFT JOIN vyuCMBankAccount bankAccount ON bankAccount.intBankAccountId = A.intPayFromBankAccountId
 		LEFT JOIN tblCMBank bank ON bank.intBankId = A.intBankId
 		LEFT JOIN vyuCMBankAccount bankAccount2 ON bankAccount2.intBankAccountId = A.intBankAccountId
+		LEFT JOIN tblSMLineOfBusiness LOB ON A.intLineOfBusinessId = LOB.intLineOfBusinessId
 		LEFT JOIN tblCMBorrowingFacility borrowingFacility ON borrowingFacility.intBorrowingFacilityId = A.intBorrowingFacilityId
 		LEFT JOIN tblCMBorrowingFacilityLimit borrowingFacilityLimit ON borrowingFacilityLimit.intBorrowingFacilityLimitId = A.intBorrowingFacilityLimitId
 		LEFT JOIN tblCMBorrowingFacilityLimitDetail borrowingFacilityLimitDetail ON borrowingFacilityLimitDetail.intBorrowingFacilityLimitDetailId = A.intBorrowingFacilityLimitDetailId
@@ -494,6 +497,8 @@ BEGIN
 		,[strTaxPoint]
 		,[intTaxLocationId]
 		,[strTaxLocation]
+		,[strLineOfBusiness]
+		,[intLineOfBusinessId]
 	)
 	VALUES (
 		[intEntityVendorId]		
@@ -620,6 +625,8 @@ BEGIN
 		,[strTaxPoint]
 		,[intTaxLocationId]
 		,[strTaxLocation]
+		,[strLineOfBusiness]
+		,[intLineOfBusinessId]
 	)
 	OUTPUT
 		SourceData.intVoucherPayableId,

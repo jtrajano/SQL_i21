@@ -133,6 +133,8 @@
 	[strTaxPoint] 						NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
 	[intTaxLocationId] 					INT NULL,
 	[strTaxLocation]					NVARCHAR (200) COLLATE Latin1_General_CI_AS NULL,
+	[intLineOfBusinessId] 		INT NULL,
+	[strLineOfBusiness]				NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
 
     [intConcurrencyId]				INT NOT NULL DEFAULT 0
 );

@@ -164,6 +164,6 @@ CREATE TYPE [dbo].[VoucherPayable] AS TABLE
 	 /*Tax Override*/
 	[strTaxPoint] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
 	[intLineOfBusinessId]	INT NULL,
-	[strLineOfBusiness]	NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,	
+	[strLineOfBusiness]	NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,	
 	[intTaxLocationId] INT NULL
 )
