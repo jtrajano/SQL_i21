@@ -54,7 +54,7 @@ AS BEGIN
 	WHERE		a.intCompanyLocationId = @intCompanyLocationId AND
 				c.intDeviceId NOT IN (	SELECT		intDeviceId 
 										FROM		tblSTCheckoutTankVarianceCalculation 
-										WHERE		@intCheckoutId = @intCheckoutId) AND
+										WHERE		intCheckoutId = @intCheckoutId) AND
 				d.intDeviceTypeId = 1 --Tank
 	
 	DECLARE MY_CURSOR CURSOR LOCAL STATIC READ_ONLY FORWARD_ONLY
