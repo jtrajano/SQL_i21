@@ -1766,19 +1766,19 @@ BEGIN TRY
 				AND PCT.dblQuantity > ISNULL(PCT.dblInvoicedQty, 0)
 			GROUP BY PCT.intContractDetailId
 					
-			UNION ALL 
-			SELECT dblQuantity = SUM(LD.dblQuantity)
-				, intContractDetailId = PCT.intContractDetailId
-				, dblInitialQty = SUM(LD.dblQuantity)
-			FROM tblLGLoad L
-			JOIN tblLGLoadDetail LD 
-				ON L.intLoadId = LD.intLoadId 
-				AND ysnPosted = 1 
-				AND L.intShipmentStatus IN (6, 3)
-			JOIN tblCTContractDetail PCT 
-				ON PCT.intContractDetailId = LD.intSContractDetailId 
-				AND PCT.dblQuantity > PCT.dblInvoicedQty
-			GROUP BY PCT.intContractDetailId
+			--UNION ALL 
+			--SELECT dblQuantity = SUM(LD.dblQuantity)
+			--	, intContractDetailId = PCT.intContractDetailId
+			--	, dblInitialQty = SUM(LD.dblQuantity)
+			--FROM tblLGLoad L
+			--JOIN tblLGLoadDetail LD 
+			--	ON L.intLoadId = LD.intLoadId 
+			--	AND ysnPosted = 1 
+			--	AND L.intShipmentStatus IN (6, 3)
+			--JOIN tblCTContractDetail PCT 
+			--	ON PCT.intContractDetailId = LD.intSContractDetailId 
+			--	AND PCT.dblQuantity > PCT.dblInvoicedQty
+			--GROUP BY PCT.intContractDetailId
 
 			-- PARTIAL SHIPMENT
 			UNION ALL
@@ -1804,27 +1804,27 @@ BEGIN TRY
 			) LC		
 			GROUP BY PCT.intContractDetailId
 					
-			UNION ALL 
-			SELECT dblQuantity = SUM(LD.dblQuantity - CASE WHEN ISNULL(LC.dblReceivedQty, 0) = 0 THEN LD.dblDeliveredQuantity ELSE ISNULL(LC.dblReceivedQty, 0) END)
-				, PCT.intContractDetailId
-				, dblInitialQty = SUM(LD.dblQuantity)
-			FROM tblLGLoad L
-			JOIN tblLGLoadDetail LD 
-				ON L.intLoadId = LD.intLoadId 
-				AND ysnPosted = 1 AND L.intShipmentStatus = 4
-			JOIN tblCTContractDetail PCT 
-				ON PCT.intContractDetailId = LD.intSContractDetailId 
-				AND PCT.dblQuantity > PCT.dblInvoicedQty
-			OUTER APPLY (
-				SELECT dblReceivedQty = SUM(LDCL.dblReceivedQty)
-				FROM 
-					tblLGLoadDetailContainerLink LDCL INNER JOIN tblLGLoadContainer LC 
-						ON LDCL.intLoadContainerId = LC.intLoadContainerId
-					WHERE 
-					LD.intLoadDetailId = LDCL.intLoadDetailId 
-					AND ISNULL(LC.ysnRejected, 0) = 0
-			) LC	
-			GROUP BY PCT.intContractDetailId
+			--UNION ALL 
+			--SELECT dblQuantity = SUM(LD.dblQuantity - CASE WHEN ISNULL(LC.dblReceivedQty, 0) = 0 THEN LD.dblDeliveredQuantity ELSE ISNULL(LC.dblReceivedQty, 0) END)
+			--	, PCT.intContractDetailId
+			--	, dblInitialQty = SUM(LD.dblQuantity)
+			--FROM tblLGLoad L
+			--JOIN tblLGLoadDetail LD 
+			--	ON L.intLoadId = LD.intLoadId 
+			--	AND ysnPosted = 1 AND L.intShipmentStatus = 4
+			--JOIN tblCTContractDetail PCT 
+			--	ON PCT.intContractDetailId = LD.intSContractDetailId 
+			--	AND PCT.dblQuantity > PCT.dblInvoicedQty
+			--OUTER APPLY (
+			--	SELECT dblReceivedQty = SUM(LDCL.dblReceivedQty)
+			--	FROM 
+			--		tblLGLoadDetailContainerLink LDCL INNER JOIN tblLGLoadContainer LC 
+			--			ON LDCL.intLoadContainerId = LC.intLoadContainerId
+			--		WHERE 
+			--		LD.intLoadDetailId = LDCL.intLoadDetailId 
+			--		AND ISNULL(LC.ysnRejected, 0) = 0
+			--) LC	
+			--GROUP BY PCT.intContractDetailId
 		) t
 		GROUP BY t.intContractDetailId
 
@@ -2728,7 +2728,7 @@ BEGIN TRY
 											END
 									END
 						FROM @tblOpenContractList cd
-						LEFT JOIN #tmpInTransitLS LG
+						JOIN #tmpInTransitLS LG
 						ON LG.intContractDetailId = cd.intContractDetailId
 						LEFT JOIN #tmpAllocatedContracts allocatedContract
 							ON allocatedContract.intContractDetailId = cd.intContractDetailId
@@ -3538,6 +3538,7 @@ BEGIN TRY
 					FROM @tblOpenContractList cd
 					LEFT JOIN #tmpInTransitLS LG 
 						ON LG.intContractDetailId = cd.intContractDetailId
+						AND cd.intContractTypeId = 1 -- Purchase Only
 						AND @ysnIncludeInTransitM2M = 1
 					LEFT JOIN #tmpAllocatedContracts allocatedContract
 						ON allocatedContract.intContractDetailId = cd.intContractDetailId
