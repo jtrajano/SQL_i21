@@ -32,6 +32,7 @@ DECLARE @dtmDate						DATETIME
 	  , @endgroup						NVARCHAR(50)
 	  , @datatype						NVARCHAR(50)
 	  , @strReportLogId					NVARCHAR(MAX)
+	  , @strCompanyName					NVARCHAR(MAX)
 	  , @strCompanyAddress				NVARCHAR(MAX)
 	  	
 -- Create a table variable to hold the XML data. 		
@@ -131,7 +132,8 @@ IF @dtmDate IS NOT NULL
 ELSE 			  
 	SET @dtmDate = CAST(FLOOR(CAST(GETDATE() AS FLOAT)) AS DATETIME)
 
-SELECT TOP 1 @strCompanyAddress = dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, NULL) COLLATE Latin1_General_CI_AS
+SELECT TOP 1 @strCompanyName = strCompanyName
+		   , @strCompanyAddress = dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, NULL) COLLATE Latin1_General_CI_AS
 FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 
 IF NOT EXISTS(SELECT * FROM tblSRReportLog WHERE strReportLogId = @strReportLogId)
@@ -208,6 +210,7 @@ BEGIN
 
 	UPDATE tblARCustomerInquiryStagingTable
 	SET strCompanyAddress = @strCompanyAddress
+	  , strCompanyName = @strCompanyName
 
 	UPDATE CIST
 	SET strContact = dbo.fnARFormatCustomerAddress(CONTACT.strPhone, CONTACT.strEmail, CUSTOMER.strBillToLocationName, CUSTOMER.strBillToAddress, CUSTOMER.strBillToCity, CUSTOMER.strBillToState, CUSTOMER.strBillToZipCode, CUSTOMER.strBillToCountry, NULL, 0)
