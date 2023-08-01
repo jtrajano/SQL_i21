@@ -104,12 +104,12 @@ BEGIN
 						,dblWeightLoss = CASE WHEN (RI.dblNet - CLNW.dblLinkNetWt) < 0.0
 											THEN (RI.dblNet - CLNW.dblLinkNetWt)
 										ELSE (CLNW.dblLinkNetWt - RI.dblNet) END
-						,dblClaimableWt = CASE WHEN (ABS((RI.dblNet - CLNW.dblLinkNetWt)) > (LD.dblNet * WG.dblFranchise / 100))
+						,dblClaimableWt = CASE WHEN (ABS((RI.dblNet - CLNW.dblLinkNetWt)) > (LC.dblNetWt * WG.dblFranchise / 100))
 											THEN
 												CASE WHEN (RI.dblNet - CLNW.dblLinkNetWt) < 0.0
-													THEN (RI.dblNet - CLNW.dblLinkNetWt) + (LD.dblNet * WG.dblFranchise / 100)
+													THEN (RI.dblNet - CLNW.dblLinkNetWt) + (LC.dblNetWt * WG.dblFranchise / 100)
 												ELSE 
-													(CLNW.dblLinkNetWt - RI.dblNet) - (LD.dblNet * WG.dblFranchise / 100)
+													(CLNW.dblLinkNetWt - RI.dblNet) - (LC.dblNetWt * WG.dblFranchise / 100)
 												END
 											ELSE 0.0 END
 						,dblSeqPrice = AD.dblSeqPrice
