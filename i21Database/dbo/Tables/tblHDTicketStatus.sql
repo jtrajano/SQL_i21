@@ -11,6 +11,8 @@
 	[ysnDefaultActivity] [bit] NULL DEFAULT 0,
 	[ysnDefaultProject] [bit] NULL DEFAULT 0,
 	[ysnDefaultOpportunity] [bit] NULL DEFAULT 0,
+    [ysnSOW] [bit] NOT NULL DEFAULT 0,
+    [ysnDefaultSOW] [bit] NOT NULL DEFAULT 0,
 	[strIcon] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strFontColor] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strBackColor] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
