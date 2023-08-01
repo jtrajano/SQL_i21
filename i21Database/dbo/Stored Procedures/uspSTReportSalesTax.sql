@@ -67,7 +67,8 @@ BEGIN
 
 	DECLARE @CategorySalesTotalDetails AS TABLE (intStoreId INT, 
 		intStoreNo INT,
-		dblTotalSalesAmountRaw DECIMAL(18, 2),
+		dblTaxableTotalSales DECIMAL(18, 2),
+		dblNonTaxableTotalSales DECIMAL(18, 2),
 		intItemsSold INT,
 		dblTaxableTotalTax DECIMAL(18, 2),
 		dblTaxableNetSales DECIMAL(18, 2),
@@ -76,8 +77,8 @@ BEGIN
 	)
 		
 	DECLARE @SummaryTotalDetails AS TABLE (intStoreId INT
-			, dblTaxableNetsales NUMERIC(18, 6)
-			, dblNonTaxableNetsales NUMERIC(18, 6)
+			, dblTaxableTotalSales NUMERIC(18, 6)
+			, dblNonTaxableTotalSales NUMERIC(18, 6)
 		)
 
 	INSERT INTO @tmpStores
@@ -410,7 +411,8 @@ BEGIN
 					INNER JOIN tblSTCheckoutDepartmetTotals T1 ON T0.intCheckoutId = T1.intCheckoutId
 					INNER JOIN tblSTStore T2 ON T0.intStoreId = T2.intStoreId
 					INNER JOIN tblICItem T3 ON T1.intItemId = T3.intItemId
-					INNER JOIN tblICCategoryLocation T4 ON T3.intCategoryId = T4.intCategoryId
+					INNER JOIN tblICItemLocation T8 ON T3.intItemId = T8.intItemId
+					INNER JOIN tblICCategoryLocation T4 ON T3.intCategoryId = T4.intCategoryId and T4.intLocationId = T8.intLocationId
 					INNER JOIN tblICCategory T5 ON T4.intCategoryId = T5.intCategoryId
 					--INNER JOIN tblSTCheckoutSalesTaxTotals T6 ON T0.intCheckoutId = T6.intCheckoutId
 					INNER JOIN (
@@ -470,7 +472,8 @@ BEGIN
 					INNER JOIN tblSTCheckoutDepartmetTotals T1 ON T0.intCheckoutId = T1.intCheckoutId
 					INNER JOIN tblSTStore T2 ON T0.intStoreId = T2.intStoreId
 					INNER JOIN tblICItem T3 ON T1.intItemId = T3.intItemId
-					INNER JOIN tblICCategoryLocation T4 ON T3.intCategoryId = T4.intCategoryId
+					INNER JOIN tblICItemLocation T8 ON T3.intItemId = T8.intItemId
+					INNER JOIN tblICCategoryLocation T4 ON T3.intCategoryId = T4.intCategoryId and T4.intLocationId = T8.intLocationId
 					INNER JOIN tblICCategory T5 ON T4.intCategoryId = T5.intCategoryId
 					--INNER JOIN tblSTCheckoutSalesTaxTotals T6 ON T0.intCheckoutId = T6.intCheckoutId
 					INNER JOIN (
@@ -537,7 +540,8 @@ BEGIN
 					INNER JOIN tblSTCheckoutDepartmetTotals T1 ON T0.intCheckoutId = T1.intCheckoutId
 					INNER JOIN tblSTStore T2 ON T0.intStoreId = T2.intStoreId
 					INNER JOIN tblICItem T3 ON T1.intItemId = T3.intItemId
-					INNER JOIN tblICCategoryLocation T4 ON T3.intCategoryId = T4.intCategoryId
+					INNER JOIN tblICItemLocation T9 ON T3.intItemId = T9.intItemId
+					INNER JOIN tblICCategoryLocation T4 ON T3.intCategoryId = T4.intCategoryId and T4.intLocationId = T9.intLocationId
 					INNER JOIN tblICCategory T5 ON T4.intCategoryId = T5.intCategoryId
 					LEFT JOIN @tmpStoreGroup T6 ON T0.intStoreId = T6.intStoreId
 					--INNER JOIN tblSTCheckoutSalesTaxTotals T7 ON T0.intCheckoutId = T7.intCheckoutId
@@ -598,7 +602,8 @@ BEGIN
 					INNER JOIN tblSTCheckoutDepartmetTotals T1 ON T0.intCheckoutId = T1.intCheckoutId
 					INNER JOIN tblSTStore T2 ON T0.intStoreId = T2.intStoreId
 					INNER JOIN tblICItem T3 ON T1.intItemId = T3.intItemId
-					INNER JOIN tblICCategoryLocation T4 ON T3.intCategoryId = T4.intCategoryId
+					INNER JOIN tblICItemLocation T9 ON T3.intItemId = T9.intItemId
+					INNER JOIN tblICCategoryLocation T4 ON T3.intCategoryId = T4.intCategoryId and T4.intLocationId = T9.intLocationId
 					INNER JOIN tblICCategory T5 ON T4.intCategoryId = T5.intCategoryId
 					LEFT JOIN @tmpStoreGroup T6 ON T0.intStoreId = T6.intStoreId
 					--INNER JOIN tblSTCheckoutSalesTaxTotals T7 ON T0.intCheckoutId = T7.intCheckoutId
@@ -642,7 +647,8 @@ BEGIN
 		BEGIN 
 			INSERT INTO @CategorySalesTotalDetails
 			SELECT intStoreId, intStoreNo, 
-				ISNULL(SUM(dblTotalSalesAmountRaw), 0) AS dblTotalSalesAmountRaw,
+				ISNULL(SUM(dblTotalSalesAmountRaw), 0) AS dblTaxableTotalSales,
+				0 AS dblNonTaxableTotalSales,
 				ISNULL(SUM(intItemsSold), 0) AS intItemsSold,
 				ISNULL(AVG(dblTotalTax), 0) AS dblTaxableTotalTax,
 				ISNULL(SUM(dblTotalSalesAmountRaw), 0) - ISNULL(AVG(dblTotalTax), 0) AS dblTaxableNetSales,
@@ -653,7 +659,8 @@ BEGIN
 			GROUP BY intStoreId, intStoreNo
 			UNION
 			SELECT intStoreId, intStoreNo, 
-				ISNULL(SUM(dblTotalSalesAmountRaw), 0) AS dblTotalSalesAmountRaw,
+				0 AS dblTaxableTotalSales,
+				ISNULL(SUM(dblTotalSalesAmountRaw), 0) AS dblNonTaxableTotalSales,
 				ISNULL(SUM(intItemsSold), 0) AS intItemsSold,
 				0 AS dblTaxableTotalTax,
 				0 AS dblTaxableNetSales,
@@ -667,7 +674,8 @@ BEGIN
 		BEGIN
 			INSERT INTO @CategorySalesTotalDetails
 			SELECT intStoreId, intStoreNo, 
-				ISNULL(SUM(dblTotalSalesAmountRaw), 0) AS dblTotalSalesAmountRaw,
+				ISNULL(SUM(dblTotalSalesAmountRaw), 0) AS dblTaxableTotalSales,
+				0 AS dblNonTaxableTotalSales,
 				ISNULL(SUM(intItemsSold), 0) AS intItemsSold,
 				ISNULL(AVG(dblTotalTax), 0) AS dblTaxableTotalTax,
 				ISNULL(SUM(dblTotalSalesAmountRaw), 0) - ISNULL(AVG(dblTotalTax), 0) AS dblTaxableNetSales,
@@ -678,7 +686,8 @@ BEGIN
 			GROUP BY intStoreId, intStoreNo
 			UNION
 			SELECT intStoreId, intStoreNo, 
-				ISNULL(SUM(dblTotalSalesAmountRaw), 0) AS dblTotalSalesAmountRaw,
+				0 AS dblTaxableTotalSales,
+				ISNULL(SUM(dblTotalSalesAmountRaw), 0) AS dblNonTaxableTotalSales,
 				ISNULL(SUM(intItemsSold), 0) AS intItemsSold,
 				0 AS dblTaxableTotalTax,
 				0 AS dblTaxableNetSales,
@@ -691,18 +700,19 @@ BEGIN
 
 		IF @strReportName IN ('Merchandise Sales', 'Merchandise Sales Total')
 		BEGIN
-			SELECT intStoreId, intStoreNo, SUM(dblTotalSalesAmountRaw) AS dblTotalSalesAmountRaw
+			SELECT intStoreId, intStoreNo
+			, SUM(dblNonTaxableTotalSales) + SUM(dblTaxableTotalSales) AS dblTotalSalesAmountRaw
 			, SUM(intItemsSold) AS intItemsSold
 			, (SUM(dblTaxableTotalTax)) AS dblTotalTax
-			, (SUM(dblTotalSalesAmountRaw) - SUM(dblTaxableTotalTax)) AS dblTotalNetSales
+			, ((SUM(dblNonTaxableTotalSales) + SUM(dblTaxableTotalSales)) - SUM(dblTaxableTotalTax)) AS dblTotalNetSales
 			FROM @CategorySalesTotalDetails
 			GROUP BY intStoreId, intStoreNo
 		END
 		IF @strReportName IN ('Summary', 'Sales Tax Review')
 		BEGIN
 			INSERT INTO @SummaryTotalDetails
-			SELECT intStoreId, SUM(dblTaxableNetSales) as dblTaxableNetSales,
-				SUM(dblNonTaxableNetSales) as dblNonTaxableNetSales
+			SELECT intStoreId, SUM(dblTaxableTotalSales) as dblTaxableTotalSales,
+				SUM(dblNonTaxableTotalSales) as dblNonTaxableTotalSales
 			FROM @CategorySalesTotalDetails
 			GROUP BY intStoreId
 		END
@@ -1181,8 +1191,8 @@ BEGIN
 			, AVG(T10.dblQuantity) AS dblQuantity
 			, AVG(T10.dblAmount) AS dblAmount
 			, SUM(T5.dblTax) AS dblTax
-			, T9.dblNonTaxableNetsales AS dblNonTaxable
-			, T9.dblTaxableNetsales AS dblTaxable
+			, T9.dblNonTaxableTotalSales AS dblNonTaxable
+			, T9.dblTaxableTotalSales AS dblTaxable
 			, T5.dblFET
 			, T5.dblSET
 			, T5.dblSST
@@ -1238,7 +1248,7 @@ BEGIN
 			AND T0.intStoreId IN (SELECT Item FROM @tmpStores)
 		GROUP BY T5.ysnTaxExempt, T5.dblFET, T5.dblSET, T5.dblSST
 		, T8.strType
-		, T9.dblNonTaxableNetsales, T9.dblTaxableNetsales
+		, T9.dblNonTaxableTotalSales, T9.dblTaxableTotalSales
 	END
 	/********** Summary End ***********/
 	
@@ -1253,14 +1263,15 @@ BEGIN
 				, dblGrossSales
 				, SUM(dblSET) AS dblSET
 				, dblNonTaxable = AVG(dblNonTaxable)
-				, SUM(dblTax) AS dblTax
+				, SUM(dblTax) + AVG(dblTaxable) AS dblTax
 				, (dblSSTRate / 100) AS dblSSTRate
 			FROM (
 				SELECT MT.intStoreId
 					, AVG(MT.dblAmount) AS dblGrossSales
 					, CASE WHEN MT.strType = 'State Excise Tax' THEN SUM(dblSET) ELSE 0 END AS dblSET
 					, MT.dblNonTaxable
-					, SUM(MT.dblTax) AS dblTax
+					, MT.dblTaxable
+					, CASE WHEN MT.strType = 'State Sales Tax' THEN SUM(MT.dblTax) ELSE 0 END AS dblTax
 					, (SELECT TOP 1 ISNULL(dblRate, 0)
 						FROM tblSMTaxCodeRate ST1
 						INNER JOIN tblSMTaxCode ST2 ON ST1.intTaxCodeId = ST2.intTaxCodeId
@@ -1272,7 +1283,8 @@ BEGIN
 						, T8.strType
 						, T10.dblAmount
 						, T5.dblTax
-						, T11.dblNonTaxableNetsales AS dblNonTaxable
+						, T11.dblNonTaxableTotalSales AS dblNonTaxable
+						, T11.dblTaxableTotalSales AS dblTaxable
 						, T5.dblSET
 					FROM tblSTCheckoutHeader T0
 					INNER JOIN tblSTCheckoutPumpTotals T1 ON T0.intCheckoutId = T1.intCheckoutId
@@ -1328,7 +1340,8 @@ BEGIN
 						, T8.strType
 						, T1.dblQuantity
 						, T10.dblAmount
-						, T11.dblNonTaxableNetsales
+						, T11.dblNonTaxableTotalSales
+						, T11.dblTaxableTotalSales
 						, T5.dblTax
 						, T5.dblSET
 						, T8.strType
@@ -1337,6 +1350,7 @@ BEGIN
 					, MT.strType
 					, MT.dblSET
 					, MT.dblNonTaxable
+					, MT.dblTaxable
 			) T
 			GROUP BY intStoreId
 				, dblGrossSales
