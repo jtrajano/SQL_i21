@@ -163,6 +163,7 @@ BEGIN
 			,[intTicketId]
 			,[strAccountIdInventory]
 			,[strAccountIdInTransit]
+			,[dblComputedValue]
 			,[dblForexValue]
 	)
 	SELECT	[intItemId]							= @intItemId
@@ -214,6 +215,7 @@ BEGIN
 			,[intTicketId]						= @intTicketId
 			,[strAccountIdInventory]			= glAccountIdInventory.strAccountId
 			,[strAccountIdInTransit]			= glAccountIdInTransit.strAccountId
+			,[dblComputedValue]                 = dbo.fnMultiply(ISNULL(@dblQty, 0), ISNULL(@dblCost, 0)) + ISNULL(@dblValue, 0) 
 			,[dblForexValue]					= ISNULL(@dblForexValue, 0)
 	FROM	tblICItem i 
 			CROSS APPLY [dbo].[fnICGetCompanyLocation](@intItemLocationId, @intInTransitSourceLocationId) [location]
