@@ -772,6 +772,7 @@ BEGIN
 			,@TaxLocationId					= @TaxLocationId
 			,@TaxPoint						= @TaxPoint
 			,@Surcharge						= @Surcharge
+			,@ReleasePONumber				= @ReleasePONumber
 
 			,@ItemId						= @ItemId
 			,@ItemPrepayTypeId				= @ItemPrepayTypeId

@@ -120,6 +120,7 @@ CREATE TABLE #INVOICES (
 	,strLogoType					NVARCHAR(10)
 	,intItemId						INT 			NULL
 	,strTaxNumber					NVARCHAR(MAX)
+	,strReleasePONumber				NVARCHAR(25)	NULL
 )
 
 DECLARE 
@@ -299,6 +300,7 @@ INSERT INTO #INVOICES (
 	,dblPercentFull
 	,intItemId
 	,strTaxNumber
+	,strReleasePONumber
 )
 SELECT 
 	 intInvoiceId					= INV.intInvoiceId
@@ -400,6 +402,7 @@ SELECT
 	, dblPercentFull				= INVOICEDETAIL.dblPercentFull
 	, intItemId						= INVOICEDETAIL.intItemId
 	, strTaxNumber					= CAST('' AS NVARCHAR(MAX))
+	,strReleasePONumber				= INV.strReleasePONumber
 FROM dbo.tblARInvoice INV
 INNER JOIN #STANDARDINVOICES SELECTEDINV ON INV.intInvoiceId = SELECTEDINV.intInvoiceId
 INNER JOIN #LOCATIONS L ON INV.intCompanyLocationId = L.intCompanyLocationId
@@ -873,6 +876,7 @@ INSERT INTO tblARInvoiceReportStagingTable WITH (TABLOCK) (
 	,dblServiceChargeAPR
 	,strLogoType
 	,strTaxNumber
+	,strReleasePONumber
 )
 SELECT 
 	 intInvoiceId
@@ -977,6 +981,7 @@ SELECT
 	,dblServiceChargeAPR
 	,strLogoType
 	,strTaxNumber
+	,strReleasePONumber
 FROM #INVOICES
 
 --UPDATE STAGING
