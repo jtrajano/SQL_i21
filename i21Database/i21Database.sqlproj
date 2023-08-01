@@ -1850,6 +1850,8 @@
     <Build Include="dbo\Tables\tblICInventoryValueAdjustmentLog.sql" />
     <Build Include="dbo\Functions\fnCreateInTransitValueAdjDescription.sql" />
     <None Include="Scripts\Post-Deployment\HD\DefaultData\4_SOWTypeDefaults.sql" />
+    <Build Include="dbo\Tables\tblHDStatementOfWorkType.sql" />
+    <Build Include="dbo\Tables\tblHDStatementOfWorkTypeSubtype.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
