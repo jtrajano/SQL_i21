@@ -31,6 +31,10 @@ BEGIN
 		END
 	ELSE
 		BEGIN
+			DELETE A 
+			FROM [tblSCRailSheetTicket] A
+			INNER JOIN DELETED B ON A.intTicketId = B.intTicketId
+			
 			DELETE A
 			FROM [tblSCTicket] A
 			INNER JOIN DELETED B ON A.intTicketId = B.intTicketId
