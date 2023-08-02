@@ -365,8 +365,8 @@ BEGIN
 				,dblExchangeRate					= 1
 				,strInventoryTransactionTypeName	= TransType.strName
 				,strTransactionForm					= @strTransactionForm
-				,intPurchaseTaxAccountId			= ISNULL(dbo.fnGetLocationAwareGLAccount(TaxCode.intPurchaseTaxAccountId, Receipt.intLocationId), TaxCode.intPurchaseTaxAccountId) 
-				,intAPClearingAccountId				= ISNULL(dbo.fnGetLocationAwareGLAccount(TaxCode.intAPClearingAccountId, Receipt.intLocationId), TaxCode.intAPClearingAccountId) 
+				,intPurchaseTaxAccountId			= dbo.fnGetLocationAwareAPTaxGLAccount(TaxCode.intPurchaseTaxAccountId, Receipt.intLocationId)
+				,intAPClearingAccountId				= dbo.fnGetLocationAwareAPTaxGLAccount(TaxCode.intAPClearingAccountId, Receipt.intLocationId)
 				,dblForexRate						= 1
 				,strRateType						= NULL 
 				,strItemNo							= TaxCode.strTaxCode

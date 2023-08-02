@@ -45,8 +45,8 @@ BEGIN
 	SELECT 
 		tc.strTaxCode
 		, tc.ysnAddToCost
-		, ISNULL(dbo.fnGetLocationAwareGLAccount(tc.intPurchaseTaxExemptionAccountId, r.intLocationId), tc.intPurchaseTaxExemptionAccountId) --tc.intPurchaseTaxExemptionAccountId
-		, ISNULL(dbo.fnGetLocationAwareGLAccount(tc.intPurchaseTaxAccountId, r.intLocationId), tc.intPurchaseTaxAccountId) --tc.intPurchaseTaxAccountId
+		, dbo.fnGetLocationAwareAPTaxGLAccount(tc.intPurchaseTaxExemptionAccountId, r.intLocationId) --tc.intPurchaseTaxExemptionAccountId
+		, dbo.fnGetLocationAwareAPTaxGLAccount(tc.intPurchaseTaxAccountId, r.intLocationId) --tc.intPurchaseTaxAccountId
 		, i.intItemId
 		, r.intInventoryReceiptId
 		, ri.intInventoryReceiptItemId
@@ -92,8 +92,8 @@ BEGIN
 	SELECT 
 		tc.strTaxCode
 		, tc.ysnAddToCost
-		, ISNULL(dbo.fnGetLocationAwareGLAccount(tc.intPurchaseTaxExemptionAccountId, r.intLocationId), tc.intPurchaseTaxExemptionAccountId) --tc.intPurchaseTaxExemptionAccountId
-		, ISNULL(dbo.fnGetLocationAwareGLAccount(tc.intPurchaseTaxAccountId, r.intLocationId), tc.intPurchaseTaxAccountId) --tc.intPurchaseTaxAccountId
+		, dbo.fnGetLocationAwareAPTaxGLAccount(tc.intPurchaseTaxExemptionAccountId, r.intLocationId) --tc.intPurchaseTaxExemptionAccountId
+		, dbo.fnGetLocationAwareAPTaxGLAccount(tc.intPurchaseTaxAccountId, r.intLocationId) --tc.intPurchaseTaxAccountId
 		, i.intItemId
 		, r.intInventoryReceiptId
 		, ri.intInventoryReceiptChargeId
@@ -188,7 +188,7 @@ BEGIN
 			ReceiptItem.intItemId
 			,ItemLocation.intItemLocationId
 			,NULL
-			,ISNULL(dbo.fnGetLocationAwareGLAccount(TaxCode.intPurchaseTaxAccountId, Receipt.intLocationId), TaxCode.intPurchaseTaxAccountId)
+			,dbo.fnGetLocationAwareAPTaxGLAccount(TaxCode.intPurchaseTaxAccountId, Receipt.intLocationId)
 			,@strBatchId
 	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
@@ -210,7 +210,8 @@ BEGIN
 			,CASE 
 				WHEN TaxCode.ysnExpenseAccountOverride = 1 THEN 
 					dbo.fnGetItemGLAccount(ChargeItem.intChargeId, ItemLocation.intItemLocationId, @AccountCategory_OtherChargeExpense) 
-				ELSE ISNULL(dbo.fnGetLocationAwareGLAccount(TaxCode.intPurchaseTaxAccountId, Receipt.intLocationId), TaxCode.intPurchaseTaxAccountId) 
+				ELSE 
+					dbo.fnGetLocationAwareAPTaxGLAccount(TaxCode.intPurchaseTaxAccountId, Receipt.intLocationId)
 			END
 			,@strBatchId
 	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge ChargeItem
@@ -373,9 +374,7 @@ BEGIN
 								dbo.fnGetItemGLAccount(item.intItemId, ItemLocation.intItemLocationId, 'Inventory') 
 							ELSE 
 								--ISNULL(dbo.fnGetLocationAwareGLAccount(TaxCode.intPurchaseTaxAccountId, Receipt.intLocationId), TaxCode.intPurchaseTaxAccountId) 
-
-								dbo.fnGetLocationAwareGLAccount(TaxCode.intPurchaseTaxAccountId, Receipt.intLocationId)
-								
+								dbo.fnGetLocationAwareAPTaxGLAccount(TaxCode.intPurchaseTaxAccountId, Receipt.intLocationId)								
 						END
 					END
 				,intAPClearingAccountId				= CAST(NULL AS INT) 
@@ -446,10 +445,10 @@ BEGIN
 									dbo.fnGetItemGLAccount(item.intItemId, ItemLocation.intItemLocationId, 'Inventory')
 								ELSE 
 									--ex.intPurchaseTaxExemptionAccountId
-									ISNULL(dbo.fnGetLocationAwareGLAccount(ex.intPurchaseTaxExemptionAccountId, Receipt.intLocationId), ex.intPurchaseTaxExemptionAccountId) 
+									dbo.fnGetLocationAwareAPTaxGLAccount(ex.intPurchaseTaxExemptionAccountId, Receipt.intLocationId)
 								END
 							ELSE 
-								ISNULL(dbo.fnGetLocationAwareGLAccount(TaxCode.intPurchaseTaxAccountId, Receipt.intLocationId), TaxCode.intPurchaseTaxAccountId) 
+								dbo.fnGetLocationAwareAPTaxGLAccount(TaxCode.intPurchaseTaxAccountId, Receipt.intLocationId)
 							END
 					END
 				,intAPClearingAccountId				= CAST(NULL AS INT) 
@@ -517,10 +516,10 @@ BEGIN
 										dbo.fnGetItemGLAccount(item.intItemId, ItemLocation.intItemLocationId, 'Inventory')
 									ELSE 
 										--ex.intPurchaseTaxExemptionAccountId
-										ISNULL(dbo.fnGetLocationAwareGLAccount(ex.intPurchaseTaxExemptionAccountId, Receipt.intLocationId), ex.intPurchaseTaxExemptionAccountId)
+										dbo.fnGetLocationAwareAPTaxGLAccount(ex.intPurchaseTaxExemptionAccountId, Receipt.intLocationId)
 									END
 								ELSE 
-									ISNULL(dbo.fnGetLocationAwareGLAccount(TaxCode.intPurchaseTaxAccountId, Receipt.intLocationId), TaxCode.intPurchaseTaxAccountId)
+									dbo.fnGetLocationAwareAPTaxGLAccount(TaxCode.intPurchaseTaxAccountId, Receipt.intLocationId)
 							END
 					END
 				,intAPClearingAccountId				= CAST(NULL AS INT) 
@@ -578,8 +577,8 @@ BEGIN
 				,dblExchangeRate					= 1
 				,strInventoryTransactionTypeName	= TransType.strName
 				,strTransactionForm					= @strTransactionForm
-				,intPurchaseTaxAccountId			= ISNULL(dbo.fnGetLocationAwareGLAccount(TaxCode.intPurchaseTaxAccountId, Receipt.intLocationId), TaxCode.intPurchaseTaxAccountId) 
-				,intAPClearingAccountId				= ISNULL(dbo.fnGetLocationAwareGLAccount(TaxCode.intAPClearingAccountId, Receipt.intLocationId), TaxCode.intAPClearingAccountId) 
+				,intPurchaseTaxAccountId			= dbo.fnGetLocationAwareAPTaxGLAccount(TaxCode.intPurchaseTaxAccountId, Receipt.intLocationId)
+				,intAPClearingAccountId				= dbo.fnGetLocationAwareAPTaxGLAccount(TaxCode.intAPClearingAccountId, Receipt.intLocationId)
 				,dblForexRate						= 1
 				,strRateType						= NULL 
 				,strItemNo							= TaxCode.strTaxCode
@@ -1234,7 +1233,7 @@ BEGIN
 		INNER JOIN dbo.tblSMTaxCode TaxCode
 			ON TaxCode.intTaxCodeId = ReceiptTaxes.intTaxCodeId
 		CROSS APPLY (
-			SELECT intAccountId = ISNULL(dbo.fnGetLocationAwareGLAccount(TaxCode.intAPClearingAccountId, Receipt.intLocationId), TaxCode.intAPClearingAccountId) 
+			SELECT intAccountId = dbo.fnGetLocationAwareAPTaxGLAccount(TaxCode.intAPClearingAccountId, Receipt.intLocationId)
 		) apClearing
 
 		INNER JOIN tblGLAccount ga
