@@ -170,7 +170,7 @@ USING (
 				,Aggregrate_OnOrderQty = SUM(o.dblQty)
 		FROM	@ItemsToIncreaseOnOrder o
 				INNER JOIN tblICItem i
-					ON o.intItemId = o.intItemId 
+					ON o.intItemId = i.intItemId 
 		WHERE	ISNULL(i.ysnSeparateStockForUOMs, 0) = 1
 				OR i.strLotTracking LIKE 'Yes%'
 		GROUP BY 

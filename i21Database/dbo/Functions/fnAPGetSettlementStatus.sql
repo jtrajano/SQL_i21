@@ -30,6 +30,7 @@ BEGIN
 					INNER JOIN tblSCTicket TKT ON BillDtl.intScaleTicketId = TKT.intTicketId
 				WHERE  PYMT.intEntityVendorId = TKT.intEntityId 
 					AND PYMT.strPaymentRecordNum = @strTransactionId
+					AND Bill.intTransactionType NOT IN (2,13)
 				UNION ALL
 				SELECT TOP 1 1 
 				FROM tblAPPayment PYMT 
