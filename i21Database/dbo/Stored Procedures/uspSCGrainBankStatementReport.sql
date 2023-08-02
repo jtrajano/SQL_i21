@@ -104,7 +104,7 @@ begin
 
 	-- Reset the start date time
 	SELECT @dtmStartDate = CAST(CAST(@dtmStartDate AS DATE) AS DATETIME)
-	SELECT @dtmEndDate = CAST(CAST(@dtmEndDate AS DATE) AS DATETIME)
+	SELECT @dtmEndDate = CAST(CAST(@dtmEndDate AS DATE) AS DATETIME)  + '23:59:59'
 
 	-- #SCENARIO TO CHECK - MANUAL DISTRIBUTION FOR GB
 	-- #SCENARIO TO CHECK - TICKET SPLIT
