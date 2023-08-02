@@ -1353,6 +1353,7 @@
     <Build Include="dbo\Stored Procedures\uspTRFreightCommissionDriverTotal.sql" />
     <Build Include="dbo\Views\vyuAPVoucherIdWithDM.sql" />
     <Build Include="dbo\Views\vyuSTPromotionItemListDetail.sql" />
+    <Build Include="dbo\Functions\fnGetLocationAwareAPTaxGLAccount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
