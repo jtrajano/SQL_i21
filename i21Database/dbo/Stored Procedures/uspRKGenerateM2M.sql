@@ -3777,7 +3777,11 @@ BEGIN TRY
 						, dblCosts  = SUM(CASE WHEN s.strTransactionType = 'Inventory Receipt' 
 											THEN IRCost.dblTotalCost / 
 												CASE WHEN i.strLotTracking <> 'No' 
-													THEN (ISNULL(IRItem.dblOpenReceive, 0) / ABS(ISNULL(s.dblQuantity, 1)))
+													THEN
+														CASE WHEN  ISNULL(IRItem.dblOpenReceive, 0) < ISNULL(IRH.dblTotalLotQty, 0)
+															THEN (ISNULL(IRH.dblTotalLotQty, 0) / ISNULL(IRItem.dblOpenReceive, 1))
+															ELSE (ISNULL(IRItem.dblOpenReceive, 0) / ABS(ISNULL(s.dblQuantity, 1)))
+															END
 													ELSE 1 END
 											WHEN s.strTransactionType = 'Inventory Shipment' THEN ISCost.dblTotalCost
 											ELSE 0 END * CASE WHEN ISNULL(s.dblQuantity , 0) < 0 THEN 1 ELSE -1 END) 
@@ -3895,7 +3899,9 @@ BEGIN TRY
 						AND IRItem.intInventoryReceiptItemId = s.intTransactionDetailId
 						AND s.strTransactionType = 'Inventory Receipt'
 						AND i.strLotTracking <> 'No' 
-					WHERE i.intCommodityId = @intCommodityId AND ISNULL(s.dblQuantity, 0) <>0 
+					LEFT JOIN tblICInventoryReceipt IRH
+						ON IRH.intInventoryReceiptId = IRItem.intInventoryReceiptId
+					WHERE i.intCommodityId = @intCommodityId AND ISNULL(s.dblQuantity, 0) <> 0 
 						AND s.intLocationId = ISNULL(@intLocationId, s.intLocationId) 
 						AND ISNULL(strTicketStatus, '') <> 'V'
 						AND convert(DATETIME, CONVERT(VARCHAR(10), s.dtmDate, 110), 110)< = convert(datetime, @dtmEndDate)
