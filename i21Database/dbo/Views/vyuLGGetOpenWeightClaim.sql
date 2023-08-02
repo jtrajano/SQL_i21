@@ -86,6 +86,7 @@ SELECT
 	,strPurchasingGroupName = PG.strName
 	,strPurchasingGroupDesc = PG.strDescription
 	,dtmReceiptDate = ISNULL(PC.dtmReceiptDate, IR.dtmReceiptDate)
+	,strClaimRemarks = PC.strClaimRemarks
 FROM tblLGPendingClaim PC
 	JOIN tblLGLoad L ON L.intLoadId = PC.intLoadId
 	JOIN tblICUnitMeasure WUOM ON WUOM.intUnitMeasureId = PC.intWeightUnitMeasureId

@@ -40,6 +40,7 @@ SELECT
 	,dblSeqPriceInWeightUOM = dblSeqPriceConversionFactoryWeightUOM * WCD.dblUnitPrice
 	,dblSeqPrice = WCD.dblUnitPrice
 	,WCD.intConcurrencyId
+	,strClaimRemarks = WCD.strClaimRemarks
 FROM
 	tblLGWeightClaimDetail WCD
 	LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = WCD.intContractDetailId

@@ -29,6 +29,7 @@
 	[dtmDateAdded] DATETIME NULL,
 	[intConcurrencyId] INT NOT NULL DEFAULT ((1)),
 	[dtmReceiptDate] DATETIME NULL,
+	[strClaimRemarks] NVARCHAR(1024) COLLATE Latin1_General_CI_AS NULL,
 	
 	CONSTRAINT [PK_tblLGPendingClaim_intPendingClaimId] PRIMARY KEY ([intPendingClaimId]), 
 	CONSTRAINT [FK_tblLGPendingClaim_tblLGLoad] FOREIGN KEY ([intLoadId]) REFERENCES tblLGLoad([intLoadId]),
