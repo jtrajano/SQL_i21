@@ -6,6 +6,8 @@
 	,dblUnits numeric(38, 20)
 	,intConcurrencyId int default(1)
 
-	,constraint fk_tblSCRailSheetTicketApply_tblSCRailSheetTicket_intRailSheetTicketId foreign key (intRailSheetTicketId) references tblSCRailSheetTicket(intRailSheetTicketId) on delete cascade
-	,constraint fk_tblSCRailSheetTicketApply_tblSCRailSheetApply_intintRailSheetApplyId foreign key (intRailSheetApplyId) references tblSCRailSheetApply(intRailSheetApplyId) on delete cascade
+	,constraint fk_tblSCRailSheetTicketApply_tblSCRailSheetTicket_intRailSheetTicketId foreign key (intRailSheetTicketId) references tblSCRailSheetTicket(intRailSheetTicketId)
+	,constraint fk_tblSCRailSheetTicketApply_tblSCRailSheetApply_intintRailSheetApplyId foreign key (intRailSheetApplyId) references tblSCRailSheetApply(intRailSheetApplyId) 
 )
+
+

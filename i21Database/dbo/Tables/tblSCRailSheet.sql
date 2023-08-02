@@ -29,3 +29,25 @@
 
 	,constraint UQ_tblSCRailSheet_strRailSheetNo unique (strRailSheetNo)
 )
+
+GO
+
+CREATE TRIGGER [dbo].[trg_tblSCRailSheet] ON [dbo].[tblSCRailSheet]
+INSTEAD OF DELETE  
+AS
+BEGIN
+
+	DELETE A
+	FROM [tblSCRailSheetTicket] A
+	INNER JOIN DELETED B ON A.intRailSheetId = B.intRailSheetId
+
+	DELETE A
+	FROM [tblSCRailSheetApply] A
+	INNER JOIN DELETED B ON A.intRailSheetId = B.intRailSheetId
+
+	DELETE A
+	FROM [tblSCRailSheet] A
+	INNER JOIN DELETED B ON A.intRailSheetId = B.intRailSheetId
+	
+END
+GO
