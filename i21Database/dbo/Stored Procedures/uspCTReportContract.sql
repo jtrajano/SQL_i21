@@ -502,7 +502,10 @@ BEGIN TRY
 			,strTeaCaption							= @strCompanyName + ' - '+TP.strContractType+' '  + @rtContract
 			,strAtlasDeclaration					= @rtWeConfirmHaving			   + CASE WHEN CH.intContractTypeId = 1	   THEN ' '+@rtBoughtFrom+' '   ELSE ' '+@rtSoldTo+' ' END + @rtYouAsFollows + ':'
 			,strPurchaseOrder						= TP.strContractType + ' '+@rtOrder+':- ' + CASE WHEN CM.strCommodityCode = 'Tea' THEN SQ.strERPPONumber ELSE NULL        END
-			,dtmContractDate						= CH.dtmContractDate
+			,dtmContractDate						= CASE WHEN @strCompanyName LIKE '%Walter Matter%' THEN ISNULL(AD.dtmHistoryCreated, CH.dtmContractDate)
+														   WHEN @strCompanyName	LIKE '%Walter%' THEN ISNULL(AD.dtmHistoryCreated, CH.dtmContractDate)
+													  ELSE  CH.dtmContractDate END
+
 			,strAssociation							= @rtStrAssociation1 + ' '+ dbo.fnCTGetTranslation('ContractManagement.view.Associations',AN.intAssociationId,@intLaguageId,'Printable Contract Text',AN.strComment)
 													+ ' ('+dbo.fnCTGetTranslation('ContractManagement.view.Associations',AN.intAssociationId,@intLaguageId,'Name',AN.strName)+')'+' '+@rtStrAssociation2+'.'
 			,strBuyerRefNo							= CASE WHEN CH.intContractTypeId = 1 THEN CH.strContractNumber ELSE CH.strCustomerContract END
@@ -918,6 +921,13 @@ BEGIN TRY
 	LEFT JOIN tblSMCountry				rtc11 on lower(rtrim(ltrim(rtc11.strCountry))) = lower(rtrim(ltrim(EV.strEntityCountry)))
 	LEFT JOIN tblSMCountry				rtc12 on lower(rtrim(ltrim(rtc12.strCountry))) = lower(rtrim(ltrim(EC.strEntityCountry)))
 	LEFT JOIN tblCTPricingType pricingType on pricingType.intPricingTypeId = CH.intPricingTypeId
+
+	OUTER APPLY (
+		SELECT TOP 1 dtmHistoryCreated
+		FROM tblCTAmendmentApproval AAP
+		JOIN tblCTSequenceAmendmentLog AL WITH (NOLOCK) ON AL.intAmendmentApprovalId =AAP.intAmendmentApprovalId AND AL.intContractHeaderId =  @intContractHeaderId  
+		ORDER BY AL.dtmHistoryCreated DESC
+	) AD
 	ORDER BY CH.intContractHeaderId DESC
 	
 	SELECT @ysnFeedOnApproval = ysnFeedOnApproval FROM tblCTCompanyPreference
