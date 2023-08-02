@@ -19,6 +19,7 @@ SELECT DH.intLoadDistributionHeaderId
 	, I.strInvoiceNumber
 	, I.dblAmountDue
 	, EL.strSaleUnits
+	, MGL.strReleasePONumber
 FROM tblTRLoadDistributionHeader DH
 LEFT JOIN vyuARCustomer C ON C.intEntityId = DH.intEntityCustomerId
 LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = DH.intShipToLocationId
@@ -26,3 +27,4 @@ LEFT JOIN tblSMTaxGroup TG ON TG.intTaxGroupId = EL.intTaxGroupId
 LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = DH.intCompanyLocationId
 LEFT JOIN vyuEMSalesperson SP ON SP.intEntityId = DH.intEntitySalespersonId
 LEFT JOIN tblARInvoice I WITH (NOLOCK) ON I.intInvoiceId = DH.intInvoiceId
+LEFT JOIN vyuMBILGetLoads MGL ON MGL.intDeliveryHeaderId = DH.intDeliveryHeaderId
