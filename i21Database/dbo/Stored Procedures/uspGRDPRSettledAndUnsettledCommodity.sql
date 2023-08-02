@@ -75,7 +75,7 @@ BEGIN
 			WHERE ISNULL(PYMT.strPaymentInfo,'') <> ''
 				AND IC.intCommodityId = @intCommodityId
 				AND dbo.fnRemoveTimeOnDate(PYMT.dtmDatePaid) <= @dtmDate
-				and CL.intCompanyLocationId = @intLocationId
+				and (CL.intCompanyLocationId = @intLocationId or @intLocationId = 0)
 			--GROUP BY IC.intCommodityId
 			--	,SS.intCommodityStockUomId
 			UNION ALL
@@ -120,7 +120,7 @@ BEGIN
 			WHERE ISNULL(PYMT.strPaymentInfo,'') <> ''
 				AND IC.intCommodityId = @intCommodityId
 				AND dbo.fnRemoveTimeOnDate(PYMT.dtmDatePaid) <= @dtmDate
-				and CL.intCompanyLocationId = @intLocationId
+				and (CL.intCompanyLocationId = @intLocationId or @intLocationId = 0)
 				AND AP.intTransactionType = 1
 				AND ((BD.intSettleStorageId IS NULL AND BD.intCustomerStorageId IS NULL AND BD.intInventoryReceiptItemId IS NULL AND BD.intContractDetailId IS NULL)
 						OR (BD.intSettleStorageId IS NULL AND BD.intCustomerStorageId IS NULL AND BD.intInventoryReceiptItemId IS NOT NULL AND IR.intOwnershipType = 1)
@@ -160,7 +160,7 @@ BEGIN
 			*/
 			WHERE (ST_FROM.strOwnedPhysicalStock = 'Company' AND ST_TO.strOwnedPhysicalStock = 'Customer')
 				AND TS.intCommodityId = @intCommodityId
-				and CL.intCompanyLocationId = @intLocationId
+				and (CL.intCompanyLocationId = @intLocationId or @intLocationId = 0)
 				AND dbo.fnRemoveTimeOnDate(TS.dtmTransferStorageDate) = @dtmDate
 		) t
 
@@ -257,7 +257,7 @@ BEGIN
 			)
 			and dbo.fnRemoveTimeOnDate(AP.dtmDateCreated) <= @dtmDate
 			AND IC.intCommodityId = @intCommodityId
-			and CL.intCompanyLocationId = @intLocationId
+			and (CL.intCompanyLocationId = @intLocationId or @intLocationId = 0)
 			AND AP.intTransactionType = 1
 			AND ((BD.intSettleStorageId IS NULL AND BD.intCustomerStorageId IS NULL AND BD.intInventoryReceiptItemId IS NULL AND BD.intContractDetailId IS NULL)
 					OR (BD.intSettleStorageId IS NULL AND BD.intCustomerStorageId IS NULL AND BD.intInventoryReceiptItemId IS NOT NULL AND IR.intOwnershipType = 1)
@@ -322,7 +322,7 @@ BEGIN
 						AND SH_2.strType = 'Settlement'
 				WHERE ((SH.strType = 'Reverse Settlement' AND SH.intSettleStorageId IS NULL) OR (SH.strType = 'Settlement' AND SH.intSettleStorageId IS NOT NULL))
 					AND CS.intCommodityId = @intCommodityId
-					and CL.intCompanyLocationId = @intLocationId
+					and (CL.intCompanyLocationId = @intLocationId or @intLocationId = 0)
 					AND dbo.fnRemoveTimeOnDate(SH.dtmHistoryDate) <= @dtmDate
 					AND SH.strSettleTicket NOT IN (SELECT strSettleStorageTicket FROM tblGRReversedSettlementsWithVoidedPayments)
 				GROUP BY AP.intBillId, SH.strType, SH_2.dtmHistoryDate,SH.dtmHistoryDate
@@ -457,7 +457,7 @@ BEGIN
 		) ON PD.intBillId = AP.intBillId
 			WHERE ISNULL(PYMT.strPaymentInfo,'') <> ''
 				AND IC.intCommodityId = @intCommodityId
-				and CL.intCompanyLocationId = @intLocationId
+				and (CL.intCompanyLocationId = @intLocationId or @intLocationId = 0)
 				AND dbo.fnRemoveTimeOnDate(PYMT.dtmDatePaid) <= @dtmDate
 			GROUP BY IC.intCommodityId, PYMT.dtmDatePaid
 				,SS.intCommodityStockUomId
@@ -494,7 +494,7 @@ BEGIN
 			) ON PD.intBillId = AP.intBillId
 			WHERE ISNULL(PYMT.strPaymentInfo,'') <> ''
 				AND IC.intCommodityId = @intCommodityId
-				AND CL.intCompanyLocationId = @intLocationId
+				AND (CL.intCompanyLocationId = @intLocationId or @intLocationId = 0)
 				AND dbo.fnRemoveTimeOnDate(PYMT.dtmDatePaid) <= @dtmDate
 				AND AP.intTransactionType = 1
 				AND ((BD.intSettleStorageId IS NULL AND BD.intCustomerStorageId IS NULL AND BD.intInventoryReceiptItemId IS NULL AND BD.intContractDetailId IS NULL)

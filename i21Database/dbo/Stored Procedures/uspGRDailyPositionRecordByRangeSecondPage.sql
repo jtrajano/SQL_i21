@@ -13,9 +13,9 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 	,@Locations					AS Id
 	,@dtmMonthYear				datetime = '01/01/1900'
 	,@dtmLastDayMonthYear	    datetime
-	,@intLocationId				int = 1
+	,@intLocationId				int = 0
 	,@intCommodityId			int = 1
-	,@strLocation				nvarchar(500)
+	,@strLocation				nvarchar(500) = 'All Location'
 	,@strCommodity				nvarchar(150)
 	,@strLicensed				nvarchar(20)
 	,@intCommodityUnitMeasureId	int
@@ -136,7 +136,7 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 			--AND ysnDPOwnedType = 1
 			--AND ysnCustomerStorage = 0
 			--AND strOwnedPhysicalStock = 'Company'
-	WHERE DP.intCommodityId = @intCommodityId	and intLocationId = @intLocationId
+	WHERE DP.intCommodityId = @intCommodityId	and (intLocationId = @intLocationId or @intLocationId = 0)
 	
 
 	/*Ownder*/
@@ -164,7 +164,7 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 				left JOIN tblSMCompanyLocation CL
 				ON CL.intCompanyLocationId = CusOwn.intLocationId
 				AND ((CL.ysnLicensed = case when @strLicensed = 'Licensed' then 1 else 0 end) or @strLicensed = 'All')
-			WHERE CusOwn.intCommodityId = @intCommodityId and CusOwn.intLocationId = @intLocationId
+			WHERE CusOwn.intCommodityId = @intCommodityId and (CusOwn.intLocationId = @intLocationId or @intLocationId = 0)
 				and intTicketId is not null
 			UNION All
 			SELECT
@@ -190,7 +190,7 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 				left JOIN tblSMCompanyLocation CL
 				ON CL.intCompanyLocationId = CusOwn.intLocationId
 				AND ((CL.ysnLicensed = case when @strLicensed = 'Licensed' then 1 else 0 end) or @strLicensed = 'All')
-			WHERE CusOwn.intCommodityId = @intCommodityId and CusOwn.intLocationId = @intLocationId --and strTransactionType in ('Inventory Adjustment' ,'Invoice')
+			WHERE CusOwn.intCommodityId = @intCommodityId and (CusOwn.intLocationId = @intLocationId or @intLocationId = 0)--and strTransactionType in ('Inventory Adjustment' ,'Invoice')
 				and intTicketId is not null
 			UNION All
 			SELECT
@@ -216,7 +216,7 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 				left JOIN tblSMCompanyLocation CL
 				ON CL.intCompanyLocationId = transit.intLocationId
 				AND ((CL.ysnLicensed = case when @strLicensed = 'Licensed' then 1 else 0 end) or @strLicensed = 'All')
-			WHERE transit.intCommodityId = @intCommodityId and transit.intLocationId = @intLocationId and strBucketType IN ('Sales In-Transit', 'Purchase In-Transit') 	
+			WHERE transit.intCommodityId = @intCommodityId and (transit.intLocationId = @intLocationId or @intLocationId = 0) and strBucketType IN ('Sales In-Transit', 'Purchase In-Transit') 	
 			and intTicketId is not null
 			--AND transit.strTransactionType IN('Inventory Shipment','Outbound Shipment')
 		) t
@@ -241,7 +241,7 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 	JOIN tblGRStorageType ST 
 		ON ST.strStorageTypeDescription = offsite.strDistributionType 			
 			AND ysnCustomerStorage = 1			
-	WHERE offsite.intCommodityId = @intCommodityId	 and offsite.intLocationId = @intLocationId and dtmTransactionDate <=@dtmLastDayMonthYear
+	WHERE offsite.intCommodityId = @intCommodityId	 and (offsite.intLocationId = @intLocationId or @intLocationId = 0) and dtmTransactionDate <=@dtmLastDayMonthYear
 	and intTicketId is not null
 
 	/*Settled and Unsettled Company Owned*/
@@ -290,7 +290,7 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 		WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) = CONVERT(DATETIME, @dtmMonthYear)
 		and strTransactionType <> 'Inventory Adjustment' and  (strStorageTypeCode = 'WH' and ysnReceiptedStorage = 1)
 		and strOwnedPhysicalStock = 'Company'
-		 and  	C.intLocationId = @intLocationId  and isnull(ysnSettled,0) = 1
+		 and  isnull(ysnSettled,0) = 1
 
 		--GROUP BY strDistribution,intLocationId,strLocationName,strCommodityCode
 		set @dblCOBalance = isnull(@dblUnsettledIncrease,0) - isnull(@dblSettledIncrease,0) + isnull(@dblSettledIncrease,0) - isnull(@dblSettledDecrease,0)
@@ -306,8 +306,7 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 			FROM #OwnershipALL C
 			WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) < CONVERT(DATETIME, @dtmMonthYear)
 			and strTransactionType <> 'Inventory Adjustment' --and strStorageTypeCode = 'WH' and ysnReceiptedStorage = 1
-			and strOwnedPhysicalStock = 'Customer'
-			 and  	C.intLocationId = @intLocationId
+			and strOwnedPhysicalStock = 'Customer'			   
 
 			SELECT 			
 			@dblTotalTerminalStorage = SUM(dblIn) - SUM(dblOut)
@@ -339,14 +338,14 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 			WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) < CONVERT(DATETIME, @dtmMonthYear)
 			and strTransactionType <> 'Inventory Adjustment' and  (strStorageTypeCode = 'WH' and ysnReceiptedStorage = 1)
 			and strOwnedPhysicalStock = 'Company'
-			 and  	C.intLocationId = @intLocationId and isnull(ysnSettled,0) = 1
+			 and  isnull(ysnSettled,0) = 1
 			 
 			SELECT 
 				@dblIInboundBalance =sum(ISNULL(dblIn,0)),
 				@dblIOutboundBalance =sum(ISNULL(dblOut,0))
 			FROM #OwnershipALL
 			WHERE CONVERT(DATETIME,CONVERT(VARCHAR(10),dtmDate,110),110) < CONVERT(DATETIME, @dtmMonthYear)
-			AND intLocationId = @intLocationId and strOwnedPhysicalStock = 'Intransit'		
+			and strOwnedPhysicalStock = 'Intransit'		
 			and isnull(ysnSettled,0) = 1
 
 			insert into @ReportData  (
@@ -393,7 +392,7 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 		WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) = CONVERT(DATETIME, @dtmMonthYear)
 		and strTransactionType <> 'Inventory Adjustment' --and strStorageTypeCode = 'WH' and ysnReceiptedStorage = 1
 		and strOwnedPhysicalStock = 'Customer'
-		and  	C.intLocationId = @intLocationId
+		
 
 		SELECT 			
 			@dblTotalTerminalStorage = SUM(dblIn) - SUM(dblOut)
@@ -405,7 +404,7 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 			@dblIOutboundBalance =sum(ISNULL(dblOut,0))
 		FROM #OwnershipALL
 		WHERE CONVERT(DATETIME,CONVERT(VARCHAR(10),dtmDate,110),110) = CONVERT(DATETIME, @dtmMonthYear)
-			AND intLocationId = @intLocationId and strOwnedPhysicalStock = 'Intransit'		
+		and strOwnedPhysicalStock = 'Intransit'		
 		
 		--/* END IN TRANSIT */
 

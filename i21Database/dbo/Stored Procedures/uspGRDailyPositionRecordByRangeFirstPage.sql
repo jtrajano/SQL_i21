@@ -13,10 +13,10 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 	,@dtmMonthYear		datetime = '01/01/1900'
 	,@dtmLastDayMonthYear		datetime 
 	,@intDay			int
-	,@intLocationId		int = 1
+	,@intLocationId		int = 0
 	,@intCommodityId	int = 1
 	,@intCommodityUnitMeasureId	int
-	,@strLocation		nvarchar(500)
+	,@strLocation		nvarchar(500) = 'All Location'
 	,@strCommodity		nvarchar(150)
 	,@strLicensed		nvarchar(30) = 'ALL'
 	,@Locations			AS Id
@@ -130,7 +130,7 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 			FROM dbo.fnRKGetBucketCustomerOwned(@dtmLastDayMonthYear,@intCommodityId,NULL) CusOwn
 			LEFT JOIN tblGRStorageType ST 
 				ON ST.strStorageTypeDescription = CusOwn.strDistributionType
-			WHERE CusOwn.intCommodityId = @intCommodityId and CusOwn.intLocationId = @intLocationId
+			WHERE CusOwn.intCommodityId = @intCommodityId and (CusOwn.intLocationId = @intLocationId or @intLocationId = 0)
 			UNION ALL
 			SELECT
 				dtmDate = CONVERT(VARCHAR(10),dtmTransactionDate,110)
@@ -149,7 +149,7 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 			FROM dbo.fnRKGetBucketCompanyOwned(@dtmLastDayMonthYear,@intCommodityId,NULL) CusOwn
 			LEFT JOIN tblGRStorageType ST 
 				ON ST.strStorageTypeDescription = CusOwn.strDistributionType
-			WHERE CusOwn.intCommodityId = @intCommodityId and CusOwn.intLocationId = @intLocationId			
+			WHERE CusOwn.intCommodityId = @intCommodityId and (CusOwn.intLocationId = @intLocationId or @intLocationId = 0)		
 		) t		
 	
 
@@ -172,7 +172,7 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 	JOIN tblGRStorageType ST 
 		ON ST.strStorageTypeDescription = offsite.strDistributionType 			
 			AND ysnCustomerStorage = 1			
-	WHERE offsite.intCommodityId = @intCommodityId	 and offsite.intLocationId = @intLocationId
+	WHERE offsite.intCommodityId = @intCommodityId	 and (offsite.intLocationId = @intLocationId or @intLocationId = 0)
 	and intTicketId is not null
 	
 	
@@ -184,21 +184,18 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 		FROM #OwnershipALL
 		WHERE strTransactionType <> 'Inventory Adjustment'
 			and dtmDate = @dtmMonthYear
-			AND intLocationId = @intLocationId
 
 		SELECT
 			@dblPMLoadout = SUM(ISNULL(dblOut,0))			
 		FROM #OwnershipALL
 		WHERE  strTransactionType not in ('Inventory Adjustment')
 			and dtmDate = @dtmMonthYear
-			AND intLocationId = @intLocationId	
 
 		
 		SELECT @dblAdjustment = SUM(ISNULL(dblIn,0) - ISNULL(dblOut,0))
 		FROM #OwnershipALL
 		WHERE strTransactionType IN ('Inventory Adjustment')
 			 and dtmDate  = @dtmMonthYear
-			AND intLocationId = @intLocationId
 
 		
 	
@@ -207,7 +204,7 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 			,@dblWHRCancelled = SUM(dblOut)
 		FROM #OwnershipALL C
 		WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) = CONVERT(DATETIME, @dtmMonthYear)
-		 and  	C.intLocationId = @intLocationId and strStorageTypeCode = 'WH' and ysnReceiptedStorage = 1
+		 and   strStorageTypeCode = 'WH' and ysnReceiptedStorage = 1
 		 and strOwnedPhysicalStock = 'Customer'
 		and strTransactionType <> 'Inventory Adjustment'
 
@@ -216,7 +213,7 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 			,@dblCSOut = SUM(dblOut)
 		FROM #OwnershipALL C
 		WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) = CONVERT(DATETIME, @dtmMonthYear)
-		 and  	C.intLocationId = @intLocationId and  not (strStorageTypeCode = 'WH' and ysnReceiptedStorage = 1)
+		 and  not (strStorageTypeCode = 'WH' and ysnReceiptedStorage = 1)
 		 and strOwnedPhysicalStock = 'Customer'
 		and strTransactionType <> 'Inventory Adjustment'
 		SELECT 			
@@ -236,8 +233,7 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 			FROM #OwnershipALL
 			WHERE strTransactionType <> 'Inventory Adjustment' and
 				 dtmDate < @dtmMonthYear
-				AND intLocationId = @intLocationId
-
+			
 			SELECT 			
 			@dblTOSTotal = SUM(dblIn) - SUM(dblOut)
 			FROM #OffsiteStorage C
@@ -247,7 +243,7 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 			@dblWHROutstanding = SUM(dblIn) - SUM(dblOut)
 			FROM #OwnershipALL C
 			WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) < CONVERT(DATETIME, @dtmMonthYear) 
-			and  	C.intLocationId = @intLocationId and strStorageTypeCode = 'WH' and ysnReceiptedStorage = 1
+			and  	strStorageTypeCode = 'WH' and ysnReceiptedStorage = 1
 			and strOwnedPhysicalStock = 'Customer'
 			and strTransactionType <> 'Inventory Adjustment'
 
@@ -255,7 +251,7 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 			@dblCSTotal = SUM(dblIn) - SUM(dblOut)		
 			FROM #OwnershipALL C
 			WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) < CONVERT(DATETIME, @dtmMonthYear) 
-			and  	C.intLocationId = @intLocationId and strStorageTypeCode <> 'WH' and ysnReceiptedStorage <> 1
+			and  	strStorageTypeCode <> 'WH' and ysnReceiptedStorage <> 1
 			and strOwnedPhysicalStock = 'Customer'
 			and strTransactionType <> 'Inventory Adjustment'
 			insert into @ReportData  (
