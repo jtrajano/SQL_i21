@@ -24,6 +24,7 @@ DECLARE @ysnPrintInvoicePaymentDetail	BIT = 0
 	  , @strBerryOilAddress		NVARCHAR(500) = NULL
 	  , @dtmDateNow				DATETIME = NULL
 	  ,	@strInvoiceFormat		NVARCHAR(200)
+	  , @strNewtonOilRemitAddress NVARCHAR(500) = NULL
 
 SET @dtmDateNow = GETDATE()
 
@@ -38,6 +39,7 @@ SELECT TOP 1 @strCompanyFullAddress	= strAddress + CHAR(13) + CHAR(10) + ISNULL(
 		   , @strCompanyName		= strCompanyName
 		   , @strPhone				= strPhone
 		   , @strEmail				= strEmail
+		   , @strNewtonOilRemitAddress = ISNULL(LTRIM(RTRIM(strAddress)), '') + CHAR(13) + CHAR(10) + ISNULL(NULLIF(strCity, ''), '') + ISNULL(', ' + NULLIF(strState, ''), '') + ISNULL(' ' + NULLIF(strZip, ''), '') + ISNULL(' ' + NULLIF(strCountry, ''), '') 
 FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ORDER BY intCompanySetupID DESC
 
@@ -47,7 +49,10 @@ SELECT intCompanyLocationId		= L.intCompanyLocationId
 	 , strUseLocationAddress	= ISNULL(L.strUseLocationAddress, 'No')
 	 , strInvoiceComments		= L.strInvoiceComments
 	 , strLocationNumber		= L.strLocationNumber
-	 , strFullAddress			= L.strAddress + CHAR(13) + CHAR(10) + ISNULL(NULLIF(L.strCity, ''), '') + ISNULL(', ' + NULLIF(L.strStateProvince, ''), '') + ISNULL(', ' + NULLIF(L.strZipPostalCode, ''), '') + ISNULL(', ' + NULLIF(L.strCountry, ''), '')
+	 , strFullAddress			= ISNULL(LTRIM(RTRIM(L.strAddress)), '') + CHAR(13) + CHAR(10) + ISNULL(NULLIF(L.strCity, ''), '') + ISNULL(', ' + NULLIF(L.strStateProvince, ''), '') + ISNULL(', ' + NULLIF(L.strZipPostalCode, ''), '') + ISNULL(', ' + NULLIF(L.strCountry, ''), '')
+	 , strPhone	
+	 , strEmail
+	 , strWebsite				
 INTO #LOCATIONS
 FROM tblSMCompanyLocation L
 
@@ -135,8 +140,8 @@ SELECT strCompanyName			= CASE WHEN L.strUseLocationAddress = 'Letterhead' THEN 
 	 , ysnPrintInvoicePaymentDetail = @ysnPrintInvoicePaymentDetail
 	 , strFooterComment  		= ISNULL(INV.strFooterComments,'')
 	 , strSalesPersonName		= SALESPERSON.strName
-	 , strRemitToAddress		= CASE WHEN SELECTEDINV.strInvoiceFormat = 'Format 11 - Newton Oil' THEN @strBerryOilAddress ELSE '' END
-	 , strNewtonCompanyAddress  = L.strFullAddress 
+	 , strRemitToAddress		= CASE WHEN SELECTEDINV.strInvoiceFormat = 'Format 11 - Newton Oil' THEN @strNewtonOilRemitAddress ELSE '' END
+	 , strNewtonCompanyAddress  = L.strFullAddress + ISNULL(CHAR(13) + CHAR(10) + NULLIF(L.strPhone, ''), '') + ISNULL(CHAR(13) + CHAR(10) + NULLIF(L.strEmail, ''), '') + ISNULL(CHAR(13) + CHAR(10) + NULLIF(L.strWebsite, ''), '')
 INTO #INVOICES
 FROM dbo.tblARInvoice INV WITH (NOLOCK)
 INNER JOIN #MCPINVOICES SELECTEDINV ON INV.intInvoiceId = SELECTEDINV.intInvoiceId

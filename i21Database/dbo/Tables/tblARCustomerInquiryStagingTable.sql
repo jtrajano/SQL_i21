@@ -22,6 +22,7 @@ CREATE TABLE [dbo].[tblARCustomerInquiryStagingTable]
 	, strBillToState				NVARCHAR(500)   COLLATE Latin1_General_CI_AS    NULL
 	, strBillToZipCode				NVARCHAR(500)   COLLATE Latin1_General_CI_AS    NULL
     , strContact                    NVARCHAR(500)   COLLATE Latin1_General_CI_AS    NULL
+	, strCompanyName				NVARCHAR(MAX)   COLLATE Latin1_General_CI_AS    NULL
     , strCompanyAddress             NVARCHAR(MAX)   COLLATE Latin1_General_CI_AS    NULL
 	, dblYTDSales					NUMERIC(18, 6) NULL
 	, dblYDTServiceCharge			NUMERIC(18, 6) NULL
