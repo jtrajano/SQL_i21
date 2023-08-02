@@ -1784,6 +1784,7 @@
     <Build Include="dbo\Functions\fnRKIsDerivativeLocked.sql" />
     <Build Include="dbo\Views\vyuSTPromotionItemListDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspLGUpdateLogisticsLoadFromTM.sql" />
+    <Build Include="dbo\Functions\fnGetLocationAwareAPTaxGLAccount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

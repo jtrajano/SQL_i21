@@ -62,10 +62,7 @@ BEGIN
 						dbo.fnGetItemGLAccount(ShipmentCharge.intChargeId, ItemLocation.intItemLocationId, @AccountCategory_OtherChargeExpense) 
 					ELSE 
 						--TaxCode.intPurchaseTaxAccountId 
-						ISNULL(
-							dbo.fnGetLocationAwareGLAccount(TaxCode.intPurchaseTaxAccountId, Shipment.intShipFromLocationId)
-							, TaxCode.intPurchaseTaxAccountId
-						) 
+						dbo.fnGetLocationAwareAPTaxGLAccount(TaxCode.intPurchaseTaxAccountId, Shipment.intShipFromLocationId)							
 				END
 			,@strBatchId
 	FROM	dbo.tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentCharge ShipmentCharge
@@ -142,10 +139,7 @@ BEGIN
 															) 
 														  ELSE 
 															--TaxCode.intPurchaseTaxAccountId 
-															ISNULL(
-																dbo.fnGetLocationAwareGLAccount(TaxCode.intPurchaseTaxAccountId, Shipment.intShipFromLocationId)
-																, TaxCode.intPurchaseTaxAccountId
-															) 
+															dbo.fnGetLocationAwareAPTaxGLAccount(TaxCode.intPurchaseTaxAccountId, Shipment.intShipFromLocationId)																
 													 END
 				,dblForexRate						= ISNULL(ShipmentCharge.dblForexRate, 1)
 				,strRateType						= currencyRateType.strCurrencyExchangeRateType
@@ -194,10 +188,7 @@ BEGIN
 															) 
 														  ELSE 
 															--TaxCode.intPurchaseTaxAccountId 
-															ISNULL(
-																dbo.fnGetLocationAwareGLAccount(TaxCode.intPurchaseTaxAccountId, Shipment.intShipFromLocationId)
-																, TaxCode.intPurchaseTaxAccountId
-															) 
+															dbo.fnGetLocationAwareAPTaxGLAccount(TaxCode.intPurchaseTaxAccountId, Shipment.intShipFromLocationId)
 													 END
 				,dblForexRate						= ISNULL(ShipmentCharge.dblForexRate, 1)
 				,strRateType						= currencyRateType.strCurrencyExchangeRateType
