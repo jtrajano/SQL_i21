@@ -5162,8 +5162,8 @@ BEGIN TRY
 	
 			UNION ALL SELECT @intM2MHeaderId intM2MHeaderId
 				, @dtmPostDate AS dtmPostDate
-				, CASE WHEN ISNULL(dblGrossPnL, 0) >= 0 THEN @intUnrealizedGainOnFuturesId ELSE @intUnrealizedLossOnFuturesId END intAccountId
-				, CASE WHEN ISNULL(dblGrossPnL, 0) >= 0 THEN @strUnrealizedGainOnFuturesId ELSE @strUnrealizedLossOnFuturesId END strAccountId
+				, CASE WHEN ISNULL(dblGrossPnL, 0) >= 0 THEN @intUnrealizedGainOnInventoryFuturesIOSId ELSE @intUnrealizedLossOnInventoryFuturesIOSId END intAccountId
+				, CASE WHEN ISNULL(dblGrossPnL, 0) >= 0 THEN @strUnrealizedGainOnInventoryFuturesIOSId ELSE @strUnrealizedLossOnInventoryFuturesIOSId END strAccountId
 				, CASE WHEN ISNULL(dblGrossPnL, 0) <= 0 THEN 0.0 ELSE ABS(dblGrossPnL) END dblDebit
 				, CASE WHEN ISNULL(dblGrossPnL, 0) >= 0 THEN 0.0 ELSE ABS(dblGrossPnL) END dblCredit
 				, CASE WHEN ISNULL(dblNetPnL, 0) <= 0 THEN 0.0 ELSE ABS(dblNetPnL) END dblDebitUnit

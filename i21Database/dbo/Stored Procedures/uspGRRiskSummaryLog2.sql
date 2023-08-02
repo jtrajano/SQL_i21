@@ -333,21 +333,11 @@ BEGIN TRY
 			,ysnDelete						= 0
 			,intUserId						= sh.intUserId
 			,strMiscFields					= NULL
-			--,strMiscFields					= CASE WHEN ISNULL(strStorageTypeCode, '') = '' THEN '' ELSE '{ strStorageTypeCode = "' + strStorageTypeCode + '" }' END
-			--								+ CASE WHEN ISNULL(ysnReceiptedStorage, '') = '' THEN '' ELSE '{ ysnReceiptedStorage = "' + CAST(ysnReceiptedStorage AS NVARCHAR) + '" }' END
-			--								+ CASE WHEN ISNULL(sh.intTransactionTypeId, '') = '' THEN '' ELSE '{ intTypeId = "' + CAST(sh.intTransactionTypeId AS NVARCHAR) + '" }' END
-			--								+ CASE WHEN ISNULL(strStorageType, '') = '' THEN '' ELSE '{ strStorageType = "' + strStorageType + '" }' END
-			--								+ CASE WHEN ISNULL(cs.intDeliverySheetId, '') = '' THEN '' ELSE '{ intDeliverySheetId = "' + CAST(cs.intDeliverySheetId AS NVARCHAR) + '" }' END
-			--								+ CASE WHEN ISNULL(strTicketStatus, '') = '' THEN '' ELSE '{ strTicketStatus = "' + strTicketStatus + '" }' END
-			--								+ CASE WHEN ISNULL(strOwnedPhysicalStock, '') = '' THEN '' ELSE '{ strOwnedPhysicalStock = "' + strOwnedPhysicalStock + '" }' END
-			--								+ CASE WHEN ISNULL(strStorageTypeDescription, '') = '' THEN '' ELSE '{ strStorageTypeDescription = "' + strStorageTypeDescription + '" }' END
-			--								+ CASE WHEN ISNULL(ysnActive, '') = '' THEN '' ELSE '{ ysnActive = "' + CAST(ysnActive AS NVARCHAR) + '" }' END
-			--								+ CASE WHEN ISNULL(ysnExternal, '') = '' THEN '' ELSE '{ ysnExternal = "' + CAST(ysnExternal AS NVARCHAR) + '" }' END
-			--								+ CASE WHEN ISNULL(sh.intStorageHistoryId, '') = '' THEN '' ELSE '{ intStorageHistoryId = "' + CAST(sh.intStorageHistoryId AS NVARCHAR) + '" }' END			
-			--,strNotes						= 'intStorageHistoryId=' + CAST(sh.intStorageHistoryId AS NVARCHAR)
-			,intActionId					= CASE 
-												WHEN ISNULL(@strAction,'') = '' THEN CASE WHEN sh.dblUnits > -1 THEN 33 ELSE 9 END 
-												ELSE CASE WHEN sh.dblUnits > -1 THEN 9 ELSE 33 END 
+			,intActionId					= CASE WHEN ts.KindOfTransfer = 'Transfer OS to OS' THEN 74 
+												ELSE CASE 
+														WHEN ISNULL(@strAction,'') = '' THEN CASE WHEN sh.dblUnits > -1 THEN 33 ELSE 9 END 
+														ELSE CASE WHEN sh.dblUnits > -1 THEN 9 ELSE 33 END 
+													END
 											END
 			,strStorageTypeCode 			= strStorageTypeCode
 			,ysnReceiptedStorage 			= ysnReceiptedStorage
@@ -378,6 +368,7 @@ BEGIN TRY
 		LEFT JOIN tblSMCompanyLocationSubLocation sl 
 			ON sl.intCompanyLocationSubLocationId = t.intSubLocationId 
 				AND sl.intCompanyLocationId = t.intProcessingLocationId
+		OUTER APPLY dbo.fnGRWhatIsMyTransfer(sh.strTransferTicket,sh.intTransferStorageId) ts
 		WHERE --sh.intStorageHistoryId = @intStorageHistoryId AND
 			intTransactionTypeId = 3
 		--COMPANY OWNED STORAGE (DP/PRICED LATER)

@@ -690,11 +690,6 @@ EXEC dbo.uspARInvoiceGrossMarginSummary @ysnRebuild = 0
 EXEC dbo.uspIPInterCompanyPreStageInvoice @PreStageInvoice	= @tblInvoicesToUpdate
 									    , @intUserId		= @UserId		
 
---DELETE FROM POSTING QUEUE
-DELETE PQ
-FROM tblARPostingQueue PQ
-INNER JOIN ##ARPostInvoiceHeader II ON II.strInvoiceNumber = PQ.strTransactionNumber AND II.intInvoiceId = PQ.intTransactionId
-
 --AUDIT LOG
 BEGIN
 DECLARE @InvoiceLog dbo.[AuditLogStagingTable]
