@@ -13,13 +13,13 @@ BEGIN
 
 	if (@intContractTypeId = 1)
 	begin
-		select @dblReturn = sum(dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,ri.intUnitMeasureId,@intUnitMeasureId,isnull(ri.dblReceived,0))) from tblICInventoryReceiptItem ri where ri.intLineNo = @intContractDetailId and ri.intItemId = @intItemId;
+		select @dblReturn = sum(dbo.fnCTConvertQtyToTargetItemUOM(ri.intUnitMeasureId,@intItemUOMId,isnull(ri.dblReceived,0))) from tblICInventoryReceiptItem ri where ri.intLineNo = @intContractDetailId and ri.intItemId = @intItemId;
 	end
 	else
 	begin
 		select @dblReturn = sum(dbo.fnCTConvertQtyToTargetItemUOM(si.intItemUOMId,@intItemUOMId,isnull(si.dblQuantity,0))) from tblICInventoryShipmentItem si where si.intLineNo = @intContractDetailId and si.intItemId = @intItemId;
 	end
 	
-	RETURN @dblReturn;	
+	RETURN isnull(@dblReturn,0.00);	
 END
 GO
