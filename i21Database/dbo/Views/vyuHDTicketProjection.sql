@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuHDTicketProjection]
 	AS
-		select
+	select
 		 a.intTicketId
 		,a.strTicketNumber
 		,a.strSubject
@@ -131,7 +131,6 @@
 		,strDefaultCurrencyExchangeRateType = DefaultHelpDeskRateType.strCurrencyExchangeRateType
 		,strUpgradeStartTime = CONVERT(nvarchar(30),a.dtmUpgradeStartTime,22) COLLATE Latin1_General_CI_AS
 		,strUpgradeEndTime = CONVERT(nvarchar(30),a.dtmUpgradeEndTime,22) COLLATE Latin1_General_CI_AS
-		,strCustomerSuccessManager = CustomerSuccessManager.strCustomerSuccessManager
 	from tblHDTicket a
 		left join tblEMEntity b on b.intEntityId = a.intCustomerContactId
 		left join tblEMEntity c on c.intEntityId = a.intCustomerId
@@ -172,13 +171,5 @@
 						 tblSMCurrencyExchangeRateType b 
 					on b.intCurrencyExchangeRateTypeId = a.intHelpdeskRateTypeId
 			) DefaultHelpDeskRateType
-
-			outer apply(
-			select top 1 agentdetail.strFullName as strCustomerSuccessManager
-			from tblARCustomer customer
-			join vyuHDAgentDetail agentdetail
-			on customer.intCustomerSuccessManager = agentdetail.intEntityId
-			where customer.intEntityId = c.intEntityId 
-		)CustomerSuccessManager
 
 GO
