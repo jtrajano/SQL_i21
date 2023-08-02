@@ -93,6 +93,7 @@ AS
   ,rc.strRootCause  
   ,tic.dtmCompleted
   ,lob.strLineOfBusiness
+  ,tic.ysnImageSynced
  from  
   tblHDTicket tic  
   join tblHDTicketType typ on typ.intTicketTypeId = tic.intTicketTypeId  
