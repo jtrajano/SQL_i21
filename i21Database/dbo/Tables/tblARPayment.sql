@@ -49,6 +49,7 @@
 	[dtmScheduledPayment]	DATETIME		NULL,
 	[strCreditCardStatus]	NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
 	[strCreditCardNote]		NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
+	[intEntityEFTInfoId]	INT				NULL,
     CONSTRAINT [PK_tblARPayment_intPaymentId] PRIMARY KEY CLUSTERED ([intPaymentId] ASC),
     CONSTRAINT [FK_tblARPayment_tblARCustomer_intEntityCustomerId] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId]),
 	CONSTRAINT [FK_tblARPayment_tblGLAccount_intAccountId] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),

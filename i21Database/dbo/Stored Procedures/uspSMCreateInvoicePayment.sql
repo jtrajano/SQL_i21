@@ -12,6 +12,7 @@
 	,@ysnScheduledPayment	AS BIT 				= 0
 	,@dtmScheduledPayment	AS DATETIME 		= NULL
 	,@intBankAccountId  	AS INT     			= NULL
+	,@intEntityEFTInfoId 	AS INT 				= NULL
 	,@strPaymentIdNew 		AS NVARCHAR(50) 	= NULL OUTPUT
 	,@intPaymentIdNew 		AS INT 				= NULL OUTPUT
 	,@ErrorMessage 			AS NVARCHAR(250)	= NULL OUTPUT
@@ -192,6 +193,7 @@ BEGIN
 				, ysnFromAP
 				, ysnScheduledPayment
 				, dtmScheduledPayment
+				, intEntityEFTInfoId
 			)
 			SELECT 
 				intId							= INVOICE.intInvoiceId
@@ -238,6 +240,7 @@ BEGIN
 				, ysnFromAP						= 0
 				, ysnScheduledPayment			= ISNULL(@ysnScheduledPayment, 0)
 				, dtmScheduledPayment			= CASE WHEN @ysnScheduledPayment = 1 THEN @dtmScheduledPayment ELSE NULL END
+				, intEntityEFTInfoId			= ISNULL(@intEntityEFTInfoId)
 			FROM vyuARInvoicesForPayment INVOICE
 			INNER JOIN #INVOICEANDPAYMENT PAYMENTS ON INVOICE.strInvoiceNumber = PAYMENTS.strInvoiceNumber
 			WHERE INVOICE.strInvoiceNumber IN (SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strInvoiceNumber))
@@ -273,6 +276,7 @@ BEGIN
 				, ysnPost
 				, intEntityId
 				, intEntityCardInfoId
+				, intEntityEFTInfoId
 			)
 			SELECT intId						= 1
 				, strSourceTransaction			= 'Direct'
@@ -293,6 +297,7 @@ BEGIN
 				, ysnPost						= CASE WHEN ISNULL(@intPaymentMethodId, 0) <> 0 THEN 1 ELSE 0 END
 				, intEntityId					= @intUserId
 				, intEntityCardInfoId			= NULLIF(@intEntityCardInfoId, 0)
+				, intEntityEFTInfoId			= ISNULL(@intEntityEFTInfoId)
 			FROM vyuARCustomerSearch C			
 			WHERE intEntityId = @intEntityCustomerId
 		END

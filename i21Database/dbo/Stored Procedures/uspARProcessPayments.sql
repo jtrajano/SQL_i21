@@ -344,6 +344,7 @@ BEGIN
 		,[dblCurrencyExchangeRate]
 		,[ysnAllowOverpayment]
 		,[ysnFromAP]
+		,[intEntityEFTInfoId]
 	)								
 	SELECT		 	
 		 [intId]								= IE.[intId]
@@ -405,6 +406,7 @@ BEGIN
 		,[dblCurrencyExchangeRate]				= (CASE WHEN @GroupingOption = 0 THEN IE.[dblCurrencyExchangeRate] ELSE NULL END) 
 		,[ysnAllowOverpayment]					= (CASE WHEN @GroupingOption = 0 THEN IE.[ysnAllowOverpayment] ELSE NULL END) 
 		,[ysnFromAP]							= (CASE WHEN @GroupingOption = 0 THEN IE.[ysnFromAP] ELSE NULL END) 
+		,[intEntityEFTInfoId]					= (CASE WHEN @GroupingOption = 0 THEN IE.[intEntityEFTInfoId] ELSE NULL END) 
 	FROM
 		@tmpEntriesForProcessing EFP
 	CROSS APPLY

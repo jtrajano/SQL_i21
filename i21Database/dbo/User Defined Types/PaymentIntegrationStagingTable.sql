@@ -79,5 +79,6 @@ CREATE TYPE [dbo].[PaymentIntegrationStagingTable] AS TABLE
 	,[dblCurrencyExchangeRate]				NUMERIC(18, 6)									NULL		-- Average Invoice Detail Forex Rate - tblARInvoice.dblCurrencyExchangeRate
 	,[ysnAllowOverpayment]					BIT												NULL		-- 	
 	,[ysnFromAP]							BIT												NULL		-- 	
+	,[intEntityEFTInfoId]					INT												NULL		-- EFT Info Id (tblEMEntityEFTInformation)
 
 )
