@@ -14,14 +14,28 @@ select cast( Item as int) Item from  dbo.fnSplitString(@strOverrideREArray,',');
 DECLARE @ysnOverrideFirstColumn bit = 0
 DECLARE @ysnOverrideSecondColumn bit = 0
 DECLARE @ysnOverrideThirdColumn bit = 0
+DECLARE @ysnOverrideFourthColumn bit = 0
+DECLARE @ysnOverrideFifthColumn bit = 0
+DECLARE @ysnOverrideSixthColumn bit = 0
 
-
-IF EXISTS(SELECT 1 FROM @tbl WHERE Item = 1)
+IF EXISTS(SELECT 1 FROM @tbl WHERE Item = 0)
 	select @ysnOverrideFirstColumn = 1
-IF EXISTS(SELECT 1 FROM @tbl WHERE Item = 2)
+IF EXISTS(SELECT 1 FROM @tbl WHERE Item = 1)
 	select @ysnOverrideSecondColumn = 1
-IF EXISTS(SELECT 1 FROM @tbl WHERE Item = 3)
+IF EXISTS(SELECT 1 FROM @tbl WHERE Item = 2)
 	select @ysnOverrideThirdColumn = 1
+IF EXISTS(SELECT 1 FROM @tbl WHERE Item = 3)
+	select @ysnOverrideFourthColumn = 1
+IF EXISTS(SELECT 1 FROM @tbl WHERE Item = 4)
+	select @ysnOverrideFourthColumn = 1
+IF EXISTS(SELECT 1 FROM @tbl WHERE Item = 5)
+	select @ysnOverrideFifthColumn = 1
+IF EXISTS(SELECT 1 FROM @tbl WHERE Item = 6)
+	select @ysnOverrideSixthColumn = 1
+
+	--select cast( Item as int) Item from  dbo.fnSplitString(@strOverrideREArray,',');
+	--select @ysnOverrideFirstColumn
+
 
 DECLARE @maxColId INT 
 
@@ -55,11 +69,12 @@ PIVOT(
 
 ) DAS
 )
-SELECT @columns ='[' + [3] + '] + ''-''' +
-case when @ysnOverrideFirstColumn = 1 then '+ replicate(''X'', LEN([' + [4] + '])) + ''-'''  else  '+ [' + [4] + '] + ''-''' end  + 
-case when @ysnOverrideSecondColumn = 1 then '+ replicate(''X'', LEN([' +[5] + '])) + ''-'''  else  '+ [' + [5] + '] + ''-''' end  + 
-case when @ysnOverrideThirdColumn = 1 then '+ replicate(''X'', LEN([' + [6] + '])) + ''-'''  else  '+ [' + [6] + '] + ''-''' end  + 
- '+ [' + [7] + ']'   
+SELECT @columns =--'[' + [3] + '] + ''-''' +
+case when @ysnOverrideFirstColumn = 1 then '+ replicate(''X'', LEN([' + [3] + '])) + ''-'''  else  '+ [' + [3] + '] + ''-''' end  + 
+case when @ysnOverrideSecondColumn = 1 then '+ replicate(''X'', LEN([' +[4] + '])) + ''-'''  else  '+ [' + [4] + '] + ''-''' end  + 
+case when @ysnOverrideThirdColumn = 1 then '+ replicate(''X'', LEN([' + [5] + '])) + ''-'''  else  '+ [' + [5] + '] + ''-''' end  + 
+case when @ysnOverrideFourthColumn = 1 then '+ replicate(''X'', LEN([' + [6] + '])) + ''-'''  else  '+ [' + [6] + '] + ''-''' end  +
+case when @ysnOverrideFifthColumn = 1 then '+ replicate(''X'', LEN([' + [7] + '])) + ''-'''  else  '+ [' + [7] + ']' end  
 FROM QUERY
 GOTO _execute
 _max6:
@@ -79,10 +94,11 @@ PIVOT(
 
 ) DAS
 )
-SELECT @columns ='[' + [3] + '] + ''-''' +
-case when @ysnOverrideFirstColumn = 1 then '+ replicate(''X'', LEN([' + [4] + '])) + ''-'''  else  '+ [' + [4] + '] + ''-''' end  + 
-case when @ysnOverrideSecondColumn = 1 then '+ replicate(''X'', LEN([' +[5] + '])) + ''-'''  else  '+ [' + [5] + '] + ''-''' end  + 
-case when @ysnOverrideThirdColumn = 1 then '+ replicate(''X'', LEN([' + [6] + ']))'  else  '+ [' + [6] + ']' end  
+select @columns=
+case when @ysnOverrideFirstColumn = 1 then '+ replicate(''X'', LEN([' + [3] + '])) + ''-'''  else  '+ [' + [3] + '] + ''-''' end  + 
+case when @ysnOverrideSecondColumn = 1 then '+ replicate(''X'', LEN([' +[4] + '])) + ''-'''  else  '+ [' + [4] + '] + ''-''' end  + 
+case when @ysnOverrideThirdColumn = 1 then '+ replicate(''X'', LEN([' + [5] + '])) + ''-'''  else  '+ [' + [5] + '] + ''-''' end  + 
+case when @ysnOverrideFourthColumn = 1 then '+ replicate(''X'', LEN([' + [6] + '])) + ''-'''  else  '+ [' + [6] + ']' end  
 FROM QUERY
 GOTO _execute
 _max5:
@@ -102,9 +118,10 @@ PIVOT(
 
 ) DAS
 )
-SELECT @columns ='[' + [3] + '] + ''-''' +
-case when @ysnOverrideFirstColumn = 1 then '+ replicate(''X'', LEN([' + [4] + '])) + ''-'''  else  '+ [' + [4] + '] + ''-''' end  + 
-case when @ysnOverrideSecondColumn = 1 then '+ replicate(''X'', LEN([' +[5] + ']))'  else  '+ [' + [5] + ']' end
+SELECT @columns =
+case when @ysnOverrideFirstColumn = 1 then '+ replicate(''X'', LEN([' + [3] + '])) + ''-'''  else  '+ [' + [3] + '] + ''-''' end  + 
+case when @ysnOverrideSecondColumn = 1 then '+ replicate(''X'', LEN([' +[4] + '])) + ''-'''  else  '+ [' + [4] + '] + ''-''' end  + 
+case when @ysnOverrideThirdColumn = 1 then '+ replicate(''X'', LEN([' + [5] + '])) + ''-'''  else  '+ [' + [5] + ']' end  
 FROM QUERY
 GOTO _execute
 _max4:
@@ -124,13 +141,14 @@ PIVOT(
 
 ) DAS
 )
-SELECT @columns ='[' + [3] + '] + ''-''' +
-case when @ysnOverrideFirstColumn = 1 then '+ replicate(''X'', LEN([' + [4] + ']))'  else  '+ [' + [4] + ']' end 
+SELECT @columns =
+case when @ysnOverrideFirstColumn = 1 then '+ replicate(''X'', LEN([' + [3] + '])) + ''-'''  else  '+ [' + [3] + '] + ''-''' end  + 
+case when @ysnOverrideSecondColumn = 1 then '+ replicate(''X'', LEN([' + [4] + ']))'  else  '+ [' + [4] + ']' end 
 FROM QUERY
 
 _execute:
 declare @sql nvarchar(max) =
- 'TRUNCATE TABLE tblGLREMaskAccount insert into tblGLREMaskAccount(intAccountId, strAccountId, intConcurrencyId, dtmModified) select intAccountId,' + @columns +', 1, getdate()  from tblGLTempCOASegment'
+'TRUNCATE TABLE tblGLREMaskAccount insert into tblGLREMaskAccount(intAccountId, strAccountId, intConcurrencyId, dtmModified) select intAccountId,' + @columns +', 1, getdate()  from tblGLTempCOASegment'
 EXEC (@sql)
 
 END
