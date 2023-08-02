@@ -136,12 +136,12 @@ BEGIN
   VALUES (@strCustomerId,'Invoice cycle is required')  
   SET @ysnHasError = 1  
  END  
- IF(ISNULL(@strDetailDisplay,'') = '')  
- BEGIN  
-  INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)  
-  VALUES (@strCustomerId,'Detail Display is required')  
-  SET @ysnHasError = 1  
- END  
+--  IF(ISNULL(@strDetailDisplay,'') = '')  
+--  BEGIN  
+--   INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)  
+--   VALUES (@strCustomerId,'Detail Display is required')  
+--   SET @ysnHasError = 1  
+--  END  
 
 IF(ISNULL(@strDepartmentGrouping,'') = '')  
  BEGIN  
