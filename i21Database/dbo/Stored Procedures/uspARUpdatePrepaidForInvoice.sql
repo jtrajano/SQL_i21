@@ -78,16 +78,17 @@ END
 
 BEGIN TRY
 	--GET APPLIED INVOICES
-	SELECT intPrepaymentId
-         , intPrepaymentDetailId
-		 , intInvoiceId
-		 , dblAppliedInvoiceDetailAmount
-		 , dblBaseAppliedInvoiceDetailAmount
+	SELECT P.intPrepaymentId
+         , P.intPrepaymentDetailId
+		 , P.intInvoiceId
+		 , P.dblAppliedInvoiceDetailAmount
+		 , I.dblCurrencyExchangeRate
 	INTO #APPLIEDINVOICES 
-	FROM tblARPrepaidAndCredit
-	WHERE intInvoiceId = @InvoiceId 
-	  AND ysnApplied = 1 
-	  AND ysnPosted = 0
+	FROM tblARPrepaidAndCredit P
+	INNER JOIN tblARInvoice I on P.intInvoiceId = I.intInvoiceId
+	WHERE P.intInvoiceId = @InvoiceId 
+	  AND P.ysnApplied = 1 
+	  AND P.ysnPosted = 0
 		
 	DELETE FROM tblARPrepaidAndCredit WHERE intInvoiceId = @InvoiceId
 
@@ -313,11 +314,12 @@ BEGIN TRY
 	UPDATE A 
 	SET ysnApplied = 1
 	  , dblAppliedInvoiceDetailAmount		= B.dblAppliedInvoiceDetailAmount
-	  , dblBaseAppliedInvoiceDetailAmount	= B.dblBaseAppliedInvoiceDetailAmount
+	  , dblBaseAppliedInvoiceDetailAmount	= dbo.fnRoundBanker(ISNULL(ISNULL(ID.dblTotal, B.dblAppliedInvoiceDetailAmount) * ISNULL(ID.dblCurrencyExchangeRate, B.dblCurrencyExchangeRate), @ZeroDecimal), @Precision)
 	FROM tblARPrepaidAndCredit A
 	INNER JOIN #APPLIEDINVOICES B ON A.intPrepaymentId = B.intPrepaymentId
 								 AND A.intInvoiceId = B.intInvoiceId
 								 AND (A.intPrepaymentDetailId IS NULL OR (A.intPrepaymentDetailId IS NOT NULL AND A.intPrepaymentDetailId = B.intPrepaymentDetailId))
+	LEFT JOIN tblARInvoiceDetail ID ON A.intInvoiceDetailId = ID.intInvoiceDetailId
 
 END TRY
 BEGIN CATCH	
