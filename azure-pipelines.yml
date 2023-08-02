@@ -4,7 +4,7 @@
 # https://aka.ms/yaml
 
 trigger:
-- master
+- 23.1Dev-Azure
 
 pool:
   vmImage: ubuntu-latest
