@@ -354,7 +354,9 @@ FROM (
 			 , strTicketNumbers	= I.strTicketNumbers
 		FROM dbo.tblARInvoice I WITH (NOLOCK)
 		INNER JOIN #GLACCOUNTS GL ON I.intAccountId = GL.intAccountId		
-		WHERE ysnPosted  = 1		
+		WHERE ysnPosted  = 1
+		  AND strInvoiceNumber NOT LIKE ''%CPP%'' 
+		  AND strInvoiceNumber NOT LIKE ''%COP%''
 		  AND ysnCancelled = 0
 		  AND ysnProcessedToNSF = 0
 		  AND ((strType = ''Service Charge'' AND ysnForgiven = 0) OR ((strType <> ''Service Charge'' AND ysnForgiven = 1) OR (strType <> ''Service Charge'' AND ysnForgiven = 0)))
