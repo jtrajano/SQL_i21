@@ -36,8 +36,7 @@ BEGIN TRY
 			@dblHeaderQuantity	NUMERIC(18,6),
 			@dblTotalHeaderApplied NUMERIC(18,6),
 			@ysnQuantityAtHeaderLevel bit = 0,
-			@dblSequenceOrigBalance NUMERIC(18,6),
-			@ysnIsDWG				BIT = 0
+			@dblSequenceOrigBalance NUMERIC(18,6)
 	
 	BEGINING:
 
@@ -160,7 +159,6 @@ BEGIN TRY
 			WHERE ISNULL(ysnDestinationWeightGradePost,0) = 0 AND intContractId = @intContractDetailId
 
 			SELECT @ysnCompleted = CASE WHEN @intPostedTicketDestinationWeightsAndGrades > 0 AND @intUnPostedTicketDestinationWeightsAndGrades = 0 THEN 1 ELSE 0 END
-			SELECT @ysnIsDWG = 1;
 		END
 	END
 
@@ -168,20 +166,12 @@ BEGIN TRY
 	SET		intConcurrencyId	=	intConcurrencyId + 1,
 			dblBalance			=	CASE WHEN ISNULL(@ysnLoad,0) = 0 THEN (case when isnull(@ysnQuantityAtHeaderLevel,0) = 1 then @dblSequenceOrigBalance - @dblQuantityToUpdate else @dblNewBalance end) ELSE @dblNewBalance * dblQuantityPerLoad END,
 			dblBalanceLoad		=	CASE WHEN ISNULL(@ysnLoad,0) = 0 THEN NULL ELSE @dblNewBalance END,
-			intContractStatusId	=	CASE	WHEN @ysnCompleted = 0 and (CASE WHEN ISNULL(@ysnLoad,0) = 0 THEN @dblNewBalance ELSE @dblNewBalance * dblQuantityPerLoad END) > 0
-											THEN	(CASE	WHEN intContractStatusId = 5
-															THEN 1
-															ELSE intContractStatusId
-													END)
-											ELSE
-												case
-													when (@ysnIsDWG = 1 and @ysnCompleted = 0)
-													then 1
-													when intPricingTypeId = 5
-													then intContractStatusId
-													else 5
-												end
-									END
+			intContractStatusId	=	case
+									when @ysnCompleted = 1
+									then 5
+									else
+										case when intContractStatusId = 5 then 1 else intContractStatusId end
+									end
 	WHERE	intContractDetailId =	@intContractDetailId
 
 	update ch set ch.intConcurrencyId = ch.intConcurrencyId + 1

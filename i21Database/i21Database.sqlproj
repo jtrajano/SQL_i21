@@ -1852,6 +1852,17 @@
     <Build Include="dbo\Tables\tblTMSiteFee.sql" />
     <Build Include="dbo\Tables\tblTMFee.sql" />
     <Build Include="dbo\Functions\fnRKIsDerivativeLocked.sql" />
+    <Build Include="dbo\Views\vyuTMFeeSearch.sql" />
+    <Build Include="dbo\Tables\tblLGNotifyPartyGroup.sql" />
+    <Build Include="dbo\Tables\tblLGNotifyPartyGroupDetail.sql" />
+    <Build Include="dbo\Views\vyuLGNotifyPartyGroup.sql" />
+    <Build Include="dbo\Views\vyuLGStorageLocation.sql" />
+    <Build Include="dbo\Views\vyuLGNotifyPartyGroupView.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGUpdateNotifyPartyGroup.sql" />
+    <None Include="Scripts\Post-Deployment\EM\2310_FixCMBankTransactionNonExistentEFT.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGUpdateLogisticsLoadFromTM.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCSSetDefaultDepartmentSetup.sql" />
+    <None Include="Scripts\Post-Deployment\ST\57_TagDepartmentCategoriesForFuel.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -12291,6 +12302,8 @@
     <Build Include="dbo\Tables\tblAPVoucherPayableReversed.sql" />
     <Build Include="dbo\Tables\tblAPVoucherPayableTaxReversed.sql" />
     <Build Include="dbo\Stored Procedures\uspARMainCustomerInquiryReport.sql" />
+    <None Include="Scripts\Post-Deployment\GR\Fix_Transfer_Storage_Action.sql" />
+    <Build Include="dbo\Views\vyuARGetInvoiceDetailTax.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

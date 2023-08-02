@@ -4,6 +4,7 @@
 )
 AS
 SET NOCOUNT ON;
+DECLARE @strMessageCatch NVARCHAR(MAX)
 BEGIN TRY
 	DECLARE @Cost DECIMAL(18,6)  
 	DECLARE @dblMargin DECIMAL(18,6)  
@@ -19,8 +20,8 @@ BEGIN TRY
 	DECLARE @dblTotalCommission DECIMAL (18,6) = 0  
 	DECLARE @strItemNo NVARCHAR(250)  
 	DECLARE @strItemDescription NVARCHAR(500) 
-	DECLARE @strMessage NVARCHAR(MAX)  
-
+	DECLARE @strMessage NVARCHAR(MAX)
+	
 	DECLARE @intPumpTotalsId INT
 	DECLARE @ysnAutoBlend BIT 
 
@@ -29,6 +30,9 @@ BEGIN TRY
 	DECLARE @ysnStopProcessingFinal BIT = 0
 	DECLARE @intLatestWarningId INT = (SELECT DISTINCT TOP 1 intCheckoutProcessErrorWarningId FROM tblSTCheckoutProcessErrorWarning WHERE intCheckoutProcessId = @intCheckoutProcessId ORDER BY intCheckoutProcessErrorWarningId DESC)
 	DECLARE @intSubLocationId INT
+
+	DECLARE @ysnNegativeCommissionCalculated BIT = 0
+	DECLARE @strListOfNegativeCommissionItems NVARCHAR(MAX)  
   
 	DECLARE MY_CURSOR CURSOR LOCAL STATIC READ_ONLY FORWARD_ONLY
 	FOR  
@@ -83,8 +87,9 @@ BEGIN TRY
 				EXEC [dbo].[uspICCalculateCost] @intItemId, @intCompanyLocationId, @dblQty, NULL, @Cost OUT, @intItemUOMId, NULL, NULL, @intSubLocationId, NULL
 			END TRY
 			BEGIN CATCH
+				SET @strMessageCatch = ERROR_MESSAGE()
 				SET @ysnStopProcessing = 1;
-				BREAK
+				BREAK 
 			END CATCH
 		END
 		--ROLLBACK
@@ -128,6 +133,7 @@ BEGIN TRY
 						EXEC [dbo].[uspICCalculateCost] @intMFGItemId, @intCompanyLocationId, @dblQty, NULL, @MFGCost OUT, @intMFGItemUOMId, NULL, NULL, @intSubLocationId, NULL
 					END TRY
 					BEGIN CATCH
+						SET @strMessageCatch = ERROR_MESSAGE()
 						SET @ysnStopProcessing = 1;
 						BREAK
 					END CATCH				
@@ -157,11 +163,10 @@ BEGIN TRY
 		-- MARGIN = ((Qty Sold) * (Unit Price)) - (Cost in Inventory)  - ((Qty Sold) * (Consignor Markup/dblConsCommissionRawMarkup))  
 		-- COMMISSION = (MARGIN) * (Commission Rate/dblConsCommissionDealerPercentage)      
 		--BEGIN TRAN	
-
-		SET @dblMargin = (@dblQty * @dblPrice) - (ISNULL(@Cost,0) * @dblQty) - (@dblQty * @dblMarkUp)  
-		SET @dblCommission = @dblMargin * @dblDealerPercentage  
-		SET @dblTotalCommission += @dblCommission 	
-		SET @dblPriceMargin = 0.5 * @dblPrice;
+		
+		SET @dblMargin = (@dblQty * @dblPrice) - (ISNULL(@Cost,0) * @dblQty) - (@dblQty * @dblMarkUp);  
+		SET @dblCommission = @dblMargin * @dblDealerPercentage;
+		SET @dblPriceMargin = 0.5 * @dblPrice;		
 
 		IF @dblCommission < 0
 		BEGIN
@@ -174,33 +179,35 @@ BEGIN TRY
 			SET @strCost = (SELECT FORMAT(@Cost, 'N', 'en-us'));
 			SET @strCommission = (SELECT FORMAT(@dblCommission, 'N', 'en-us'));
 
-			SET @strMessage = 'Negative Dealer commissions have been calculated for fuel grade ' + @strItemNo + '-' + @strItemDescription + ' (Price: ' + @strPrice + ', Cost: ' + @strCost + ', Commission for this Item: ' + @strCommission + ') ' +
-								' which is an indication that this fuel''s cost basis isn''t correctly set. Please correct the cost basis before processing this day.'
+			SET @strMessage = '$0 Commissions were calculated for fuel grade ' + @strItemNo + '-' + @strItemDescription + ' (Price: ' + @strPrice + ', Cost: ' + @strCost + ') '
 
 			INSERT tblSTCheckoutProcessErrorWarning (intCheckoutProcessId, intCheckoutId, strMessageType, strMessage, intConcurrencyId)
-			VALUES (@intCheckoutProcessId, @intCheckoutId, 'F', @strMessage, 1) 
+			VALUES (@intCheckoutProcessId, @intCheckoutId, 'W', @strMessage, 1)
+					
+			SET @dblCommission = 0;
 		END
 
-		IF ISNULL(@Cost, 0) = 0 OR ISNULL(@Cost, 0) < @dblPriceMargin
+		IF ISNULL(@Cost, 0) = 0
 		BEGIN
 			SET @ysnStopProcessing = 1;
 			SET @ysnStopProcessingFinal = 1;
 			BREAK
 		END
+
+		SET @dblTotalCommission += @dblCommission; 
   
 		--- END INSERT FORMULA FOR CALCULATING DEALER COMMISSION HERE....  
 		FETCH NEXT FROM MY_CURSOR INTO @intPumpTotalsId, @ysnAutoBlend
 	END  
 	CLOSE MY_CURSOR  
-	DEALLOCATE MY_CURSOR  
+	DEALLOCATE MY_CURSOR  	
 
 	IF @ysnStopProcessing = 1
 	BEGIN
 		IF @ysnStopProcessingFinal = 0
 		BEGIN
-			--SELECT '@ysnStopProcessing-1, @ysnStopProcessingFinal-0'
 			ROLLBACK
-			SET @strMessage = 'There was an error when calculating Dealer Commissions. The Cost Basis for fuel was not received from the Inventory Module.';
+			SET @strMessage = '[A] There was an error when calculating Dealer Commissions. The Cost Basis for fuel was not received from the Inventory Module. With error message: ' + @strMessageCatch;
 			DELETE FROM tblSTCheckoutProcessErrorWarning WHERE intCheckoutId = @intCheckoutId AND intCheckoutProcessId = @intCheckoutProcessId AND intCheckoutProcessErrorWarningId > @intLatestWarningId
 
 			IF EXISTS (SELECT TOP 1 1 FROM tblSTCheckoutProcessErrorWarning WHERE intCheckoutId = @intCheckoutId AND intCheckoutProcessId = @intCheckoutProcessId AND strMessage = @strMessage)
@@ -215,8 +222,7 @@ BEGIN TRY
 		END
 		ELSE
 		BEGIN
-			--SELECT '@ysnStopProcessing-1, @ysnStopProcessingFinal-1'
-			SET @strMessage = 'There was an error when calculating Dealer Commissions. The Cost Basis for fuel was not received from the Inventory Module.';
+			SET @strMessage = '[B] There was an error when calculating Dealer Commissions. The Cost Basis for fuel was not received from the Inventory Module. With error message: ' + @strMessageCatch;
 
 			IF EXISTS (SELECT TOP 1 1 FROM tblSTCheckoutProcessErrorWarning WHERE intCheckoutId = @intCheckoutId AND intCheckoutProcessId = @intCheckoutProcessId AND (strMessage = @strMessage OR strMessage LIKE 'Negative Dealer commissions have been calculated for fuel grade%'))
 			BEGIN
@@ -229,8 +235,7 @@ BEGIN TRY
 	END
 	ELSE
 	BEGIN
-		--SELECT '@ysnStopProcessing-0, @ysnStopProcessingFinal-0'
-		SET @strMessage = 'There was an error when calculating Dealer Commissions. The Cost Basis for fuel was not received from the Inventory Module.';
+		SET @strMessage = '[C] There was an error when calculating Dealer Commissions. The Cost Basis for fuel was not received from the Inventory Module. With error message: ' + @strMessageCatch;
 
 		IF EXISTS (SELECT TOP 1 1 FROM tblSTCheckoutProcessErrorWarning WHERE intCheckoutId = @intCheckoutId AND intCheckoutProcessId = @intCheckoutProcessId AND strMessage = @strMessage)
 		BEGIN
@@ -242,13 +247,13 @@ BEGIN TRY
 	UPDATE tblSTCheckoutDealerCommission SET dblCommissionAmount = @dblTotalCommission WHERE intCheckoutId = @intCheckoutId 
 END TRY
 BEGIN CATCH
+	SET @strMessageCatch = ERROR_MESSAGE()
 	IF @ysnStopProcessing = 1
 	BEGIN
 		IF @ysnStopProcessingFinal = 0
 		BEGIN
-			--SELECT 'F: @ysnStopProcessing-1, @ysnStopProcessingFinal-0'
 			ROLLBACK
-			SET @strMessage = 'There was an error when calculating Dealer Commissions. The Cost Basis for fuel was not received from the Inventory Module.';
+			SET @strMessage = '[D] There was an error when calculating Dealer Commissions. The Cost Basis for fuel was not received from the Inventory Module. With error message: ' + @strMessageCatch;
 			DELETE FROM tblSTCheckoutProcessErrorWarning WHERE intCheckoutId = @intCheckoutId AND intCheckoutProcessId = @intCheckoutProcessId AND intCheckoutProcessErrorWarningId > @intLatestWarningId
 
 			IF EXISTS (SELECT TOP 1 1 FROM tblSTCheckoutProcessErrorWarning WHERE intCheckoutId = @intCheckoutId AND intCheckoutProcessId = @intCheckoutProcessId AND strMessage = @strMessage)
@@ -263,8 +268,7 @@ BEGIN CATCH
 		END
 		ELSE
 		BEGIN
-			--SELECT 'F: @ysnStopProcessing-1, @ysnStopProcessingFinal-1'
-			SET @strMessage = 'There was an error when calculating Dealer Commissions. The Cost Basis for fuel was not received from the Inventory Module.';
+			SET @strMessage = '[E] There was an error when calculating Dealer Commissions. The Cost Basis for fuel was not received from the Inventory Module. With error message: ' + @strMessageCatch;
 
 			IF EXISTS (SELECT TOP 1 1 FROM tblSTCheckoutProcessErrorWarning WHERE intCheckoutId = @intCheckoutId AND intCheckoutProcessId = @intCheckoutProcessId AND (strMessage = @strMessage OR strMessage LIKE 'Negative Dealer commissions have been calculated for fuel grade%'))
 			BEGIN
@@ -277,8 +281,7 @@ BEGIN CATCH
 	END
 	ELSE
 	BEGIN
-		--SELECT 'F: @ysnStopProcessing-0, @ysnStopProcessingFinal-0'
-		SET @strMessage = 'There was an error when calculating Dealer Commissions. The Cost Basis for fuel was not received from the Inventory Module.';
+		SET @strMessage = '[F] There was an error when calculating Dealer Commissions. The Cost Basis for fuel was not received from the Inventory Module. With error message: ' + @strMessageCatch;
 
 		IF EXISTS (SELECT TOP 1 1 FROM tblSTCheckoutProcessErrorWarning WHERE intCheckoutId = @intCheckoutId AND intCheckoutProcessId = @intCheckoutProcessId AND strMessage = @strMessage)
 		BEGIN

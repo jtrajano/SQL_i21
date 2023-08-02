@@ -137,12 +137,12 @@ BEGIN
   VALUES (@strCustomerId,'Invoice cycle is required')  
   SET @ysnHasError = 1  
  END  
- IF(ISNULL(@strDetailDisplay,'') = '')  
- BEGIN  
-  INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)  
-  VALUES (@strCustomerId,'Detail Display is required')  
-  SET @ysnHasError = 1  
- END  
+--  IF(ISNULL(@strDetailDisplay,'') = '')  
+--  BEGIN  
+--   INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)  
+--   VALUES (@strCustomerId,'Detail Display is required')  
+--   SET @ysnHasError = 1  
+--  END  
 
 IF(ISNULL(@strDepartmentGrouping,'') = '')  
  BEGIN  
@@ -628,10 +628,10 @@ IF(ISNULL(@strDepartmentGrouping,'') = '')
  END  
   
  --Secondary Sort Options  
- IF(@strSecondarySortOptions NOT IN ('Card','Vehicle','Department','Miscellaneous'))  
+ IF(@strSecondarySortOptions NOT IN ('Card','Vehicle','Department','Miscellaneous','None'))  
  BEGIN  
   INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)  
-  VALUES (@strCustomerId,'Invalid secondary sort option value '+ @strSecondarySortOptions +'. Value should be Card, Vehicle, Department, Miscellaneous only')  
+  VALUES (@strCustomerId,'Invalid secondary sort option value '+ @strSecondarySortOptions +'. Value should be Card, Vehicle, Department, Miscellaneous,None only')  
   SET @ysnHasError = 1  
  END  
   

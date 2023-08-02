@@ -678,7 +678,7 @@ BEGIN TRY
 			RL.dtmReceiptDate,
 			LG.intEndingNumber,
 			LG.intStartingNumber,
-			LG.intStartingNumber AS intReceiptEndingNumber,
+			LG.intEndingNumber AS intReceiptEndingNumber,
 			RL.intTicketPerPack,
 			RL.intItemUOMId,
 			'Inactive',

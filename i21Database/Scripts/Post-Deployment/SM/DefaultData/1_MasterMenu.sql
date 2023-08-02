@@ -4797,6 +4797,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Freight P
 ELSE
     UPDATE tblSMMasterMenu SET intSort = 13, strCommand = N'Logistics.view.FreightPayment' WHERE strMenuName = 'Freight Payment' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsMaintenanceParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Notify Party Groups' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsMaintenanceParentMenuId)
+    INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+    VALUES (N'Notify Party Groups', N'Logistics', @LogisticsMaintenanceParentMenuId, N'Notify Party Groups', N'Maintenance', N'Screen', N'Logistics.view.NotifyPartyGroup?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 14, 1)
+ELSE
+    UPDATE tblSMMasterMenu SET intSort = 14, strCommand = N'Logistics.view.NotifyPartyGroup?showSearch=true' WHERE strMenuName = 'Notify Party Groups' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsMaintenanceParentMenuId
+
 /* START OF DELETING */
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Allocated Contracts List' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsMaintenanceParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Unallocated Contracts List' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsMaintenanceParentMenuId

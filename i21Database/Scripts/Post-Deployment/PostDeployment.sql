@@ -584,6 +584,7 @@ print 'Test'
 :r .\EM\1910_Set_Contact_Location.sql
 :r .\EM\2210_AddDefaultEFTBank.sql
 :r .\EM\2210_CompanyPreference.sql
+:r .\EM\2310_FixCMBankTransactionNonExistentEFT.sql
 
 -- Quality Module
 :r .\QM\1_MasterTables.sql
@@ -650,6 +651,7 @@ print 'Test'
 :r .\ST\40_Rename_And_Alter_int_trl_dept_number.sql
 :r .\ST\50_TransferMappingFromIcToSt.sql
 :r .\ST\52_Populate_JobTypes.sql
+:r .\ST\57_TagDepartmentCategoriesForFuel.sql
 
 
 -- Motor Fuel Tax
