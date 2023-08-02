@@ -182,7 +182,6 @@ BEGIN TRY
 		,intDispatchId							= DD.intTMOId
 		,[intCompanyLocationSubLocationId]		= TR.intBulkStorageLocationId
 		,ysnUseOriginIdAsInvoiceNumber			= CASE WHEN (MBIL.intDeliveryHeaderId IS NOT NULL AND ISNULL(MBIL.strDeliveryNumber, '') <> '') THEN 1 ELSE  0 END
-		,strReleasePONumber = MGL.strReleasePONumber
 	INTO #tmpSourceTable
 	FROM tblTRLoadHeader TL
 	LEFT JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = TL.intLoadHeaderId
@@ -246,7 +245,6 @@ BEGIN TRY
     AND TPPC.intCategoryId = IC.intCategoryId
 
 	LEFT JOIN tblMBILDeliveryHeader MBIL ON DH.intDeliveryHeaderId = MBIL.intDeliveryHeaderId
-	LEFT JOIN vyuMBILGetLoads MGL ON MGL.intDeliveryHeaderId = DH.intDeliveryHeaderId
 	WHERE TL.intLoadHeaderId = @intLoadHeaderId
 		AND DH.strDestination = 'Customer'
 		-- AND (TL.intMobileLoadHeaderId IS NULL
@@ -734,7 +732,6 @@ BEGIN TRY
 		,[dblComboFreightRate]
 		,[intInventoryReceiptId]
 		,[ysnUseOriginIdAsInvoiceNumber]
-		,[strReleasePONumber]
 	)
 	SELECT
 		0 AS intId
@@ -825,7 +822,6 @@ BEGIN TRY
 		,[dblComboFreightRate]					= IE.dblComboFreightRate
 		,[intInventoryReceiptId]				= IE.intInventoryReceiptId
 		,[ysnUseOriginIdAsInvoiceNumber]        = IE.ysnUseOriginIdAsInvoiceNumber
-		,[strReleasePONumber]       = IE.strReleasePONumber
 	FROM #tmpSourceTableFinal IE
 	INNER JOIN tblICItem Item ON Item.intItemId = @intFreightItemId
 	WHERE (ISNULL(IE.dblFreightRate, 0) != 0 AND IE.ysnFreightInPrice != 1) AND ysnComboFreight = 0
@@ -919,7 +915,6 @@ BEGIN TRY
 		,[dblComboFreightRate]					= IE.dblComboFreightRate
 		,[intInventoryReceiptId]				= IE.intInventoryReceiptId
 		,[ysnUseOriginIdAsInvoiceNumber]        = IE.ysnUseOriginIdAsInvoiceNumber
-		,[strReleasePONumber] = NULL    
 	FROM #tmpSourceTableFinal IE
 	INNER JOIN tblICItem Item ON Item.intItemId = @intFreightItemId
 	WHERE (ISNULL(IE.dblComboFreightRate, 0) != 0 AND IE.ysnFreightInPrice != 1 AND ysnComboFreight = 1)
@@ -1042,7 +1037,6 @@ BEGIN TRY
 		,[intDispatchId]
 		,[intCompanyLocationSubLocationId]
 		,[ysnUseOriginIdAsInvoiceNumber]
-		,[strReleasePONumber]
 	)
 	SELECT
 		 [strSourceTransaction]					= TR.strSourceTransaction
@@ -1130,7 +1124,6 @@ BEGIN TRY
 		,intDispatchId							= TR.intDispatchId
 		,intCompanyLocationSubLocationId		= TR.intCompanyLocationSubLocationId
 		,ysnUseOriginIdAsInvoiceNumber			= TR.ysnUseOriginIdAsInvoiceNumber
-		,strReleasePONumber   = TR.strReleasePONumber
 	FROM #tmpSourceTableFinal TR
 	ORDER BY TR.intLoadDistributionDetailId, intId DESC
 
