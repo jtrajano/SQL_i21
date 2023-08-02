@@ -17,6 +17,7 @@ DECLARE @intEntityCustomerId	INT	= NULL
 	  , @strErrorMessage		NVARCHAR(MAX)
 	  , @ZeroDecimal			NUMERIC(18, 6)	= 0
 	  , @dtmPostDate			DATETIME = NULL
+	  , @Precision	            INT = 2	 
 
 SELECT @intEntityCustomerId	= intEntityCustomerId
 	 , @ysnPosted			= ysnPosted
