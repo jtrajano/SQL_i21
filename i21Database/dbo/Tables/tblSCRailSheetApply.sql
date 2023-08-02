@@ -15,3 +15,21 @@
 	,constraint fk_tblSCRailSheetApply_tblCTContractDetail_intContractDetailId foreign key (intContractDetailId) references tblCTContractDetail(intContractDetailId)
 	,constraint fk_tblSCRailSheetApply_tblSCTicket_intTicketId foreign key (intTicketId) references tblSCTicket(intTicketId)
 )
+
+GO
+
+CREATE TRIGGER [dbo].[trg_tblSCRailSheetApply] ON [dbo].[tblSCRailSheetApply]
+INSTEAD OF DELETE  
+AS
+BEGIN
+
+	DELETE A
+	FROM [tblSCRailSheetTicketApply] A
+	INNER JOIN DELETED B ON A.intRailSheetApplyId = B.intRailSheetApplyId
+
+	DELETE A
+	FROM [tblSCRailSheetApply] A
+	INNER JOIN DELETED B ON A.intRailSheetApplyId = B.intRailSheetApplyId
+	
+END
+GO
