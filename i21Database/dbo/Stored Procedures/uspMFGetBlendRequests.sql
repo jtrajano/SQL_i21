@@ -48,7 +48,7 @@ IF @intWorkOrderId = 0
 		 , Machine.strName AS strMachine
 		 , a.dblEstNoOfBlendSheet
 		 , 'Not Released' AS strWorkOrderStatus
-		 , 0 AS ysnOverrideRecipe
+		 , CAST(0 AS BIT) AS ysnOverrideRecipe
 	FROM tblMFBlendRequirement a 
 	JOIN tblICItem b ON a.intItemId = b.intItemId 
 	JOIN tblICItemUOM c ON b.intItemId = c.intItemId AND a.intUOMId=c.intUnitMeasureId 
