@@ -37,6 +37,7 @@
 	[dtmDateDeleted] DATETIME NULL,
 	[ysnOneBillPerPayment]	BIT NULL DEFAULT 0,
 	[strFLOId]						  NVARCHAR (100)   COLLATE Latin1_General_CI_AS NULL,	
+	[strExtVendorId]						  NVARCHAR (250)   COLLATE Latin1_General_CI_AS NULL,
 	[intApprovalListId] INT NULL,
 	[intTermsId] INT NULL,
 	[intEntityGroupId] INT NULL,
