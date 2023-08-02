@@ -85,7 +85,7 @@ BEGIN TRY
 			@intFinalCurrencyId		=	PC.intFinalCurrencyId,
 			@ysnFinalSubCurrency	=	CY.ysnSubCurrency,
 			@intPriceContractId		=	PF.intPriceContractId,
-			@dblFixationFX			=	PF.dblFX
+			@dblFixationFX			=	PF.dblSequenceFX
 	FROM	tblCTPriceFixation		PF  WITH (UPDLOCK)
 	JOIN	tblCTPriceContract		PC	ON	PC.intPriceContractId	=	PF.intPriceContractId	LEFT 
 	JOIN	tblSMCurrency			CY	ON	CY.intCurrencyID		=	PC.intFinalCurrencyId
