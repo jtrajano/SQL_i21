@@ -411,8 +411,8 @@ BEGIN
 					INNER JOIN tblSTCheckoutDepartmetTotals T1 ON T0.intCheckoutId = T1.intCheckoutId
 					INNER JOIN tblSTStore T2 ON T0.intStoreId = T2.intStoreId
 					INNER JOIN tblICItem T3 ON T1.intItemId = T3.intItemId
-					INNER JOIN tblICItemLocation T8 ON T3.intItemId = T8.intItemId
-					INNER JOIN tblICCategoryLocation T4 ON T3.intCategoryId = T4.intCategoryId and T4.intLocationId = T8.intLocationId
+					INNER JOIN vyuSTStoreItems T8 ON T1.intItemId = T8.intItemId AND T2.intStoreId = T8.intStoreId
+					INNER JOIN tblICCategoryLocation T4 ON T3.intCategoryId = T4.intCategoryId AND T8.intLocationId = T4.intLocationId
 					INNER JOIN tblICCategory T5 ON T4.intCategoryId = T5.intCategoryId
 					--INNER JOIN tblSTCheckoutSalesTaxTotals T6 ON T0.intCheckoutId = T6.intCheckoutId
 					INNER JOIN (
@@ -472,8 +472,8 @@ BEGIN
 					INNER JOIN tblSTCheckoutDepartmetTotals T1 ON T0.intCheckoutId = T1.intCheckoutId
 					INNER JOIN tblSTStore T2 ON T0.intStoreId = T2.intStoreId
 					INNER JOIN tblICItem T3 ON T1.intItemId = T3.intItemId
-					INNER JOIN tblICItemLocation T8 ON T3.intItemId = T8.intItemId
-					INNER JOIN tblICCategoryLocation T4 ON T3.intCategoryId = T4.intCategoryId and T4.intLocationId = T8.intLocationId
+					INNER JOIN vyuSTStoreItems T8 ON T1.intItemId = T8.intItemId AND T2.intStoreId = T8.intStoreId
+					INNER JOIN tblICCategoryLocation T4 ON T3.intCategoryId = T4.intCategoryId AND T8.intLocationId = T4.intLocationId
 					INNER JOIN tblICCategory T5 ON T4.intCategoryId = T5.intCategoryId
 					--INNER JOIN tblSTCheckoutSalesTaxTotals T6 ON T0.intCheckoutId = T6.intCheckoutId
 					INNER JOIN (
@@ -540,8 +540,8 @@ BEGIN
 					INNER JOIN tblSTCheckoutDepartmetTotals T1 ON T0.intCheckoutId = T1.intCheckoutId
 					INNER JOIN tblSTStore T2 ON T0.intStoreId = T2.intStoreId
 					INNER JOIN tblICItem T3 ON T1.intItemId = T3.intItemId
-					INNER JOIN tblICItemLocation T9 ON T3.intItemId = T9.intItemId
-					INNER JOIN tblICCategoryLocation T4 ON T3.intCategoryId = T4.intCategoryId and T4.intLocationId = T9.intLocationId
+					INNER JOIN vyuSTStoreItems T9 ON T1.intItemId = T9.intItemId AND T2.intStoreId = T9.intStoreId
+					INNER JOIN tblICCategoryLocation T4 ON T3.intCategoryId = T4.intCategoryId AND T9.intLocationId = T4.intLocationId
 					INNER JOIN tblICCategory T5 ON T4.intCategoryId = T5.intCategoryId
 					LEFT JOIN @tmpStoreGroup T6 ON T0.intStoreId = T6.intStoreId
 					--INNER JOIN tblSTCheckoutSalesTaxTotals T7 ON T0.intCheckoutId = T7.intCheckoutId
@@ -602,8 +602,8 @@ BEGIN
 					INNER JOIN tblSTCheckoutDepartmetTotals T1 ON T0.intCheckoutId = T1.intCheckoutId
 					INNER JOIN tblSTStore T2 ON T0.intStoreId = T2.intStoreId
 					INNER JOIN tblICItem T3 ON T1.intItemId = T3.intItemId
-					INNER JOIN tblICItemLocation T9 ON T3.intItemId = T9.intItemId
-					INNER JOIN tblICCategoryLocation T4 ON T3.intCategoryId = T4.intCategoryId and T4.intLocationId = T9.intLocationId
+					INNER JOIN vyuSTStoreItems T9 ON T1.intItemId = T9.intItemId AND T2.intStoreId = T9.intStoreId
+					INNER JOIN tblICCategoryLocation T4 ON T3.intCategoryId = T4.intCategoryId AND T9.intLocationId = T4.intLocationId
 					INNER JOIN tblICCategory T5 ON T4.intCategoryId = T5.intCategoryId
 					LEFT JOIN @tmpStoreGroup T6 ON T0.intStoreId = T6.intStoreId
 					--INNER JOIN tblSTCheckoutSalesTaxTotals T7 ON T0.intCheckoutId = T7.intCheckoutId
