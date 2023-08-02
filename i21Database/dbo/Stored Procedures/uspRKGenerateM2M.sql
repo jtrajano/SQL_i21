@@ -3715,7 +3715,8 @@ BEGIN TRY
 				, dblOpenQtyDisplay
 				, dblResult
 				, dblCashPrice
-				, intCurrencyId)
+				, intCurrencyId
+				, intMarketBasisCurrencyId)
 			SELECT * FROM (
 				SELECT strContractOrInventoryType
 					, strCommodityCode
@@ -3740,6 +3741,7 @@ BEGIN TRY
 					, SUM(dblOpenQty) dblResult
 					, dblCashOrFuture = dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId, intMarketBasisUOM, dblCashOrFuture)
 					, intCurrencyId
+					, intMarketBasisCurrencyId = intCurrencyId
 				FROM (
 					SELECT strContractOrInventoryType = 'Inventory'
 						, s.strLocationName
@@ -3763,6 +3765,7 @@ BEGIN TRY
 						, PriceSourceUOMId = ISNULL(bdcu.intCommodityUnitMeasureId, 0)
 						, dblInvMarketBasis = 0
 						, dblCashOrFuture = ROUND(ISNULL(bd.dblCashOrFuture, 0), 4)
+											* dbo.fnRKGetCurrencyConvertion(ISNULL(bd.intCurrencyId, 0), @intCurrencyId, @intMarkToMarketRateTypeIdInv)
 						, intMarketBasisUOM = ISNULL(bdcu.intCommodityUnitMeasureId, 0)
 						, intCurrencyId = ISNULL(bd.intCurrencyId, 0)
 						, (SELECT TOP 1 strFutureMonth strFutureMonth FROM tblRKFuturesMonth WHERE ysnExpired = 0 AND dtmSpotDate < = @dtmCurrentDate AND intFutureMarketId = c.intFutureMarketId ORDER BY 1 DESC) strFutureMonth
