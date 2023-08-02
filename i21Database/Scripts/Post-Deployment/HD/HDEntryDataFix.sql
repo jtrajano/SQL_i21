@@ -1094,4 +1094,17 @@ END
 
 GO
 	PRINT N'End Remove Project, Customer and Ticket of Holiday Time Entries';
+	PRINT N'Start Update ysnImageSynced to false';
+GO
+
+IF  EXISTS(SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblHDTicket' AND COLUMN_NAME = 'ysnImageSynced') 
+BEGIN
+
+	UPDATE tblHDTicket
+	SET ysnImageSynced = CONVERT(BIT, 0)
+
+END
+
+GO
+	PRINT N'End Update ysnImageSynced to false';
 GO
