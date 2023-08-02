@@ -1,6 +1,7 @@
 CREATE PROCEDURE [dbo].[uspICExportItemsToStaging]
 	@dtmDate DATETIME = NULL,
-	@ysnIncludeDetails BIT = 1
+	@ysnIncludeDetails BIT = 1,
+	@intLocationId INT = NULL
 AS
 
 SET @dtmDate = DATEADD(MI, DATEDIFF(MI, GETDATE(),  GETUTCDATE()), @dtmDate)
@@ -28,7 +29,6 @@ DECLARE @Items TABLE(
 	dtmDateModified DATETIME NULL,
 	dtmDate DATETIME
 )
-
 
 INSERT INTO @Items
 SELECT
@@ -58,7 +58,9 @@ FROM tblICItem item
 	LEFT OUTER JOIN tblICCategory category ON category.intCategoryId = item.intCategoryId
 	LEFT OUTER JOIN tblICBrand brand ON brand.intBrandId = item.intBrandId
 	LEFT OUTER JOIN tblICManufacturer manufacturer ON manufacturer.intManufacturerId = item.intManufacturerId
-WHERE dbo.fnDateGreaterThanEquals(ISNULL(item.dtmDateModified, item.dtmDateCreated), @dtmDate) = 1 OR @dtmDate IS NULL
+WHERE (dbo.fnDateGreaterThanEquals(ISNULL(item.dtmDateModified, item.dtmDateCreated), @dtmDate) = 1 OR @dtmDate IS NULL)
+	AND (EXISTS(SELECT * FROM tblICItemLocation WHERE intItemId = item.intItemId
+		AND intLocationId = @intLocationId) OR @intLocationId IS NULL)
 
 /* Header */
 INSERT INTO tblICStagingItem(intItemId, strItemNo, strDescription, strType, strBundleType, strStatus
