@@ -60,6 +60,13 @@ BEGIN
 	END
 END
 
+IF (dbo.isOpenAccountingDateByModule(@dtmPayDate,'Payroll') = 0 AND @ysnRecap = 0)
+BEGIN
+	-- Unable to find an open fiscal year period to match the transaction date.
+	RAISERROR('Unable to find an open fiscal year period for Payroll module to match the transaction date.', 11, 1)
+	GOTO Post_Exit
+END
+
 IF (@ysnPost = 1)
 BEGIN
 	/****************************************
